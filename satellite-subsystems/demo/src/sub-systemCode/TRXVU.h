@@ -2,7 +2,7 @@
  * TRXVU.h
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef TRXVU_H_
@@ -17,12 +17,12 @@
 
 #include "Global/Global.h"
 #include "COMM/GSC.h"
-
 #define APRS_ON
 
 #define TRXVU_TO_CALSIGN "GS1"
 #define TRXVU_FROM_CALSIGN "4x4HSL1"
 
+#define VALUE_TX_BUFFER_FULL 255
 #define NUM_FILES_IN_DUMP	5
 
 #define NOMINAL_MODE TRUE
@@ -37,7 +37,7 @@
 #ifndef TESTING
 #define DEFULT_BEACON_DELAY 20
 #else
-#define DEFULT_BEACON_DELAY 20// in seconds
+#define DEFULT_BEACON_DELAY 4// in seconds
 #endif
 
 #define MIN_TIME_DELAY_BEACON	1

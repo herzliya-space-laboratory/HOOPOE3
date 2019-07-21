@@ -2,7 +2,7 @@
 / * TRXVU.c
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <stdlib.h>
 
@@ -160,25 +160,23 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 	if (CHECK_STARTING_DUMP_ABILITY)
 	{
 #ifdef TESTING_BRONFELD
-		byte arr[20];
-		memset(arr, 'f', 20);
-		for (int l = 0; l < (int)resulotion; l++)
+		for (uint8_t i = 0; i < 0xff; i++)
 		{
-			i_error = TRX_sendFrame(arr, (uint8_t)20, trxvu_bitrate_9600);
+			i_error = TRX_sendFrame(&i, (uint8_t)1, trxvu_bitrate_9600);
 			check_int("TRX_sendFrame, dump_logic", i_error);
-			//printf("number of packets: %d\n", numberOfPackets++);
-			//lookForRequestToDelete_dump(cmdID);
-			//vTaskDelay(SYSTEM_DEALY);
+			printf("number of packets: %u\n", i);
 		}
 #else
+
 		for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		{
 			if (HK[i] == this_is_not_the_file_you_are_looking_for)
 				continue;
 
 			find_fileName(HK[i], fileName);
-			parameterSize = size_of_element(HK[i]);
+			parameterSize = (size_of_element(HK[i]) + TIME_SIZE);
 			last_read = start_time;
+			last_send = 0;
 			do
 			{
 				numberOfParameters = 0;
@@ -338,6 +336,7 @@ void Transponder_task(void *arg)
 	check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
 	vTaskDelete(NULL);
 }
+
 
 void lookForRequestToDelete_transponder(command_id cmdID)
 {
@@ -729,29 +728,30 @@ int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 			check_int("TRX_sendFrame, IsisTrxvu_tcSetAx25Bitrate", i_error);
 		}
 
-		unsigned char avalFrames = 255;
+		unsigned char avalFrames = VALUE_TX_BUFFER_FULL;
 
 		i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
 		check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
 
-		if (avalFrames == 255)
-		{
-			printf("Tx buffer is full\n");
-			retVal = -1;
-		}
 		int count = 0;
-		while (avalFrames == 255)
+		do
 		{
 			count++;
 			i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
 			check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
+			retVal = 0;
 			vTaskDelay(50);
 			if (count > 2000)
 			{
 				retVal = -1;
 				break;
 			}
-		}
+			if (count == 1)
+			{
+				printf("Tx buffer is full\n");
+				retVal = -1;
+			}
+		}while(avalFrames == VALUE_TX_BUFFER_FULL);
 
 		//delay so Tx buffer will never be full
 		if (bitRate == trxvu_bitrate_9600 && retVal == 0)
