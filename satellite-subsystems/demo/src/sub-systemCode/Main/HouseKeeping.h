@@ -2,7 +2,7 @@
  * HouseKeeping.h
  *
  *  Created on: Jan 18, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef HOUSEKEEPING_H_
@@ -17,9 +17,11 @@
 #define TASK_HK_HIGH_RATE_DELAY 	1000
 #define TASK_HK_LOW_RATE_DELAY 	10000
 
+#define NUMBER_OF_SOLAR_PANNELS	6
+
 #define ACK_HK_SIZE ACK_DATA_LENGTH
 #define EPS_HK_SIZE 49
-#define SP_HK_SIZE	24
+#define SP_HK_SIZE	FLOAT_SIZE * NUMBER_OF_SOLAR_PANNELS
 #define CAM_HK_SIZE 62
 #define COMM_HK_SIZE 12
 #define ADCS_HK_SIZE 34
@@ -31,7 +33,7 @@
 #define	SP_HK_FILE_NAME	"SPF"
 #define CAM_HK_FILE_NAME "CAMf"
 #define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
-#define ADCS_HK_FILE_NAME "ADCSf"// ADCS panel HK
+#define ADCS_HK_FILE_NAME "ADCf"// ADCS
 #define BOS_HK_FILE_NAME	"BOSf"
 
 typedef enum HK_dump_types{
@@ -59,6 +61,7 @@ typedef enum HK_dump_types{
 	ADCS_ESTIMATED_ANGLES_T = 34,
 	ADCS_Estimated_AR_T = 35,
 	ADCS_ECI_POS_T = 36,
+	ADCS_ECI_VEL_T = 255,
 	ADCS_SAV_Vel_T = 37,
 	ADCS_ECEF_POS_T = 38,
 	ADCS_LLH_POS_T = 39,
@@ -141,7 +144,7 @@ typedef union __attribute__ ((__packed__))
 	byte raw[SP_HK_SIZE];
 	struct __attribute__((packed))
 	{
-		temp_t SP_temp[6];
+		temp_t SP_temp[NUMBER_OF_SOLAR_PANNELS];
 	}fields;
 }SP_HK;
 

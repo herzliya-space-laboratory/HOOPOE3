@@ -1,8 +1,10 @@
 /*
+
+
  * HouseKeeping.c
  *
  *  Created on: Jan 18, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -146,6 +148,8 @@ int size_of_element(HK_types type)
 		return ADCS_HK_SIZE;
 	if (ADCS_CSS_DATA_T <= type && type <= ADCS_EST_QUATERNION_T)
 		return ADCS_SC_SIZE;
+	if (ADCS_ECI_VEL_T == type)
+		return ADCS_SC_SIZE;
 
 	return 0;
 }
@@ -198,18 +202,20 @@ void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 
 int SP_HK_collect(SP_HK* hk_out)
 {
-	int error;
+	int errors[NUMBER_OF_SOLAR_PANNELS];
+	int error_combine = 1;
 	IsisSolarPanelv2_wakeup();
 	int32_t paneltemp;
 	uint8_t status = 0;
-	for(int i = 0; i < 6; i++)
+	for(int i = 0; i < NUMBER_OF_SOLAR_PANNELS; i++)
 	{
-		error = IsisSolarPanelv2_getTemperature(i, &paneltemp, &status);
-		check_int("EPS_HK_collect, IsisSolarPanelv2_getTemperature", error);
+		errors[i] = IsisSolarPanelv2_getTemperature(i, &paneltemp, &status);
+		check_int("EPS_HK_collect, IsisSolarPanelv2_getTemperature", errors[i]);
 		hk_out->fields.SP_temp[i] = (float)(paneltemp) * ISIS_SOLAR_PANEL_CONV;
+		error_combine &= errors[i];
 	}
 	IsisSolarPanelv2_sleep();
-	return 0;
+	return error_combine;
 }
 int EPS_HK_collect(EPS_HK* hk_out)
 {
@@ -242,7 +248,7 @@ int EPS_HK_collect(EPS_HK* hk_out)
 	}
 
 	set_GP_EPS(*hk_out);
-	return 0;
+	return error;
 }
 int CAM_HK_collect(CAM_HK* hk_out)
 {
@@ -281,28 +287,31 @@ int CAM_HK_collect(CAM_HK* hk_out)
 int COMM_HK_collect(COMM_HK* hk_out)
 {
 	ISIStrxvuRxTelemetry_revC telemetry;
-	int error =  IsisTrxvu_rcGetTelemetryAll_revC(0, &telemetry);
-	check_int("COMM_HK_collect, IsisTrxvu_rcGetTelemetryAll_revC", error);
+	int error_trxvu = -1, error_antA = -1, error_antB = -1;
+	error_trxvu = IsisTrxvu_rcGetTelemetryAll_revC(0, &telemetry);
+	check_int("COMM_HK_collect, IsisTrxvu_rcGetTelemetryAll_revC", error_trxvu);
 	hk_out->fields.bus_vol = telemetry.fields.bus_volt;
 	hk_out->fields.total_curr = telemetry.fields.total_current;
 	hk_out->fields.pa_temp = telemetry.fields.pa_temp;
 	hk_out->fields.locosc_temp = telemetry.fields.locosc_temp;
 
-	error = IsisAntS_getTemperature(0, isisants_sideA, &(hk_out->fields.ant_A_temp));
-	//check_int("COMM_HK_collect ,IsisAntS_getTemperature", error);
+#ifdef ANTS_ON
+	error_antA = IsisAntS_getTemperature(0, isisants_sideA, &(hk_out->fields.ant_A_temp));
+	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antA);
 
-	error = IsisAntS_getTemperature(0, isisants_sideB, &(hk_out->fields.ant_B_temp));
-	//check_int("COMM_HK_collect ,IsisAntS_getTemperature", error);
+	error_antB = IsisAntS_getTemperature(0, isisants_sideB, &(hk_out->fields.ant_B_temp));
+	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antB);
+#endif
 
 	set_GP_COMM(telemetry);
 
-	return 0;
+	return (error_trxvu && error_antA && error_antB);
 }
 int ADCS_HK_collect(ADCS_HK* hk_out)
 {
 	int error = cspaceADCS_getPowTempMeasTLM(0, hk_out);
 	check_int("ADCS_HK_collect, cspaceADCS_getPowTempMeasTLM", error);
-	return 0;
+	return error;
 }
 
 
@@ -386,7 +395,7 @@ int create_files(Boolean firstActivation)
 	CAM_create_file();
 	COMM_create_file();
 	//ADCS_CreateFiles();
-	//int SP_create_file();
+	SP_create_file();
 	return 0;
 }
 
@@ -409,7 +418,7 @@ void save_SP_HK()
 	else
 	{
 		//can't get eps hk
-		printf("ERROR IN COLLECTING EPS TM: %d\n", error);
+		printf("ERROR IN COLLECTING SP TM: %d\n", error);
 	}
 }
 void save_EPS_HK()
@@ -478,7 +487,7 @@ void save_COMM_HK()
 	else
 	{
 		//can't get eps hk
-		printf("ERROR IN COLLECTING EPS TM: %d\n", error);
+		printf("ERROR IN COLLECTING COMM TM: %d\n", error);
 	}
 }
 void save_ADCS_HK()
@@ -502,16 +511,16 @@ void save_ADCS_HK()
 		else
 		{
 			//can't get eps hk
-			printf("ERROR IN COLLECTING EPS TM: %d\n", error);
+			printf("ERROR IN COLLECTING ADCS TM: %d\n", error);
 		}
 	}
 }
 
 int EPS_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
-	int params[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 1, 1, 4, 4, 4, 4, 4, 4};
+	int params[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 1, 1};
 	int lastPlace = 0, l;
-	for (int i = 0; i < 31; i++)
+	for (int i = 0; i < 25; i++)
 	{
 		for (l = 0; l < params[i] / 2; l++)
 		{
@@ -571,6 +580,22 @@ int ADCS_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 
 	return 0;
 }
+int SP_HK_raw_BiEnE(byte* raw_in, byte* raw_out)
+{
+	int params[] = {4, 4, 4, 4, 4, 4};
+	int lastPlace = 0, l;
+	for (int i = 0; i < 6; i++)
+	{
+		for (l = 0; l < params[i] / 2; l++)
+		{
+			raw_out[l + lastPlace] = raw_in[lastPlace + params[i] - 1 - l];
+			raw_out[lastPlace + params[i] - 1 - l] = raw_in[l + lastPlace];
+		}
+		lastPlace += params[i];
+	}
+
+	return 0;
+}
 int ADCS_SC_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
 	int params[] = {2, 2, 2};
@@ -592,7 +617,7 @@ int ADCS_SC_raw_BigEnE(byte* raw_in, byte* raw_out)
 int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 {
 	time_unix data_time;
-	data_time = BigEnE_raw_to_uInt(raw_data);
+	memcpy(&data_time, raw_data, sizeof(time_unix));
 	switch(type)
 	{
 	case ACK_T:
@@ -600,7 +625,8 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		packet->subType = ACK_ST;
 		packet->length = ACK_DATA_LENGTH;
 		packet->time = data_time;
-		memcpy(raw_data + TIME_SIZE, packet->data, ACK_DATA_LENGTH);
+		memcpy(packet->data, raw_data + TIME_SIZE, ACK_DATA_LENGTH);
+
 		break;
 	case EPS_HK_T:
 		packet->type = DUMP_T;
@@ -627,6 +653,13 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		packet->type = DUMP_T;
 		packet->subType = ADCS_DUMP_ST;
 		packet->length = ADCS_HK_SIZE;
+		packet->time = data_time;
+		ADCS_HK_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
+		break;
+	case SP_HK_T:
+		packet->type = DUMP_T;
+		packet->subType = SP_DUMP_ST;
+		packet->length = SP_HK_SIZE;
 		packet->time = data_time;
 		ADCS_HK_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
@@ -795,18 +828,16 @@ void HouseKeeping_highRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF == TRUE_8BIT)
+		if (DF != TRUE_8BIT)
 		{
-			continue;
+			save_EPS_HK();
+
+			save_CAM_HK();
+
+			save_COMM_HK();
+
+			//save_ADCS_HK();
 		}
-
-		save_EPS_HK();
-
-		save_CAM_HK();
-
-		save_COMM_HK();
-
-		save_ADCS_HK();
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
@@ -821,12 +852,10 @@ void HouseKeeping_lowRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF == TRUE_8BIT)
+		if (DF != TRUE_8BIT)
 		{
-			continue;
+			save_SP_HK();
 		}
-
-		save_SP_HK();
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
