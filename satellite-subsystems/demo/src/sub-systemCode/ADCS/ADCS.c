@@ -166,7 +166,7 @@ void gatherData(stageTable StTa)
 		satEstimatesAttitideAngles.fields.yaw = -1 * ADCSStateData.fields.estim_angles.fields.roll;
 		c_fileWrite(ESTIMATED_ANGLES_FILE, satEstimatesAttitideAngles.raw);
 	}
-	// checks if it neccacery to save this param
+	// checks if it necessary to save this parameters
 	if(checkEstimatedAngularRates(StTa))
 	{
 		// get the data from the adcs and put it in the according to the axis of the sat than save it in the file system

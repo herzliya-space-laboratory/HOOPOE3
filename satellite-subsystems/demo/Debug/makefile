@@ -49,7 +49,7 @@ all: Hoopoe3.elf secondary-outputs
 Hoopoe3.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C Linker'
-	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra  -g -T C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/linker-scripts/sdram.lds -nostartfiles -Xlinker --gc-sections -L"C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/lib" -L"C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/lib" -L"C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/lib" -L"C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hcc/lib" -L"C:/Hoopoe3/satellite-subsystems/demo/..//satellite-subsystems/lib" -Wl,-Map,"Hoopoe3.map" --specs=nano.specs -lc -u _printf_float -u _scanf_float -o "Hoopoe3.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra  -g -T C:/Hoopoe3/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/linker-scripts/sdram.lds -nostartfiles -Xlinker --gc-sections -L"C:/Hoopoe3/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/lib" -L"C:/Hoopoe3/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/lib" -L"C:/Hoopoe3/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/lib" -L"C:/Hoopoe3/Hoopoe3/satellite-subsystems/demo/../..//hal/hcc/lib" -L"C:/Hoopoe3/Hoopoe3/satellite-subsystems/demo/..//satellite-subsystems/lib" -Wl,-Map,"Hoopoe3.map" --specs=nano.specs -lc -u _printf_float -u _scanf_float -o "Hoopoe3.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
