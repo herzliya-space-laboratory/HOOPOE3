@@ -220,7 +220,7 @@ void EPS_Conditioning()
 	printf("TX: %d\n", get_system_state(Tx_param));*/
 	if (vbatt_filtered > currentvbatt)
 	{
-		printf(". downward");
+		printf(". downward ");
 		if (currentvbatt < voltages[0])
 		{
 			EnterCriticalMode(&switches_states);
@@ -241,7 +241,7 @@ void EPS_Conditioning()
 	// Conditioning on upward trend of battery voltage
 	else if (vbatt_filtered < currentvbatt)
 	{
-		printf(". upward");
+		printf(". upward ");
 		if (currentvbatt > voltages[3])
 		{
 			EnterFullMode(&switches_states);
@@ -263,6 +263,8 @@ void EPS_Conditioning()
 	{
 		return;
 	}
+
+	printf("\n");
 
 	if (CHECK_CHANNEL_CHANGE(switches_states, eps_tlm))
 	{
@@ -302,7 +304,7 @@ Boolean overRide_Camera()
 //EPS modes
 void EnterFullMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Full Mode");
+	printf("Enter Full Mode\n");
 	set_system_state(Tx_param, SWITCH_ON);
 
 	if (overRide_ADCS(switches_states))
@@ -325,7 +327,7 @@ void EnterFullMode(gom_eps_channelstates_t* switches_states)
 
 void EnterCruiseMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Cruise Mode");
+	printf("Enter Cruise Mode\n");
 	set_system_state(Tx_param, SWITCH_ON);
 
 	if (overRide_ADCS(switches_states))
@@ -347,7 +349,7 @@ void EnterCruiseMode(gom_eps_channelstates_t* switches_states)
 
 void EnterSafeMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Safe Mode");
+	printf("Enter Safe Mode\n");
 	set_system_state(Tx_param, SWITCH_OFF);
 
 	if (overRide_ADCS(switches_states))
@@ -369,7 +371,7 @@ void EnterSafeMode(gom_eps_channelstates_t* switches_states)
 
 void EnterCriticalMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Critical Mode");
+	printf("Enter Critical Mode\n");
 	switches_states->fields.quadbatSwitch = 0;
 	switches_states->fields.quadbatHeater = 0;
 	switches_states->fields.channel3V3_1 = 0;

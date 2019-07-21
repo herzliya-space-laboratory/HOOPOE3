@@ -37,7 +37,7 @@
 #ifndef TESTING
 #define DEFULT_BEACON_DELAY 20
 #else
-#define DEFULT_BEACON_DELAY 4// in seconds
+#define DEFULT_BEACON_DELAY 20// in seconds
 #endif
 
 #define MIN_TIME_DELAY_BEACON	1
