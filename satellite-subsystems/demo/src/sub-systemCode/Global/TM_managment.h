@@ -16,6 +16,9 @@
 #define LAST_ELEMENT_IN_C_FILE 0
 #define DEFAULT_NUM_OF_FILES 0
 
+#define FS_FILE_ENDING	"TLM"
+#define FS_FILE_ENDING_SIZE	3
+
 #ifndef FSFRAM
 #define FSFRAM 0x20000
 #endif
@@ -34,7 +37,10 @@ typedef enum
 	FS_FAIL
 } FileSystemResult;
 
-
+/*
+ *
+ */
+void delete_allTMFilesFromSD();
 /*!
  * Initializes the file system.
  * @note call once for boot and after DeInitializeFS.

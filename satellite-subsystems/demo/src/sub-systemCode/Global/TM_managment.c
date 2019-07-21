@@ -44,6 +44,25 @@ typedef struct
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
 
 
+void delete_allTMFilesFromSD()
+{
+	F_FIND find;
+	if (!f_findfirst("A:/*.*",&find))
+	{
+		do
+		{
+			int count = 0;
+			while (find.filename[count] != '.' || find.filename[count] != '\0')
+				count++;
+
+			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING))
+			{
+				f_delete(find.filename);
+			}
+
+		} while (!f_findnext(&find));
+	}
+}
 // return -1 for FRAM fail
 static int getNumOfFilesInFS()
 {
@@ -213,7 +232,7 @@ static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 void get_file_name_by_index(char* c_file_name,int index,char* curr_file_name)
 {
 	PLZNORESTART();
-	sprintf(curr_file_name,"%s%d",c_file_name,index);
+	sprintf(curr_file_name,"%s%d.%s", c_file_name, index, FS_FILE_ENDING);
 }
 FileSystemResult c_fileReset(char* c_file_name)
 {
