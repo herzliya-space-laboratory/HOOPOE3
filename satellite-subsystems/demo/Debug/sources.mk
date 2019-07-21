@@ -17,9 +17,6 @@ S_UPPER_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-src/sub-systemCode/payload/ImgCompressor \
-src/sub-systemCode/payload \
-src/sub-systemCode/Tests \
 src/sub-systemCode/Main \
 src/sub-systemCode/Main/CMD \
 src/sub-systemCode/Global \

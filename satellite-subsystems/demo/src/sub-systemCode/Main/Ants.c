@@ -2,7 +2,6 @@
 #include <freertos/task.h>
 
 #include "../Ants.h"
-#include "../Tests/Test.h"
 
 #include <hal/Storage/FRAM.h>
 #include <hal/errors.h>
@@ -146,9 +145,6 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 1, side A\n");
 		deploye_ants(isisants_sideA);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = 1;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
@@ -161,9 +157,6 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 2, side B\n");
 		deploye_ants(isisants_sideB);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = TRUE;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
@@ -176,9 +169,6 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 3, side A\n");
 		deploye_ants(isisants_sideA);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = TRUE;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;

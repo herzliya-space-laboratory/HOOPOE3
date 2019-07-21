@@ -44,13 +44,8 @@
 #include "../ADCS.h"
 #include "../ADCS/Stage_Table.h"
 #include "../TRXVU.h"
-#include "../payload/CameraManeger.h"
 #include "HouseKeeping.h"
 #include "commands.h"
-
-#ifdef TESTING
-#include "../Tests/Test.h"
-#endif
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -62,6 +57,8 @@
 stageTable ST;
 
 #ifdef TESTING
+
+
 void test_menu()
 {
 	byte dataFRAM = FALSE_8BIT;
@@ -69,12 +66,12 @@ void test_menu()
 
 	Boolean exit = FALSE;
 	unsigned int selection;
+	byte data;
 	while (!exit)
 	{
 		printf( "\n\r Select a test to perform: \n\r");
 		printf("\t 0) continue to code\n\r");
 		printf("\t 1) set first activation flag to TRUE\n\r");
-		printf("\t 2) write data to FRAM \n");
 
 		exit = FALSE;
 		while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
@@ -85,7 +82,7 @@ void test_menu()
 			exit = TRUE;
 			break;
 		case 1:
-			reset_FIRST_activation();
+			FRAM_write(&data, FIRST_ACTIVATION_ADDR, 1);
 			break;
 		}
 	}

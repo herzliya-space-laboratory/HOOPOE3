@@ -17,8 +17,6 @@
 
 #include "Global/Global.h"
 #include "COMM/GSC.h"
-#include "payload/DataBase.h"
-#include "payload/Butchering.h"
 
 #define APRS_ON
 

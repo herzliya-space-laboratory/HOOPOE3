@@ -4,6 +4,9 @@
  *  Created on: 22 Mar 2011
  *     @Author Michael
  */
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,11 +16,6 @@
 #include "Stage_Table.h"
 #include "../Global/GlobalParam.h"
 #include <hal/Storage/FRAM.h>
-
-#ifndef TESTING
-	#define TESTING
-#endif
-
 
 
 //! CubeADCS ID
@@ -138,8 +136,6 @@ typedef union __attribute__ ((__packed__)) stageTableData
 	telemtry->EstimatedQuaternionCheckSaveId218 = 0; // 6 byte
 	// set the ECEFPositionCheckSaveId219 parameter to 0
 	telemtry->ECEFPositionCheckSaveId219 = 0; // 6 byte
-
-	printf("%d - %d - %d\n\r",telemtry[0],telemtry[1],telemtry[2]);
 
 }
 int GetDelay(stageTable ST)
