@@ -198,10 +198,9 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet, trxvu_bitrate_9600);
 						check_int("TRX_sendFrame, dump_logic", i_error);
 						printf("number of packets: %d\n", numberOfPackets++);
+						vTaskDelay(SYSTEM_DEALY);
 					}
-
 					lookForRequestToDelete_dump(cmdID);
-					vTaskDelay(SYSTEM_DEALY);
 				}
 			}
 			while (FS_result == FS_BUFFER_OVERFLOW);
