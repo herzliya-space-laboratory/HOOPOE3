@@ -65,6 +65,9 @@ int find_fileName(HK_types type, char *fileName)
 	case ADCS_HK_T:
 		strcpy(fileName, ADCS_HK_FILE_NAME);
 		break;
+	case SP_HK_T:
+		strcpy(fileName, SP_HK_FILE_NAME);
+		break;
 	case ADCS_CSS_DATA_T:
 		strcpy(fileName, NAME_OF_CSS_DATA_FILE);
 		break;
@@ -142,6 +145,8 @@ int size_of_element(HK_types type)
 		return CAM_HK_SIZE;
 	if (type == ACK_T)
 		return ACK_DATA_LENGTH;
+	if (type == SP_HK_T)
+		return SP_HK_SIZE;
 	if (type == COMM_HK_T)
 		return COMM_HK_SIZE;
 	if (type == ADCS_HK_T)
@@ -188,8 +193,8 @@ void set_GP_EPS(EPS_HK hk_in)
 }
 void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 {
-	set_tempComm_LO((float)(hk_in.fields.locosc_temp) * -0.07669 + 195.6037);
-	set_tempComm_PA((float)(hk_in.fields.pa_temp) * -0.07669 + 195.6037);
+	set_tempComm_LO(hk_in.fields.locosc_temp);
+	set_tempComm_PA(hk_in.fields.pa_temp);
 	set_RxDoppler(hk_in.fields.rx_doppler);
 	set_RxRSSI(hk_in.fields.rx_rssi);
 	ISIStrxvuTxTelemetry_revC tx_tm;
@@ -211,7 +216,7 @@ int SP_HK_collect(SP_HK* hk_out)
 	{
 		errors[i] = IsisSolarPanelv2_getTemperature(i, &paneltemp, &status);
 		check_int("EPS_HK_collect, IsisSolarPanelv2_getTemperature", errors[i]);
-		hk_out->fields.SP_temp[i] = (float)(paneltemp) * ISIS_SOLAR_PANEL_CONV;
+		hk_out->fields.SP_temp[i] = paneltemp;
 		error_combine &= errors[i];
 	}
 	IsisSolarPanelv2_sleep();

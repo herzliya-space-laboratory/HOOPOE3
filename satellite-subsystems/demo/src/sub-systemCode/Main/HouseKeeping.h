@@ -144,7 +144,7 @@ typedef union __attribute__ ((__packed__))
 	byte raw[SP_HK_SIZE];
 	struct __attribute__((packed))
 	{
-		temp_t SP_temp[NUMBER_OF_SOLAR_PANNELS];
+		int32_t SP_temp[NUMBER_OF_SOLAR_PANNELS];
 	}fields;
 }SP_HK;
 

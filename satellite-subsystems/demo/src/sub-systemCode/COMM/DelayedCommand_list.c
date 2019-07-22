@@ -8,6 +8,9 @@
 #include <hal/Storage/FRAM.h>
 #include "string.h"
 
+#include "../Global/GlobalParam.h"
+#include "../Global/Global.h"
+
 #include "DelayedCommand_list.h"
 #include "../Main/commands.h"
 
@@ -96,6 +99,7 @@ void check_delaycommand()
 	unsigned char numberOfCommands = 0;	//stored the number of commands from the FRAM
 	err = FRAM_read(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
 	check_int("check_delaycommand, FRAM_read(NUMBER_COMMAND_FRAM_ADDR)", err);
+	set_numOfDelayedCommand(numberOfCommands);
 	//printf("number of commands in FRAM %d\n", numberOfCommands);
 	//2. Loading delayed command list from FRAM
 
