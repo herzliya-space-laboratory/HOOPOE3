@@ -224,12 +224,7 @@ int InitSubsystems()
 	numberOfRestarts();
 
 	InitializeFS(activation);
-	if (activation)
-	{
-		resetSD();
 
-		resetSD();
-	}
 	create_files(activation);
 
 	EPS_Init();

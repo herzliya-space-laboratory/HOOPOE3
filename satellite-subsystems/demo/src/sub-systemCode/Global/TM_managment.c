@@ -52,10 +52,10 @@ void delete_allTMFilesFromSD()
 		do
 		{
 			int count = 0;
-			while (find.filename[count] != '.' || find.filename[count] != '\0')
+			while (find.filename[count] != '.' && find.filename[count] != '\0' && count < 30)
 				count++;
-
-			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING))
+			count++;
+			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
 			{
 				f_delete(find.filename);
 			}
@@ -119,6 +119,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 	}
 	if(first_time)
 	{
+		delete_allTMFilesFromSD();
 		FS fs = {0};
 		if(FRAM_write((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
