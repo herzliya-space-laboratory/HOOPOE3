@@ -249,8 +249,6 @@ void Dump_task(void *arg)
 	}
 	else
 	{
-		int ret = f_enterFS();
-		check_int("Dump task enter FileSystem", ret);
 		vTaskDelay(SYSTEM_DEALY);
 		xQueueReset(xDumpQueue);
 		dump_logic(id, startTime, endTime, resulotion, HK_dump_type);

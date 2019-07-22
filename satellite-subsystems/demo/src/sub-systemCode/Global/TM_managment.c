@@ -273,7 +273,9 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	}
 	int index_current = getFileIndex(c_file.creation_time,curr_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
-	file= f_open(curr_file_name,"a+");
+	int error = f_enterFS();
+	check_int("c_fileWrite, f_enterFS", error);
+	file = f_open(curr_file_name,"a+");
 	writewithEpochtime(file,element,c_file.size_of_element,curr_time);
 	c_file.last_time_modified= curr_time;
 	if(FRAM_write((unsigned char *)&c_file,addr,sizeof(C_FILE))!=0)//update last written
@@ -281,6 +283,7 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 		return FS_FRAM_FAIL;
 	}
 	f_close(file);
+	f_releaseFS();
 	return FS_SUCCSESS;
 }
 FileSystemResult fileWrite(char* file_name, void* element,int size)
@@ -363,6 +366,8 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
+		int error = f_enterFS();
+		check_int("c_fileWrite, f_enterFS", error);
 		current_file= f_open(curr_file_name,"r");
 		if (current_file == NULL)
 			return FS_NOT_EXIST;
@@ -395,6 +400,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			}
 		}
 		f_close(current_file);
+		f_releaseFS();
 	}while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current);
 
 

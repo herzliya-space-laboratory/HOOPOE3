@@ -820,8 +820,6 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 
 void HouseKeeping_highRate_Task()
 {
-	int ret = f_enterFS(); /* Register this task with filesystem */
-	check_int("HouseKeeping_Task enter FileSystem", ret);
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = TASK_HK_HIGH_RATE_DELAY;
 	while(1)
@@ -844,8 +842,6 @@ void HouseKeeping_highRate_Task()
 }
 void HouseKeeping_lowRate_Task()
 {
-	int ret = f_enterFS(); /* Register this task with filesystem */
-	check_int("HouseKeeping_Task enter FileSystem", ret);
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = TASK_HK_LOW_RATE_DELAY;
 	while(1)
