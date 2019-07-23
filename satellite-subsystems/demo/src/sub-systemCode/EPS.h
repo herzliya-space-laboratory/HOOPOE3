@@ -32,6 +32,22 @@
 #define STATE_7 0x40
 #define STATE_8 0x80
 
+#define NUM_BATTERY_MODE 4
+
+#define EPS_ROUNDING_FACTOR	5
+
+typedef enum EPS_mode_t{
+	critical_mode = 0,
+	safe_mode = 1,
+	cruise_mode = 2,
+	full_mode = 3
+}EPS_mode_t;
+
+typedef struct{
+	void (*fun)(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode);
+	EPS_mode_t type;
+}EPS_enter_mode_t;
+
 /**
  * @brief Initializes the first platform consumption state
  */
@@ -57,25 +73,25 @@ void shut_ADCS(Boolean mode);
 /**
  * @brief Change switches according to full consumption mode.
  */
-void EnterFullMode(gom_eps_channelstates_t *switches_states);
+void EnterFullMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode);
 
 /**
  * @brief Change switches according to cruise consumption mode.
  */
-void EnterCruiseMode(gom_eps_channelstates_t *switches_states);
+void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode);
 
 /**
  * @brief Change switches according to safe consumption mode.
  */
-void EnterSafeMode(gom_eps_channelstates_t *switches_states);
+void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode);
 
 /**
  * @brief Change switches according to critical consumption mode.
  */
-void EnterCriticalMode(gom_eps_channelstates_t *switches_states);
+void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode);
 
 void WriteCurrentTelemetry(gom_eps_hk_t telemetry);
 
-void convert_raw_voltage(byte raw[EPS_VOLTAGES_SIZE_RAW], voltage_t voltages[EPS_VOLTAGES_SIZE]);
+void convert_raw_voltage(byte raw[EPS_VOLTAGES_SIZE_RAW], voltage_t voltages[EPS_VOLTAGE_TABLE_NUM_ELEMENTS]);
 
 #endif /* EPS_H_ */

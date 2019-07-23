@@ -30,7 +30,7 @@
 #define IMAGE_SIZE (IMAGE_WIDTH * IMAGE_HEIGHT)	///< image size in bytes
 #define MAX_SIZE_OF_PARAM_IMAGE_DUMP	9
 
-#define EPS_VOLTAGES_SIZE 6
+#define EPS_VOLTAGE_TABLE_NUM_ELEMENTS	 6
 #define AUTO_DEPLOYMENT_TIME 10
 #define TIME_SIZE 4
 #define CMD_ID_SIZE	4
@@ -60,7 +60,7 @@
 #define STACK_DUMP_SIZE 2048//when you create the dump task, size of stack, //need to be tasted...
 #define DUMP_BUFFER_SIZE  40000
 
-#define EPS_VOLTAGES_SIZE_RAW (EPS_VOLTAGES_SIZE * 2) //!< Size of EPS_VOLTAGES_ADDR
+#define EPS_VOLTAGES_SIZE_RAW (EPS_VOLTAGE_TABLE_NUM_ELEMENTS * 2) //!< Size of EPS_VOLTAGES_ADDR
 
 #define STAGE_TABLE_SIZE 9
 #endif /* SIZES_H_ */
