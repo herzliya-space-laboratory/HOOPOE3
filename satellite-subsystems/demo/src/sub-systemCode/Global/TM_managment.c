@@ -184,7 +184,7 @@ static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int t
 	int number_of_writes;
 	number_of_writes = f_write( &time,sizeof(unsigned int),1, file );
 	number_of_writes += f_write( data, size,1, file );
-	printf("writing element, time is: %u\n",time);
+	//printf("writing element, time is: %u\n",time);
 	if(number_of_writes!=2)
 	{
 		printf("writewithEpochtime error\n");
