@@ -45,9 +45,11 @@
 #include "../ADCS.h"
 
 
-
 int find_fileName(HK_types type, char *fileName)
 {
+	if (fileName == NULL)
+		return -2;
+
 	switch(type)
 	{
 	case EPS_HK_T:
@@ -176,6 +178,7 @@ int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 	return 0;
 }
 
+//update the global_params
 void set_GP_EPS(EPS_HK hk_in)
 {
 	set_Vbatt(hk_in.fields.VBatt);
@@ -204,7 +207,7 @@ void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 	set_TxRefl(tx_tm.fields.tx_reflpwr);
 }
 
-
+// collect from the drivers telemetry for each of the HK types
 int SP_HK_collect(SP_HK* hk_out)
 {
 	int errors[NUMBER_OF_SOLAR_PANNELS];
@@ -319,7 +322,7 @@ int ADCS_HK_collect(ADCS_HK* hk_out)
 	return error;
 }
 
-
+//create file for every type of HK
 int COMM_create_file()
 {
 	int er = c_fileReset(COMM_HK_FILE_NAME);
@@ -404,20 +407,21 @@ int create_files(Boolean firstActivation)
 	return 0;
 }
 
+//save data from each of the systems, every type of HK have his own function
 void save_SP_HK()
 {
 	int error;
-	SP_HK eps_hk;
+	SP_HK sp_hk;
 	// 1.1. collect hk
-	error = SP_HK_collect(&eps_hk);
+	error = SP_HK_collect(&sp_hk);
 	if (error == 0)
 	{
 		// 1.2. save hk in filesystem
-		error = c_fileWrite(SP_HK_FILE_NAME, (void*)(&eps_hk));
+		error = c_fileWrite(SP_HK_FILE_NAME, (void*)(&sp_hk));
 		if (error == FS_NOT_EXIST)
 		{
 			// 1.3. create file if not exist
-			EPS_create_file();
+			SP_create_file();
 		}
 	}
 	else
@@ -430,21 +434,17 @@ void save_EPS_HK()
 {
 	int error;
 	EPS_HK eps_hk;
-	// 1.1. collect hk
 	error = EPS_HK_collect(&eps_hk);
 	if (error == 0)
 	{
-		// 1.2. save hk in filesystem
 		error = c_fileWrite(EPS_HK_FILE_NAME, (void*)(&eps_hk));
 		if (error == FS_NOT_EXIST)
 		{
-			// 1.3. create file if not exist
 			EPS_create_file();
 		}
 	}
 	else
 	{
-		//can't get eps hk
 		printf("ERROR IN COLLECTING EPS TM: %d\n", error);
 	}
 }
@@ -454,22 +454,18 @@ void save_CAM_HK()
 	if (get_system_state(cam_operational_param))
 	{
 		CAM_HK cam_hk;
-		// 2.1. collect hk
 		error = CAM_HK_collect(&cam_hk);
 		if (error == 0)
 		{
-			// 2.2. save hk in filesystem
 			error = c_fileWrite(CAM_HK_FILE_NAME, (void*)(&cam_hk));
 			if (error == FS_NOT_EXIST)
 			{
-				// 2.3. create file if not exist
 				CAM_create_file();
 			}
 		}
 		else
 		{
-			//can't get eps hk
-			//printf("ERROR IN COLLECTING CAM TM: %d\n", error);
+			printf("ERROR IN COLLECTING CAM TM: %d\n", error);
 		}
 	}
 }
@@ -477,21 +473,17 @@ void save_COMM_HK()
 {
 	int error;
 	COMM_HK comm_hk;
-	// 3.1. collect hk
 	error = COMM_HK_collect(&comm_hk);
 	if (error == 0)
 	{
-		// 3.2. save hk in filesystem
 		error = c_fileWrite(COMM_HK_FILE_NAME, (void*)(&comm_hk));
 		if (error == FS_NOT_EXIST)
 		{
-			// 3.3. create file if not exist
 			COMM_create_file();
 		}
 	}
 	else
 	{
-		//can't get eps hk
 		printf("ERROR IN COLLECTING COMM TM: %d\n", error);
 	}
 }
@@ -499,28 +491,25 @@ void save_ADCS_HK()
 {
 	int error;
 	ADCS_HK adcs_hk;
-	// 3.1. collect hk
 	if (get_system_state(ADCS_param))
 	{
 		error = ADCS_HK_collect(&adcs_hk);
 		if (error == 0)
 		{
-			// 3.2. save hk in filesystem
 			error = c_fileWrite(ADCS_HK_FILE_NAME, (void*)(&adcs_hk));
 			if (error == FS_NOT_EXIST)
 			{
-				// 3.3. create file if not exist
 				ADCS_create_file();
 			}
 		}
 		else
 		{
-			//can't get eps hk
 			printf("ERROR IN COLLECTING ADCS TM: %d\n", error);
 		}
 	}
 }
 
+//convert data from little-endian to big-endian, every HK type have his own function
 int EPS_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
 	int params[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 1, 1};
@@ -589,7 +578,7 @@ int SP_HK_raw_BiEnE(byte* raw_in, byte* raw_out)
 {
 	int params[] = {4, 4, 4, 4, 4, 4};
 	int lastPlace = 0, l;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < NUMBER_OF_SOLAR_PANNELS; i++)
 	{
 		for (l = 0; l < params[i] / 2; l++)
 		{
@@ -621,6 +610,9 @@ int ADCS_SC_raw_BigEnE(byte* raw_in, byte* raw_out)
 
 int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 {
+	if (raw_data == NULL || packet == NULL)
+		return -2;
+
 	time_unix data_time;
 	memcpy(&data_time, raw_data, sizeof(time_unix));
 	switch(type)
