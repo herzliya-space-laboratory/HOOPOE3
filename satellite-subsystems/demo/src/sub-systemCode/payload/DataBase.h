@@ -1,7 +1,7 @@
 /*
  * DataBase.h
  *
- *  Created on: 7 Χ‘ΧΧΧ™ 2019
+ *  Created on: 7 αξΰι 2019
  *      Author: I7COMPUTER
  */
 
@@ -11,28 +11,26 @@
 #include <hal/Boolean.h>
 #include <hcc/api_fat.h>
 
-#include "../Global/FRAMadress.h"
+#include <hal/Storage/FRAM.h>
 #include "../Global/Global.h"
 
-#define IMAGE_HEIGHT_ 1088
-#define IMAGE_WIDTH_ 2048
-#define IMAGE_SIZE_ IMAGE_HEIGHT_*IMAGE_WIDTH_
+#define FILENAMESIZE 15			// The size of the filename parameter. img0000001.raw (+1 for '/0')
 
-#define FILENAMESIZE 13			// The size of the filename parameter. img0000001.raw (+1 for '/0')
-
-#define MAXNUMBEROFPICTURES 5		// The maximum number of pictures the database supports
+#define NUMBEROFGROUNDPICTURES 5		// The maximum number of pictures the database supports
+#define NUMBEROFAUTOPICTURES 5	// The maximum number of automatically shot pictures the database supports
 
 #define defaltFrameRate 1
-#define defaltFrameAmount 1
 #define defaltAdcGain 53
 #define defaltPgaGain 3
 #define defaltExposure 2048
 
+#define defaltAutoFrameAmount 1
+
+#define defaltAutoFrequancy 0
+
 // ToDo: get rid of once all code is together!
 //! the file name of the estimated angles
 #define ESTIMATED_ANGLES_FILE ("ESTIMATED_ANGLES")
-
-#define imageDataBaseFile ("DataBaseFile")
 
 typedef enum
 {
@@ -44,8 +42,8 @@ typedef enum
 	t32,	// thumbnail, factor 32 (reduction level 5), 34x64
 	t64,	// thumbnail, factor 64 (reduction level 6), 17x32
 	jpg,	// a compressed picture
-	NumberOfFileTypes,
 	bmp,	// bitmap for jpg, unavailable - deleted and created for jpg
+	NumberOfFileTypes
 } fileType;
 
 typedef unsigned int imageid;
@@ -67,9 +65,6 @@ typedef enum
 	DataBaseFail,
 	DataBaseTimeError,
 	DataBaseShotPicNotLongAgo,
-	DataBaseAlreadyMarked,
-	DataBase_SmallerThanTheCurrentMax,
-	DataBase_sizeBeyondFRAMBounderies,
 	//------GECKO_UC_TakeImage returns------
 	GECKO_Take_Success,						// (0) completed successfully
 	GECKO_Take_Error_TurnOffSensor,			// (-1) could not turn off sensor
@@ -107,11 +102,7 @@ typedef enum
 	GECKO_Erase_Error_ClearEraseDoneFlag	// (-4) could not clear erase done flag
 } DataBaseResult;
 
-imageid getLatestID(DataBase database);
-unsigned int getNumberOfFrames(DataBase database);
-
-DataBaseResult markPicture(DataBase database, imageid id);
-DataBaseResult handleMarkedPictures(DataBase database);
+//------BASIC FUNCTIONS------
 
 /*!
  * init image data base
@@ -119,16 +110,16 @@ DataBaseResult handleMarkedPictures(DataBase database);
  * @return data base handler,
  * NULL on fail.
  */
-DataBase initDataBase(Boolean8bit reset);
+DataBase initDataBase(Boolean reset);
 /*
  * Ressets the whole database: the FRAM, the handler and deletes all of the pictures saved on OBC sd
  * @param database the DataBase's handler
  * @param shouldDelete a pointer to a function that decides whether or not a picture should be deleted
  * @return
  */
-DataBase resetDataBase(DataBase database);
+DataBaseResult resetDataBase(DataBase database);
 
-void updateCameraParameters(DataBase database, unsigned int frameRate, unsigned char adcGain, unsigned char pgaGain, unsigned int exposure, unsigned int frameAmount);
+void updateCameraParameters(DataBase database, unsigned int frameRate, unsigned char adcGain, unsigned char pgaGain, unsigned int exposure, unsigned int frameAmount, Boolean Auto);
 
 /*!
  * transfer image from payload SD To OBC SD
@@ -143,7 +134,7 @@ void updateCameraParameters(DataBase database, unsigned int frameRate, unsigned 
  * 28 - 37: Camera errors (lines 64 - 73)
  * DataBaseSuccess on success.
  */
-DataBaseResult transferImageToSD(DataBase database, imageid cameraId);
+DataBaseResult transferImageToSD(DataBase database, imageid cameraId, Boolean mode, Boolean Auto);
 
 /*!
  * Delete images from OBC SD
@@ -154,7 +145,7 @@ DataBaseResult transferImageToSD(DataBase database, imageid cameraId);
  * DataBaseFail,
  * DataBaseSuccess on success.
  */
-DataBaseResult DeleteImageFromOBC(DataBase database, imageid id, fileType type);
+DataBaseResult DeleteImageFromOBC(DataBase database, imageid id, fileType type, Boolean Auto);
 /*!
  * Delete images from payload SD by index
  * @param id index of image.
@@ -163,7 +154,9 @@ DataBaseResult DeleteImageFromOBC(DataBase database, imageid id, fileType type);
  * 38 - 43: Camera errors (lines 74 - 79)
  * DataBaseSuccess on success.
  */
-DataBaseResult DeleteImageFromPayload(DataBase database,imageid id);
+DataBaseResult DeleteImageFromPayload(DataBase database,imageid id, Boolean Auto);
+
+imageid getCameraId_bySecondaryId(DataBase database, imageid secondaryId, Boolean Auto);
 
 /*!
  * takes a picture and writes info about it
@@ -172,9 +165,9 @@ DataBaseResult DeleteImageFromPayload(DataBase database,imageid id);
  * 12 - 30: Camera errors (lines 45 - 63)
  * DataBaseSuccess on success.
  */
-DataBaseResult takePicture(DataBase database, Boolean8bit testPattern);
+DataBaseResult takePicture(DataBase database, unsigned int frameAmount, Boolean testPattern, Boolean Auto);
 
-DataBaseResult takePicture_withSpecialParameters(DataBase database, unsigned int frameRate, unsigned char adcGain, unsigned char pgaGain, unsigned int exposure, unsigned int frameAmount, Boolean8bit testPattern);
+DataBaseResult takePicture_withSpecialParameters(DataBase database, unsigned int frameRate, unsigned char adcGain, unsigned char pgaGain, unsigned int exposure, unsigned int frameAmount, Boolean testPattern, Boolean Auto);
 
 /*!
  * get Image file descriptor
@@ -183,19 +176,22 @@ DataBaseResult takePicture_withSpecialParameters(DataBase database, unsigned int
  * @note User have to close the file
  */
 char* GetImageFileName(DataBase database, imageid cameraId, fileType fileType);
-
 /*
- * will contain the data about the picture with the id given, at the start is the size if the array (the size is uint32)
- * @note User have to free the array
- */
-byte* GetImageMetaData_byID(DataBase database, imageid id);
-/*
- * GetImageMetaData but has the general data that the DB has before the metadata about the images, at the start is the size if the array (the size is uint32)
- * @note User have to free the array
+ * get a file containing all information on the DataBase
+ * format:
+ *	 writing general information on database:
+ *     1. number of pictures on the satellite right now
+ *     2. the current id we are at (also overall number of pictures taken)
+ *     3. Mishelle's array vector
+ *   for each picture on the satellite currently (at that order):
+ *     id, true(boolean) if on iOBC SD else false, score, type, date
+ * @param database the requested database
+ * @return File descriptor containing database, NULL if failed
+ * @note User have to close the file
 */
-byte* getDataBaseFile(DataBase database, unsigned int start, unsigned int end);
+F_FILE* getDataBaseFile(DataBase database, unsigned int start, unsigned int end);
 
-DataBaseResult BinImage(DataBase database, imageid id, byte reductionLevel);
+DataBaseResult BinImage(DataBase database, imageid id, unsigned int reductionLevel);
 
 /*!
  * get Image file descriptor
@@ -203,8 +199,19 @@ DataBaseResult BinImage(DataBase database, imageid id, byte reductionLevel);
  * imageFactor 0 for raw
  * @note
  */
-DataBaseResult compressImage(DataBase database, imageid id);
+DataBaseResult compressImage(DataBase database, imageid id, unsigned int imageFactor);
 
-DataBaseResult updateMaxNumberOfPictures(DataBase database, unsigned int maxNumberOfGroundPictures);
+DataBaseResult newAutoImageing(DataBase database);
+
+DataBaseResult updateMaxNumberOfGroundPictures(DataBase database, unsigned int maxNumberOfGroundPictures);
+DataBaseResult updateMaxNumberOfAutoPictures(DataBase database, unsigned int maxNumberOfAutoPictures);
+
+// ----------HIGHER LEVEL FUNCTIONS----------
+
+DataBaseResult DeleteImage_bySecondaryID(DataBase database, imageid secondaryId, fileType fileType, Boolean Auto);
+DataBaseResult DeleteImage_byCameraID(DataBase database, imageid cameraId, fileType fileType, Boolean Auto);
+
+DataBaseResult TransferImage_bySecondaryID(DataBase database, imageid secondaryId, Boolean mode, Boolean Auto);
+
 
 #endif /* DataBase_H_ */

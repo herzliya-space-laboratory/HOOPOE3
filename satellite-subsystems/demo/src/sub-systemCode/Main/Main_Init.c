@@ -18,8 +18,6 @@
 #include <at91/utility/trace.h>
 #include <at91/peripherals/cp15/cp15.h>
 
-#include <hcc/api_fat.h>
-
 #include <hal/Timing/WatchDogTimer.h>
 #include <hal/Timing/Time.h>
 
@@ -135,7 +133,7 @@ void StartTIME()
 {
 	// starts time
 	int error = 0;
-	Time initial_time_jan2000={0,0,0,1,30,6,19,0};
+	Time initial_time_jan2000={0,0,0,1,1,1,0,0};
 	error = Time_start(&initial_time_jan2000,0);
 	if(0 != error )
 	{
@@ -182,30 +180,6 @@ Boolean first_activation()
 	return TRUE;
 }
 
-#define BUFFLEN 30+F_MAXNAME
-
-
-void resetSD()
-{
-	F_FIND find;
-	unsigned int selection = 0;
-	if (!f_findfirst("A:/*.*",&find))
-	{
-		do
-		{
-			printf ("filename:%s\n ",find.filename);
-			printf("\t 0) next file \n\r");
-			printf("\t 1) delete and next file \n\r");
-			while(UTIL_DbguGetIntegerMinMax(&selection, 0, 13) == 0);
-			if(selection == 1)
-			{
-				f_delete(find.filename);
-			}
-			selection =0;
-		} while (!f_findnext(&find));
-	}
-}
-
 int InitSubsystems()
 {
 	StartI2C();
@@ -227,12 +201,7 @@ int InitSubsystems()
 	numberOfRestarts();
 
 	InitializeFS(activation);
-	if (activation)
-	{
-		resetSD();
 
-		resetSD();
-	}
 	create_files(activation);
 
 	EPS_Init();
@@ -240,39 +209,55 @@ int InitSubsystems()
 #ifdef ANTS_ON
 	init_Ants();
 
-#ifdef TESTING
-	printf("before deploy\n");
+	printf("before deploy ");
 	readAntsState();
-#endif
 
 	Auto_Deploy();
 
-#ifdef TESTING
-	printf("after deploy\n");
 	readAntsState();
-#endif
+	printf("after deploy ");
 #endif
 
-	init_adcs(activation);
+	ADCS_startLoop(activation);
 
 	init_trxvu();
+
+	initCamera(activation);
 
 	init_command();
 
 	return 0;
 }
 
+void task_delay()
+{
+	while(1)
+	{
+		vTaskDelay(SYSTEM_DEALY);
+	}
+}
+
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
-	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+
+
+	xTaskCreate(TRXVU_task, (const signed char*)("TRXVU_TASK_Debug"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
-	xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(HouseKeeping_Task, (const signed char*)("HouseKeeping_Task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(HouseKeeping_secondTask, (const signed char*)("HouseKeeping2_Task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
+	xTaskGenericCreate(ADCS_Task, (const signed char*)"ADCS_TASK_Debug", 8192, (void *) ST, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL, NULL, NULL);
 	vTaskDelay(100);
+
+	//KickStartCamera();
+
+/*#ifdef TESTING
+	xTaskCreate(test_task, (const signed char*)("test_Task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	vTaskDelay(100);
+#endif*/
 	return 0;
 }
 

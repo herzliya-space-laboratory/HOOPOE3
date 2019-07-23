@@ -2,7 +2,7 @@
  * Global.h
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef GLOBAL_H_
@@ -22,10 +22,6 @@ typedef unsigned int  Boolean;
 #include <stdlib.h>
 #include <stdint.h>
 #include <strings.h>
-#include <string.h>
-
-#include <hal/Timing/Time.h>
-#include <hal/Storage/FRAM.h>
 
 #include "FRAMadress.h"
 #include "sizes.h"
@@ -34,7 +30,6 @@ typedef unsigned int  Boolean;
 //#define NOT_USE_ACK_HK
 #define TESTS
 #define FILE_SYSTEM_NOT_TESTED
-//#define TESTING_BRONFELD
 //for tests
 
 #define I2C_BUS_ADDR 0
@@ -54,6 +49,8 @@ typedef unsigned int  Boolean;
 //delay
 #define SYSTEM_DEALY		5
 #define TASK_DELAY 100//test...
+#define TASK_HK_DELAY 1000
+#define TASK_SECOND_HK_DELAY	10000
 #define QUEUE_DELAY 100//test...
 #define QUEUE_DELETE_DELAY 1000//test...
 #define MAX_DELAY 100000//test...
@@ -63,6 +60,9 @@ typedef unsigned int  Boolean;
 //tasks buffer
 #define BEACON_TASK_BUFFER	2048
 #define CAMERA_MANEGER_TASK_BUFFER	4096
+
+//priority task
+#define FIRST_PRIORITY 1
 
 // times
 #define CONVERT_SECONDS_TO_MS(ms) (ms * 1000)
@@ -114,7 +114,7 @@ typedef enum subSystem_indx
 
 extern int not_first_activation;
 
-//check error from drivers
+//check error from driverse
 void check_int(char *string_output, int error);
 void check_portBASE_TYPE(char *string_output, long error);
 
@@ -128,6 +128,8 @@ void BigEnE_raw_value(byte *in, int length);
 void print_array(unsigned char *arr,int length);
 void switch_endian(unsigned char *in, unsigned char *out, int len);
 void double_little_endian(unsigned char* d);
+void kicktime(int n);
+void zero_initial_activation();
 
 int soft_reset_subsystem(subSystem_indx reset_idx);
 int hard_reset_subsystem(subSystem_indx reset_idx);
@@ -135,7 +137,6 @@ int hard_reset_subsystem(subSystem_indx reset_idx);
 int fram_byte_fix(unsigned int address);
 Boolean comapre_string(unsigned char* str0, unsigned char* str1, int numberOfBytes);
 
-Boolean getBitValueByIndex(byte* data, int length, int index);
-
+void copyDATA(byte* to, byte* from, int legnth);
 void reset_FRAM_MAIN();
 #endif /* GLOBAL_H_ */

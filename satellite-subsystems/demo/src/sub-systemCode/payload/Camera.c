@@ -10,9 +10,6 @@
 
 #include <satellite-subsystems/GomEPS.h>
 
-#include <hal/Storage/FRAM.h>
-#include <hal/Timing/Time.h>
-
 #include <at91/peripherals/pio/pio.h>
 
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
@@ -21,12 +18,6 @@
 #include "Camera.h"
 
 #define Result(value, errorType)	if(value != 0) { return errorType; }
-
-#define PauseDuration_Location 0x9500
-#define TimeBetweenPauses_Location 0x9501
-
-//#define Default_PauseDuration 5000
-//#define Default_TimeBetweenPauses 20000
 
 #define _SPI_GECKO_BUS_SPEED MHZ(5)
 
@@ -37,17 +28,16 @@
 #define	totalPageCount 136
 #define totalFlashCount 4096
 
-static unsigned int Duration; // = Default_PauseDuration;
-static unsigned int TimeBetweenPauses; // = Default_TimeBetweenPauses;
-
 void Initialized_GPIO()
 {
-	Pin gpio12 = PIN_GPIO12;
-	PIO_Configure(&gpio12, PIO_LISTSIZE(&gpio12));
+	Pin Pin12 = PIN_GPIO12;
+	PIO_Configure(&Pin12, PIO_LISTSIZE(Pin12));
 	vTaskDelay(10);
-	PIO_Set(&gpio12);
+	PIO_Set(&Pin12);
 	vTaskDelay(10);
+
 }
+
 void De_Initialized_GPIO()
 {
 	Pin Pin12 = PIN_GPIO12;
@@ -79,11 +69,10 @@ Boolean TurnOnGecko()
 	vTaskDelay(10);
 	PIO_Set(&gpio7);
 	vTaskDelay(10);
-
-	//Initialized_GPIO();
-
+	printf("turned on (;\n");
 	return TRUE;
 }
+
 Boolean TurnOffGecko()
 {
 	printf("turning camera off\n");
@@ -101,38 +90,22 @@ Boolean TurnOffGecko()
 	vTaskDelay(10);
 	PIO_Clear(&gpio7);
 	vTaskDelay(10);
-
-	//De_Initialized_GPIO();
-
+	printf("turned off\n");
 	return TRUE;
 }
 
 int initGecko()
 {
 	int err = GECKO_Init( (SPIslaveParameters){ bus1_spi, mode0_spi, slave1_spi, 100, 1, _SPI_GECKO_BUS_SPEED, 0 } );
-
-	FRAM_read((unsigned char*)&Duration, PauseDuration_Location, sizeof(unsigned int));
-	FRAM_read((unsigned char*)&TimeBetweenPauses, TimeBetweenPauses_Location, sizeof(unsigned int));
-
+	if(0 == err)
+	{
+		Initialized_GPIO();
+	}
 	return err;
-}
-
-void updatePauseTimes(unsigned int duration, unsigned int timeBetweenPauses)
-{
-	Duration = duration;
-	TimeBetweenPauses = timeBetweenPauses;
-
-	FRAM_write((unsigned char*)&Duration, PauseDuration_Location, sizeof(unsigned int));
-	FRAM_write((unsigned char*)&TimeBetweenPauses, TimeBetweenPauses_Location, sizeof(unsigned int));
 }
 
 int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
 {
-	unsigned int timestamp = 0;
-	unsigned int currentTime = 0;
-
-	Time_getUnixEpoch(&timestamp);
-
 	// reseting whatchdog:
 	unsigned char somebyte = 0;
 	GomEpsPing(0, 0, &somebyte);
@@ -176,17 +149,9 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	do
 	{
 		result = GECKO_GetTrainingDone();
-
 		vTaskDelay(500);
 
-		Time_getUnixEpoch(&currentTime);
-		if (currentTime - timestamp == TimeBetweenPauses)
-		{
-			vTaskDelay(Duration);
-			Time_getUnixEpoch(&timestamp);
-		}
-
-		if (i == 60 * frameAmount)	// timeout - 30 seconds for each frame
+		if (i == 120)	// timeout at 1 minute
 			return -9;
 		i++;
 	} while(result == 0);
@@ -200,17 +165,9 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	do
 	{
 		result = GECKO_GetFlashInitDone();
-
 		vTaskDelay(500);
 
-		Time_getUnixEpoch(&currentTime);
-		if (currentTime - timestamp == TimeBetweenPauses)
-		{
-			vTaskDelay(Duration);
-			Time_getUnixEpoch(&timestamp);
-		}
-
-		if (i == 60 * frameAmount)	// timeout - 30 seconds for each frame
+		if (i == 120)	// timeout at 1 minute
 			return -11;
 		i++;
 	} while(result == 0);
@@ -239,17 +196,9 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	do
 	{
 		result = GECKO_GetSampleDone();
-
 		vTaskDelay(500);
 
-		Time_getUnixEpoch(&currentTime);
-		if (currentTime - timestamp == TimeBetweenPauses)
-		{
-			vTaskDelay(Duration);
-			Time_getUnixEpoch(&timestamp);
-		}
-
-		if (i == 60 * frameAmount)	// timeout - 30 seconds for each frame
+		if (i == 120)	// timeout at 1 minute
 			return -16;
 		i++;
 	} while(result == 0);
@@ -265,13 +214,8 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	return 0;
 }
 
-int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
+int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer, Boolean fast )
 {
-	unsigned int timestamp = 0;
-	unsigned int currentTime = 0;
-
-	Time_getUnixEpoch(&timestamp);
-
 	// reseting whatchdog:
 	unsigned char somebyte = 0;
 	GomEpsPing(0, 0, &somebyte);
@@ -281,15 +225,7 @@ int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 	do
 	{
 		result = GECKO_GetFlashInitDone();
-
 		vTaskDelay(500);
-
-		Time_getUnixEpoch(&currentTime);
-		if (currentTime - timestamp == TimeBetweenPauses)
-		{
-			vTaskDelay(Duration);
-			Time_getUnixEpoch(&timestamp);
-		}
 
 		if (i == 120)	// timeout at 1 minute
 			return -1;
@@ -308,33 +244,42 @@ int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 	do
 	{
 		result = GECKO_GetReadReady();
-
+		printf("not finish in: GECKO_GetReadReady = %d\n" , result);
 		vTaskDelay(100);
-
-		Time_getUnixEpoch(&currentTime);
-		if (currentTime - timestamp == TimeBetweenPauses)
-		{
-			vTaskDelay(Duration);
-			Time_getUnixEpoch(&timestamp);
-		}
-
 	} while(result == 0);
+
+
+	unsigned int pageCount = 0;
+	unsigned int flashCount = 0;
 
 	vTaskDelay(1000);
 
 	for (unsigned int i = 0; i < IMAGE_HEIGHT*IMAGE_WIDTH/sizeof(uint32_t); i++)
 	{
+		if(!fast)
+		{
+			flashCount++;
+			if(flashCount == totalFlashCount)
+			{
+				flashCount = 0;
+				pageCount++;
+			}
+			if (flashCount != GECKO_GetFlashCount() || flashCount > totalFlashCount)
+				return -5;
+			if (pageCount != GECKO_GetPageCount() || pageCount > totalPageCount)
+				return -6;
+			// printf("page count = %u, total page count = %u\nflash count = %u, total flash count = %u", pageCount, totalPageCount, flashCount, totalFlashCount);
+		}
+
 		buffer[i] = GECKO_GetImgData();
 
 		// Printimg a value one every 40000 pixels:
 		if(i % 5000 == 0)
 		{
 			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
-			vTaskDelay(10);
 		}
 	}
-
-	printf("finished reading image!\n");
+	printf("page count = %u, total page count = %u\nflash count = %u, total flash count = %u", pageCount, totalPageCount, flashCount, totalFlashCount);
 
 	result = GECKO_GetReadDone();
 	if(result == 0)
@@ -363,10 +308,9 @@ int GECKO_EraseBlock( uint32_t imageID )
 
 	int i = 0;
 	do {
-		if (i == 60)	// timeout at 30 seconds
+		if (i == 50)	// ToDo: when should the timeout be?
 			return -3;
 		i++;
-
 		vTaskDelay(500);
 	} while (GECKO_GetEraseDone() == 0);
 

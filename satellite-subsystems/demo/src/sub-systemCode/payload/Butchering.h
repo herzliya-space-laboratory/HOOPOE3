@@ -30,7 +30,7 @@ enum BUTCHER_ERR
 };
 
 
-typedef unsigned char pixel_t;						///< declare pixel type. each pixel is only one color(R or B or G)
+typedef char pixel_t;						///< declare pixel type. each pixel is only one color(R or B or G)
 typedef unsigned char chunk_t[CHUNK_SIZE];	///< declare chunk type with fixed size
 
 

@@ -8,6 +8,26 @@
 #ifndef STAGE_TABLE_H_
 #define STAGE_TABLE_H_
 
+typedef union
+{
+
+	unsigned char raw[6];
+	struct __attribute__ ((__packed__))
+	{
+		short a;
+		short b;
+		short c;
+	}fields;
+}Hold_Data;
+
+typedef struct __attribute__ ((__packed__))
+{
+	int (*FuncPointer)(unsigned char,void*);
+	unsigned char Save;
+	unsigned char Change_Cord;
+	unsigned char Start_Pos;
+	char * File_Name;
+}Gather_TM_Data;
 //! The structure TLM_Data_t contains the Delay in the Stage Table and the telemtry part of the Stage table
 /*! this structere contains the delay in the stage table and the telmtry part of the stage table as shown in the flowing link:
  * https://drive.google.com/open?id=1vyo0ZM_S_6jSiOzThDQ1VauMdaNUAnhaFKsNeQK_CA0
@@ -63,6 +83,7 @@ typedef struct
 
 //! a pointer to a struct that contains all the information about the stage table
 typedef union stageTableData* stageTable;
+
 //! a function that creates a stage Table with all the parameters in the starting position down 00000000 00000011 11101000 00000000 00000000 00000000 00000000 00000000 00000000
 void createTable(stageTable stageTableBuild);
 /*! updates the stage table data to the cubeADCS system
@@ -74,33 +95,33 @@ int updateTable(stageTable stageTableGainData);
  * @param[telemtry] contains the new stage table data
  * @param[stagetable] the stage table that will be updated
  */
-int translateCommandFULL(unsigned char telemtry[], stageTable stagetable);
+int translateCommandFULL(unsigned char telemtry[]);
 /*! Get the delay parameter stage table from the ground and update it to the stage table
  * @param[delay] contains the new delay
  * @param[stagetable] the stage table that will be updated
  */
-void translateCommandDelay(unsigned char delay[3], stageTable stagetable);
+int translateCommandDelay(unsigned char delay[3]);
 /*! Get the control mode parameter stage table from the ground and update it to the stage table
  * @param[controlMode] contains the new control Mode
  * @param[stagetable] the stage table that will be updated
  */
-int translateCommandControlMode(unsigned char controlMode, stageTable stagetable);
+int translateCommandControlMode(unsigned char controlMode);
 /*! Get the Power parameter stage table from the ground and update it to the stage table
  * @param[power] contains the new power
  * @param[stagetable] the stage table that will be updated
  */
-int translateCommandPower( unsigned char power,stageTable stageTableGainData);
+int translateCommandPower( unsigned char power);
 /*! Get the Estimation mode parameter stage table from the ground and update it to the stage table
  * @param[estimationMode] contains the new estimation Mode
  * @param[stagetable] the stage table that will be updated
  */
-int translateCommandEstimationMode(unsigned char estimationMode,stageTable stagetable);
+int translateCommandEstimationMode(unsigned char estimationMode);
 /*! Get the Telemtry parameter stage table from the ground and update it to the stage table
  *  @param[telemtry] contains the new telemtry
  * @param[stagetable] the stage table that will be updated
  *
  */
-void translateCommandTelemtry(unsigned char telemtry[3],stageTable stagetable);
+int translateCommandTelemtry(unsigned char telemtry[3]);
 /*! Get the current stage table according to the data char
  * @param[Data] caontain what parametrs of the stage table will be returned
  * @param[stagetable] the stage table to be returned
@@ -109,86 +130,5 @@ void getTableTo(stageTable stagetable,unsigned char* Data);
 /*!a function that checks if the system need to save the 146 id telemtry
  * @param[stagetable] the stage table which the data is taken from
  */
-int checkEstimatedAttitudeAngles(stageTable stagetable);
-/*!a function that checks if the system need to save the 147 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkSatellitePositionECI(stageTable stagetable);
-/*!a function that checks if the system need to save the 148 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkEstimatedAngularRates(stageTable stagetable);
-/*!a function that checks if the system need to save the 149 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkSatelliteVelocityECI(stageTable stagetable);
-/*!a function that checks if the system need to save the 150 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkSatellitePositionLLH(stageTable Stagetable);
-/*!a function that checks if the system need to save the 151 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkMagneticFieldVector(stageTable Stagetable);
-/*!a function that checks if the system need to save the 152 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkCoarseSunVector(stageTable Stagetable);
-/*!a function that checks if the system need to save the 155 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkRateSensorRates(stageTable Stagetable);
-/*!a function that checks if the system need to save the 156 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkWheelSpeedcheck(stageTable Stagetable);
-/*!a function that checks if the system need to save the 157 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkMagnetorquercmd(stageTable stageTable);
-/*!a function that checks if the system need to save the 158 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkWheelSpeedcmd(stageTable stageTable);
-/*!a function that checks if the system need to save the 159 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkIGRFModelledMagneticFieldVector(stageTable Stagetable);
-/*!a function that checks if the system need to save the 161 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkEstimatedGyroBiascheck(stageTable Stagetable);
-/*!a function that checks if the system need to save the 162 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkEstimationInnovationVector(stageTable Stagetable);
-/*!a function that checks if the system need to save the 163 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkQuaternionErrorVector(stageTable Stagetable);
-/*!a function that checks if the system need to save the 164 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkQuaternionCovariance(stageTable Stagetable);
-/*!a function that checks if the system need to save the 165 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkAngularRateCovariance(stageTable Stagetable);
-/*!a function that checks if the system need to save the 168 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkRawCSS(stageTable Stagetable);
-/*!a function that checks if the system need to save the 170 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkRawMagnetometer(stageTable Stagetable);
-/*!a function that checks if the system need to save the 218 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkEstimatedQuaternion(stageTable Stagetable);
-/*!a function that checks if the system need to save the 219 id telemtry
- * @param[stagetable] the stage table which the data is taken from
- */
-int checkECEFPosition(stageTable Stagetable);
-int checkSunModelle(stageTable stageTable);
+TLMData Get_TM(stageTable stageTable);
 #endif /* STAGETABLEH */

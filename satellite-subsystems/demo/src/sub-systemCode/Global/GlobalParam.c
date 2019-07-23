@@ -2,7 +2,7 @@
  * GlobalParam.c
  *
  *  Created on: Mar 28, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -94,8 +94,6 @@ int init_GP()
 	current_global_param.numOfAPRS = 0;
 	current_global_param.numOfResets = 0;
 	current_global_param.lastReset = 0;
-
-	current_global_param.ground_conn = FALSE;
 
 	return 0;
 }
@@ -776,29 +774,6 @@ time_unix get_lastReset()
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
 		return_value = current_global_param.lastReset;
-		lu_error = xSemaphoreGive(xCGP_semaphore);
-		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
-	}
-	return return_value;
-}
-//CGP ->connection to ground state
-void set_ground_conn(Boolean param)
-{
-	portBASE_TYPE lu_error;
-	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
-	{
-		current_global_param.ground_conn = param;
-		lu_error = xSemaphoreGive(xCGP_semaphore);
-		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
-	}
-}
-Boolean get_ground_conn()
-{
-	portBASE_TYPE lu_error;
-	Boolean return_value = 0;
-	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
-	{
-		return_value = current_global_param.ground_conn;
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}

@@ -12,14 +12,14 @@
 #include <stdint.h>
 
 void Initialized_GPIO();
+
 void De_Initialized_GPIO();
 
 Boolean TurnOnGecko();
+
 Boolean TurnOffGecko();
 
 int initGecko();
-
-void updatePauseTimes(unsigned int duration, unsigned int timeBetweenPauses);
 
 /**
  * @brief Higher level function for taking an image.
@@ -97,7 +97,7 @@ int GECKO_TakeImage(uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_
  *  -7 = read done flag not set
  *  -8 = could not clear read done flag
  */
-int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer);
+int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer, Boolean fast );
 
 /**
  * @brief Higher level function for erasing an image.

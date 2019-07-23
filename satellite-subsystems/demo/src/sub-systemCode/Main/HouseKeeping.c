@@ -2,7 +2,7 @@
  * HouseKeeping.c
  *
  *  Created on: Jan 18, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -308,9 +308,9 @@ int ADCS_HK_collect(ADCS_HK* hk_out)
 
 int COMM_create_file()
 {
-	int er = c_fileReset(COMM_HK_FILE_NAME);
+	int er = f_delete(COMM_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(COMM_HK_FILE_NAME, COMM_HK_SIZE);
+	FileSystemResult error = c_fileCreate(COMM_HK_FILE_NAME, COMM_HK_SIZE, NUMBER_OF_FILE_HK);
 	if (error != FS_SUCCSESS)
 	{
 		printf("ERROR IN CREATING ACK FILE %d\n", error);
@@ -320,9 +320,9 @@ int COMM_create_file()
 }
 int ACK_create_file()
 {
-	int er = c_fileReset(ACK_FILE_NAME);
+	int er = f_delete(ACK_FILE_NAME);
 	check_int("delete_ack_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(ACK_FILE_NAME, ACK_HK_SIZE);
+	FileSystemResult error = c_fileCreate(ACK_FILE_NAME, ACK_HK_SIZE, NUMBER_OF_FILE_HK);
 	if (error != FS_SUCCSESS)
 	{
 		printf("ERROR IN CREATING ACK FILE %d\n", error);
@@ -332,9 +332,9 @@ int ACK_create_file()
 }
 int EPS_create_file()
 {
-	int er = c_fileReset(EPS_HK_FILE_NAME);
+	int er = f_delete(EPS_HK_FILE_NAME);
 	check_int("delete_eps_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(EPS_HK_FILE_NAME, EPS_HK_SIZE);
+	FileSystemResult error = c_fileCreate(EPS_HK_FILE_NAME, EPS_HK_SIZE, NUMBER_OF_FILE_HK);
 	if (error != FS_SUCCSESS)
 	{
 		printf("ERROR IN CREATING EPS FILE %d\n", error);
@@ -344,9 +344,9 @@ int EPS_create_file()
 }
 int CAM_create_file()
 {
-	int er = c_fileReset(CAM_HK_FILE_NAME);
+	int er = f_delete(CAM_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(CAM_HK_FILE_NAME, CAM_HK_SIZE);
+	FileSystemResult error = c_fileCreate(CAM_HK_FILE_NAME, CAM_HK_SIZE, NUMBER_OF_FILE_HK);
 	if (error != FS_SUCCSESS)
 	{
 		//error
@@ -355,9 +355,9 @@ int CAM_create_file()
 }
 int ADCS_create_file()
 {
-	int er = c_fileReset(ADCS_HK_FILE_NAME);
+	int er = f_delete(ADCS_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(ADCS_HK_FILE_NAME, ADCS_HK_SIZE);
+	FileSystemResult error = c_fileCreate(ADCS_HK_FILE_NAME, ADCS_HK_SIZE, NUMBER_OF_FILE_HK);
 	if (error != FS_SUCCSESS)
 	{
 		//error
@@ -366,9 +366,9 @@ int ADCS_create_file()
 }
 int SP_create_file()
 {
-	int er = c_fileReset(SP_HK_FILE_NAME);
+	int er = f_delete(SP_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(SP_HK_FILE_NAME, SP_HK_SIZE);
+	FileSystemResult error = c_fileCreate(SP_HK_FILE_NAME, SP_HK_SIZE, NUMBER_OF_FILE_HK);
 	if (error != FS_SUCCSESS)
 	{
 		//error
@@ -399,7 +399,7 @@ void save_SP_HK()
 	if (error == 0)
 	{
 		// 1.2. save hk in filesystem
-		error = c_fileWrite(SP_HK_FILE_NAME, (void*)(&eps_hk));
+		error = fileWrite(SP_HK_FILE_NAME, (void*)(&eps_hk), SP_HK_SIZE);
 		if (error == FS_NOT_EXIST)
 		{
 			// 1.3. create file if not exist
@@ -421,7 +421,7 @@ void save_EPS_HK()
 	if (error == 0)
 	{
 		// 1.2. save hk in filesystem
-		error = c_fileWrite(EPS_HK_FILE_NAME, (void*)(&eps_hk));
+		error = fileWrite(EPS_HK_FILE_NAME, (void*)(&eps_hk), EPS_HK_SIZE);
 		if (error == FS_NOT_EXIST)
 		{
 			// 1.3. create file if not exist
@@ -445,7 +445,7 @@ void save_CAM_HK()
 		if (error == 0)
 		{
 			// 2.2. save hk in filesystem
-			error = c_fileWrite(CAM_HK_FILE_NAME, (void*)(&cam_hk));
+			error = fileWrite(CAM_HK_FILE_NAME, (void*)(&cam_hk), CAM_HK_SIZE);
 			if (error == FS_NOT_EXIST)
 			{
 				// 2.3. create file if not exist
@@ -468,7 +468,7 @@ void save_COMM_HK()
 	if (error == 0)
 	{
 		// 3.2. save hk in filesystem
-		error = c_fileWrite(COMM_HK_FILE_NAME, (void*)(&comm_hk));
+		error = fileWrite(COMM_HK_FILE_NAME, (void*)(&comm_hk), COMM_HK_SIZE);
 		if (error == FS_NOT_EXIST)
 		{
 			// 3.3. create file if not exist
@@ -492,7 +492,7 @@ void save_ADCS_HK()
 		if (error == 0)
 		{
 			// 3.2. save hk in filesystem
-			error = c_fileWrite(ADCS_HK_FILE_NAME, (void*)(&adcs_hk));
+			error = fileWrite(ADCS_HK_FILE_NAME, (void*)(&adcs_hk), ADCS_HK_SIZE);
 			if (error == FS_NOT_EXIST)
 			{
 				// 3.3. create file if not exist
@@ -506,6 +506,29 @@ void save_ADCS_HK()
 		}
 	}
 }
+
+int save_HK()
+{
+	// 0. check if satellite in not save TM state
+	byte DF;
+	FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
+	if (DF == TRUE_8BIT)
+	{
+		return -1;
+	}
+
+	// 1. save EPS_HK
+	save_EPS_HK();
+	// 2. save CMA_HK
+	//save_CAM_HK();
+	// 3. save COMM_HK
+	save_COMM_HK();
+	// 4. save ADCS_HK
+	//save_ADCS_HK();
+
+	return 0;
+}
+
 
 int EPS_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
@@ -785,49 +808,27 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 }
 
 
-void HouseKeeping_highRate_Task()
+void HouseKeeping_Task()
 {
 	int ret = f_enterFS(); /* Register this task with filesystem */
 	check_int("HouseKeeping_Task enter FileSystem", ret);
 	portTickType xLastWakeTime = xTaskGetTickCount();
-	const portTickType xFrequency = TASK_HK_HIGH_RATE_DELAY;
+	const portTickType xFrequency = TASK_HK_DELAY;
 	while(1)
 	{
-		byte DF;
-		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF == TRUE_8BIT)
-		{
-			continue;
-		}
-
-		save_EPS_HK();
-
-		save_CAM_HK();
-
-		save_COMM_HK();
-
-		save_ADCS_HK();
-
+		save_HK();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
-void HouseKeeping_lowRate_Task()
+void HouseKeeping_secondTask()
 {
 	int ret = f_enterFS(); /* Register this task with filesystem */
 	check_int("HouseKeeping_Task enter FileSystem", ret);
 	portTickType xLastWakeTime = xTaskGetTickCount();
-	const portTickType xFrequency = TASK_HK_LOW_RATE_DELAY;
+	const portTickType xFrequency = TASK_SECOND_HK_DELAY;
 	while(1)
 	{
-		byte DF;
-		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF == TRUE_8BIT)
-		{
-			continue;
-		}
-
 		save_SP_HK();
-
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }

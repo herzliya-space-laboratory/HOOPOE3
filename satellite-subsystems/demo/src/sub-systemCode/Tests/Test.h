@@ -2,7 +2,7 @@
  * Test.h
  *
  *  Created on: Mar 3, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef TEST_H_
@@ -15,5 +15,5 @@
 void collect_TM_during_deploy();
 void reset_FIRST_activation();
 void readAntsState();
-void imageDump_test(void* param);
+
 #endif /* TEST_H_ */

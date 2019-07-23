@@ -9,7 +9,7 @@
 #define ESLADCS_H_
 
 #include "cspaceADCS_types.h"
-#include <hal/boolean.h>
+#include <hal/hal/include/boolean.h>
 
 
 /**

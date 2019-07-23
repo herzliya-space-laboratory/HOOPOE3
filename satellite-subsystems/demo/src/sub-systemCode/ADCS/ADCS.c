@@ -28,7 +28,7 @@
 #include <satellite-subsystems/GomEPS.h>
 //include for TESTS
 #include <at91/utility/exithandler.h>
-
+#include "../Main/CMD/ADCS_CMD.h"
 //! define START_ESTIMATION_MODE as 0
 
 
@@ -85,7 +85,7 @@ int BOOMStickDeploy(unsigned char timeout)
 void ADCS_CreateFiles()
 {
 	// opens file ... i don't know ... LOOK AT THE NAME OF THE GIVEN PARAMTER TO THE FUNCTION
-	/*c_fileCreate(ESTIMATED_ANGLES_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
+	c_fileCreate(ESTIMATED_ANGLES_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
 	c_fileCreate(ESTIMATED_ANGULAR_RATE_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
 	c_fileCreate(NAME_OF_ECI_POSITION_DATA_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
 	c_fileCreate(NAME_OF_SATALLITE_VELOCITY_DATA_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
@@ -105,10 +105,10 @@ void ADCS_CreateFiles()
 	c_fileCreate(NAME_OF_CSS_DATA_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
 	c_fileCreate(RAW_MAGNETOMETER_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
 	c_fileCreate(ESTIMATED_QUATERNION_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
-	c_fileCreate(NAME_OF_ECEF_POSITION_DATA_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);*/
+	c_fileCreate(NAME_OF_ECEF_POSITION_DATA_FILE,SIZE_OF_TELEMTRY,DEFAULT_NUM_OF_FILES);
 }
 //! a function that is called once and it starts the adcs loop and an initialization of the cubeadcs
-void init_adcs(Boolean activation)
+void ADCS_startLoop(Boolean activation)
 {
 	unsigned char I2C = ADCS_I2C_ADRR;
 	// connects to the cubeADCS thorough I2C
@@ -124,6 +124,8 @@ void init_adcs(Boolean activation)
 	//initialize the stage table
 	stageTable ST = get_ST();
 	byte raw_stageTable[STAGE_TABLE_SIZE];
+	Set_ADCS_CMD(ADCS_cmd);
+
 	if (activation)
 	{
 		createTable(ST);
@@ -490,7 +492,7 @@ void ADCS_ERROR_TEST()
 	int x = 20;
 	int err;
 	unsigned char *Alpha = "aaabbbb";
-	unsigned char *Hoopoe3 = "aaabbbb";
+	unsigned char *Elai = "aaabbbb";
 	unsigned char b[100];
 	unsigned char _avil = 0;
 	Boolean offerMoreTests = TRUE;
@@ -892,7 +894,7 @@ int test_data()
 		printf("err %d \n",err);
 
 	}
-
+return 0;
 }
 void ADCS_PROPER_TEST()
 {
@@ -1286,7 +1288,7 @@ void ADCS_Task()
 	unsigned char data[STAGE_TABLE_SIZE];
 	int ret = f_enterFS(); /* Register this task with filesystem */
 	check_int("adcs_task enter FileSystem", ret);
-
+	ADCS_Tests(get_ST());
 	// the adcs loop
 	while (TRUE)
 	{
@@ -1334,6 +1336,7 @@ int integral[2];
 
 int ADCS_command(unsigned char id, unsigned char* data, unsigned int dat_len)
 {
+	//TODO: rewrite
 	unsigned char arr[dat_len + 1];
 	unsigned int i;
 	arr[0] = id;
@@ -1480,8 +1483,7 @@ void PIDMODE()
 {
 	int size = 0;
 	unsigned char data[SIZE_OF_TELEMTRY];
-	time_unix Todo;
-	c_fileRead(ESTIMATED_ANGLES_FILE, data, 1, LAST_ELEMENT_IN_C_FILE, LAST_ELEMENT_IN_C_FILE, &size, &Todo);
+	c_fileRead(ESTIMATED_ANGLES_FILE, data, 1, LAST_ELEMENT_IN_C_FILE, LAST_ELEMENT_IN_C_FILE, &size);
 	prvious[X_AXIS	] = GET_X_AXIS;
 	prvious[Z_AXIS] = GET_Z_AXIS;
 	integral[X_AXIS] = prvious[X_AXIS];
@@ -1526,3 +1528,149 @@ int Cashe_State(unsigned char state)
 	return cspaceADCS_cacheStateADCS(ADCS_ID, state);
 }
 
+int Magnetorquer_Configuration(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 0, 3);
+}
+int RW_Configuration(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 3, 4);
+}
+int Gyro_Configuration(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 7, 3);
+}
+int CSS_Configuration(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 10, 10);
+}
+int CSS_Relative_Scale(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 20, 10);
+}
+int CSS_Threshold(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 30, 1);
+}
+int Magnetometer_Mounting_Transform_Angles(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 101, 6);
+}
+int Magnetometer_Channel_1_3_Offset(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 107, 6);
+}
+int Magnetometer_Sensitivity_Matrix(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 113, 18);
+}
+int Rate_Sensor_Offset(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 131, 6);
+}
+int Rate_Sensor_Mult(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 137, 1);
+}
+int Detumbling_Gain_Config(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 164, 14);
+}
+int Y_Momentum_Gain_Config(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 178, 16);
+}
+int Reference_Wheel_Momentum(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 194, 4);
+}
+int RWheel_Gain(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 198, 8);
+}
+int Moment_of_Inertia(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 218, 24);
+}
+int Noise_Configuration(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 242, 28);
+}
+int Use_in_EKF(unsigned char * Data)
+{
+	return FRAM_write(Data, START + 270, 1);
+}
+
+
+//SGP4 All CMD Gets func id: 207
+void GetSG4OrbitPrams(unsigned char *data) {
+	if (data == NULL) {
+		printf("NULL PARM");
+		return;
+	}
+
+	unsigned char temp[8];
+	int id = 207;
+	I2C_write(ADCS_I2C_ADRR, &id, 1);
+	vTaskDelay(5);
+	I2C_read(ADCS_I2C_ADRR, data, 64);
+	for (int i = 0; i < 64; i+=sizeof(double))
+	{
+		printf("SG4 orbit pram(%d): %lfn", i/8+1, doubleParse(data + i));
+	}
+	
+}
+
+void GetSG4SubPrams(unsigned char *data, int PramT) {
+	if (data == NULL) {
+		printf("NULL PARM");
+		return;
+	}
+
+	char temp[64];
+	int id = 207;
+	I2C_write(ADCS_I2C_ADRR, &id, 1);
+	vTaskDelay(5);
+	I2C_read(ADCS_I2C_ADRR, temp, 64);
+
+
+	for (short i = PramT; i < PramT+8; i++)
+	{
+		data[i - PramT] = temp[i];
+	}
+	switch (PramT)
+	{
+	case 0:
+		printf("SG4 orbit Inclination: %lf", doubleParse(data));
+			break;
+	case 8:
+		printf("SG4 orbit IncEccentricity: %lf", doubleParse(data));
+			break;
+	case 16:
+		printf("SG4 orbit IncRight_Ascension: %lf", doubleParse(data));
+			break;
+	case 24:
+		printf("SG4 orbit IncArgumentofPerigee: %lf", doubleParse(data));
+			break;
+	case 32:
+		printf("SG4 orbit BStar: %lf", doubleParse(data));
+			break;
+	case 40:
+		printf("SG4 orbit MeanAnomaly: %lf", doubleParse(data));
+			break;
+	case 48:
+		printf("SG4 orbit Epoch: %lf", doubleParse(data));
+			break;
+	default:
+		break;
+	}
+}
+
+double doubleParse(unsigned char *gther) {
+	if (gther == NULL) {
+		return -666.666;
+	}
+	double temp;
+	memcpy(&temp, gther, sizeof(temp));
+	return temp;
+}

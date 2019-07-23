@@ -5,151 +5,135 @@
  *      Author: Roy's Laptop
  */
 
-#include <freertos/FreeRTOS.h>
-
-#include <string.h>
+#include <hcc/api_fat.h>
 
 #include "Camera.h"
 
 #include "DB_RequestHandling.h"
 
-DataBaseResult TakePicture(DataBase database, unsigned char* data)
+DataBaseResult TakePicture(DataBase database, unsigned char data[])
 {
-	Boolean8bit isTestPattern;
-
-	memcpy(&isTestPattern, data, sizeof(Boolean8bit));
+	Boolean8bit isAuto = data[0];
+	Boolean8bit isTestPattern = data[1];
+	unsigned int frameAmount = *((unsigned int*)data + 2);
 
 	TurnOnGecko();
 
-	DataBaseResult DB_result = takePicture(database, isTestPattern);
+	DataBaseResult DB_result = takePicture(database, frameAmount, isTestPattern, isAuto);
+
+	TurnOffGecko();
 
 	return DB_result;
 }
-DataBaseResult TakeSpecialPicture(DataBase database, unsigned char* data)
+DataBaseResult TakeSpecialPicture(DataBase database, unsigned char data[])
 {
-	Boolean8bit isTestPattern;
-	unsigned int frameAmount;
-	unsigned int frameRate;
-	unsigned char adcGain;
-	unsigned char pgaGain;
-	unsigned int exposure;
-
-	memcpy(&isTestPattern, data, sizeof(Boolean8bit));
-	memcpy(&frameAmount, data + 1, sizeof(int));
-	memcpy(&frameRate, data + 5, sizeof(int));
-	memcpy(&adcGain, data + 9, sizeof(char));
-	memcpy(&pgaGain, data + 10, sizeof(char));
-	memcpy(&exposure, data + 11, sizeof(int));
+	Boolean8bit isAuto = data[0];
+	Boolean8bit isTestPattern = data[1];
+	unsigned int frameAmount = *((unsigned int*)data + 2);
+	unsigned int frameRate = *((unsigned int*)data + 6);
+	unsigned int adcGain = *((unsigned int*)data + 10);
+	unsigned int pgaGain = *((unsigned int*)data + 14);
+	unsigned int exposure = *((unsigned int*)data + 18);
 
 	TurnOnGecko();
 
-	DataBaseResult DB_result = takePicture_withSpecialParameters(database, frameRate, adcGain, pgaGain, exposure, frameAmount, isTestPattern);
+	DataBaseResult DB_result = takePicture_withSpecialParameters(database, frameRate, adcGain, pgaGain, exposure, frameAmount, isTestPattern, isAuto);
+
+	TurnOffGecko();
 
 	return DB_result;
 }
-DataBaseResult DeletePicture(DataBase database, unsigned char* data)
+DataBaseResult DeletePicture(DataBase database, unsigned char data[])
 {
-	unsigned int cameraID;
-	byte GroundFileType;
-
-	memcpy(&cameraID, data, sizeof(int));
-	memcpy(&GroundFileType, data + 4, sizeof(byte));
+	Boolean8bit isAuto = data[0];
+	unsigned int cameraID = *((unsigned int*)data + 1);
+	fileType fileType = *((unsigned int*)data + 5);
 
 	TurnOnGecko();
 
-	if (GroundFileType == GeckoSD)
+	DataBaseResult DB_result;
+	if (fileType == bmp) // Gecko.... just look at "δχρν TLM&TLC" and u wil understand how stupid it is abd why I did it this way.
 	{
-		return DeleteImageFromPayload(database, cameraID);
+		DB_result = DeleteImageFromPayload(database, cameraID, isAuto);
 	}
 	else
 	{
-		return DeleteImageFromOBC(database, cameraID, GroundFileType);
+		DB_result = DeleteImageFromOBC(database, cameraID, fileType, isAuto);
 	}
-}
-DataBaseResult TransferPicture(DataBase database, unsigned char* data)
-{
-	unsigned int cameraID;
 
-	memcpy(&cameraID, data, sizeof(int));
-
-	TurnOnGecko();
-
-	DataBaseResult DB_result = transferImageToSD(database, cameraID);
+	TurnOffGecko();
 
 	return DB_result;
 }
-byte* GetDataBase(DataBase database, unsigned char* data)
+DataBaseResult TransferPicture(DataBase database, unsigned char data[])
 {
-	unsigned int start, end;
+	Boolean8bit isAuto = data[0];
+	unsigned int cameraID = *((unsigned int*)data + 1);
 
-	memcpy(&start, data, 4);
-	memcpy(&end, data + 4, 4);
+	TurnOnGecko();
 
-	// ToDo: fix
-	//return getDataBaseFile(database, start, end);
+	DataBaseResult DB_result = transferImageToSD(database, cameraID, TRUE, isAuto);
 
-	return NULL;
+	TurnOffGecko();
+
+	return DB_result;
 }
-DataBaseResult CreateThumbnail(DataBase database, unsigned char* data)
+F_FILE* GetDataBaseFile(DataBase database, unsigned char data[])
 {
-	unsigned int cameraID;
-	byte reductionLevel;
+	unsigned int start = *((unsigned int*)data);
+	unsigned int end = *((unsigned int*)data + 4);
 
-	memcpy(&cameraID, data, sizeof(int));
-	memcpy(&reductionLevel, data + 4, sizeof(byte));
+	return getDataBaseFile(database, start, end);
+}
+DataBaseResult CreateThumbnail(DataBase database, unsigned char data[])
+{
+	unsigned int cameraID = *((unsigned int*)data);
+	unsigned int reductionLevel = *((unsigned int*)data + 4);
 
 	DataBaseResult DB_result = BinImage(database, cameraID, reductionLevel);
 
 	return DB_result;
 }
-DataBaseResult CreateJPG(DataBase database, unsigned char* data)
+DataBaseResult CreateJPG(DataBase database, unsigned char data[])
 {
-	unsigned int cameraID;
+	unsigned int cameraID = *((unsigned int*)data);
+	unsigned int imageFactor = *((unsigned int*)data + 4);
 
-	memcpy(&cameraID, data, sizeof(int));
-
-	DataBaseResult DB_result = compressImage(database, cameraID);
+	DataBaseResult DB_result = compressImage(database, cameraID, imageFactor);
 
 	return DB_result;
 }
-DataBaseResult UpdatePhotographyValues(DataBase database, unsigned char* data)
+DataBaseResult UpdatePhotographyValues(DataBase database, unsigned char data[])
 {
-	unsigned int frameAmount;
-	unsigned int frameRate;
-	unsigned char adcGain;
-	unsigned char pgaGain;
-	unsigned int exposure;
+	unsigned int isAuto = data[0];
+	unsigned int frameRate = *((unsigned int*)data + 1);
+	unsigned int adcGain = *((unsigned int*)data + 5);
+	unsigned int pgaGain = *((unsigned int*)data + 9);
+	unsigned int exposure = *((unsigned int*)data + 13);
+	unsigned int frameAmount = *((unsigned int*)data + 17);
 
-	memcpy(&frameAmount, data, sizeof(int));
-	memcpy(&frameRate, data + 4, sizeof(int));
-	memcpy(&adcGain, data + 8, sizeof(char));
-	memcpy(&pgaGain, data + 9, sizeof(char));
-	memcpy(&exposure, data + 10, sizeof(int));
-
-	updateCameraParameters(database, frameRate, adcGain, pgaGain, exposure, frameAmount);
+	updateCameraParameters(database, frameRate, adcGain, pgaGain, exposure, frameAmount, isAuto);
 
 	return DataBaseSuccess;
 }
-DataBaseResult UpdateMaxNumberOfPicturesInDB(DataBase database, unsigned char* data)
+DataBaseResult UpdateMaxNumberOfPicturesInDB(DataBase database, unsigned char data[])
 {
-	unsigned int maxNumberOfPictures;
+	unsigned int isAuto = data[0];
+	unsigned int maxNumberOfPictures = *((unsigned int*)data + 1);
 
-	memcpy(&maxNumberOfPictures, data, sizeof(int));
-
-	updateMaxNumberOfPictures(database, maxNumberOfPictures);
+	if (isAuto)
+		updateMaxNumberOfAutoPictures(database, maxNumberOfPictures);
+	else
+		updateMaxNumberOfGroundPictures(database, maxNumberOfPictures);
 
 	return DataBaseSuccess;
 }
-char* GetPictureFile(DataBase database, unsigned char* data)
+char* GetPictureFile(DataBase database, unsigned char data[])
 {
-	unsigned int cameraID;
-	byte reductionLevel;
+	unsigned int cameraID = *((unsigned int*)data);
+	unsigned int fileType = *((unsigned int*)data + 4);
 
-	memcpy(&cameraID, data, sizeof(int));
-	memcpy(&reductionLevel, data + 4, sizeof(byte));
-
-
-	char* fileName = GetImageFileName(database, cameraID, reductionLevel);
+	char* fileName = GetImageFileName(database, cameraID, fileType);
 
 	return fileName;
 }

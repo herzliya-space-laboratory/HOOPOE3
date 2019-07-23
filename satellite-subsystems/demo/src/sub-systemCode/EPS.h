@@ -2,7 +2,7 @@
  * EPS.h
  *
  *  Created on: Oct 21, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef EPS_H_
@@ -49,10 +49,10 @@ void reset_EPS_voltages();
 void EPS_Conditioning();
 
 Boolean8bit  get_shut_CAM();
-void shut_CAM(Boolean mode);
+void shut_CAM(Boolean8bit on_off);
 
 Boolean8bit  get_shut_ADCS();
-void shut_ADCS(Boolean mode);
+void shut_ADCS(Boolean8bit on_off);
 
 /**
  * @brief Change switches according to full consumption mode.

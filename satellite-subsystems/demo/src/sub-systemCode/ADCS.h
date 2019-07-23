@@ -95,6 +95,17 @@
 
 #define ADCS_ID 0
 
+typedef enum SGP4SubPram_t {
+	Inclination = 0,
+	Eccentricity = 8,
+	RAAN = 16,
+	ArgumentofPerigee = 24,
+	BStar = 32,
+	MeanMotion = 40,
+	MeanAnomaly = 48,
+	Epoch = 56
+};
+
 typedef enum en_t
 {
 	aasdf,bfdsasdf,cdsafdsa
@@ -102,7 +113,7 @@ typedef enum en_t
 }EN;
 
 //! a function the starts the loop called only one time
-void init_adcs(Boolean activation);
+void ADCS_startLoop(Boolean activation);
 //!creates the ADCS files
 void ADCS_CreateFiles();
 //! the ADCS loop
@@ -162,4 +173,27 @@ int SGP4_Oribt_Mean_Motion(unsigned char * data);
 int SGP4_Oribt_Mean_Anomaly(unsigned char * data);
 int SGP4_Oribt_Epoc(unsigned char * data);
 int Reset_Boot_Registers();
+int Magnetorquer_Configuration(unsigned char * Data);
+int RW_Configuration(unsigned char * Data);
+int Gyro_Configuration(unsigned char * Data);
+int CSS_Configuration(unsigned char * Data);
+int CSS_Relative_Scale(unsigned char * Data);
+int CSS_Threshold(unsigned char * Data);
+int Magnetometer_Mounting_Transform_Angles(unsigned char * Data);
+int Magnetometer_Channel_1_3_Offset(unsigned char * Data);
+int Magnetometer_Sensitivity_Matrix(unsigned char * Data);
+int Rate_Sensor_Offset(unsigned char * Data);
+int Rate_Sensor_Mult(unsigned char * Data);
+int Detumbling_Gain_Config(unsigned char * Data);
+int Y_Momentum_Gain_Config(unsigned char * Data);
+int Reference_Wheel_Momentum(unsigned char * Data);
+int RWheel_Gain(unsigned char * Data);
+int Moment_of_Inertia(unsigned char * Data);
+int Noise_Configuration(unsigned char * Data);
+int Save_Config();
+void GetSG4OrbitPrams(unsigned char *data);
+void GetSG4SubPram(unsigned char *data, int PramT);
+double doubleParse(unsigned char *gther);
 #endif /* ADCS_H_ */
+
+

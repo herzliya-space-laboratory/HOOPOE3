@@ -2,54 +2,47 @@
  * CameraManeger.c
  *
  *  Created on: Jun 2, 2019
- *      Author: DBTn
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 #include <freertos/queue.h>
 
+#include <at91/utility/exithandler.h>
+#include <at91/commons.h>
+#include <at91/utility/trace.h>
+#include <at91/peripherals/cp15/cp15.h>
+
+#include <hal/Utility/util.h>
+#include <hal/Timing/WatchDogTimer.h>
 #include <hal/Timing/Time.h>
+#include <hal/Drivers/I2C.h>
+#include <hal/Drivers/LED.h>
 #include <hal/errors.h>
+
 #include <hal/Storage/FRAM.h>
 
-#include "../Global/Global.h"
-#include "../COMM/imageDump.h"
 #include "DataBase.h"
 #include "CameraManeger.h"
 #include "Camera.h"
 #include "DB_RequestHandling.h"
 
 #include "../TRXVU.h"
-#include "../Main/HouseKeeping.h"
-
-#define CameraManagmentTask_StackDepth /*8192*/30000
-#define CameraManagmentTask_Name ("CMT")
-#define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
 static xQueueHandle interfaceQueue;
 xTaskHandle	camManeger_handler;
 
+#ifdef AUTO_CAMERA
 time_unix lastPicture_time;
-time_unix timeBetweenPictures;
-uint32_t numberOfPicturesLeftToBeTaken;
-
-command_id cmd_id_4_takePicturesWithTimeInBetween;
-
-Boolean transition;
-
-imageid lastPicture_id;
-unsigned int numberOfFrames;
-
-time_unix turnedOnCamera;
+xSemaphoreHandle xLastPicture_time;
+#endif
 
 DataBase imageDataBase;
 
 /*
- * Handle the functionality of every request.
- * @param[in]	the request to order
- *
- * @note the definition is for the functions written above the implementation
+ *	Handle the functionality of every request.
+ *	@param[in]	the request to order
  */
 void act_upon_request(Camera_Request request);
 /*
@@ -57,87 +50,149 @@ void act_upon_request(Camera_Request request);
  * @param[out]	the request removed from the queue
  * @return positive-number the number of requests in the Queue
  * @return -1 if the queue if empty
- *
- * @note the definition is for the functions written above the implementation
  */
 int removeRequestFromQueue(Camera_Request *request);
-/*
- * will check if needs to take picture and will take if it does
- *
- * @note the definition is for the functions written above the implementation
- */
-void Take_pictures_with_time_in_between();
 
 /*
  * The task who handle all the requests from the system
  * @param[in]	Pointer to an unsigned short representing the number of seconds
  * 				to keep the camera on after the request have been done
  */
-void CameraManagerTaskMain()
+void camManeger_task(void* arg)
 {
-	f_enterFS();
+	int i_error;
 	Camera_Request req;
-	time_unix timeNow;
+	time_unix timeToShut = 0, timeNow;
 	while(TRUE)
 	{
-		transition = get_ground_conn();
-
 		if (removeRequestFromQueue(&req) > -1)
 		{
+			req.data[0] = FALSE_8BIT;
 			act_upon_request(req);
+
+			if (timeToShut == 0)
+			{
+				i_error = Time_getUnixEpoch(&timeToShut);
+				check_int("camManeger_task, Time_getUnixEpoch", i_error);
+			}
+			else if (MIN_TIME_TO_KEEP_ON_CAMERA <= req.keepOnCamera && req.keepOnCamera <= MAX_TIME_TO_KEEP_ON_CAMERA)
+			{
+				timeToShut += req.keepOnCamera;
+			}
 		}
 
-		Time_getUnixEpoch(&timeNow);
-		if (timeNow > ( turnedOnCamera + 15 ) && turnedOnCamera != 0)
+		i_error = Time_getUnixEpoch(&timeNow);
+		check_int("camManeger_task, Time_getUnixEpoch", i_error);
+		if (timeToShut != 0 && timeToShut < timeNow)
 		{
 			TurnOffGecko();
-			turnedOnCamera = 0;
-		}
-
-		Take_pictures_with_time_in_between();
-
-		vTaskDelay(1000);
-
-		if (!transition)
-		{
-			Time_getUnixEpoch(&turnedOnCamera);
-
-			DataBaseResult error = handleMarkedPictures(imageDataBase);
-
-			save_ACK(ACK_CAMERA, error + 30, cmd_id_4_takePicturesWithTimeInBetween); // ToDo: How do we handle errors? (error log...)
+			timeToShut = 0;
 		}
 
 		vTaskDelay(SYSTEM_DEALY);
 	}
 }
 
+#ifdef AUTO_CAMERA
+//The handler of the auto camera task
+xTaskHandle autoCameraHandler;
+
+/*
+ * The task who handle the "Auto pilot" of the camera
+ */
+void autoCamera_task()
+{
+	portTickType xLastWakeTime = xTaskGetTickCount();
+	const portTickType xFrequency = CONVERT_SECONDS_TO_MS(30 * 60);
+
+	while(TRUE)
+	{
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+	}
+}
+
+/*
+ * Returns the auto state if on/off
+ * @return FALSE == off, On == true
+ */
+Boolean check_autoPilot()
+{
+	Boolean8bit state;
+	int error = FRAM_read(&state, AUTO_PILOT_STATE_ADDR, 1);
+	check_int("check_autoPilot, FRAM_read(AUTO_PILOT_STATE_ADDR)", error);
+	return state;
+}
+
+/*
+ * Change the auto pilot state on/off
+ * @param[in]	New value to update
+ */
+void change_autoPilot(Boolean state)
+{
+	int error = FRAM_write(&state, AUTO_PILOT_STATE_ADDR, 1);
+	check_int("check_autoPilot, FRAM_read(AUTO_PILOT_STATE_ADDR)", error);
+}
+
+/*
+ * Turn off the auto pilot, delete the task,
+ * change the auto pilot to off
+ */
+void turnOff_autoPilot()
+{
+	vTaskDelete(autoCameraHandler);
+	change_autoPilot(SWITCH_OFF);
+}
+
+/*
+ * Turn on the auto pilot, create the task,
+ * change the auto pilot to on
+ */
+void turnOn_autoPilot()
+{
+	if (check_autoPilot())
+		return;
+
+	xTaskCreate(autoCamera_task, (const signed char*)("Auto cam task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), autoCameraHandler);
+	change_autoPilot(SWITCH_ON);
+}
+#endif
+
 int initCamera(Boolean firstActivation)
 {
-	int error = initGecko();
-	if (error)
-		return error;
-
 	Initialized_GPIO();
-
+	int error = initGecko();
 	imageDataBase = initDataBase(firstActivation);
-	if (imageDataBase == NULL)
-		error = -1;
 
 	return error;
 }
 
-int KickStartCamera(void)
+int KickStartCamera()
 {
 	//Software initialize
 	interfaceQueue = xQueueCreate(MAX_NUMBER_OF_CAMERA_REQ, sizeof(Camera_Request));
 	if (interfaceQueue == NULL)
 		return -1;
 
-	numberOfPicturesLeftToBeTaken = 0;
+#ifdef AUTO_CAMERA
+	FRAM_read(&lastPicture_time, CAMERA_LAST_PICTUR_TIME_ADDR, TIME_SIZE);
+	vSemaphoreCreateBinary(xLastPicture_time);
+	if (xLastPicture_time == NULL)
+		return -2;
+#endif
 
-	xTaskCreate(imageDump_task, (const signed char*)"ID_Task", CameraManagmentTask_StackDepth, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 1), NULL);
+	xTaskCreate(camManeger_task, (const signed char*)("cam manager task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+
+#ifdef AUTO_CAMERA
+	if (check_autoPilot())
+		xTaskCreate(autoCamera_task, (const signed char*)("Auto cam task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), autoCameraHandler);
+#endif
 
 	return 0;
+}
+
+void reset_payload_FRAM()
+{
+	resetDataBase(imageDataBase);
 }
 
 int addRequestToQueue(Camera_Request request)
@@ -174,144 +229,49 @@ int resetQueue()
 
 void send_picture_to_earth_(Camera_Request request)
 {
-	char* name = GetPictureFile(imageDataBase, request.data);
+	char *name = GetPictureFile(imageDataBase, request.data);
 	byte arg[40];
 	memcpy(arg, &request.cmd_id, 4);
 	memcpy(arg + 4, request.data, 23);
-	memcpy(arg + 27, name, FILENAMESIZE);
+	xTaskCreate(Dump_image_task, (const signed char*)("Roy"), 8192, arg, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(10);
-}
-void send_imageDataBase_to_earth_(Camera_Request request)
-{
-	byte* ImageDataBaseFile = GetDataBase(imageDataBase, request.data);
-	free(ImageDataBaseFile);
-}
-
-void Take_pictures_with_time_in_between()
-{
-	time_unix currentTime;
-	Time_getUnixEpoch(&currentTime);
-
-	if ( (lastPicture_time + timeBetweenPictures <= currentTime) && (numberOfPicturesLeftToBeTaken != 0) )
-	{
-		lastPicture_time = currentTime;
-
-		Time_getUnixEpoch(&turnedOnCamera);
-		TurnOnGecko();
-
-		takePicture(imageDataBase, FALSE_8BIT);
-
-		imageid id = getLatestID(imageDataBase);
-		markPicture(imageDataBase, id);
-
-		numberOfPicturesLeftToBeTaken--;
-	}
 }
 
 void act_upon_request(Camera_Request request)
 {
-	DataBaseResult error = DataBaseSuccess;
-
+	DataBaseResult error;
 	switch (request.id)
 	{
 	case take_picture:
 		error = TakePicture(imageDataBase, request.data);
-
-		Time_getUnixEpoch(&turnedOnCamera);
-
-		lastPicture_id = getLatestID(imageDataBase);
-		numberOfFrames = getNumberOfFrames(imageDataBase);
-		for (unsigned int i = 0; i < numberOfFrames; i++) {
-			markPicture(imageDataBase, lastPicture_id - i);
-		}
-
 		break;
-
-
-	case take_picture_with_special_values:
-		Time_getUnixEpoch(&turnedOnCamera);
-
-		error = TakeSpecialPicture(imageDataBase, request.data);
-
-		lastPicture_id = getLatestID(imageDataBase);
-		numberOfFrames = getNumberOfFrames(imageDataBase);
-		for (unsigned int i = 1; i < numberOfFrames; i++) {
-			markPicture(imageDataBase, lastPicture_id - i);
-		}
-
-		break;
-
-
-	case take_pictures_with_time_in_between:
-		memcpy(&numberOfPicturesLeftToBeTaken, request.data, sizeof(int));
-		memcpy(&timeBetweenPictures, request.data + 4, sizeof(int));
-
-		Time_getUnixEpoch(&lastPicture_time);
-
-		cmd_id_4_takePicturesWithTimeInBetween = request.cmd_id;
-
-		break;
-
-
 	case delete_picture:
 		error = DeletePicture(imageDataBase, request.data);
-
-		Time_getUnixEpoch(&turnedOnCamera);
-
 		break;
-
-
 	case transfer_image_to_OBC:
-		if (transition)
-		{
-			addRequestToQueue(request);
-		}
-		else
-		{
-			error = TransferPicture(imageDataBase, request.data);
-		}
-
+		error = TransferPicture(imageDataBase, request.data);
 		break;
-
-
 	case create_thambnail:
 		error = CreateThumbnail(imageDataBase, request.data);
 		break;
-
-
-	case create_jpg:
-		error = CreateJPG(imageDataBase, request.data);
-		break;
-
-
 	case update_photography_values:
 		error = UpdatePhotographyValues(imageDataBase, request.data);
 		break;
-
-
-	case update_max_number_of_pictures:
-		error = UpdateMaxNumberOfPicturesInDB(imageDataBase, request.data);
-		break;
-
-
 	case send_picture_to_earth:
 		send_picture_to_earth_(request);
 		break;
-
-
-	case send_imageDataBase_to_earth:
-		send_imageDataBase_to_earth_(request);
+	case turn_off_auto_pilot:
+		turnOff_autoPilot();
 		break;
-
-
-	case reset_DataBase:
-		imageDataBase = resetDataBase(imageDataBase);
+	case turn_on_auto_pilot:
+		turnOn_autoPilot();
 		break;
-
-
-	default:
-		return;
+	case reset_FRAM_address:
+		reset_payload_FRAM();
 		break;
+		default:
+			return;
+			break;
 	}
 
 	save_ACK(ACK_CAMERA, error + 30, request.cmd_id);

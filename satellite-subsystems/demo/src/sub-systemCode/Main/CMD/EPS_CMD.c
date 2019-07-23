@@ -2,11 +2,10 @@
  * EPS_CMD.c
  *
  *  Created on: Jun 13, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <hal/errors.h>
-#include <hal/Storage/FRAM.h>
 
 #include "EPS_CMD.h"
 
@@ -168,44 +167,22 @@ void cmd_heater_temp(Ack_type* type, ERR_type* err, TC_spl cmd)
 void cmd_SHUT_CAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	*type = ACK_EPS_SHUT_SYSTEM;
-	if (cmd.length != 0)
+	if (cmd.length != 1)
 	{
 		*err = ERR_PARAMETERS;
 		return;
 	}
 	*err = ERR_SUCCESS;
-	shut_CAM(SWITCH_ON);
+	shut_CAM(cmd.data);
 }
 void cmd_SHUT_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	*type = ACK_EPS_SHUT_SYSTEM;
-	if (cmd.length != 0)
+	if (cmd.length != 1)
 	{
 		*err = ERR_PARAMETERS;
 		return;
 	}
 	*err = ERR_SUCCESS;
-	shut_ADCS(SWITCH_ON);
-}
-void cmd_allow_CAM(Ack_type* type, ERR_type* err, TC_spl cmd)
-{
-	*type = ACK_EPS_SHUT_SYSTEM;
-	if (cmd.length != 0)
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-	*err = ERR_SUCCESS;
-	shut_CAM(SWITCH_OFF);
-}
-void cmd_allow_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
-{
-	*type = ACK_EPS_SHUT_SYSTEM;
-	if (cmd.length != 0)
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-	*err = ERR_SUCCESS;
-	shut_ADCS(SWITCH_OFF);
+	shut_CAM(cmd.data);
 }

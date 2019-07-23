@@ -2,16 +2,15 @@
  * GSC.h
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef GSC_H_
 #define GSC_H_
 
 #include "../Global/Global.h"
-#include "splTypes.h"
 
-#define MAX_NAMBER_OF_APRS_PACKETS 20//the max number of APRS packets in the FRAM list
+#define MAX_NAMBER_OF_APRS_PACKETS 100//the max number of APRS packets in the FRAM list
 #define NO_AVAILABLE_SLOTS -1
 
 typedef enum ERR_type
@@ -19,7 +18,6 @@ typedef enum ERR_type
 	ERR_SUCCESS,
 	ERR_FAIL,
 	ERR_ACTIVE,
-	ERR_STOP_TASK,
 	ERR_TURNED_OFF,
 	ERR_PARAMETERS,
 	ERR_FRAM_WRITE_FAIL,
@@ -42,6 +40,7 @@ typedef enum ACK
 {
 	ACK_RECEIVE_COMM = 0,					//ACK when receive any packet
 	ACK_CAMERA = 1,
+
 	ACK_ADCS_SET_BOOT_LODER = 30,
 	ACK_ADCS_RUN_BOOT_LOADER = 31,
 	ACK_ADCS_UPFATE_TLE_PARAMETER = 32,
@@ -51,6 +50,7 @@ typedef enum ACK
 	ACK_ADCS_STAGE_TABLE = 36,
 	ACK_ADCS_SET_TIME = 37,
 	ACK_ADCS_BOOM_DEPLOY = 38,
+	ACK_ADCS_TEST = 39,
 
 	ACK_THE_MIGHTY_DUMMY_FUNC = 126,			//be aware of the mighty dummy func
 	ACK_RESET = 127,
@@ -82,7 +82,6 @@ typedef enum ACK
 	ACK_FRAM_RESET = 160,
 	ACK_UPDATE_TRANS_RSSI = 161,
 	ACK_EPS_SHUT_SYSTEM = 162,
-	ACK_RESET_FILE = 163,
 	ACK_NOTHING = 255
 }Ack_type;
 
@@ -113,8 +112,7 @@ typedef struct inklajn_spl_TC
  *	@param[in]		length of data to decode
  *	@param[in][out]	decoded TM spl packet
  *	@return			0 no problems in decoding,
- *					1 ,2 ,3 a problem with length
- *					-1 a NULL pointer
+ *	1 too short array
  */
 int decode_TMpacket(byte* data, TM_spl* packet);//this function use calloc for the data
 
@@ -123,9 +121,6 @@ int decode_TMpacket(byte* data, TM_spl* packet);//this function use calloc for t
  *	@param[out] 	data encoded data
  *	@param[out]		size length of *data
  *	@param[in]		packet TM spl packet to encode
- *	@return			0 no problems in decoding,
- *					1 a problem with length
- *					-1 a NULL pointer
  */
 int encode_TMpacket(byte* data, int* size, TM_spl packet);//this function use calloc for the data
 
@@ -133,11 +128,9 @@ int encode_TMpacket(byte* data, int* size, TM_spl packet);//this function use ca
  *	@brief			decode raw data to a TC spl packet
  *	@param[in]		data to decode
  *	@param[in]		length of data to decode
- *	@note			if length is -1 that means that the command is delayed command
  *	@param[in][out]	decoded TC spl packet
  *	@return			0 no problems in decoding,
- *					1 a problem with length
- *					-1 a NULL pointer
+ *	1 too short array
  */
 int decode_TCpacket(byte* data, int length, TC_spl* packet);//this function use calloc for the data
 
@@ -146,27 +139,16 @@ int decode_TCpacket(byte* data, int length, TC_spl* packet);//this function use 
  *	@param[out] 	data encoded data
  *	@param[out]		size length of *data
  *	@param[in]		packet TC spl packet to encode
- *	@return			0 no problems in decoding,
- *					1 a problem with length
- *					-1 a NULL pointer
  */
 int encode_TCpacket(byte* data, int* size, TC_spl packet);//this function use calloc for the data
 
 /**
- * @brief 		build Ack inside spl.
+ * @brief 		build Ack inside Spl.
  * @param[in] 	type Ack type according to Ack_type (typedef enum).
  * @param[in]	err Errors to be send.
  * return		ACK packet as inklajn_spl
  */
 int build_raw_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* raw_ACK);
 
-/**
- * @brief 		build raw ack
- * @param[in] 	type Ack type according to Ack_type (typedef enum).
- * @param[in]	err Errors to be send.
- * @param[in]	the array to fill the the raw ack
- * return		0
- * 				-1 a NULL pointer
- */
 int build_data_field_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* data_feild);
 #endif /* GSC_H_ */

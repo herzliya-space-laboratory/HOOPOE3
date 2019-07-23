@@ -2,7 +2,7 @@
  * GlobalParam.h
  *
  *  Created on: Mar 28, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef GLOBALPARAM_H_
@@ -70,8 +70,6 @@ typedef struct __attribute__ ((__packed__))
 	time_unix lastReset;
 
 	systems_state state;
-
-	Boolean ground_conn;
 } global_param;
 
 int init_GP();
@@ -143,7 +141,4 @@ unsigned int get_numOfResets();
 // CGP ->lastReset
 void set_lastReset(time_unix param);
 time_unix get_lastReset();
-//CGP ->connection to ground state
-void set_ground_conn(Boolean param);
-Boolean get_ground_conn();
 #endif /* GLOBALPARAM_H_ */

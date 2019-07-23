@@ -2,7 +2,7 @@
  * DelayedCommand_list.c
  *
  *  Created on: Apr 6, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <hal/Timing/Time.h>
 #include <hal/Storage/FRAM.h>
@@ -13,7 +13,6 @@
 
 #define DELETE_CMD_FROM_LIST(starting_point) memset((starting_point + DelayCommand_list) , 0, SIZE_OF_DELAYED_COMMAND)
 #define EXTRACT_TIME_FROM_DELAYED_COMMAND(startOfCommand) BigEnE_raw_to_uInt(DelayCommand_list + startOfCommand + SPL_TC_HEADER_SIZE - TIME_SIZE)
-
 static byte DelayCommand_list[MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND];
 
 /*

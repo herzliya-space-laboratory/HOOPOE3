@@ -2,7 +2,7 @@
  * CameraManeger.h
  *
  *  Created on: Jun 2, 2019
- *      Author: DBTn
+ *      Author: elain
  *
  *      this file is in charge off all the camera
  */
@@ -16,6 +16,8 @@
 
 #include <hal/boolean.h>
 
+#define AUTO_CAMERA
+
 #define MAX_NUMBER_OF_CAMERA_REQ	10
 #define MAX_DATA_CAM_REQ			20
 #define AUTO_CAMERA_SLEEP_TIMEOUT	CONVERT_MS_TO_SECONDS(30 * 60)
@@ -27,17 +29,14 @@ typedef int duration_t;
 
 typedef enum{
 	take_picture,
-	take_picture_with_special_values,
-	take_pictures_with_time_in_between,
 	delete_picture,
 	transfer_image_to_OBC,
 	create_thambnail,
-	create_jpg,
 	update_photography_values,
-	update_max_number_of_pictures,
 	send_picture_to_earth,
-	send_imageDataBase_to_earth,
-	reset_DataBase,
+	turn_off_auto_pilot,
+	turn_on_auto_pilot,
+	reset_FRAM_address,
 	far_more_requests
 }cam_Request_id_t;
 
@@ -49,7 +48,6 @@ typedef struct __attribute__ ((__packed__))
 	byte data[MAX_DATA_CAM_REQ];
 }Camera_Request;
 
-void CameraManagerTaskMain();
 
 /*
  * Initialize all the components of the camera
