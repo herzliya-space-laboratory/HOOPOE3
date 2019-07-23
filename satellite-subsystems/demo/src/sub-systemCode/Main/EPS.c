@@ -162,11 +162,10 @@ void EPS_Init()
 	enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
 	update_powerLines(switches_states);
 
-	set_Vbatt(current_vbatt);
+	set_Vbatt(eps_tlm.fields.vbatt);
 	voltage_t pre_value[3];
 	for (int i = 0; i < 3; i++)
-		pre_value[i] = current_vbatt;
-
+		pre_value[i] = eps_tlm.fields.vbatt;
 	set_Vbatt_previous(pre_value);
 }
 
@@ -263,6 +262,7 @@ void EPS_Conditioning()
 	check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
 	if (i_error != 0)
 		return;
+	set_Vbatt(eps_tlm.fields.vbatt);
 
 	voltage_t vbatt_filtered = CALCAVARAGE3(vbatt_prev);
 	voltage_t currentvbatt = eps_tlm.fields.vbatt;
