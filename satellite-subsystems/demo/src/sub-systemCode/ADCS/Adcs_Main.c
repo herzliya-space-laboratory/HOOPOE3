@@ -11,8 +11,9 @@ void AdcsTask()
 	//todo: check xQueueCreate
 	int ret = f_enterFS(); /* Register this task with filesystem */
 	AdcsCmdTour = xQueueCreate(COMMAND_LIST_SIZE,sizeof(TC_spl));
+	TC_spl commend;
 	InitStateMachine();
-	int ActiveStateMachine = 1;
+	int ActiveStateMachine = TRUE;
 	TroubleErrCode err[3];
 	err[0] = TRBL_NO_ERROR;
 	err[1] = TRBL_NO_ERROR;
@@ -27,7 +28,7 @@ void AdcsTask()
 			continue;
 		}
 
-		if(ActiveStateMachine == 1)
+		if(ActiveStateMachine == TRUE)
 		{
 		err[1] = UpdateAdcsStateMachine(CMD_UPDATE_STATE_MATRIX, NULL, 0);
 		//todo: SM Log
@@ -38,7 +39,7 @@ void AdcsTask()
 
 		if(err != TRBL_NO_ERROR)
 		{
-			ActiveStateMachine = 0;
+			ActiveStateMachine = FALSE;
 			AdcsTroubleShooting(err);
 			continue;
 		}
@@ -46,12 +47,14 @@ void AdcsTask()
 		err[2] = GatherTlmAndData();
 		vTaskDelay(1000);
 
-		if(uxQueueSpacesAvailable(AdcsCmdTour) == sizeof(TC_spl)*COMMAND_LIST_SIZE)//cheak if queue free size = size of queue
+		if(uxQueueMessagesWaiting(AdcsCmdTour) == 0)//cheak if queue free size = size of queue
 		{
-			ActiveStateMachine = 1;
-		}else{
-			GetCmdFromQueue();
-			ActiveStateMachine = 0;
+			ActiveStateMachine = FALSE;
+		}
+		else
+		{
+			GetCmdFromQueue(&commend);
+			ActiveStateMachine = TRUE;
 			//todo System Log
 		}
 	}
@@ -62,8 +65,8 @@ void AdcsTask()
 
 
 
-TC_spl GetCmdFromQueue()
+Boolean8bit GetCmdFromQueue(TC_spl *request)
 {
-
-	return 0;
+	Boolean8bit isWork = xQueueReceive(AdcsCmdTour, request, MAX_DELAY);
+	return isWork;
 }
