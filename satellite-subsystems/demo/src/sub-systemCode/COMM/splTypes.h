@@ -9,30 +9,31 @@
 #define SPLTYPES_H_
 
 //Types (TM)
-#define BEACON_T 3
-#define APRS 20
-#define ACK_TYPE 13
-#define DUMP_T 173
-#define IMAGE_DUMP_T 11
-#define ACK_ST 90
-#define TM_ADCS_ST 	42
-#define ADCS_SC_ST	55
+#define BEACON_T				3
+#define APRS					20
+#define ACK_TYPE				13
+#define DUMP_T					173
+#define IMAGE_DUMP_T			11
+#define IMAGE_DATABASE_DUMP_T	12
+#define ACK_ST					90
+#define TM_ADCS_ST 				42
+#define ADCS_SC_ST				55
 
 //Types (TC)
-
-#define NONE_APRS_T 33
-#define COMM_T 		13
-#define GENERAL_T 	20
-#define TC_ADCS_T 		154
-#define GENERALLY_SPEAKING_T		195
-#define PAYLOAD_T	251
-#define EPS_T		6
-#define SOFTWARE_T 42
+#define NONE_APRS_T 			33
+#define COMM_T 					13
+#define GENERAL_T 				20
+#define TC_ADCS_T 				154
+#define GENERALLY_SPEAKING_T	195
+#define PAYLOAD_T				251
+#define EPS_T					6
+#define SOFTWARE_T 				42
 #define SPECIAL_OPERATIONS_T	69
 
 //SubType (TM)
 #define BEACON_ST 25
 #define APRS_PACKET_FRAM 33
+
 //dumps subTypes:
 #define EPS_DUMP_ST 13
 #define CAM_DUMP_ST 23
@@ -40,12 +41,17 @@
 #define ADCS_DUMP_ST 78
 #define SP_DUMP_ST	91
 
+//Payload dump subTypes:
+#define IMAGE_DATABASE_DUMP_ST		97
+#define IMAGE_DUMP_THUMBNAIL6_ST	98
+#define IMAGE_DUMP_THUMBNAIL5_ST	99
 #define IMAGE_DUMP_THUMBNAIL4_ST	100
 #define IMAGE_DUMP_THUMBNAIL3_ST	101
 #define IMAGE_DUMP_THUMBNAIL2_ST	102
 #define IMAGE_DUMP_THUMBNAIL1_ST	103
 #define IMAGE_DUMP_RAW_ST			104
 #define IMAGE_DUMP_JPG_ST			105
+
 //ADCS science sub-types
 #define ADCS_CSS_DATA_ST 				122
 #define ADCS_MAGNETIC_FILED_ST			123
@@ -70,7 +76,7 @@
 #define ADCS_EST_QUATERNION_ST			142
 
 //camm staff
-#define IMAGE_DUMP_ST 122
+//#define IMAGE_DUMP_ST 122
 
 //Subtypes (TC)
 //comm
@@ -101,18 +107,22 @@
 #define ARM_DISARM				57
 
 //payload
-#define SEND_PIC_CHUNCK_ST		1
-#define UPDATE_STN_PARAM_ST 	2
-#define GET_IMG_DATA_BASE_ST	7
-#define RESET_DATA_BASE_ST		11
-#define DELETE_PIC_ST			42
-#define UPD_DEF_DUR_ST			69
-#define	OFF_CAM_ST				73
-#define ON_CAM_ST				101
-#define MOV_IMG_CAM_OBS_ST		123
-#define TAKE_IMG_DEF_VAL_ST		213
-#define TAKE_IMG_ST				255
-#define CREATE_TB_FROM_IMAGE_ST	51
+#define SEND_PIC_CHUNCK_CHUNK_FIELD_ST		1
+#define SEND_PIC_CHUNCK_BIT_FIELD_ST 		2
+#define TAKE_IMG_ST							3
+#define TAKE_IMG_SPECIAL_VAL_ST				4
+#define TAKE_PICTURE_WITH_TIME_IN_BETWEEN 	5
+#define UPDATE_PHOTOGRAPHY_VALUES_ST		6
+#define DELETE_PIC_ST						7
+#define MOV_IMG_CAM_OBS_ST					8
+#define CREATE_THUMBNAIL_FROM_IMAGE_ST		9
+#define CREATE_JPEG_FROM_IMAGE_ST			10
+#define RESET_DATA_BASE_ST					11
+#define SEND_IMAGE_DATA_BASE_ST				12
+#define SEND_ALL_DEFALT_THUMBNAILS_ST		13
+#define UPDATE_DEF_DUR_ST					14
+#define	OFF_CAM_ST							15
+#define ON_CAM_ST							16
 
 //eps
 #define ALLOW_ADCS_ST			99

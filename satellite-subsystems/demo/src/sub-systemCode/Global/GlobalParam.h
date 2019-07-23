@@ -71,7 +71,7 @@ typedef struct __attribute__ ((__packed__))
 
 	systems_state state;
 
-	Boolean ground_conn;
+	Boolean ground_conn;	// TRUE during transitions above the ground station
 } global_param;
 
 int init_GP();

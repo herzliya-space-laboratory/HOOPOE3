@@ -46,6 +46,7 @@
 #include "../TRXVU.h"
 #include "HouseKeeping.h"
 #include "commands.h"
+#include "../payload/CameraManager.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -249,6 +250,8 @@ int InitSubsystems()
 
 	init_trxvu();
 
+	initCamera(activation);
+
 	init_command();
 
 	return 0;
@@ -263,6 +266,8 @@ int SubSystemTaskStart()
 	xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
+
+	KickStartCamera();
 
 	vTaskDelay(100);
 	return 0;

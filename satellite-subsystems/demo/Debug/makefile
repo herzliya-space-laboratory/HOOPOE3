@@ -8,6 +8,9 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/sub-systemCode/payload/jpeg/bmp/subdir.mk
+-include src/sub-systemCode/payload/jpeg/subdir.mk
+-include src/sub-systemCode/payload/subdir.mk
 -include src/sub-systemCode/Main/CMD/subdir.mk
 -include src/sub-systemCode/Main/subdir.mk
 -include src/sub-systemCode/Global/subdir.mk
@@ -46,7 +49,7 @@ all: Hoopoe3.elf secondary-outputs
 Hoopoe3.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C Linker'
-	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra  -g -T C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/linker-scripts/sdram.lds -nostartfiles -Xlinker --gc-sections -L"C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib" -L"C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib" -L"C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib" -L"C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib" -L"C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib" -Wl,-Map,"Hoopoe3.map" --specs=nano.specs -lc -u _printf_float -u _scanf_float -o "Hoopoe3.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra  -g -T C:/ISIS/workspace/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/linker-scripts/sdram.lds -nostartfiles -Xlinker --gc-sections -L"C:/ISIS/workspace/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib" -L"C:/ISIS/workspace/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib" -L"C:/ISIS/workspace/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib" -L"C:/ISIS/workspace/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib" -L"C:/ISIS/workspace/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib" -Wl,-Map,"Hoopoe3.map" --specs=nano.specs -lc -u _printf_float -u _scanf_float -o "Hoopoe3.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

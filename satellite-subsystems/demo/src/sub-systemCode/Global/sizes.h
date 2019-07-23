@@ -11,6 +11,7 @@
 
 #define IMAGE_WIDTH 2048	///< defines the image width
 #define IMAGE_HEIGHT 1088	///< defines the image height
+#define IMAGE_SIZE (IMAGE_WIDTH * IMAGE_HEIGHT)	///< image size in bytes
 
 #define CHUNK_WIDTH 14		///< defines the chunk image width
 #define CHUNK_HEIGHT 16		///< defines the chunks image height
@@ -18,6 +19,9 @@
 
 #define CHUNK_SIZE (CHUNK_HEIGHT*CHUNK_WIDTH)			///< defines number of bytes per chunk
 #define NUM_OF_CHUNKS (IMAGE_HEIGHT/CHUNK_HEIGHT)*(IMAGE_WIDTH/CHUNK_WIDTH)	///< defines how many chunks devide an entire image
+
+
+#define SPL_TC_DATA_SIZE	SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE
 
 
 //variables
