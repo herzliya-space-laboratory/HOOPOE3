@@ -119,7 +119,7 @@ void TRXVU_task()
 		return;
 	}
 	//3. create beacon task
-	//lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xBeaconTask);
+	lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xBeaconTask);
 	check_portBASE_TYPE("could not create Beacon Task.", lu_error);
 	vTaskDelay(SYSTEM_DEALY);
 	//4. checks if theres was a dump before the reset and turned him off
@@ -738,7 +738,7 @@ int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 			retVal = 0;
 			if (count % 10 == 1)
 			{
-				vTaskDelay(50);
+				vTaskDelay((portTickType)(length * 20));
 				printf("Tx buffer is full\n");
 				retVal = -1;
 			}
