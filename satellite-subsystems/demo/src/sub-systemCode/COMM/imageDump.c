@@ -189,9 +189,7 @@ int imageDataBase_Dump(byte* DataBase_buffer, command_id cmdId)
 		byte rawPacket[IMAGE_PACKET_SIZE];
 		encode_TMpacket(rawPacket, &rawPacket_length, packet);
 
-#ifndef TESTING
 		TRX_sendFrame(rawPacket, rawPacket_length, trxvu_bitrate_9600);
-#endif
 
 		lookForRequestToDelete_dump(cmdId);
 		vTaskDelay(SYSTEM_DEALY);

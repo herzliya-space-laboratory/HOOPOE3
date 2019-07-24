@@ -38,14 +38,14 @@
 #define CameraManagmentTask_Name ("Camera Management Task")
 #define CameraDumpTask_Name ("Camera Dump Task")
 
+#define MAX_NUMBER_OF_PICTURES_TO_BE_HANDLED 2
+
 static xQueueHandle interfaceQueue;
 xTaskHandle	camManeger_handler;
 
 static time_unix lastPicture_time;
 static time_unix timeBetweenPictures;
 static uint32_t numberOfPicturesLeftToBeTaken;
-
-static global_param globalParam;	// used to know when in a transition and if the EPS system allows camera operations
 
 command_id cmd_id_4_takePicturesWithTimeInBetween;
 
@@ -88,17 +88,39 @@ void Take_pictures_with_time_in_between();
  */
 void CameraManagerTaskMain()
 {
-	f_enterFS();
+	int err = f_enterFS();
+	if (err != 0)
+		printf("\n*ERROR* - eentering file system (%d)\n\n", err);
+
+	F_FILE* a = f_open("pic123.bla", "w+");
+	if (a == NULL)
+		printf("\n\n\n*ERROR* - FS\n\n\n");
+	f_close(a);
+
 	Camera_Request req;
 	time_unix timeNow;
+
+	F_FILE* b = f_open("pic123.bla", "w+");
+	if (b == NULL)
+		printf("\n\n\n*ERROR* - FS\n\n\n");
+	f_close(b);
+
 	while(TRUE)
 	{
-		get_current_global_param(&globalParam);	// updating the global parameters
+		F_FILE* e = f_open("pic123.bla", "w+");
+		if (e == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(e);
 
 		if (removeRequestFromQueue(&req) > -1)
 		{
 			act_upon_request(req);
 		}
+
+		F_FILE* b = f_open("pic123.bla", "w+");
+		if (b == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(b);
 
 		Time_getUnixEpoch(&timeNow);
 		if (timeNow > ( turnedOnCamera + cameraActivation_duration ) && turnedOnCamera != 0)
@@ -107,17 +129,27 @@ void CameraManagerTaskMain()
 			turnedOnCamera = 0;
 		}
 
+		F_FILE* c = f_open("pic123.bla", "w+");
+		if (c == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(c);
+
 		Take_pictures_with_time_in_between();
 
 		vTaskDelay(1000);
 
-		if (!globalParam.ground_conn)
+		F_FILE* d = f_open("pic123.bla", "w+");
+		if (d == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(d);
+
+
+		if (!get_ground_conn())
 		{
-			Time_getUnixEpoch(&turnedOnCamera);
+			DataBaseResult error = handleMarkedPictures(imageDataBase, MAX_NUMBER_OF_PICTURES_TO_BE_HANDLED, &turnedOnCamera);
 
-			DataBaseResult error = handleMarkedPictures(imageDataBase);
-
-			save_ACK(ACK_CAMERA, error + 30, cmd_id_4_takePicturesWithTimeInBetween); // ToDo: How do we handle errors? (error log...)
+			if (error != DataBase_thereWereNoPicturesToBeHandled)
+				save_ACK(ACK_CAMERA, error + 30, cmd_id_4_takePicturesWithTimeInBetween);
 		}
 
 		vTaskDelay(SYSTEM_DEALY);
@@ -261,15 +293,33 @@ void act_upon_request(Camera_Request request)
 {
 	DataBaseResult error = DataBaseSuccess;
 
+	F_FILE* a = f_open("pic123.bla", "w+");
+	if (a == NULL)
+		printf("\n\n\n*ERROR* - FS\n\n\n");
+	f_close(a);
+
+	F_FILE* l;
+
 	switch (request.id)
 	{
 	case take_picture:
 		error = TakePicture(imageDataBase, request.data);
 
+		F_FILE* b = f_open("pic123.bla", "w+");
+		if (b == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(b);
+
 		Time_getUnixEpoch(&turnedOnCamera);
 
 		lastPicture_id = getLatestID(imageDataBase);
 		numberOfFrames = getNumberOfFrames(imageDataBase);
+
+		F_FILE* c = f_open("pic123.bla", "w+");
+		if (c == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(c);
+
 		for (unsigned int i = 0; i < numberOfFrames; i++) {
 			markPicture(imageDataBase, lastPicture_id - i);
 		}
@@ -311,7 +361,7 @@ void act_upon_request(Camera_Request request)
 
 
 	case transfer_image_to_OBC:
-		if (globalParam.ground_conn)
+		if (get_ground_conn())
 		{
 			addRequestToQueue(request);
 		}
@@ -357,9 +407,25 @@ void act_upon_request(Camera_Request request)
 
 
 	case Turn_On_Camera:
+
+		l = f_open("pic123.bla", "w+");
+		if (l == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(l);
+
 		TurnOnGecko();
 
+		F_FILE* h = f_open("pic123.bla", "w+");
+		if (h == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(h);
+
 		Time_getUnixEpoch(&turnedOnCamera);
+
+		F_FILE* g = f_open("pic123.bla", "w+");
+		if (g == NULL)
+			printf("\n\n\n*ERROR* - FS\n\n\n");
+		f_close(g);
 
 		break;
 
@@ -372,6 +438,11 @@ void act_upon_request(Camera_Request request)
 		return;
 		break;
 	}
+
+	F_FILE* d = f_open("pic123.bla", "w+");
+	if (d == NULL)
+		printf("\n\n\n*ERROR* - FS\n\n\n");
+	f_close(d);
 
 	save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 }

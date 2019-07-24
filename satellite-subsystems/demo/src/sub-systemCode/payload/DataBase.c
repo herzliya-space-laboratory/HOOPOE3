@@ -1,7 +1,7 @@
 /*
  * DataBase.c
  *
- *  Created on: 7 במאי 2019
+ *  Created on: 7 ׳‘׳�׳�׳™ 2019
  *      Author: I7COMPUTER
  */
 
@@ -236,8 +236,13 @@ DataBaseResult markPicture(DataBase database, imageid id)
 	return DataBaseIllegalId;
 }
 
-DataBaseResult handleMarkedPictures(DataBase database)
+DataBaseResult handleMarkedPictures(DataBase database, uint32_t maxNumberOfPicturesToBeHandled, time_unix* turnedOnCamera)
 {
+	F_FILE* a = f_open("pic123.bla", "w+");
+	if (a == NULL)
+		printf("\n\n\n*ERROR* - FS\n\n\n");
+	f_close(a);
+
 	unsigned int currentPosition = getDatabaseStart(database);
 	unsigned int endPosition = getDatabaseEnd(database);
 
@@ -245,14 +250,29 @@ DataBaseResult handleMarkedPictures(DataBase database)
 
 	DataBaseResult DB_result;
 
+	uint32_t numberOfPicturesHandled = 0;
+
 	while(currentPosition < endPosition)  // as long as we are not in the end of the file ,we will continue
 	{
 		vTaskDelay(100);
+
+		if (numberOfPicturesHandled == maxNumberOfPicturesToBeHandled)
+			break;
 
 		FRAM_readAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
 
 		if (currentImageDetails.markedFor_4thTumbnailCreation && currentImageDetails.cameraId != 0)
 		{
+			TurnOnGecko();
+			Time_getUnixEpoch(turnedOnCamera);
+
+			numberOfPicturesHandled++;
+
+			F_FILE* a = f_open("pic123.bla", "w+");
+			if (a == NULL)
+				printf("\n\n\n*ERROR* - FS\n\n\n");
+			f_close(a);
+
 			DB_result = transferImageToSD(database, currentImageDetails.cameraId);
 			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
 				return DB_result;
@@ -277,6 +297,10 @@ DataBaseResult handleMarkedPictures(DataBase database)
 			FRAM_writeAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
 		}
 	}
+
+	if (numberOfPicturesHandled == 0)
+		return DataBase_thereWereNoPicturesToBeHandled;
+
 	return DataBaseSuccess;
 }
 
@@ -366,26 +390,38 @@ DataBaseResult transferImageToSD(DataBase database, imageid cameraId)
 		return DataBaseNullPointer;
 	}
 
+	F_FILE* a = f_open("pic123.bla", "w+");
+	if (a == NULL)
+		printf("\n\n\n*ERROR* - FS\n\n\n");
+	f_close(a);
+
+
 	int err = GomEpsResetWDT(0);
 	printf("err DB eps: %d\n", err);
-
+/*
 	err = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
 	if( err )
 	{
 		printf("\ntransferImageToSD Error = (%d) reading image!\n\r",err);
 		return (GECKO_Read_Success - err);
 	}
+	*/
 
 	vTaskDelay(500);
 
 	// Creating a file for the picture at iOBC sd:
 	char fileName[FILE_NAME_SIZE];
 	getFileName(cameraId, raw, fileName);
-
+	int err2 = f_enterFS();
+	if(err2!=0)
+	{
+		printf("int err = f_enterFS(); error: %d\n",err2);
+	}
 	F_FILE *PictureFile = f_open(fileName, "w+" );	// open a new file for writing in safe mode
 	if(PictureFile == NULL)
 	{
-		printf("transferImageToSD - f_open\n");	// if file pointer is NULL, get an error
+		int a = f_getlasterror();
+		printf("transferImageToSD - f_open (%d)\n", a);	// if file pointer is NULL, get an error
 		return DataBaseFail;
 	}
 

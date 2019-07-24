@@ -1,7 +1,7 @@
 /*
  * DataBase.h
  *
- *  Created on: 7 במאי 2019
+ *  Created on: 7 ׳‘׳�׳�׳™ 2019
  *      Author: I7COMPUTER
  */
 
@@ -72,6 +72,7 @@ typedef enum
 	DataBaseAlreadyMarked,
 	DataBase_SmallerThanTheCurrentMax,
 	DataBase_sizeBeyondFRAMBounderies,
+	DataBase_thereWereNoPicturesToBeHandled,
 	//------GECKO_UC_TakeImage returns------
 	GECKO_Take_Success,						// (0) completed successfully
 	GECKO_Take_Error_TurnOffSensor,			// (-1) could not turn off sensor
@@ -113,7 +114,7 @@ imageid getLatestID(DataBase database);
 unsigned int getNumberOfFrames(DataBase database);
 
 DataBaseResult markPicture(DataBase database, imageid id);
-DataBaseResult handleMarkedPictures(DataBase database);
+DataBaseResult handleMarkedPictures(DataBase database, uint32_t maxNumberOfPicturesToBeHandled, time_unix* turnedOnCamera);
 
 /*!
  * init image data base

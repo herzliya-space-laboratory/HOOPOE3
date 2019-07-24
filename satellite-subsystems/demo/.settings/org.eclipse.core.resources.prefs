@@ -2,3 +2,5 @@ eclipse.preferences.version=1
 encoding//src/sub-systemCode/Global/TM_managment.c=UTF-8
 encoding//src/sub-systemCode/Main/EPS.c=UTF-8
 encoding//src/sub-systemCode/payload/Camera.h=UTF-8
+encoding//src/sub-systemCode/payload/DataBase.c=UTF-8
+encoding//src/sub-systemCode/payload/DataBase.h=UTF-8
