@@ -117,10 +117,10 @@ void init_enterMode()
 {
 	enterMode[0].fun = EnterCriticalMode;
 	enterMode[0].type = critical_mode;
-	enterMode[1].fun = EnterCruiseMode;
-	enterMode[1].type = cruise_mode;
-	enterMode[2].fun = EnterSafeMode;
-	enterMode[2].type = safe_mode;
+	enterMode[1].fun = EnterSafeMode;
+	enterMode[1].type = safe_mode;
+	enterMode[2].fun = EnterCruiseMode;
+	enterMode[2].type = cruise_mode;
 	enterMode[3].fun = EnterFullMode;
 	enterMode[3].type = full_mode;
 }
@@ -235,7 +235,12 @@ void battery_upward(voltage_t currentvbatt)
 	{
 		if (currentvbatt > voltage_table[1][i - EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
 		{
-			if (currentvbatt > voltage_table[0][EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i] &&
+			if (i == EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2)
+			{
+				enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].fun(&switches_states, &batteryLastMode);
+				return;
+			}
+			else if (currentvbatt > voltage_table[0][EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i] &&
 					batteryLastMode > enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].type)
 			{
 				return;
@@ -270,6 +275,9 @@ void EPS_Conditioning()
 	vbatt_filtered = convert_vol(vbatt_filtered);;
 	currentvbatt = convert_vol(currentvbatt);
 
+	printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuse Vbatt: %u\n", eps_tlm.fields.vbatt, currentvbatt, vbatt_filtered);
+	printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+
 	if (currentvbatt < vbatt_filtered)
 	{
 		battery_downward(currentvbatt);
@@ -280,6 +288,8 @@ void EPS_Conditioning()
 	}
 
 	update_powerLines(switches_states);
+	printf("last state: %d\n", batteryLastMode);
+	printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 }
 
 
