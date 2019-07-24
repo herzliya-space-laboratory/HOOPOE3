@@ -92,6 +92,9 @@ void init_trxvu(void)
 	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
 	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
 
+	retValInt = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
+	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
+
 	/*retValInt = IsisTrxvu_tcSetDefFromClSign(0, TRXVU_FROM_CALSIGN);
 	check_int("init_trxvu, frommm call sign", retValInt);
 
@@ -160,7 +163,7 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 	if (CHECK_STARTING_DUMP_ABILITY)
 	{
 #ifdef TESTING_BRONFELD
-		for (uint8_t i = 0; i < 0xff; i++)
+		for (uint8_t i = 0; i < 210; i++)
 		{
 			i_error = TRX_sendFrame(&i, (uint8_t)1, trxvu_bitrate_9600);
 			check_int("TRX_sendFrame, dump_logic", i_error);
@@ -198,10 +201,9 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet, trxvu_bitrate_9600);
 						check_int("TRX_sendFrame, dump_logic", i_error);
 						printf("number of packets: %d\n", numberOfPackets++);
+						vTaskDelay(SYSTEM_DEALY);
 					}
-
 					lookForRequestToDelete_dump(cmdID);
-					vTaskDelay(SYSTEM_DEALY);
 				}
 			}
 			while (FS_result == FS_BUFFER_OVERFLOW);
@@ -728,35 +730,23 @@ int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 
 		unsigned char avalFrames = VALUE_TX_BUFFER_FULL;
 
-		i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
-		check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
-
 		int count = 0;
 		do
 		{
-			count++;
 			i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
 			check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
 			retVal = 0;
-			vTaskDelay(50);
-			if (count > 2000)
+			if (count % 10 == 1)
 			{
-				retVal = -1;
-				break;
-			}
-			if (count == 1)
-			{
+				vTaskDelay((portTickType)(length * 20));
 				printf("Tx buffer is full\n");
 				retVal = -1;
 			}
+			count++;
 		}while(avalFrames == VALUE_TX_BUFFER_FULL);
 
 		//delay so Tx buffer will never be full
-		if (bitRate == trxvu_bitrate_9600 && retVal == 0)
-		{
-			vTaskDelay(TRANSMMIT_DELAY_9600(length));
-		}
-		else if (retVal == 0)
+		if (bitRate == trxvu_bitrate_1200 && retVal == 0)
 		{
 			vTaskDelay(TRANSMMIT_DELAY_1200(length));
 		}

@@ -22,7 +22,7 @@
 #define TRXVU_TO_CALSIGN "GS1"
 #define TRXVU_FROM_CALSIGN "4x4HSL1"
 
-#define VALUE_TX_BUFFER_FULL 255
+#define VALUE_TX_BUFFER_FULL 0xff
 #define NUM_FILES_IN_DUMP	5
 
 #define NOMINAL_MODE TRUE
@@ -45,7 +45,7 @@
 
 #define TRANSMMIT_DELAY_9600(length) (length - length)
 //(portTickType)((length + 30) * (5 / 6) + 30)
-#define TRANSMMIT_DELAY_1200(length) (portTickType)(TRANSMMIT_DELAY_9600(length) * 100)
+#define TRANSMMIT_DELAY_1200(length) (portTickType)(20 * 100)
 
 #define GROUND_PASSING_TIME	(60*10)//todo: find real values
 
