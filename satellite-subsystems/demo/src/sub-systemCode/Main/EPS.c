@@ -205,7 +205,7 @@ void reset_EPS_voltages()
 }
 
 
-void battery_downward(voltage_t currentvbatt)
+void battery_downward(voltage_t currentvbatt, voltage_t previuseVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
@@ -213,47 +213,23 @@ void battery_downward(voltage_t currentvbatt)
 
 	printf(". downward ");
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
-	{
 		if (currentvbatt < voltage_table[0][i])
-		{
-			enterMode[i].fun(&switches_states, &batteryLastMode);
-			return;
-		}
-	}
-
-	enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
+			if (previuseVBatt > voltage_table[0][i])
+				enterMode[NUM_BATTERY_MODE - i].fun(&switches_states, &batteryLastMode);
 }
 
-void battery_upward(voltage_t currentvbatt)
+void battery_upward(voltage_t currentvbatt, voltage_t previuseVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("FRAM_read, EPS_Init", i_error);
 
 	printf(". upward ");
-	for (int i = EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS; i++)
-	{
-		if (currentvbatt > voltage_table[1][i - EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
-		{
-			if (i == EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2)
-			{
-				enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].fun(&switches_states, &batteryLastMode);
-				return;
-			}
-			else if (currentvbatt > voltage_table[0][EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i] &&
-					batteryLastMode > enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].type)
-			{
-				return;
-			}
-			else
-			{
-				enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].fun(&switches_states, &batteryLastMode);
-				return;
-			}
-		}
-	}
 
-	enterMode[0].fun(&switches_states, &batteryLastMode);
+	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
+		if (currentvbatt > voltage_table[1][i])
+			if (previuseVBatt < voltage_table[1][i])
+				enterMode[NUM_BATTERY_MODE - i].fun(&switches_states, &batteryLastMode);
 }
 
 
@@ -280,11 +256,11 @@ void EPS_Conditioning()
 
 	if (currentvbatt < vbatt_filtered)
 	{
-		battery_downward(currentvbatt);
+		battery_downward(currentvbatt, vbatt_filtered);
 	}
 	else if (currentvbatt > vbatt_filtered)
 	{
-		battery_upward(currentvbatt);
+		battery_upward(currentvbatt, vbatt_filtered);
 	}
 
 	update_powerLines(switches_states);
