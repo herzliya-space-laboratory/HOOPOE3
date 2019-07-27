@@ -50,8 +50,8 @@ typedef struct __attribute__ ((__packed__))
 	current_t cur3V3;
 	current_t cur5V;
 
-	short tempComm_LO;//current temperature of the trxvu
-	short tempComm_PA;//current temperature of the trxvu
+	unsigned short tempComm_LO;//current temperature of the trxvu
+	unsigned short tempComm_PA;//current temperature of the trxvu
 	short tempEPS[4];//current temperature of the EPS controller
 	short tempBatt[2];//current temperature of the batteries
 
@@ -70,6 +70,8 @@ typedef struct __attribute__ ((__packed__))
 	time_unix lastReset;
 
 	systems_state state;
+
+	Boolean ground_conn;
 } global_param;
 
 int init_GP();
@@ -96,16 +98,16 @@ current_t get_cur5V();
 void set_cur5V(current_t param);
 // CGP-> tempComm_LO
 temp_t get_tempComm_LO();
-void set_tempComm_LO(temp_t param);
+void set_tempComm_LO(unsigned short param);
 // CGP-> tempComm_PA
 temp_t get_tempComm_PA();
-void set_tempComm_PA(temp_t param);
+void set_tempComm_PA(unsigned short param);
 // CGP-> tempEPS
 temp_t get_tempEPS(int index);
-void set_tempEPS(int index, temp_t param);
+void set_tempEPS(int index, short param);
 // CGP-> tempBatt
 temp_t get_tempBatt(int index);
-void set_tempBatt(int index, temp_t param);
+void set_tempBatt(int index, short param);
 // CGP-> RxDoppler
 unsigned short get_RxDoppler();
 void set_RxDoppler(unsigned short param);
@@ -141,4 +143,7 @@ unsigned int get_numOfResets();
 // CGP ->lastReset
 void set_lastReset(time_unix param);
 time_unix get_lastReset();
+//CGP ->connection to ground state
+void set_ground_conn(Boolean param);
+Boolean get_ground_conn();
 #endif /* GLOBALPARAM_H_ */

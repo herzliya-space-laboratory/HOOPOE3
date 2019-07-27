@@ -5,6 +5,7 @@
  *      Author: איתי
  */
 
+#include "Stage_Table.h"
 
 #ifndef ADCSGETDATAANDTLM_H_
 #define ADCSGETDATAANDTLM_H_
@@ -15,7 +16,7 @@
 #include "AdcsTroubleShooting.h"
 
 
-void IniTData(Gather_TM_Data Data[]);
+void InitData(Gather_TM_Data Data[]);
 
 /*!
  * @get all ADCS data and TLM and save if need to

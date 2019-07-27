@@ -1,13 +1,4 @@
-#include "../TRXVU.h"
-#include "Stage_Table.h"
-#include "../ADCS.h"
 #include "ADCS_CMD.h"
-#include "../COMM/GSC.h"
-#include "../COMM/splTypes.h"
-#include "../Main/HouseKeeping.h"
-#include <hal/Drivers/I2C.h>
-#include <stdlib.h>
-#include <string.h>
 
 //TODO: change 'decode' into a pointer to 'TC_spl' to save space on the stack
 void ADCS_CMD(TC_spl decode)

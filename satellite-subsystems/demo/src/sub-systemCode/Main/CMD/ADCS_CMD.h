@@ -4,6 +4,15 @@
 #include <freertos/queue.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
+#include "../../ADCS/Stage_Table.h"
+#include "../../TRXVU.h"
+#include "../../ADCS.h"
+#include "../../COMM/GSC.h"
+#include "../../COMM/splTypes.h"
+#include "../HouseKeeping.h"
+#include <hal/Drivers/I2C.h>
+#include <stdlib.h>
+#include <string.h>
 
 //def
 #define SUCCESS 0
@@ -77,4 +86,4 @@ void SetMagnetometerOffsetAndScalingConfiguration(Ack_type * type, ERR_type * er
 
 
 
-#endif ADCS_CMD_H_ // !ADCS_CMD_H_
+#endif // !ADCS_CMD_H_

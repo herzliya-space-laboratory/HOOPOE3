@@ -2,7 +2,7 @@
  * splTypes.h
  *
  *  Created on: Dec 5, 2018
- *      Author: elain
+ *      Author: Hoopoe3n
  */
 
 #ifndef SPLTYPES_H_
@@ -38,6 +38,14 @@
 #define CAM_DUMP_ST 23
 #define COMM_DUMP_ST 45
 #define ADCS_DUMP_ST 78
+#define SP_DUMP_ST	91
+
+#define IMAGE_DUMP_THUMBNAIL4_ST	100
+#define IMAGE_DUMP_THUMBNAIL3_ST	101
+#define IMAGE_DUMP_THUMBNAIL2_ST	102
+#define IMAGE_DUMP_THUMBNAIL1_ST	103
+#define IMAGE_DUMP_RAW_ST			104
+#define IMAGE_DUMP_JPG_ST			105
 //ADCS science sub-types
 #define ADCS_CSS_DATA_ST 				122
 #define ADCS_MAGNETIC_FILED_ST			123
@@ -86,7 +94,7 @@
 #define GENERIC_I2C_ST			0
 #define DUMP_ST					33
 #define DELETE_PACKETS_ST		35
-#define DELETE_FILE_ST			45
+#define RESET_FILE_ST			45
 #define RESTSRT_FS_ST			46
 #define DUMMY_FUNC_ST			122
 #define REDEPLOY				56
@@ -107,8 +115,10 @@
 #define CREATE_TB_FROM_IMAGE_ST	51
 
 //eps
-#define SHUT_ADCS_ST			33
-#define SHUT_CAM_ST			34
+#define ALLOW_ADCS_ST			99
+#define SHUT_ADCS_ST			100
+#define ALLOW_CAM_ST			101
+#define SHUT_CAM_ST			102
 #define UPD_LOGIC_VOLT_ST		255
 #define UPD_COMM_VOLTAGE		20
 #define CHANGE_HEATER_TMP_ST	0
@@ -126,8 +136,7 @@
 #define ADCS_SET_TLE_PART_6_ST				107
 #define ADCS_SET_TLE_PART_7_ST				108
 #define ADCS_RESET_BOOT_REGI_ST				109
-#define ADCS_
-_ST					110
+#define ADCS_SAVE_CONFIG_ST					110
 #define ADCS_SAVE_TLE_ST					111
 #define ADCS_SET_UNIX_TIME_ST				112
 #define ADCS_SET_CACHE_STATE_ST				113

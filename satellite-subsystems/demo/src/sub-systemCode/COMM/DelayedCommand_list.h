@@ -2,7 +2,7 @@
  * DelayedCommand_list.h
  *
  *  Created on: Apr 6, 2019
- *      Author: elain
+ *      Author: Hoopoe3n
  */
 
 #ifndef DELAYEDCOMMAND_LIST_H_
@@ -14,7 +14,7 @@
 
 #define NOT_DELAYED_COMMAND 0
 #define EXPIRED_TIME_DC (15 * 60)
-#define MAX_NUMBER_OF_DELAY_COMMAND			64 //the max number of delayed commands in the FRAM
+#define MAX_NUMBER_OF_DELAY_COMMAND			100 //the max number of delayed commands in the FRAM
 
 
 /**

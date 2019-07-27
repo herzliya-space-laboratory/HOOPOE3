@@ -1,4 +1,6 @@
 /*
+
+
  * HouseKeeping.c
  *
  *  Created on: Jan 18, 2019
@@ -62,6 +64,9 @@ int find_fileName(HK_types type, char *fileName)
 		break;
 	case ADCS_HK_T:
 		strcpy(fileName, ADCS_HK_FILE_NAME);
+		break;
+	case SP_HK_T:
+		strcpy(fileName, SP_HK_FILE_NAME);
 		break;
 	case ADCS_CSS_DATA_T:
 		strcpy(fileName, NAME_OF_CSS_DATA_FILE);
@@ -140,11 +145,15 @@ int size_of_element(HK_types type)
 		return CAM_HK_SIZE;
 	if (type == ACK_T)
 		return ACK_DATA_LENGTH;
+	if (type == SP_HK_T)
+		return SP_HK_SIZE;
 	if (type == COMM_HK_T)
 		return COMM_HK_SIZE;
 	if (type == ADCS_HK_T)
 		return ADCS_HK_SIZE;
 	if (ADCS_CSS_DATA_T <= type && type <= ADCS_EST_QUATERNION_T)
+		return ADCS_SC_SIZE;
+	if (ADCS_ECI_VEL_T == type)
 		return ADCS_SC_SIZE;
 
 	return 0;
@@ -184,8 +193,8 @@ void set_GP_EPS(EPS_HK hk_in)
 }
 void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 {
-	set_tempComm_LO((float)(hk_in.fields.locosc_temp) * -0.07669 + 195.6037);
-	set_tempComm_PA((float)(hk_in.fields.pa_temp) * -0.07669 + 195.6037);
+	set_tempComm_LO(hk_in.fields.locosc_temp);
+	set_tempComm_PA(hk_in.fields.pa_temp);
 	set_RxDoppler(hk_in.fields.rx_doppler);
 	set_RxRSSI(hk_in.fields.rx_rssi);
 	ISIStrxvuTxTelemetry_revC tx_tm;
@@ -198,18 +207,20 @@ void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 
 int SP_HK_collect(SP_HK* hk_out)
 {
-	int error;
+	int errors[NUMBER_OF_SOLAR_PANNELS];
+	int error_combine = 1;
 	IsisSolarPanelv2_wakeup();
 	int32_t paneltemp;
 	uint8_t status = 0;
-	for(int i = 0; i < 6; i++)
+	for(int i = 0; i < NUMBER_OF_SOLAR_PANNELS; i++)
 	{
-		error = IsisSolarPanelv2_getTemperature(i, &paneltemp, &status);
-		check_int("EPS_HK_collect, IsisSolarPanelv2_getTemperature", error);
-		hk_out->fields.SP_temp[i] = (float)(paneltemp) * ISIS_SOLAR_PANEL_CONV;
+		errors[i] = IsisSolarPanelv2_getTemperature(i, &paneltemp, &status);
+		check_int("EPS_HK_collect, IsisSolarPanelv2_getTemperature", errors[i]);
+		hk_out->fields.SP_temp[i] = paneltemp;
+		error_combine &= errors[i];
 	}
 	IsisSolarPanelv2_sleep();
-	return 0;
+	return error_combine;
 }
 int EPS_HK_collect(EPS_HK* hk_out)
 {
@@ -242,7 +253,7 @@ int EPS_HK_collect(EPS_HK* hk_out)
 	}
 
 	set_GP_EPS(*hk_out);
-	return 0;
+	return error;
 }
 int CAM_HK_collect(CAM_HK* hk_out)
 {
@@ -281,36 +292,39 @@ int CAM_HK_collect(CAM_HK* hk_out)
 int COMM_HK_collect(COMM_HK* hk_out)
 {
 	ISIStrxvuRxTelemetry_revC telemetry;
-	int error =  IsisTrxvu_rcGetTelemetryAll_revC(0, &telemetry);
-	check_int("COMM_HK_collect, IsisTrxvu_rcGetTelemetryAll_revC", error);
+	int error_trxvu = -1, error_antA = -1, error_antB = -1;
+	error_trxvu = IsisTrxvu_rcGetTelemetryAll_revC(0, &telemetry);
+	check_int("COMM_HK_collect, IsisTrxvu_rcGetTelemetryAll_revC", error_trxvu);
 	hk_out->fields.bus_vol = telemetry.fields.bus_volt;
 	hk_out->fields.total_curr = telemetry.fields.total_current;
 	hk_out->fields.pa_temp = telemetry.fields.pa_temp;
 	hk_out->fields.locosc_temp = telemetry.fields.locosc_temp;
 
-	error = IsisAntS_getTemperature(0, isisants_sideA, &(hk_out->fields.ant_A_temp));
-	//check_int("COMM_HK_collect ,IsisAntS_getTemperature", error);
+#ifdef ANTS_ON
+	error_antA = IsisAntS_getTemperature(0, isisants_sideA, &(hk_out->fields.ant_A_temp));
+	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antA);
 
-	error = IsisAntS_getTemperature(0, isisants_sideB, &(hk_out->fields.ant_B_temp));
-	//check_int("COMM_HK_collect ,IsisAntS_getTemperature", error);
+	error_antB = IsisAntS_getTemperature(0, isisants_sideB, &(hk_out->fields.ant_B_temp));
+	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antB);
+#endif
 
 	set_GP_COMM(telemetry);
 
-	return 0;
+	return (error_trxvu && error_antA && error_antB);
 }
 int ADCS_HK_collect(ADCS_HK* hk_out)
 {
 	int error = cspaceADCS_getPowTempMeasTLM(0, hk_out);
 	check_int("ADCS_HK_collect, cspaceADCS_getPowTempMeasTLM", error);
-	return 0;
+	return error;
 }
 
 
 int COMM_create_file()
 {
-	int er = f_delete(COMM_HK_FILE_NAME);
+	int er = c_fileReset(COMM_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(COMM_HK_FILE_NAME, COMM_HK_SIZE, NUMBER_OF_FILE_HK);
+	FileSystemResult error = c_fileCreate(COMM_HK_FILE_NAME, COMM_HK_SIZE);
 	if (error != FS_SUCCSESS)
 	{
 		printf("ERROR IN CREATING ACK FILE %d\n", error);
@@ -320,9 +334,9 @@ int COMM_create_file()
 }
 int ACK_create_file()
 {
-	int er = f_delete(ACK_FILE_NAME);
+	int er = c_fileReset(ACK_FILE_NAME);
 	check_int("delete_ack_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(ACK_FILE_NAME, ACK_HK_SIZE, NUMBER_OF_FILE_HK);
+	FileSystemResult error = c_fileCreate(ACK_FILE_NAME, ACK_HK_SIZE);
 	if (error != FS_SUCCSESS)
 	{
 		printf("ERROR IN CREATING ACK FILE %d\n", error);
@@ -332,9 +346,9 @@ int ACK_create_file()
 }
 int EPS_create_file()
 {
-	int er = f_delete(EPS_HK_FILE_NAME);
+	int er = c_fileReset(EPS_HK_FILE_NAME);
 	check_int("delete_eps_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(EPS_HK_FILE_NAME, EPS_HK_SIZE, NUMBER_OF_FILE_HK);
+	FileSystemResult error = c_fileCreate(EPS_HK_FILE_NAME, EPS_HK_SIZE);
 	if (error != FS_SUCCSESS)
 	{
 		printf("ERROR IN CREATING EPS FILE %d\n", error);
@@ -344,9 +358,9 @@ int EPS_create_file()
 }
 int CAM_create_file()
 {
-	int er = f_delete(CAM_HK_FILE_NAME);
+	int er = c_fileReset(CAM_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(CAM_HK_FILE_NAME, CAM_HK_SIZE, NUMBER_OF_FILE_HK);
+	FileSystemResult error = c_fileCreate(CAM_HK_FILE_NAME, CAM_HK_SIZE);
 	if (error != FS_SUCCSESS)
 	{
 		//error
@@ -355,9 +369,9 @@ int CAM_create_file()
 }
 int ADCS_create_file()
 {
-	int er = f_delete(ADCS_HK_FILE_NAME);
+	int er = c_fileReset(ADCS_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(ADCS_HK_FILE_NAME, ADCS_HK_SIZE, NUMBER_OF_FILE_HK);
+	FileSystemResult error = c_fileCreate(ADCS_HK_FILE_NAME, ADCS_HK_SIZE);
 	if (error != FS_SUCCSESS)
 	{
 		//error
@@ -366,9 +380,9 @@ int ADCS_create_file()
 }
 int SP_create_file()
 {
-	int er = f_delete(SP_HK_FILE_NAME);
+	int er = c_fileReset(SP_HK_FILE_NAME);
 	check_int("delete_comm_file, f_delete", er);
-	FileSystemResult error = c_fileCreate(SP_HK_FILE_NAME, SP_HK_SIZE, NUMBER_OF_FILE_HK);
+	FileSystemResult error = c_fileCreate(SP_HK_FILE_NAME, SP_HK_SIZE);
 	if (error != FS_SUCCSESS)
 	{
 		//error
@@ -386,7 +400,7 @@ int create_files(Boolean firstActivation)
 	CAM_create_file();
 	COMM_create_file();
 	//ADCS_CreateFiles();
-	//int SP_create_file();
+	SP_create_file();
 	return 0;
 }
 
@@ -399,7 +413,7 @@ void save_SP_HK()
 	if (error == 0)
 	{
 		// 1.2. save hk in filesystem
-		error = fileWrite(SP_HK_FILE_NAME, (void*)(&eps_hk), SP_HK_SIZE);
+		error = c_fileWrite(SP_HK_FILE_NAME, (void*)(&eps_hk));
 		if (error == FS_NOT_EXIST)
 		{
 			// 1.3. create file if not exist
@@ -409,7 +423,7 @@ void save_SP_HK()
 	else
 	{
 		//can't get eps hk
-		printf("ERROR IN COLLECTING EPS TM: %d\n", error);
+		printf("ERROR IN COLLECTING SP TM: %d\n", error);
 	}
 }
 void save_EPS_HK()
@@ -421,7 +435,7 @@ void save_EPS_HK()
 	if (error == 0)
 	{
 		// 1.2. save hk in filesystem
-		error = fileWrite(EPS_HK_FILE_NAME, (void*)(&eps_hk), EPS_HK_SIZE);
+		error = c_fileWrite(EPS_HK_FILE_NAME, (void*)(&eps_hk));
 		if (error == FS_NOT_EXIST)
 		{
 			// 1.3. create file if not exist
@@ -445,7 +459,7 @@ void save_CAM_HK()
 		if (error == 0)
 		{
 			// 2.2. save hk in filesystem
-			error = fileWrite(CAM_HK_FILE_NAME, (void*)(&cam_hk), CAM_HK_SIZE);
+			error = c_fileWrite(CAM_HK_FILE_NAME, (void*)(&cam_hk));
 			if (error == FS_NOT_EXIST)
 			{
 				// 2.3. create file if not exist
@@ -468,7 +482,7 @@ void save_COMM_HK()
 	if (error == 0)
 	{
 		// 3.2. save hk in filesystem
-		error = fileWrite(COMM_HK_FILE_NAME, (void*)(&comm_hk), COMM_HK_SIZE);
+		error = c_fileWrite(COMM_HK_FILE_NAME, (void*)(&comm_hk));
 		if (error == FS_NOT_EXIST)
 		{
 			// 3.3. create file if not exist
@@ -478,7 +492,7 @@ void save_COMM_HK()
 	else
 	{
 		//can't get eps hk
-		printf("ERROR IN COLLECTING EPS TM: %d\n", error);
+		printf("ERROR IN COLLECTING COMM TM: %d\n", error);
 	}
 }
 void save_ADCS_HK()
@@ -492,7 +506,7 @@ void save_ADCS_HK()
 		if (error == 0)
 		{
 			// 3.2. save hk in filesystem
-			error = fileWrite(ADCS_HK_FILE_NAME, (void*)(&adcs_hk), ADCS_HK_SIZE);
+			error = c_fileWrite(ADCS_HK_FILE_NAME, (void*)(&adcs_hk));
 			if (error == FS_NOT_EXIST)
 			{
 				// 3.3. create file if not exist
@@ -502,39 +516,16 @@ void save_ADCS_HK()
 		else
 		{
 			//can't get eps hk
-			printf("ERROR IN COLLECTING EPS TM: %d\n", error);
+			printf("ERROR IN COLLECTING ADCS TM: %d\n", error);
 		}
 	}
 }
 
-int save_HK()
-{
-	// 0. check if satellite in not save TM state
-	byte DF;
-	FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-	if (DF == TRUE_8BIT)
-	{
-		return -1;
-	}
-
-	// 1. save EPS_HK
-	save_EPS_HK();
-	// 2. save CMA_HK
-	//save_CAM_HK();
-	// 3. save COMM_HK
-	save_COMM_HK();
-	// 4. save ADCS_HK
-	//save_ADCS_HK();
-
-	return 0;
-}
-
-
 int EPS_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
-	int params[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 1, 1, 4, 4, 4, 4, 4, 4};
+	int params[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 1, 1};
 	int lastPlace = 0, l;
-	for (int i = 0; i < 31; i++)
+	for (int i = 0; i < 25; i++)
 	{
 		for (l = 0; l < params[i] / 2; l++)
 		{
@@ -594,6 +585,22 @@ int ADCS_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 
 	return 0;
 }
+int SP_HK_raw_BiEnE(byte* raw_in, byte* raw_out)
+{
+	int params[] = {4, 4, 4, 4, 4, 4};
+	int lastPlace = 0, l;
+	for (int i = 0; i < 6; i++)
+	{
+		for (l = 0; l < params[i] / 2; l++)
+		{
+			raw_out[l + lastPlace] = raw_in[lastPlace + params[i] - 1 - l];
+			raw_out[lastPlace + params[i] - 1 - l] = raw_in[l + lastPlace];
+		}
+		lastPlace += params[i];
+	}
+
+	return 0;
+}
 int ADCS_SC_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
 	int params[] = {2, 2, 2};
@@ -615,7 +622,7 @@ int ADCS_SC_raw_BigEnE(byte* raw_in, byte* raw_out)
 int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 {
 	time_unix data_time;
-	data_time = BigEnE_raw_to_uInt(raw_data);
+	memcpy(&data_time, raw_data, sizeof(time_unix));
 	switch(type)
 	{
 	case ACK_T:
@@ -623,7 +630,8 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		packet->subType = ACK_ST;
 		packet->length = ACK_DATA_LENGTH;
 		packet->time = data_time;
-		memcpy(raw_data + TIME_SIZE, packet->data, ACK_DATA_LENGTH);
+		memcpy(packet->data, raw_data + TIME_SIZE, ACK_DATA_LENGTH);
+
 		break;
 	case EPS_HK_T:
 		packet->type = DUMP_T;
@@ -650,6 +658,13 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		packet->type = DUMP_T;
 		packet->subType = ADCS_DUMP_ST;
 		packet->length = ADCS_HK_SIZE;
+		packet->time = data_time;
+		ADCS_HK_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
+		break;
+	case SP_HK_T:
+		packet->type = DUMP_T;
+		packet->subType = SP_DUMP_ST;
+		packet->length = SP_HK_SIZE;
 		packet->time = data_time;
 		ADCS_HK_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
@@ -808,27 +823,41 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 }
 
 
-void HouseKeeping_Task()
+void HouseKeeping_highRate_Task()
 {
-	int ret = f_enterFS(); /* Register this task with filesystem */
-	check_int("HouseKeeping_Task enter FileSystem", ret);
 	portTickType xLastWakeTime = xTaskGetTickCount();
-	const portTickType xFrequency = TASK_HK_DELAY;
+	const portTickType xFrequency = TASK_HK_HIGH_RATE_DELAY;
 	while(1)
 	{
-		save_HK();
+		byte DF;
+		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
+		if (DF != TRUE_8BIT)
+		{
+			save_EPS_HK();
+
+			save_CAM_HK();
+
+			save_COMM_HK();
+
+			//save_ADCS_HK();
+		}
+
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
-void HouseKeeping_secondTask()
+void HouseKeeping_lowRate_Task()
 {
-	int ret = f_enterFS(); /* Register this task with filesystem */
-	check_int("HouseKeeping_Task enter FileSystem", ret);
 	portTickType xLastWakeTime = xTaskGetTickCount();
-	const portTickType xFrequency = TASK_SECOND_HK_DELAY;
+	const portTickType xFrequency = TASK_HK_LOW_RATE_DELAY;
 	while(1)
 	{
-		save_SP_HK();
+		byte DF;
+		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
+		if (DF != TRUE_8BIT)
+		{
+			save_SP_HK();
+		}
+
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }

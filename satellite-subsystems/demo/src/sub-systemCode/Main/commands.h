@@ -2,7 +2,7 @@
  * commands.h
  *
  *  Created on: Dec 5, 2018
- *      Author: elain
+ *      Author: Hoopoe3n
  */
 
 #ifndef COMMANDS_H_
@@ -57,52 +57,4 @@ void AUC_SW(TC_spl decode);
 
 void AUC_special_operation(TC_spl decode);
 
-
-void cmd_error(Ack_type* type, ERR_type* err);
-
-void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_reset_satellite(Ack_type* type, ERR_type* err);
-
-void cmd_gracefull_reset_satellite(Ack_type* type, ERR_type* err);
-
-void cmd_hard_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_mute(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_unmute(Ack_type* type, ERR_type* err);
-
-void cmd_active_trans(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_shut_trans(Ack_type* type, ERR_type* err);
-
-void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_aprs_dump(Ack_type* type, ERR_type* err);
-
-void cmd_stop_dump(Ack_type* type, ERR_type* err);
-
-void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_dump(TC_spl cmd);
-
-void cmd_image_dump(TC_spl cmd);
-
-void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_dummy_func(Ack_type* type, ERR_type* err);
-
-void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_deploy_ants(Ack_type* type, ERR_type* err);
-
-void cmd_reset_APRS_list(Ack_type* type, ERR_type* err);
-
-void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err);
-
-void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd);
 #endif /* COMMANDS_H_ */

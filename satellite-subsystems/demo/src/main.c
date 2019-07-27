@@ -34,12 +34,14 @@
 #include "sub-systemCode/Main/Main_Init.h"
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
+#include "sub-systemCode/ADCS/Adcs_Main.h"
 
 #define DEBUGMODE
 
 #ifndef DEBUGMODE
 	#define DEBUGMODE
 #endif
+
 
 #define HK_DELAY_SEC 10
 #define MAX_SIZE_COMMAND_Q 20
@@ -64,14 +66,6 @@ void save_time()
 
 void Command_logic()
 {
-	/*TC_spl packet;
-	while (uxQueueMessagesWaiting(commandQueue) > 0)
-	{
-		xQueueReceive(commandQueue, &packet, MAX_DELAY);
-		act_upon_command(packet);
-		free(packet.data);
-	}*/
-
 	TC_spl command;
 	int error = 0;
 	do
@@ -83,14 +77,12 @@ void Command_logic()
 	while (error == 0);
 }
 
-//todo: different TASK for HK and commands
-
 void taskMain()
 {
 	WDT_startWatchdogKickTask(10 / portTICK_RATE_MS, FALSE);
 	InitSubsystems();
-	vTaskDelay(100);
 
+	vTaskDelay(100);
 	printf("init\n");
 	SubSystemTaskStart();
 	printf("Task Main start\n");
@@ -100,14 +92,9 @@ void taskMain()
 
 	while(1)
 	{
-
-		//eps conditions
 		EPS_Conditioning();
-		//command logic
 		Command_logic();
-		//save time
 		save_time();
-		//delay of 1 second
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
@@ -117,6 +104,7 @@ int main()
 	TRACE_CONFIGURE_ISP(DBGU_STANDARD, 2000000, BOARD_MCK);
 	// Enable the Instruction cache of the ARM9 core. Keep the MMU and Data Cache disabled.
 	CP15_Enable_I_Cache();
+
 	WDT_start();
 
 	printf("Task Main 2121\n");

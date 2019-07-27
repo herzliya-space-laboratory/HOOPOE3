@@ -10,7 +10,7 @@
 //! define True as 1 true in c
 //#define TRUE 1
 //! define False as 0 false in c
-
+/*
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -28,7 +28,7 @@
 #include <satellite-subsystems/GomEPS.h>
 //include for TESTS
 #include <at91/utility/exithandler.h>
-#include "../Main/CMD/ADCS_CMD.h"
+//#include "../Main/CMD/ADCS_CMD.h"
 //! define START_ESTIMATION_MODE as 0
 
 
@@ -148,6 +148,7 @@ void ADCS_startLoop(Boolean activation)
 /*! a function that gathers the telemtry data
  *@param[StTa] holds what telmetry shuld be saved
  */
+/*
 void gatherData(stageTable StTa)
 {
 	// a parameter that holds part of the adcs data
@@ -821,7 +822,7 @@ void css()
 		{
 			printf("error from getRawCss 2: %d\n", err);
 		}*/
-
+/*
 		err = cspaceADCS_getCoarseSunVec(0,&raw_sunvec);
 		if (err == 0)
 		{
@@ -1287,6 +1288,7 @@ void ADCS_Task()
 	int err;
 	unsigned char data[STAGE_TABLE_SIZE];
 	int ret = f_enterFS(); /* Register this task with filesystem */
+/*
 	check_int("adcs_task enter FileSystem", ret);
 	ADCS_Tests(get_ST());
 	// the adcs loop
@@ -1321,7 +1323,7 @@ void ADCS_Task()
  * @param[prvious] pointer to an int that holds the privious values of the eror
  * @param[integral] pointer to an int thaht hold the integral values of the erors
  */
-
+/*
 int biasZ = 666; //change paramater
 int biasX = 666; //change paramater
 int kpZ = 666; //change paramater
@@ -1674,3 +1676,4 @@ double doubleParse(unsigned char *gther) {
 	memcpy(&temp, gther, sizeof(temp));
 	return temp;
 }
+*/

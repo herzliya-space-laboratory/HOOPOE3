@@ -2,7 +2,7 @@
  * Global.c
  *
  *  Created on: Oct 20, 2018
- *      Author: elain
+ *      Author: Hoopoe3n
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -83,10 +83,6 @@ void double_little_endian(unsigned char* d)
 		d[i]=d[7-i];
 		d[7-i]=temp;
 	}
-}
-
-void zero_initial_activation()
-{
 }
 
 int soft_reset_subsystem(subSystem_indx reset_idx)
@@ -241,17 +237,6 @@ Boolean comapre_string(unsigned char* str0, unsigned char* str1, int numberOfByt
 	return TRUE;
 }
 
-void copyDATA(byte* to, byte* from, int length)
-{
-	if (to == NULL || from == NULL)
-		return;
-
-	for (int i = 0; i < length; i++)
-	{
-		to[i] = from[i];
-	}
-}
-
 void reset_FRAM_MAIN()
 {
 	byte raw[4];
@@ -263,37 +248,40 @@ void reset_FRAM_MAIN()
 	raw[0] = TRUE_8BIT;
 	err = FRAM_write(raw, FIRST_ACTIVATION_ADDR, 1);
 	check_int("reset_FRAM_MAIN, FRAM_write(FIRST_ACTIVATION_ADDR)", err);
-	// sets the time to 0
+
 	int i;
 	for (i = 0; i < 4; i++)
 		raw[i] = 0;
 	err = FRAM_write(raw, TIME_ADDR, TIME_SIZE);
 	check_int("reset_FRAM_MAIN, FRAM_write(TIME_ADDR)", err);
-	//
+
 	err = FRAM_write(raw, RESTART_FLAG_ADDR, 4);
 	check_int("reset_FRAM_MAIN, FRAM_write(RESTART_FLAG)", err);
-#ifndef TESTING
+
 	Boolean8bit bool = FALSE_8BIT;
 	err = FRAM_write(&bool, STOP_TELEMETRY_ADDR, 1);
 	check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
-#else
-	raw[0] = 0;
-	err = FRAM_write(raw, DEPLOY_ANTS_ATTEMPTS_ADDR, 1);
-	check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
-	/*Boolean8bit bool = FALSE_8BIT;
-	int selection;
-	printf("0 for savin HK, 1 for not saving HK\n");
-	while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
-	switch(selection)
+	for (int i = 0; i < 3; i++)
 	{
-	case 0:
 		bool = FALSE_8BIT;
-		break;
-	case 1:
-		bool = TRUE_8BIT;
-		break;
+		err = FRAM_write(&bool, DEPLOY_ANTS_ATTEMPTS_ADDR + i, 1);
+		check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
 	}
-	err = FRAM_write(bool, STOP_TELEMETRY_ADDR, 1);
-	check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);*/
-#endif
+}
+
+Boolean getBitValueByIndex(byte* data, int length, int index)
+{
+	if (data == NULL)
+		return FALSE;
+
+	if (length * 8 < index)
+		return FALSE;
+
+	int byteIndexInArray = (int)(index / 8);
+	byte retValue = data[byteIndexInArray] & (1 << (index % 8));
+
+	if (retValue == 0)
+		return FALSE;
+	else
+		return TRUE;
 }

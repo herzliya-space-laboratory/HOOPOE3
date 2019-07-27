@@ -79,7 +79,7 @@ int GatherTlmAndData(Gather_TM_Data Data[])
 	return err;
 }
 
-void IniTData(Gather_TM_Data Data[])
+void InitData(Gather_TM_Data Data[])
 {
 	stageTable ST = Get_ST();
 	Data[0].Change_Cord = 1;

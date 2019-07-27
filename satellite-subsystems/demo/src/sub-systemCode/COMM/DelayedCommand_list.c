@@ -2,17 +2,21 @@
  * DelayedCommand_list.c
  *
  *  Created on: Apr 6, 2019
- *      Author: elain
+ *      Author: Hoopoe3n
  */
 #include <hal/Timing/Time.h>
 #include <hal/Storage/FRAM.h>
 #include "string.h"
+
+#include "../Global/GlobalParam.h"
+#include "../Global/Global.h"
 
 #include "DelayedCommand_list.h"
 #include "../Main/commands.h"
 
 #define DELETE_CMD_FROM_LIST(starting_point) memset((starting_point + DelayCommand_list) , 0, SIZE_OF_DELAYED_COMMAND)
 #define EXTRACT_TIME_FROM_DELAYED_COMMAND(startOfCommand) BigEnE_raw_to_uInt(DelayCommand_list + startOfCommand + SPL_TC_HEADER_SIZE - TIME_SIZE)
+
 static byte DelayCommand_list[MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND];
 
 /*
@@ -95,6 +99,7 @@ void check_delaycommand()
 	unsigned char numberOfCommands = 0;	//stored the number of commands from the FRAM
 	err = FRAM_read(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
 	check_int("check_delaycommand, FRAM_read(NUMBER_COMMAND_FRAM_ADDR)", err);
+	set_numOfDelayedCommand(numberOfCommands);
 	//printf("number of commands in FRAM %d\n", numberOfCommands);
 	//2. Loading delayed command list from FRAM
 

@@ -6,6 +6,9 @@
 #include "Adcs_Main.h"
 #include "../Main/commands.h"
 
+#define ADCS_RESPONSE_DELAY 1000 
+#define ADCS_LOOP_DELAY 1000 //the loop runs in 1Hz
+
 void AdcsTask()
 {
 	//todo: check xQueueCreate
@@ -24,7 +27,7 @@ void AdcsTask()
 
 		if(!get_system_state(ADCS_param))
 		{
-			vTaskDelay(1000);
+			vTaskDelay(ADCS_RESPONSE_DELAY);
 			continue;
 		}
 
@@ -32,7 +35,7 @@ void AdcsTask()
 		{
 		err[1] = UpdateAdcsStateMachine(CMD_UPDATE_STATE_MATRIX, NULL, 0);
 		//todo: SM Log
-		ActiveStateMachine = 0;
+		ActiveStateMachine = FALSE;
 		}
 
 		err[0] = FindErr();
@@ -45,9 +48,9 @@ void AdcsTask()
 		}
 
 		err[2] = GatherTlmAndData();
-		vTaskDelay(1000);
+		vTaskDelay(ADCS_LOOP_DELAY);
 
-		if(uxQueueMessagesWaiting(AdcsCmdTour) == 0)//cheak if queue free size = size of queue
+		if(uxQueueMessagesWaiting(AdcsCmdTour) == 0)//cheak if queue is empty
 		{
 			ActiveStateMachine = FALSE;
 		}
@@ -55,7 +58,7 @@ void AdcsTask()
 		{
 			GetCmdFromQueue(&commend);
 			ActiveStateMachine = TRUE;
-			//todo System Log
+			//todo: System Log
 		}
 	}
 }

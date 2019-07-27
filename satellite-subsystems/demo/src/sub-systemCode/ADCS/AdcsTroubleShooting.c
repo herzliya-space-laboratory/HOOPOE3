@@ -8,7 +8,7 @@ int AdcsTroubleShooting(TroubleErrCode *trbl)
 
 
 //Gather TLM
-int GatherTlmAndData();
+//int GatherTlmAndData();
 
 
 TroubleErrCode FindErr()

@@ -2,7 +2,6 @@
 #include <freertos/task.h>
 
 #include "../Ants.h"
-#include "../Tests/Test.h"
 
 #include <hal/Storage/FRAM.h>
 #include <hal/errors.h>
@@ -85,6 +84,7 @@ int DISARM_ants()
 
 int deploye_ants(ISISantsSide side)
 {
+	(void)side;
 #ifndef ANTS_DO_NOT_DEPLOY
 	int error = ARM_ants();
 
@@ -111,7 +111,7 @@ int time_out_before_deploy(int attempt_number)
 
 	int i_error;
 	deploy_attempt deploy_status;
-	i_error = FRAM_read(&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
+	i_error = FRAM_read((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
 	check_int("FRAM_read(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
 	if (deploy_status.isAtemptDone)
 		return 1;
@@ -126,7 +126,7 @@ int time_out_before_deploy(int attempt_number)
 		check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
 
 		deploy_status.minutesToAttempt++;
-		i_error = FRAM_write(&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
+		i_error = FRAM_write((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
 		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -145,13 +145,10 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 1, side A\n");
 		deploye_ants(isisants_sideA);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = 1;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
-		i_error = FRAM_write(&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_1, 1);
+		i_error = FRAM_write((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_1, 1);
 		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
 		printf("ended attempt 1 to deploy ants, side A\n");
 	}
@@ -160,9 +157,6 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 2, side B\n");
 		deploye_ants(isisants_sideB);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = TRUE;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
@@ -175,9 +169,6 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 3, side A\n");
 		deploye_ants(isisants_sideA);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = TRUE;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;

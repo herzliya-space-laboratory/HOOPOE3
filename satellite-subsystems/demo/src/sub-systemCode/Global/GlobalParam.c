@@ -28,6 +28,7 @@
 #include "GlobalParam.h"
 
 #define TEMP_CALIBRATION		100
+#define TRXVU_TEMP_CALIBRATION(ADC) ((temp_t)ADC * -0.07669 + 195.6037)
 #define ATTITUDE_CALIBRATION 	10
 
 #define current_system_state current_global_param.state
@@ -94,6 +95,8 @@ int init_GP()
 	current_global_param.numOfAPRS = 0;
 	current_global_param.numOfResets = 0;
 	current_global_param.lastReset = 0;
+
+	current_global_param.ground_conn = FALSE;
 
 	return 0;
 }
@@ -421,18 +424,18 @@ temp_t get_tempComm_LO()
 	temp_t return_value = 0;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		return_value = (temp_t)(current_global_param.tempComm_LO / TEMP_CALIBRATION);
+		return_value = TRXVU_TEMP_CALIBRATION(current_global_param.tempComm_LO);
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
 	return return_value;
 }
-void set_tempComm_LO(temp_t param)
+void set_tempComm_LO(unsigned short param)
 {
 	portBASE_TYPE lu_error;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		current_global_param.tempComm_LO = (short)(param * TEMP_CALIBRATION);
+		current_global_param.tempComm_LO = param;
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
@@ -444,18 +447,18 @@ temp_t get_tempComm_PA()
 	temp_t return_value = 0;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		return_value = (temp_t)(current_global_param.tempComm_PA / TEMP_CALIBRATION);
+		return_value = TRXVU_TEMP_CALIBRATION(current_global_param.tempComm_PA);
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
 	return return_value;
 }
-void set_tempComm_PA(temp_t param)
+void set_tempComm_PA(unsigned short param)
 {
 	portBASE_TYPE lu_error;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		current_global_param.tempComm_PA = (short)(param * TEMP_CALIBRATION);
+		current_global_param.tempComm_PA = param;
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
@@ -472,13 +475,13 @@ temp_t get_tempEPS(int index)
 	temp_t return_value = 0;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		return_value = (temp_t)(current_global_param.tempEPS[index] / TEMP_CALIBRATION);
+		return_value = (temp_t)current_global_param.tempEPS[index];
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
 	return return_value;
 }
-void set_tempEPS(int index, temp_t param)
+void set_tempEPS(int index, short param)
 {
 	if (index < 0 || index > 4)
 	{
@@ -488,7 +491,7 @@ void set_tempEPS(int index, temp_t param)
 	portBASE_TYPE lu_error;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		current_global_param.tempEPS[index] = (short)(param * TEMP_CALIBRATION);
+		current_global_param.tempEPS[index] = param;
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
@@ -505,13 +508,13 @@ temp_t get_tempBatt(int index)
 	temp_t return_value = 0;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		return_value = (temp_t)(current_global_param.tempBatt[index] / TEMP_CALIBRATION);
+		return_value = (temp_t)current_global_param.tempBatt[index];
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
 	return return_value;
 }
-void set_tempBatt(int index, temp_t param)
+void set_tempBatt(int index, short param)
 {
 	if (index < 0 || index > 2)
 	{
@@ -521,7 +524,7 @@ void set_tempBatt(int index, temp_t param)
 	portBASE_TYPE lu_error;
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		current_global_param.tempBatt[index] = (short)(param * TEMP_CALIBRATION);
+		current_global_param.tempBatt[index] = param;
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
@@ -774,6 +777,29 @@ time_unix get_lastReset()
 	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
 		return_value = current_global_param.lastReset;
+		lu_error = xSemaphoreGive(xCGP_semaphore);
+		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
+	}
+	return return_value;
+}
+//CGP ->connection to ground state
+void set_ground_conn(Boolean param)
+{
+	portBASE_TYPE lu_error;
+	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
+	{
+		current_global_param.ground_conn = param;
+		lu_error = xSemaphoreGive(xCGP_semaphore);
+		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
+	}
+}
+Boolean get_ground_conn()
+{
+	portBASE_TYPE lu_error;
+	Boolean return_value = 0;
+	if(xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
+	{
+		return_value = current_global_param.ground_conn;
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}

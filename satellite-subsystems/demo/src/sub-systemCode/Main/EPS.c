@@ -43,43 +43,43 @@
 
 static 	gom_eps_channelstates_t switches_states;
 
-#define DEFULT_VALUES_VOL_TABLE	{ 6300, 7000, 7400, 7500, 7100, 6400}
+#define DEFULT_VALUES_VOL_TABLE	{ 6600, 7000, 7400, 7500, 7100, 6700}
 
 voltage_t convert_vol(voltage_t vol)
 {
-	if (vol % 10 > 5)
+	if (vol % 20 > 10)
 	{
-		return (voltage_t)((double)(vol) / 10) * 10 + 10;
+		return (voltage_t)((double)(vol) / 20) * 20 + 20;
 	}
 	else
 	{
-		return (voltage_t)((double)(vol) / 10) * 10;
+		return (voltage_t)((double)(vol) / 20) * 20;
 	}
 }
 
 Boolean8bit  get_shut_ADCS()
 {
-	Boolean8bit on_off;
-	int error = FRAM_read(&on_off, SHUT_ADCS_ADDR, 1);
+	Boolean8bit mode;
+	int error = FRAM_read(&mode, SHUT_ADCS_ADDR, 1);
 	check_int("shut_ADCS, FRAM_read", error);
-	return on_off;
+	return mode;
 }
-void shut_ADCS(Boolean8bit on_off)
+void shut_ADCS(Boolean mode)
 {
-	int error = FRAM_write(&on_off, SHUT_ADCS_ADDR, 1);
+	int error = FRAM_write((byte*)&mode, SHUT_ADCS_ADDR, 1);
 	check_int("shut_ADCS, FRAM_write", error);
 }
 
 Boolean8bit  get_shut_CAM()
 {
-	Boolean8bit on_off;
-	int error = FRAM_read(&on_off, SHUT_CAM_ADDR, 1);
+	Boolean8bit mode;
+	int error = FRAM_read(&mode, SHUT_CAM_ADDR, 1);
 	check_int("shut_CAM, FRAM_read", error);
-	return on_off;
+	return mode;
 }
-void shut_CAM(Boolean8bit on_off)
+void shut_CAM(Boolean mode)
 {
-	int error = FRAM_write(&on_off, SHUT_CAM_ADDR, 1);
+	int error = FRAM_write((byte*)&mode, SHUT_CAM_ADDR, 1);
 	check_int("shut_CAM, FRAM_write", error);
 }
 
@@ -160,7 +160,7 @@ void reset_FRAM_EPS()
 	byte data = 0;
 	i_error = FRAM_write(&data, EPS_STATES_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
-	data = SWITCH_ON;
+	data = SWITCH_OFF;
 	i_error = FRAM_write(&data, SHUT_ADCS_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	i_error = FRAM_write(&data, SHUT_CAM_ADDR, 1);
@@ -189,14 +189,14 @@ void EPS_Conditioning()
 	int i_error;
 	voltage_t voltages[EPS_VOLTAGES_SIZE] = DEFULT_VALUES_VOL_TABLE;// Remove magical numbers and declare a pointer when the FRAM will be organised
 
-	// TODO: read voltages from FRAM. in a separate function
-
 	voltage_t vbatt_prev[3];
 	get_Vbatt_previous(vbatt_prev);
 
 	gom_eps_hk_t eps_tlm;
 	i_error = GomEpsGetHkData_general(0, &eps_tlm);
 	check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
+	if (i_error != 0)
+		return;
 
 	voltage_t vbatt_filtered = CALCAVARAGE3(vbatt_prev);
 	voltage_t currentvbatt = eps_tlm.fields.vbatt;
@@ -213,10 +213,14 @@ void EPS_Conditioning()
 	FRAM_read(raw_vol_fram, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	convert_raw_voltage(raw_vol_fram, voltages);
 
-	printf("channel 1: %d, channe: %d\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+	/*printf("channel 1: %d, channe: %d\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+	printf("current voltage: %u, previous voltage: %u\n\n", currentvbatt, vbatt_filtered);
+	printf("ADCS: %d\n", get_system_state(ADCS_param));
+	printf("cam: %d\n", get_system_state(cam_operational_param));
+	printf("TX: %d\n", get_system_state(Tx_param));*/
 	if (vbatt_filtered > currentvbatt)
 	{
-		printf(". downward");
+		printf(". downward ");
 		if (currentvbatt < voltages[0])
 		{
 			EnterCriticalMode(&switches_states);
@@ -237,7 +241,7 @@ void EPS_Conditioning()
 	// Conditioning on upward trend of battery voltage
 	else if (vbatt_filtered < currentvbatt)
 	{
-		printf(". upward");
+		printf(". upward ");
 		if (currentvbatt > voltages[3])
 		{
 			EnterFullMode(&switches_states);
@@ -260,6 +264,8 @@ void EPS_Conditioning()
 		return;
 	}
 
+	printf("\n");
+
 	if (CHECK_CHANNEL_CHANGE(switches_states, eps_tlm))
 	{
 		i_error = GomEpsSetOutput(0, switches_states);
@@ -270,61 +276,102 @@ void EPS_Conditioning()
 	}
 }
 
+Boolean overRide_ADCS(gom_eps_channelstates_t* switches_states)
+{
+	if(get_shut_ADCS())
+	{
+		switches_states->raw = 0;
+		set_system_state(ADCS_param, SWITCH_OFF);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+Boolean overRide_Camera()
+{
+	if(get_shut_CAM())
+	{
+		set_system_state(cam_operational_param, SWITCH_OFF);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 //EPS modes
 void EnterFullMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Full Mode");
-	switches_states->fields.quadbatSwitch = 0;
-	switches_states->fields.quadbatHeater = 0;
-	switches_states->fields.channel3V3_1 = 1;
-	switches_states->fields.channel3V3_2 = 0;
-	switches_states->fields.channel3V3_3 = 0;
-	switches_states->fields.channel5V_1 = 1;
-	switches_states->fields.channel5V_2 = 0;
-	switches_states->fields.channel5V_3 = 0;
-
-	set_system_state(cam_operational_param, SWITCH_ON);
+	printf("Enter Full Mode\n");
 	set_system_state(Tx_param, SWITCH_ON);
-	set_system_state(ADCS_param, SWITCH_ON);
+
+	if (overRide_ADCS(switches_states))
+	{
+		switches_states->fields.quadbatSwitch = 0;
+		switches_states->fields.quadbatHeater = 0;
+		switches_states->fields.channel3V3_1 = 1;
+		switches_states->fields.channel3V3_2 = 0;
+		switches_states->fields.channel3V3_3 = 0;
+		switches_states->fields.channel5V_1 = 1;
+		switches_states->fields.channel5V_2 = 0;
+		switches_states->fields.channel5V_3 = 0;
+
+		set_system_state(ADCS_param, SWITCH_ON);
+	}
+
+	if (overRide_Camera())
+		set_system_state(cam_operational_param, SWITCH_ON);
 }
 
 void EnterCruiseMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Cruise Mode");
-	switches_states->fields.quadbatSwitch = 0;
-	switches_states->fields.quadbatHeater = 0;
-	switches_states->fields.channel3V3_1 = 1;
-	switches_states->fields.channel3V3_2 = 0;
-	switches_states->fields.channel3V3_3 = 0;
-	switches_states->fields.channel5V_1 = 1;
-	switches_states->fields.channel5V_2 = 0;
-	switches_states->fields.channel5V_3 = 0;
+	printf("Enter Cruise Mode\n");
+	set_system_state(Tx_param, SWITCH_ON);
+
+	if (overRide_ADCS(switches_states))
+	{
+		switches_states->fields.quadbatSwitch = 0;
+		switches_states->fields.quadbatHeater = 0;
+		switches_states->fields.channel3V3_1 = 1;
+		switches_states->fields.channel3V3_2 = 0;
+		switches_states->fields.channel3V3_3 = 0;
+		switches_states->fields.channel5V_1 = 1;
+		switches_states->fields.channel5V_2 = 0;
+		switches_states->fields.channel5V_3 = 0;
+
+		set_system_state(ADCS_param, SWITCH_ON);
+	}
 
 	set_system_state(cam_operational_param, SWITCH_OFF);
-	set_system_state(Tx_param, SWITCH_ON);
-	set_system_state(ADCS_param, SWITCH_ON);
 }
 
 void EnterSafeMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Safe Mode");
-	switches_states->fields.quadbatSwitch = 0;
-	switches_states->fields.quadbatHeater = 0;
-	switches_states->fields.channel3V3_1 = 1;
-	switches_states->fields.channel3V3_2 = 0;
-	switches_states->fields.channel3V3_3 = 0;
-	switches_states->fields.channel5V_1 = 1;
-	switches_states->fields.channel5V_2 = 0;
-	switches_states->fields.channel5V_3 = 0;
+	printf("Enter Safe Mode\n");
+	set_system_state(Tx_param, SWITCH_OFF);
+
+	if (overRide_ADCS(switches_states))
+	{
+		switches_states->fields.quadbatSwitch = 0;
+		switches_states->fields.quadbatHeater = 0;
+		switches_states->fields.channel3V3_1 = 1;
+		switches_states->fields.channel3V3_2 = 0;
+		switches_states->fields.channel3V3_3 = 0;
+		switches_states->fields.channel5V_1 = 1;
+		switches_states->fields.channel5V_2 = 0;
+		switches_states->fields.channel5V_3 = 0;
+
+		set_system_state(ADCS_param, SWITCH_ON);
+	}
 
 	set_system_state(cam_operational_param, SWITCH_OFF);
-	set_system_state(Tx_param, SWITCH_OFF);
-	set_system_state(ADCS_param, SWITCH_ON);
 }
 
 void EnterCriticalMode(gom_eps_channelstates_t* switches_states)
 {
-	printf("Enter Critical Mode");
+	printf("Enter Critical Mode\n");
 	switches_states->fields.quadbatSwitch = 0;
 	switches_states->fields.quadbatHeater = 0;
 	switches_states->fields.channel3V3_1 = 0;
