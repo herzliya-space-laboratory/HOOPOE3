@@ -41,13 +41,15 @@
 #define CHECK_CHANNEL_3(preState, currState) ((unsigned char)preState.fields.channel5V_1 != currState.fields.output[3])
 #define CHECK_CHANNEL_CHANGE(preState, currState) CHECK_CHANNEL_0(preState, currState) || CHECK_CHANNEL_3(preState, currState)
 
-static 	gom_eps_channelstates_t switches_states;
-static EPS_mode_t batteryLastMode;
-static EPS_enter_mode_t enterMode[NUM_BATTERY_MODE];
+voltage_t VBatt_previous;
+double alpha = EPS_ALPHA_DEFFAULT_VALUE;
+gom_eps_channelstates_t switches_states;
+EPS_mode_t batteryLastMode;
+EPS_enter_mode_t enterMode[NUM_BATTERY_MODE];
 
-#define DEFULT_VALUES_VOL_TABLE	{ {6600, 7000, 7400}, {7500, 7100, 6700}}
+#define DEFULT_VALUES_VOL_TABLE	{ {6700, 7000, 7400}, {7500, 7100, 6800}}
 
-voltage_t convert_vol(voltage_t vol)
+voltage_t round_vol(voltage_t vol)
 {
 	int rounding_mul2 = EPS_ROUNDING_FACTOR * 2;
 	if (vol % rounding_mul2 > EPS_ROUNDING_FACTOR)
@@ -145,28 +147,29 @@ void EPS_Init()
 	gom_eps_hk_t eps_tlm;
 	error = GomEpsGetHkData_general(0, &eps_tlm);
 	check_int("GomEpsGetHkData_general, EPS_init", error);
-	voltage_t current_vbatt = convert_vol(eps_tlm.fields.vbatt);
+	voltage_t current_vbatt = round_vol(eps_tlm.fields.vbatt);
 
 	init_enterMode();
 
+	Boolean changeMode = FALSE;
 	for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
 	{
 		if (current_vbatt < voltage_table[0][i])
 		{
 			enterMode[i].fun(&switches_states, &batteryLastMode);
 			update_powerLines(switches_states);
-			return;
+			changeMode = TRUE;
 		}
 	}
 
-	enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
-	update_powerLines(switches_states);
+	if (!changeMode)
+	{
+		enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
+		update_powerLines(switches_states);
+	}
 
 	set_Vbatt(eps_tlm.fields.vbatt);
-	voltage_t pre_value[3];
-	for (int i = 0; i < 3; i++)
-		pre_value[i] = eps_tlm.fields.vbatt;
-	set_Vbatt_previous(pre_value);
+	VBatt_previous = current_vbatt;
 }
 
 
@@ -205,7 +208,7 @@ void reset_EPS_voltages()
 }
 
 
-void battery_downward(voltage_t currentvbatt)
+void battery_downward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
@@ -213,55 +216,28 @@ void battery_downward(voltage_t currentvbatt)
 
 	printf(". downward ");
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
-	{
-		if (currentvbatt < voltage_table[0][i])
-		{
-			enterMode[i].fun(&switches_states, &batteryLastMode);
-			return;
-		}
-	}
-
-	enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
+		if (previuse_VBatt < voltage_table[0][i])
+			if (previuseVBatt > voltage_table[0][i])
+				enterMode[i].fun(&switches_states, &batteryLastMode);
 }
 
-void battery_upward(voltage_t currentvbatt)
+void battery_upward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("FRAM_read, EPS_Init", i_error);
 
 	printf(". upward ");
-	for (int i = EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS; i++)
-	{
-		if (currentvbatt > voltage_table[1][i - EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
-		{
-			if (i == EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2)
-			{
-				enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].fun(&switches_states, &batteryLastMode);
-				return;
-			}
-			else if (currentvbatt > voltage_table[0][EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i] &&
-					batteryLastMode > enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].type)
-			{
-				return;
-			}
-			else
-			{
-				enterMode[EPS_VOLTAGE_TABLE_NUM_ELEMENTS - i].fun(&switches_states, &batteryLastMode);
-				return;
-			}
-		}
-	}
 
-	enterMode[0].fun(&switches_states, &batteryLastMode);
+	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
+		if (previuse_VBatt > voltage_table[1][i])
+			if (previuseVBatt < voltage_table[1][i])
+				enterMode[NUM_BATTERY_MODE - 1 - i].fun(&switches_states, &batteryLastMode);
 }
 
 
 void EPS_Conditioning()
 {
-	voltage_t vbatt_prev[3];
-	get_Vbatt_previous(vbatt_prev);
-
 	gom_eps_hk_t eps_tlm;
 	int i_error = GomEpsGetHkData_general(0, &eps_tlm);
 	check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
@@ -269,27 +245,25 @@ void EPS_Conditioning()
 		return;
 	set_Vbatt(eps_tlm.fields.vbatt);
 
-	voltage_t vbatt_filtered = CALCAVARAGE3(vbatt_prev);
-	voltage_t currentvbatt = eps_tlm.fields.vbatt;
-	currentvbatt = CALCAVARAGE2(vbatt_filtered, currentvbatt);
-	vbatt_filtered = convert_vol(vbatt_filtered);;
-	currentvbatt = convert_vol(currentvbatt);
+	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
+	voltage_t VBatt_filtered = (voltage_t)(current_VBatt * alpha + (1 - alpha) * VBatt_previous);
 
-	printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuse Vbatt: %u\n", eps_tlm.fields.vbatt, currentvbatt, vbatt_filtered);
+	printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuse Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
 	printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 
-	if (currentvbatt < vbatt_filtered)
+	if (VBatt_filtered < VBatt_previous)
 	{
-		battery_downward(currentvbatt);
+		battery_downward(VBatt_filtered, VBatt_previous);
 	}
-	else if (currentvbatt > vbatt_filtered)
+	else if (VBatt_filtered > VBatt_previous)
 	{
-		battery_upward(currentvbatt);
+		battery_upward(VBatt_filtered, VBatt_previous);
 	}
 
 	update_powerLines(switches_states);
 	printf("last state: %d\n", batteryLastMode);
 	printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+	VBatt_previous = VBatt_filtered;
 }
 
 

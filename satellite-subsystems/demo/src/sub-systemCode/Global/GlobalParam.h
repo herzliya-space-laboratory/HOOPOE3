@@ -45,7 +45,6 @@ typedef union __attribute__ ((__packed__))
 typedef struct __attribute__ ((__packed__))
 {
 	voltage_t Vbatt;//current voltage of the batteries
-	voltage_t pre_vbatt[3];
 	current_t curBat;//
 	current_t cur3V3;
 	current_t cur5V;
@@ -84,9 +83,6 @@ void get_current_global_param(global_param* param_out);
 //	CGP->current Vbatt
 voltage_t get_Vbatt();
 void set_Vbatt(voltage_t param);
-//	CGP->Vbatt privouse
-void set_Vbatt_previous(voltage_t vbatt_prev[3]);
-void get_Vbatt_previous(voltage_t *vbatt_prev);
 // CGP ->current system
 void set_curBat(current_t param);
 current_t get_curBat();
