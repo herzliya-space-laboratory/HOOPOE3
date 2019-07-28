@@ -47,7 +47,7 @@ gom_eps_channelstates_t switches_states;
 EPS_mode_t batteryLastMode;
 EPS_enter_mode_t enterMode[NUM_BATTERY_MODE];
 
-#define DEFULT_VALUES_VOL_TABLE	{ {6600, 7000, 7400}, {7500, 7100, 6700}}
+#define DEFULT_VALUES_VOL_TABLE	{ {6700, 7000, 7400}, {7500, 7100, 6800}}
 
 voltage_t round_vol(voltage_t vol)
 {
@@ -151,18 +151,22 @@ void EPS_Init()
 
 	init_enterMode();
 
+	Boolean changeMode = FALSE;
 	for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
 	{
 		if (current_vbatt < voltage_table[0][i])
 		{
 			enterMode[i].fun(&switches_states, &batteryLastMode);
 			update_powerLines(switches_states);
-			return;
+			changeMode = TRUE;
 		}
 	}
 
-	enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
-	update_powerLines(switches_states);
+	if (!changeMode)
+	{
+		enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
+		update_powerLines(switches_states);
+	}
 
 	set_Vbatt(eps_tlm.fields.vbatt);
 	VBatt_previous = current_vbatt;
@@ -214,7 +218,7 @@ void battery_downward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
 		if (previuse_VBatt < voltage_table[0][i])
 			if (previuseVBatt > voltage_table[0][i])
-				enterMode[NUM_BATTERY_MODE - i].fun(&switches_states, &batteryLastMode);
+				enterMode[i].fun(&switches_states, &batteryLastMode);
 }
 
 void battery_upward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
@@ -228,7 +232,7 @@ void battery_upward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
 		if (previuse_VBatt > voltage_table[1][i])
 			if (previuseVBatt < voltage_table[1][i])
-				enterMode[NUM_BATTERY_MODE - i].fun(&switches_states, &batteryLastMode);
+				enterMode[NUM_BATTERY_MODE - 1 - i].fun(&switches_states, &batteryLastMode);
 }
 
 
