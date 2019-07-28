@@ -248,8 +248,8 @@ void EPS_Conditioning()
 	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
 	voltage_t VBatt_filtered = (voltage_t)(current_VBatt * alpha + (1 - alpha) * VBatt_previous);
 
-	printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuse Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
-	printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuse Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
+	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 
 	if (VBatt_filtered < VBatt_previous)
 	{
@@ -262,7 +262,7 @@ void EPS_Conditioning()
 
 	update_powerLines(switches_states);
 	printf("last state: %d\n", batteryLastMode);
-	printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+	//printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 	VBatt_previous = VBatt_filtered;
 }
 
