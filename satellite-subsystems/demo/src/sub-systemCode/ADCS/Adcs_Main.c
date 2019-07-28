@@ -9,18 +9,26 @@
 #define ADCS_RESPONSE_DELAY 1000 
 #define ADCS_LOOP_DELAY 1000 //the loop runs in 1Hz
 
-void AdcsTask()
+Gather_TM_Data Data[24]
+int ret;
+TC_spl commend;
+int ActiveStateMachine;
+TroubleErrCode err[3];
+
+void InitAdcs()
 {
-	//todo: check xQueueCreate
-	int ret = f_enterFS(); /* Register this task with filesystem */
-	AdcsCmdTour = xQueueCreate(COMMAND_LIST_SIZE,sizeof(TC_spl));
-	TC_spl commend;
+	InitData(Data)
+	ret = f_enterFS(); /* Register this task with filesystem */
 	InitStateMachine();
-	int ActiveStateMachine = TRUE;
-	TroubleErrCode err[3];
+	ActiveStateMachine = TRUE;
 	err[0] = TRBL_NO_ERROR;
 	err[1] = TRBL_NO_ERROR;
 	err[2] = TRBL_NO_ERROR;
+}
+void AdcsTask()
+{
+	//todo: check xQueueCreate
+
 
 	while(TRUE)
 	{
@@ -47,10 +55,10 @@ void AdcsTask()
 			continue;
 		}
 
-		err[2] = GatherTlmAndData();
+		err[2] = GatherTlmAndData(Data);
 		vTaskDelay(ADCS_LOOP_DELAY);
 
-		if(uxQueueMessagesWaiting(AdcsCmdTour) == 0)//cheak if queue is empty
+		if(IsAdcsQueueEmpty())//cheak if queue is empty
 		{
 			ActiveStateMachine = FALSE;
 		}

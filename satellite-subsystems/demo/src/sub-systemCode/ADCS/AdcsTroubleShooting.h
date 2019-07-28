@@ -7,7 +7,11 @@ typedef enum TroubleErrCode
 	TRBL_NO_ERROR,
 	TRBL_BOOT_STAK,
 	TRBL_CHANL_OFF,
-	TRBL_CMD_ERR = 4
+	TRBL_CMD_ERR,
+	ERR_WRONG_SUB_TYPE,
+	ERR_WRONG_TYPE,
+	ERR_NULL_DATA
+
 }TroubleErrCode;
 
 

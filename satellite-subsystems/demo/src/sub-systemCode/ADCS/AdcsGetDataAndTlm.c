@@ -25,7 +25,7 @@ int SaveData(Gather_TM_Data Data)
 	int err;
 	unsigned char Get[MAX_TELEMTRY_SIZE];
 	Hold_Data ADCS_Data;
-	//call Telemtry Function
+	//TODO: call Telemtry Function
 	err = Data.FuncPointer(ADCS_ID,Get);
 	if(err != 0 && err != -35)
 	{
@@ -53,8 +53,12 @@ int SaveData(Gather_TM_Data Data)
 	return err;
 }
 
-int GatherTlmAndData(Gather_TM_Data Data[])
+int GatherTlmAndData(Gather_TM_Data *Data)
 {
+	if(NULL == Data)
+	{
+		return ERR_NULL_DATA;
+	}
 	int i;
 	int err;
 	for(i = 0;i < 24;i++)
@@ -64,7 +68,7 @@ int GatherTlmAndData(Gather_TM_Data Data[])
 			err = SaveData(Data[i]);
 			if(err != 0 && err != -35)
 			{
-				//Save log
+				//TODO:Save log
 			}
 		}
 	}
@@ -74,13 +78,17 @@ int GatherTlmAndData(Gather_TM_Data Data[])
 	free(DataADCS->raw);
 	if(err != 0 && err != -35)
 	{
-		//Save log
+		//TODO:Save log
 	}
 	return err;
 }
 
-void InitData(Gather_TM_Data Data[])
+void InitData(Gather_TM_Data *Data)
 {
+	if(NULL == Data)
+	{
+		return;
+	}
 	stageTable ST = Get_ST();
 	Data[0].Change_Cord = 1;
 	Data[0].File_Name = ESTIMATED_ANGLES_FILE;

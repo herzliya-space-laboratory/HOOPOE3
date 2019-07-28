@@ -15,6 +15,13 @@
 	 NUM_OF_STATES
  }AdcsStates;
 
+ typedef enum
+ {
+	 SetBootIndex 98;
+
+ }Adcs_Sub_types;
+
+
  typedef Boolean8bit StateMatrix[NUM_OF_STATES][NUM_OF_STATES];
 
 /*! @init the State Machine

@@ -15,7 +15,12 @@
 
 #include "AdcsTroubleShooting.h"
 
-
+/*!
+ *@init the adcs get and data main function
+ *@using a arr holding the basic data of all the ADCS data we use
+ *@get:
+ *@		the arr of data to init
+ */
 void InitData(Gather_TM_Data Data[]);
 
 /*!
@@ -24,6 +29,6 @@ void InitData(Gather_TM_Data Data[]);
  * @return:
  * @	err code by TroubleErrCode enum
  */
-int GatherTlmAndData();
+int GatherTlmAndData(Gather_TM_Data *Data);
 
 #endif /* ADCSGETDATAANDTLM_H_ */

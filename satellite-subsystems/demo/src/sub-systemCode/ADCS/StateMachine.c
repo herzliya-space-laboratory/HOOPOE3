@@ -72,8 +72,14 @@ TroubleErrCode UpdateStateMatrix(StateMatrix New_mat)
 	return TRBL_NO_ERROR;
 }
 
-int ADCS_command(unsigned char id, unsigned char* data, unsigned int dat_len)
+int ADCS_command(unsigned char id, unsigned char* data, unsigned short dat_len)
 {
+	if(NULL == data)
+	{
+		return ERR_NULL_DATA;
+	}
+
+
 	unsigned char arr[dat_len + 1];
 	unsigned int i;
 	arr[0] = id;
@@ -98,97 +104,99 @@ int Run_Selected_Boot_Program()
 {
 	return cspaceADCS_BLRunSelectedProgram(ADCS_ID);
 }
-int Mag_Config(unsigned char * data)
-{
-	if(data == NULL)
-		{
-			return -1;
-		}
-	return ADCS_command(MAG_CONFIG_ID, data,MAG_CONFIG_LN);
-}
-int set_Detumbling_Param(unsigned char* data)
-{
-	if(data == NULL)
-		{
-			return -1;
-		}
-	return ADCS_command(DETUMBLING_PARAMATER_ID, data, DETUMBLING_PARAMATER_LN);
-}
-int Set_Y_Wheel_Param(unsigned char* data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(Y_WHEEL_PARAM_ID, data, Y_WHEEL_PARAM_LN);
-}
-int Set_REACTION_Wheel_Param(unsigned char* data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(REACTION_WHEEL_PARAM_ID, data, REACTION_WHEEL_PARAM_LN);
-}
-int Set_Moments_Inertia(unsigned char* data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(MOMENTS_INERTIA_ID, data, MOMENTS_INERTIA_LN);
-}
-int Set_Products_Inertia(unsigned char* data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(PRODUCTS_INERTIA_ID, data, PRODUCTS_INERTIA_LN);
-}
-int set_Mode_Of_Mag_OPeration(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(MODE_OF_MAG_OPERATION_ID, data, MODE_OF_MAG_OPERATION_LN);
-}
+//int Mag_Config(unsigned char * data)
+//{
+//	if(data == NULL)
+//		{
+//			return -1;
+//		}
+//	return ADCS_command(MAG_CONFIG_ID, data,MAG_CONFIG_LN);
+//}
+//int set_Detumbling_Param(unsigned char* data)
+//{
+//	if(data == NULL)
+//		{
+//			return -1;
+//		}
+//	return ADCS_command(DETUMBLING_PARAMATER_ID, data, DETUMBLING_PARAMATER_LN);
+//}
+//int Set_Y_Wheel_Param(unsigned char* data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(Y_WHEEL_PARAM_ID, data, Y_WHEEL_PARAM_LN);
+//}
+//int Set_REACTION_Wheel_Param(unsigned char* data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(REACTION_WHEEL_PARAM_ID, data, REACTION_WHEEL_PARAM_LN);
+//}
+//int Set_Moments_Inertia(unsigned char* data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(MOMENTS_INERTIA_ID, data, MOMENTS_INERTIA_LN);
+//}
+//int Set_Products_Inertia(unsigned char* data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(PRODUCTS_INERTIA_ID, data, PRODUCTS_INERTIA_LN);
+//}
+//int set_Mode_Of_Mag_OPeration(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(MODE_OF_MAG_OPERATION_ID, data, MODE_OF_MAG_OPERATION_LN);
+//}
 int SGP4_Oribt_Param(unsigned char * data)
 {
 	if(data == NULL){return -1;}
 	return cspaceADCS_setSGP4OrbitParameters(ADCS_ID,data);
 }
-int SGP4_Oribt_Inclination(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_INCLINATION_ID, data, SGP4_INCLINATION_LN);
-}
-int SGP4_Oribt_Eccentricy(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_ECCENTRICY_ID, data, SGP4_ECCENTRICY_LN);
-}
-int SGP4_Oribt_RAAN(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_RAAN_ID, data, SGP4_RAAN_LN);
-}
-int SGP4_Oribt_Argument(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_ARGUMENT_ID, data, SGP4_ARGUMENT_LN);
-}
-int SGP4_Oribt_B_Star(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_B_STAR_ID, data, SGP4_B_STAR_LN);
-}
-int SGP4_Oribt_Mean_Motion(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_MEAN_MOTION_ID, data, SGP4_MEAN_MOTION_LN);
-}
-int SGP4_Oribt_Mean_Anomaly(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_MEAN_ANOMALY_ID, data, SGP4_MEAN_ANOMALY_LN);
-}
-int SGP4_Oribt_Epoc(unsigned char * data)
-{
-	if(data == NULL){return -1;}
-	return ADCS_command(SGP4_INCLINATION_ID, data, SGP4_INCLINATION_LN);
-}
-int Reset_Boot_Registers()
-{
-	char data = "Null";
-	return ADCS_command(RESET_BOOTREGISTERS_ID, &data, RESET_BOOTREGISTERS_LN);
-}
+//int SGP4_Oribt_Inclination(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_INCLINATION_ID, data, SGP4_INCLINATION_LN);
+//}
+//int SGP4_Oribt_Eccentricy(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_ECCENTRICY_ID, data, SGP4_ECCENTRICY_LN);
+//}
+//int SGP4_Oribt_RAAN(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_RAAN_ID, data, SGP4_RAAN_LN);
+//}
+//int SGP4_Oribt_Argument(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_ARGUMENT_ID, data, SGP4_ARGUMENT_LN);
+//}
+//int SGP4_Oribt_B_Star(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_B_STAR_ID, data, SGP4_B_STAR_LN);
+//}
+//int SGP4_Oribt_Mean_Motion(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_MEAN_MOTION_ID, data, SGP4_MEAN_MOTION_LN);
+//}
+//int SGP4_Oribt_Mean_Anomaly(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_MEAN_ANOMALY_ID, data, SGP4_MEAN_ANOMALY_LN);
+//}
+//int SGP4_Oribt_Epoc(unsigned char * data)
+//{
+//	if(data == NULL){return -1;}
+//	return ADCS_command(SGP4_INCLINATION_ID, data, SGP4_INCLINATION_LN);
+//}
+//int Reset_Boot_Registers()
+//{
+//	char data = "Null";
+//	return ADCS_command(RESET_BOOTREGISTERS_ID, &data, RESET_BOOTREGISTERS_LN);
+//}
+
+
 int ReadACK(int cmd)
 {
 	char data[3];
@@ -200,9 +208,9 @@ int ReadACK(int cmd)
 	{
 		if(data == NULL)
 		{
-			return -1;
+			return ERR_NULL_DATA;
 		}
-		return 666;// cmd didn't go to the ADCS
+		return ERR_WRONG_TYPE;// cmd didn't go to the ADCS
 	}
 	int ret = data[2];
 	return ret;

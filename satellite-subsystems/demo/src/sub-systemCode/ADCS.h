@@ -150,7 +150,7 @@ void ADCS_translateCommandTelemtryADCS(unsigned char Telemtry[3],stageTable StTa
 cspace_adcs_magnetorq_t calculateMgnet();
 //!unlocks PID mode
 void ADCS_PIDMODE();
-int ADCS_command(unsigned char id, unsigned char* data, unsigned int dat_len);
+int ADCS_command(unsigned char sst, unsigned char* data);
 int Set_Boot_Index(unsigned char* data);
 int Run_Selected_Boot_Program();
 void get_Boot_Index(unsigned char * data);
