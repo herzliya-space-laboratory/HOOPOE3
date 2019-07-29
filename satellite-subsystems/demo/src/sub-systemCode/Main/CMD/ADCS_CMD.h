@@ -2,19 +2,56 @@
 #define ADCS_CMD_H_
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
-#include "../../ADCS/Stage_Table.h"
-#include "../../TRXVU.h"
-#include "../../ADCS.h"
+//#include <freertos/semphr.h>
+//#include <freertos/task.h>
+//#include "../../ADCS/Stage_Table.h"
+//#include "../../TRXVU.h"
+//#include "../../ADCS.h"
 #include "../../COMM/GSC.h"
-#include "../../COMM/splTypes.h"
-#include "../HouseKeeping.h"
-#include <hal/Drivers/I2C.h>
-#include <stdlib.h>
-#include <string.h>
+//#include "../../COMM/splTypes.h"
+//#include "../HouseKeeping.h"
+#include "../commands.h"
+//#include <hal/Drivers/I2C.h>
+//#include <stdlib.h>
+//#include <string.h>
 
-//def
+/*
+ * InitAdcsCmdQueue - create the queue for the commands of the ADCS
+ * @return:
+ * 	ERR_SUCCESS - if the queue created successfully
+ * 	ERR_FAIL - if it failed to create the queue
+ */
+ERR_type InitAdcsCmdQueue();
+
+/*
+ * GetAdcsCmdFromQueue - pull the first command from the ADCS command queue
+ * @param request - a pointer for the pulled command to be placed in
+ * @return:
+ * 	ERR_SUCCESS - if a command was pulled successfully
+ * 	ERR_FAIL - if it failed to pull a command from the queue
+ */
+ERR_type GetAdcsCmdFromQueue(TC_spl *request);
+
+/*
+ * AddAdcsCmdToQueue - push a new ADCS command to the queue end
+ * @param request - a pointer for the command to be pushed
+ * @return:
+ * 	ERR_SUCCESS - if a command was pushed successfully
+ * 	ERR_FAIL - if it failed to push a command to the queue because queue is full
+ */
+ERR_type AddAdcsCmdToQueue(TC_spl *cmd);
+
+/*
+ * IsAdcsCmdQueueEmpty - check if the ADCS command queue is empty
+ * @return:
+ * 	TRUE - if the queue is empty
+ * 	FALSE - if there are waiting commands in the queue
+ */
+Boolean IsAdcsCmdQueueEmpty();
+
+#endif // !ADCS_CMD_H_
+
+/*//def
 #define SUCCESS 0
 #define SYSTEM_OFF 4
 #define ERROR -35
@@ -40,50 +77,10 @@
 #define SET_MAGNETORQUER_CONFIG 117
 #define SET_MAGNETOMETER_MOUNTING 118
 
-
-
 typedef struct ADCS_CMD
 {
 	int(*Command)(void *cmd);
 	int Length;
 
 }ADCS_CMD_t;
-
-static ADCS_CMD_t ADCS_cmd[ADCS_CMD_LEN];
-
-static xQueueHandle AdcsCmdTour; //todo:add: AdcsCmdTour =  xQueueCreate(10,sizeof(tcp_spl)); to the ADCS init
-
-//main
-int ADCS_CMD(TC_spl decode);
-void Set_ADCS_CMD(ADCS_CMD ADCS_cmd[]);
-
-
-//protcted func call
-void SetBootIndex(Ack_type *type, ERR_type *err, TC_spl cmd);
-void RunSelectedBootProgram(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitPramatars(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitInclination(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitEccentricity(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitEpoch(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitRAAN(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitArgumentofPerigee(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitBStar(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitMeanMotion(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetSGP4OrbitMeanAnomaly(Ack_type *type, ERR_type *err, TC_spl cmd);
-void ResetBootRegisters(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SaveConfiguration(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SaveOrbitParameters(Ack_type *type, ERR_type *err, TC_spl cmd);
-void CurrentUnixTime(Ack_type *type, ERR_type *err, TC_spl cmd);
-void CacheEnabledState(Ack_type *type, ERR_type *err, TC_spl cmd);
-void DeployMagnetometerBoom(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetMagnetorquerConfiguration(Ack_type *type, ERR_type *err, TC_spl cmd);
-void SetMagnetometerMounting(Ack_type * type, ERR_type * err, TC_spl cmd);
-void SetMagnetometerOffsetAndScalingConfiguration(Ack_type * type, ERR_type * err, TC_spl cmd);
-
-
-
-
-
-
-
-#endif // !ADCS_CMD_H_
+*/

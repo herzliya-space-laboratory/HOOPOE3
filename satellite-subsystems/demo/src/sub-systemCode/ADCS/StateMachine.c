@@ -9,8 +9,15 @@
 
 #include <hcc/api_fat.h>
 
-#include "../ADCS.h"
+//#include "../ADCS.h"
 #include "StateMachine.h"
+#include "../Global/GlobalParam.h"
+#include "../Global/FRAMadress.h"
+#include "Stage_Table.h"
+#include <hal/Storage/FRAM.h>
+
+#define ADCS_ID 0
+#define ADCS_I2C_ADRR 0x57
 
 #define SGP4_INCLINATION_ID 46
 #define SGP4_INCLINATION_LN 8
@@ -252,7 +259,7 @@ int ADCS_CONFIG_PART(char * Data,int offset,int leangth,char * Config)
 {
 	if(Data == NULL){return -1;}
 	memccpy(Config[offset],Data,leangth);
-	return FRAM_write(Data, START + offset,leangth);
+	return FRAM_write(Data, ADCS_CONFIG_START + offset,leangth);
 }
 int ADCS_Config(unsigned char * data)
 {

@@ -11,8 +11,6 @@
 #include <satellite-subsystems/cspaceADCS_types.h>
 
 #include "Stage_Table.h"
-#include "../Global/GlobalParam.h"
-#include <hal/Storage/FRAM.h>
 
 #ifndef TESTING
 	#define TESTING
