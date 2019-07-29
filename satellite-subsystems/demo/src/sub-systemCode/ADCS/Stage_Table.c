@@ -11,10 +11,7 @@
 #include <satellite-subsystems/cspaceADCS_types.h>
 
 #include "Stage_Table.h"
-
-#ifndef TESTING
-	#define TESTING
-#endif
+#include "Adcs_Config.h"
 
 
 

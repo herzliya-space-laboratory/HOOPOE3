@@ -1,4 +1,5 @@
 #include "AdcsTroubleShooting.h"
+#include "Adcs_Config.h"
 
 int AdcsTroubleShooting(TroubleErrCode *trbl)
 {

@@ -1,19 +1,12 @@
 #include "AdcsGetDataAndTlm.h"
 
-
-/*
- * AdcsGetDataAndTlm.c
- *
- *  Created on: Jul 21, 2019
- *      Author: Michael
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <hcc/api_fat.h>
+#include <hal/boolean.h>
 
-#include "../ADCS.h"
+#include "config.h"
 #include "AdcsGetDataAndTlm.h"
 
 int SaveData(Gather_TM_Data Data)
@@ -33,7 +26,7 @@ int SaveData(Gather_TM_Data Data)
 		return err;
 	}
 
-	memccpy(ADCS_Data.raw,Get[Data.Start_Pos],DATA_SIZE);
+	memcpy(ADCS_Data.raw,Get[Data.Start_Pos],DATA_SIZE);
 	short temp;
 	// if needed chnges the XYZ system from the ADCS to the Satllighte (x,y,z) --> (z,-y,x)
 	if(Data.Change_Cord != FALSE)

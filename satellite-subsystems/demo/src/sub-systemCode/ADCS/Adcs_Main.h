@@ -21,8 +21,6 @@ xTaskHandle AdcsTaskHandle = NULL;	// a handle to the adcs task.
 
 //ADCS main
 void AdcsTask();
-
-//Get Cmd from Queue
-Boolean8bit GetCmdFromQueue(TC_spl *request);
+void InitAdcs();
 
 #endif // !ADCS_MAIN_H_
