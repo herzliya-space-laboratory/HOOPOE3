@@ -4,7 +4,7 @@
  *  Created on: 3 May 2018
  *      Author: Michael
  */
-
+/*
 #ifndef ADCS_H_
 #define ADCS_H_
 #include <stdio.h>
@@ -124,27 +124,27 @@ void gatherData(stageTable StTa);
 
  stage table
  * @param[telemtry] contains the new stage table data
- */
+ *//*
 void ADCS_translateCommandFULL(unsigned char Telemtry[10],stageTable StTa);
 /*! Get the Delay parameter stage table from the ground and update the Delay parameter in stage table
  * @param[telemtry] contains the new stage table data
- */
+ *//*
 void ADCS_translateCommandDelay(unsigned char Delay[3],stageTable StTa);
 /*! Get the ControlMode parameter stage table from the ground and update the ControlMode full stage table
  * @param[telemtry] contains the new stage table data
- */
+ *//*
 void ADCS_translateCommandControlMode(unsigned char ControlMode,stageTable StTa);
 /*! Get the Power parameter stage table from the ground and update the Power parameter in stage table
  * @param[telemtry] contains the new stage table data
- */
+ *//*
 void ADCS_translateCommandPower(unsigned char Power,stageTable StTa);
 /*! Get the Estimation Mode parameter stage table from the ground and update the parameter EstimationMode in stage table
  * @param[telemtry] contains the new stage table data
- */
+ *//*
 void ADCS_translateCommandEstimationMode(unsigned char EstimationMode,stageTable StTa);
 /*! Get the Telemtry parameter stage table from the ground and update the parameter Telemtry in stage table
  * @param[telemtry] contains the new stage table data
- */
+ *//*
 void ADCS_translateCommandTelemtryADCS(unsigned char Telemtry[3],stageTable StTa);
 //! calculte to power need for the magnetorqer according to the current attitude
 cspace_adcs_magnetorq_t calculateMgnet();
