@@ -11,12 +11,14 @@
  typedef enum
  {
 
+
 	 NUM_OF_STATES
  }AdcsStates;
 
  typedef enum
  {
-	 SetBootIndex 98
+	 SetBootIndex 98;
+
  }Adcs_Sub_types;
 
 
