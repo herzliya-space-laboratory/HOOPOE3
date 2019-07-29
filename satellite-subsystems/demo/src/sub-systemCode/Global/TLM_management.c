@@ -15,7 +15,7 @@
 #include <hcc/api_mdriver_atmel_mcipdc.h>
 #include <hal/Storage/FRAM.h>
 #include <at91/utility/trace.h>
-#include "TM_managment.h"
+#include "TLM_management.h"
 #include <stdlib.h>
 
 #define SKIP_FILE_TIME_SEC 1000000
@@ -297,6 +297,62 @@ FileSystemResult fileWrite(char* file_name, void* element,int size)
 	f_close(file);
 	return FS_SUCCSESS;
 }
+static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long from_time,
+		unsigned long to_time,int full_element_size)
+{
+	F_FILE* file = f_open(file_name,"r");
+	F_FILE* temp_file = f_open("temp","a+");
+	char* buffer = malloc(full_element_size);
+	for(int i = 0; i<f_filelength(file_name); i++)
+	{
+
+		f_read(buffer,1,full_element_size,file);
+		unsigned int element_time = *((unsigned int*)buffer);
+		if(element_time>=from_time&&element_time<=to_time)
+		{
+			f_write(buffer,1,full_element_size,temp_file);
+		}
+	}
+	f_close(file);
+	f_close(temp_file);
+	free(buffer);
+	f_delete(file_name);
+	f_rename("temp",file_name);
+	return FS_SUCCSESS;
+
+}
+FileSystemResult c_fileDeleteElements(char* c_file_name, time_unix from_time,
+		time_unix to_time)
+{
+	C_FILE c_file;
+	unsigned int addr;//FRAM ADDRESS
+	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
+	PLZNORESTART();
+	unsigned int curr_time;
+	Time_getUnixEpoch(&curr_time);
+	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
+	{
+		return FS_NOT_EXIST;
+	}
+	int first_file_index = getFileIndex(c_file.creation_time,from_time);
+	int last_file_index = getFileIndex(c_file.creation_time,to_time);
+	if(first_file_index+1<last_file_index)//delete all files between first to kast file
+	{
+		for(int i =first_file_index+1; i<last_file_index;i++)
+		{
+			get_file_name_by_index(c_file_name,i,curr_file_name);
+			f_delete(curr_file_name);
+		}
+	}
+	get_file_name_by_index(c_file_name,first_file_index,curr_file_name);
+	deleteElementsFromFile(curr_file_name,from_time,to_time,c_file.size_of_element+sizeof(int));
+	if(first_file_index!=last_file_index)
+	{
+		get_file_name_by_index(c_file_name,last_file_index,curr_file_name);
+		deleteElementsFromFile(curr_file_name,from_time,to_time,c_file.size_of_element+sizeof(int));
+	}
+	return FS_SUCCSESS;
+}
 FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 		time_unix from_time, time_unix to_time, int* read, int element_size)
 {
@@ -503,6 +559,7 @@ typedef struct{
 	c_fileWrite("idan",&test_struct);
 	c_fileRead("idan",test_struct_arr,8,start_time_unix,++curr_time,&read,&last_read_time);
 	c_fileReset("idan");
+
 
 }
 

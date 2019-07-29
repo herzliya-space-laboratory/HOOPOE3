@@ -47,7 +47,7 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Main/../COMM/GSC.h \
  ../src/sub-systemCode/Main/../Global/sizes.h \
  ../src/sub-systemCode/Main/../Global/Global.h \
- ../src/sub-systemCode/Main/../Global/TM_managment.h \
+ ../src/sub-systemCode/Main/../Global/TLM_management.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h \
  ../src/sub-systemCode/Main/../Global/../Global/Global.h \
  ../src/sub-systemCode/Main/Main_Init.h \
@@ -152,7 +152,7 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/errors.h:
 
 ../src/sub-systemCode/Main/../Global/Global.h:
 
-../src/sub-systemCode/Main/../Global/TM_managment.h:
+../src/sub-systemCode/Main/../Global/TLM_management.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
 

@@ -14,7 +14,7 @@
 #include <hal/Storage/FRAM.h>
 
 #include "ADCS/Stage_Table.h"
-#include "Global/TM_managment.h"
+#include "Global/TLM_management.h"
 #include "Global/Global.h"
 
 #define START_ESTIMATION_MODE 0
