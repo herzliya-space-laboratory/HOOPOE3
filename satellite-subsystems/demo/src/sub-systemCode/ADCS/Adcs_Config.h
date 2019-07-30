@@ -12,8 +12,8 @@
 #include <hal/Storage/FRAM.h>
 
 //#include "ADCS/Stage_Table.h"
-#include "Global/TM_managment.h"
-#include "Global/Global.h"
+#include "../Global/TM_managment.h"
+#include "../Global/Global.h"
 
 
 
