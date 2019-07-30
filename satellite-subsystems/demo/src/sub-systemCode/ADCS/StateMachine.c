@@ -19,6 +19,7 @@
 
 #include <hal/Storage/FRAM.h>
 
+#define TESTING
 #define ADCS_ID 0
 #define ADCS_I2C_ADRR 0x57
 
