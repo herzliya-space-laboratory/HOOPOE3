@@ -8,16 +8,25 @@
  * @this enum continue all the states
  * @each number respond state
  */
- typedef enum
- {
 
-	 NUM_OF_STATES
- }AdcsStates;
+typedef enum
+{
+	MANUAL_MODE,
+	AUTONMOUS_MODE
+}OperationMode;
 
- typedef enum
+
+typedef enum
  {
-	 SetBootIndex 98
- }Adcs_Sub_types;
+	NOCONTROL = 0,
+
+ }AdcsControlStates;
+
+typedef enum
+{
+
+	NUM_OF_CONTRL_STATES
+}AdcsEstimationModes;
 
 
 /*! @init the State Machine
@@ -39,6 +48,17 @@
  TroubleErrCode UpdateAdcsStateMachine(TC_spl *command);
 
 
+ /*!
+  *@change the state machine control mode.
+  *
+  *@get:
+  *@	the opration enum to chenge to.
+  *
+  *@return:
+  *@	the err code by TroubleErrCode enum.
+  *
+  */
+ TroubleErrCode ChangeOprationMode(OperationMode Mode);
 
 
  /*! Get a full stage table from the ground and update the full stage table
@@ -50,7 +70,7 @@
   * @param[delay] contains the new delay
   * @param[stagetable] the stage table that will be updated
   */
- int translateCommandDelay(unsigned char delay[3]);
+ int translateCommandDelay(unsigned char delay[3]); //TODO: WHY 3!!!???!?!? NO MAGIC NUMBERS!
  /*! Get the control mode parameter stage table from the ground and update it to the stage table
   * @param[controlMode] contains the new control Mode
   * @param[stagetable] the stage table that will be updated
