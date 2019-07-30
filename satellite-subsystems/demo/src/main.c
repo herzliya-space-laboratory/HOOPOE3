@@ -34,7 +34,6 @@
 #include "sub-systemCode/Main/Main_Init.h"
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
-#include "sub-systemCode/ADCS/Adcs_Main.h"
 
 #define DEBUGMODE
 

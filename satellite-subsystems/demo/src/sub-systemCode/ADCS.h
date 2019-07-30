@@ -4,7 +4,7 @@
  *  Created on: 3 May 2018
  *      Author: Michael
  */
-/*
+
 #ifndef ADCS_H_
 #define ADCS_H_
 #include <stdio.h>
@@ -95,17 +95,6 @@
 
 #define ADCS_ID 0
 
-typedef enum SGP4SubPram_t {
-	Inclination = 0,
-	Eccentricity = 8,
-	RAAN = 16,
-	ArgumentofPerigee = 24,
-	BStar = 32,
-	MeanMotion = 40,
-	MeanAnomaly = 48,
-	Epoch = 56
-};
-
 typedef enum en_t
 {
 	aasdf,bfdsasdf,cdsafdsa
@@ -113,87 +102,5 @@ typedef enum en_t
 }EN;
 
 //! a function the starts the loop called only one time
-void ADCS_startLoop(Boolean activation);
-//!creates the ADCS files
-void ADCS_CreateFiles();
-//! the ADCS loop
-void ADCS_Task();
-//! a function gathers data according to the Stage table telemtry
-void gatherData(stageTable StTa);
-/*! Get a full stage table from the ground and update the Telemtry
-
- stage table
- * @param[telemtry] contains the new stage table data
- *//*
-void ADCS_translateCommandFULL(unsigned char Telemtry[10],stageTable StTa);
-/*! Get the Delay parameter stage table from the ground and update the Delay parameter in stage table
- * @param[telemtry] contains the new stage table data
- *//*
-void ADCS_translateCommandDelay(unsigned char Delay[3],stageTable StTa);
-/*! Get the ControlMode parameter stage table from the ground and update the ControlMode full stage table
- * @param[telemtry] contains the new stage table data
- *//*
-void ADCS_translateCommandControlMode(unsigned char ControlMode,stageTable StTa);
-/*! Get the Power parameter stage table from the ground and update the Power parameter in stage table
- * @param[telemtry] contains the new stage table data
- *//*
-void ADCS_translateCommandPower(unsigned char Power,stageTable StTa);
-/*! Get the Estimation Mode parameter stage table from the ground and update the parameter EstimationMode in stage table
- * @param[telemtry] contains the new stage table data
- *//*
-void ADCS_translateCommandEstimationMode(unsigned char EstimationMode,stageTable StTa);
-/*! Get the Telemtry parameter stage table from the ground and update the parameter Telemtry in stage table
- * @param[telemtry] contains the new stage table data
- *//*
-void ADCS_translateCommandTelemtryADCS(unsigned char Telemtry[3],stageTable StTa);
-//! calculte to power need for the magnetorqer according to the current attitude
-cspace_adcs_magnetorq_t calculateMgnet();
-//!unlocks PID mode
-void ADCS_PIDMODE();
-int ADCS_command(unsigned char sst, unsigned char* data);
-int Set_Boot_Index(unsigned char* data);
-int Run_Selected_Boot_Program();
-void get_Boot_Index(unsigned char * data);
-int ADCS_Config(unsigned char * data);
-int Mag_Config(unsigned char * data);
-int set_Detumbling_Param(unsigned char* data);
-int set_Commanded_Attitude(unsigned char* data);
-int Set_Y_Wheel_Param(unsigned char* data);
-int Set_REACTION_Wheel_Param(unsigned char* data);
-int Set_Moments_Inertia(unsigned char* data);
-int Set_Products_Inertia(unsigned char* data);
-int set_Mode_Of_Mag_OPeration(unsigned char * data);
-int SGP4_Oribt_Param(unsigned char * data);
-int SGP4_Oribt_Inclination(unsigned char * data);
-int SGP4_Oribt_Eccentricy(unsigned char * data);
-int SGP4_Oribt_RAAN(unsigned char * data);
-int SGP4_Oribt_Argument(unsigned char * data);
-int SGP4_Oribt_B_Star(unsigned char * data);
-int SGP4_Oribt_Mean_Motion(unsigned char * data);
-int SGP4_Oribt_Mean_Anomaly(unsigned char * data);
-int SGP4_Oribt_Epoc(unsigned char * data);
-int Reset_Boot_Registers();
-int Magnetorquer_Configuration(unsigned char * Data);
-int RW_Configuration(unsigned char * Data);
-int Gyro_Configuration(unsigned char * Data);
-int CSS_Configuration(unsigned char * Data);
-int CSS_Relative_Scale(unsigned char * Data);
-int CSS_Threshold(unsigned char * Data);
-int Magnetometer_Mounting_Transform_Angles(unsigned char * Data);
-int Magnetometer_Channel_1_3_Offset(unsigned char * Data);
-int Magnetometer_Sensitivity_Matrix(unsigned char * Data);
-int Rate_Sensor_Offset(unsigned char * Data);
-int Rate_Sensor_Mult(unsigned char * Data);
-int Detumbling_Gain_Config(unsigned char * Data);
-int Y_Momentum_Gain_Config(unsigned char * Data);
-int Reference_Wheel_Momentum(unsigned char * Data);
-int RWheel_Gain(unsigned char * Data);
-int Moment_of_Inertia(unsigned char * Data);
-int Noise_Configuration(unsigned char * Data);
-int Save_Config();
-void GetSG4OrbitPrams(unsigned char *data);
-void GetSG4SubPram(unsigned char *data, int PramT);
-double doubleParse(unsigned char *gther);
+void init_adcs(Boolean activation);
 #endif /* ADCS_H_ */
-
-

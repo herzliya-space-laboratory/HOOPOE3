@@ -4,6 +4,9 @@
  *  Created on: 22 Mar 2011
  *     @Author Michael
  */
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -11,8 +14,8 @@
 #include <satellite-subsystems/cspaceADCS_types.h>
 
 #include "Stage_Table.h"
-#include "Adcs_Config.h"
-
+#include "../Global/GlobalParam.h"
+#include <hal/Storage/FRAM.h>
 
 
 //! CubeADCS ID
@@ -133,8 +136,6 @@ typedef union __attribute__ ((__packed__)) stageTableData
 	telemtry->EstimatedQuaternionCheckSaveId218 = 0; // 6 byte
 	// set the ECEFPositionCheckSaveId219 parameter to 0
 	telemtry->ECEFPositionCheckSaveId219 = 0; // 6 byte
-
-	printf("%d - %d - %d\n\r",telemtry[0],telemtry[1],telemtry[2]);
 
 }
 int GetDelay(stageTable ST)
@@ -290,36 +291,42 @@ int updateTable(stageTable stageTableGainData)
  * @param[telemtry] contains the gotten stage table data
  * @param[stageTableGainData] the stage table to update
  */
-int translateCommandFULL(unsigned char telemtry[])
+int translateCommandFULL(unsigned char telemtry[], stageTable stageTableGainData)
 {
-	stageTable stageTableGainData = get_ST();
 	// a loop to update the stage table
-	memccpy(stageTableGainData ->Raw,telemtry,STAGE_TABLE_SIZE);
+	int i = 0;
+	 for ( i = 0;  i < STAGE_TABLE_SIZE;i++)
+	 {
+		 //update a byte
+		 stageTableGainData -> Raw[i] = telemtry[i];
+	 }
 	 // update the stage table to the cube ADCS
-	FRAM_write(stageTableGainData ->Raw,STAGE_TABLE_ADDR,STAGE_TABLE_SIZE);
 	return updateTable(stageTableGainData);
 }
 /*! a command that gets and translates the delay parameter stage table gotten from the ground and updates the stage table fully
  * @param[delay] contains the gotten stage table data
  * @param[stageTableGainData] the stage table to update
  */
- int translateCommandDelay( unsigned char delay[])
+ void translateCommandDelay( unsigned char delay[], stageTable stageTableGainData)
 {
-	 stageTable stageTableGainData = get_ST();
-	 memccpy(stageTableGainData ->Raw,delay,3);
-	 FRAM_write(stageTableGainData ->Raw,STAGE_TABLE_ADDR,STAGE_TABLE_SIZE);
-	 return updateTable(stageTableGainData);
+	 int i;
+	 // a loop to update the stage table
+	 for (i = 0;  i < SIZE_OF_DELAY; ++ i)
+	 {
+		 //update a byte
+		 stageTableGainData -> Raw[i] = delay[i];
+		 printf("%d\n",delay[i]);
+	 }
+
 }
  /*! a command that gets and translates the control Mode parameter stage table gotten from the ground and updates the stage table fully
   * @param[controlMode] contains the gotten stage table data
   * @param[stageTableGainData] the stage table to update
   */
- int translateCommandControlMode( unsigned char controlMode)
+ int translateCommandControlMode( unsigned char controlMode, stageTable stageTableGainData)
 {
-	 stageTable stageTableGainData = get_ST();
 	 //update a byte
 	stageTableGainData -> Raw[3] = controlMode;
-	FRAM_write(stageTableGainData ->Raw,STAGE_TABLE_ADDR,STAGE_TABLE_SIZE);
 	//update the cube ADCS with the new data
 	return updateTable(stageTableGainData);
 }
@@ -327,40 +334,37 @@ int translateCommandFULL(unsigned char telemtry[])
    * @param[power] contains the gotten stage table data
    * @param[stageTableGainData] the stage table to update
    */
- int translateCommandPower(unsigned char power)
+ int translateCommandPower(unsigned char power,stageTable stageTableGainData)
 {
-	 stageTable stageTableGainData = get_ST();
 	 //update a byte
 	stageTableGainData -> Raw[4] = power;
 	//update the cube ADCS with the new data
-	FRAM_write(stageTableGainData ->Raw,STAGE_TABLE_ADDR,STAGE_TABLE_SIZE);
 	return updateTable(stageTableGainData);
 }
  /*! a command that gets and translates the estimation Mode parameter stage table gotten from the ground and updates the stage table fully
     * @param[estimationMode] contains the gotten stage table data
     * @param[stageTableGainData] the stage table to update
     */
- int  translateCommandEstimationMode( unsigned char estimationMode)
+ int  translateCommandEstimationMode( unsigned char estimationMode,stageTable stageTableGainData)
 {
-	 stageTable stageTableGainData = get_ST();
 	 //update a byte
 	 stageTableGainData -> Raw[5] = estimationMode;
 	 //update the cube ADCS with the new data
-	 FRAM_write(stageTableGainData ->Raw,STAGE_TABLE_ADDR,STAGE_TABLE_SIZE);
 	 return updateTable(stageTableGainData);
 }
  /*! a command that gets and translates the telemtry parameter stage table gotten from the ground and updates the stage table fully
      * @param[telemtry] contains the gotten stage table data
      * @param[stageTableGainData] the stage table to update
      */
- int translateCommandTelemtry( unsigned char telemtry[])
+ void translateCommandTelemtry( unsigned char telemtry[],stageTable stageTableGainData)
 {
-	 stageTable stageTableGainData = get_ST();
-	 memccpy(stageTableGainData -> Raw[6],telemtry,3);
+	 int i;
 	 // a loop to update the telmtry
-
-	 FRAM_write(stageTableGainData ->Raw,STAGE_TABLE_ADDR,STAGE_TABLE_SIZE);
-	 return updateTable(stageTableGainData);
+	 for (i = 0;  i < 3; ++ i)
+	 	 {
+		 //update a byte
+	 		 stageTableGainData -> Raw[i+6] = telemtry[i];
+	 	 }
 }
 /*! a function that return an array of the ADCS Stage Table according to the given data
  * @param[byteData] decided what parts of the stage table to return
@@ -414,9 +418,118 @@ int checkSatellitePositionECI(stageTable stageTable)
   * @param[stagetable] the stage table that contains the data
   */
 
-
- TLMData Get_TM(stageTable stageTable)
+ int checkMagneticFieldVector(stageTable stageTable)
 {
-	return stageTable->StageData.telemtry;
+	return stageTable->StageData.telemtry.MagneticFieldVectorCheckSaveId151;
+}
+ /*! return parameter CoarseSunVectorCheckSaveId152
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkCoarseSunVector(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.CoarseSunVectorCheckSaveId152;
+}
+ /*! return parameter RateSensorRatesCheckSaveId155
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkRateSensorRates(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.RateSensorRatesCheckSaveId155;
+}
+ /*! return parameter WheelSpeedCheckSaveId156
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkWheelSpeedcheck(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.WheelSpeedCheckSaveId156;
+}
+ /*! return parameter MagnetorquerCommandSaveId157
+  * @param[stagetable] the stage table that contains the data
+  */
+int checkMagnetorquercmd(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.MagnetorquerCommandSaveId157;
+}
+/*! return parameter WheelSpeedCommandSaveId158
+ * @param[stagetable] the stage table that contains the data
+ */
+int checkWheelSpeedcmd(stageTable stageTable)
+{
+	return stageTable ->StageData.telemtry.WheelSpeedCommandSaveId158;
+}
+/*! return parameter IGRFModelledMagneticFieldVectorCheckSaveId159
+ * @param[stagetable] the stage table that contains the data
+ */
+ int checkIGRFModelledMagneticFieldVector(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.IGRFModelledMagneticFieldVectorCheckSaveId159;
+}
+ /*! return parameter EstimatedGyroBiasCheckSaveId161
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkEstimatedGyroBiascheck(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.EstimatedGyroBiasCheckSaveId161;
+}
+ /*! return parameter EstimationInnovationVectorCheckSaveId162
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkEstimationInnovationVector(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.EstimationInnovationVectorCheckSaveId162;
+}
+ /*! return parameter QuaternionErrorVectorCheckSaveId163
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkQuaternionErrorVector(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.QuaternionErrorVectorCheckSaveId163;
+}
+ /*! return parameter QuaternionCovarianceCheckSaveId164
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkQuaternionCovariance(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.QuaternionCovarianceCheckSaveId164;
+}
+ /*! return parameter AngularRateCovarianceCheckSaveId165
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkAngularRateCovariance(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.AngularRateCovarianceCheckSaveId165;
+}
+ /*! return parameter RawCSSCheckSaveId168
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkRawCSS(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.RawCSSCheckSaveId168;
+}
+ /*! return parameter RawMagnetometerCheckSaveId170
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkRawMagnetometer(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.RawMagnetometerCheckSaveId170;
+}
+ /*! return parameter EstimatedQuaternionCheckSaveId218
+ * @param[stagetable] the stage table that contains the data
+ */
+ int checkEstimatedQuaternion(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.EstimatedQuaternionCheckSaveId218;
+}
+ /*! return parameter ECEFPositionCheckSaveId219
+  * @param[stagetable] the stage table that contains the data
+  */
+ int checkECEFPosition(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.ECEFPositionCheckSaveId219;
+}
+
+int checkSunModelle(stageTable stageTable)
+{
+	return stageTable->StageData.telemtry.Sun_Modelle;
 
 }

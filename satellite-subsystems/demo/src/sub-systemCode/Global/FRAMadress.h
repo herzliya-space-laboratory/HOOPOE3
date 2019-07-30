@@ -39,9 +39,7 @@
 #define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
 
 //ADCS
-#define CONTROL_MODE_ADDR 0x9040 // <<4 bytes>>
 #define STAGE_TABLE_ADDR 0x9044
-#define ADCS_CONFIG_START 0x904e
 
 //CAMERA
 #define AUTO_PILOT_STATE_ADDR			0x9FFB
