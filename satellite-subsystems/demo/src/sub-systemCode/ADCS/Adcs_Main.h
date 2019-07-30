@@ -1,12 +1,6 @@
 #ifndef ADCS_MAIN_H_
 #define ADCS_MAIN_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "../Main/CMD/ADCS_CMD.h"
-#include "StateMachine.h"
-#include "AdcsTroubleShooting.h"
-#include "AdcsGetDataAndTlm.h"
 
 
 

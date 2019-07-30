@@ -8,39 +8,46 @@
 #include "../Main/commands.h"
 #include "Adcs_Config.h"
 
+#include "../Main/CMD/ADCS_CMD.h"
+#include "StateMachine.h"
+#include "AdcsTroubleShooting.h"
+#include "AdcsGetDataAndTlm.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
 #define SIZE_OF_TELEMTRY 6
 #define ADCS_RESPONSE_DELAY 1000 
 #define ADCS_LOOP_DELAY 1000 //the loop runs in 1Hz
 
-Gather_TM_Data Data[24];
-TC_spl command;
-int ActiveStateMachine;
-TroubleErrCode err[3]; //TODO: big no no. shouldn't be a global variable
 
+int ActiveStateMachine = TRUE;
 
-void InitAdcs()
+TroubleErrCode InitAdcs()
 {
-	InitData(Data);
-	int ret = f_enterFS(); // Register this task with filesystem
-	if(F_NO_ERROR != ret)
-	{
+	TroubleErrCode trbl = TRBL_NO_ERROR;
+	//TODO: finish initialization of the ADCS. see the demos for further reference
+	if(F_NO_ERROR !=  f_enterFS()){
 		//TODO: handle file error
+		return -1; //TODO: return appropriate TRBL
 	}
-	InitStateMachine();
+	trbl = InitStateMachine();
+	if(TRBL_NO_ERROR != trbl){
+		return -1;//TODO: return appropriate TRBL
+	}
 	//todo: check xQueueCreate
-	ActiveStateMachine = TRUE;
-	err[0] = TRBL_NO_ERROR;
-	err[1] = TRBL_NO_ERROR;
-	err[2] = TRBL_NO_ERROR;
-	CreateTlmElementFiles();
-
+	Boolean err = CreateTlmElementFiles();
+	if(FALSE == err)
+		return -1; //TODO: return appropriate TRBL
 }
 
 void AdcsTask()
 {
+	TroubleErrCode err = {0};
+	TC_spl command = {0};
 	while(TRUE)
 	{
-		if(!get_system_state(ADCS_param))
+		if(SWITCH_OFF == get_system_state(ADCS_param))
 		{
 			vTaskDelay(ADCS_RESPONSE_DELAY);
 			continue;
@@ -49,6 +56,7 @@ void AdcsTask()
 		if(ActiveStateMachine == TRUE)
 		{
 			err[1] = UpdateAdcsStateMachine(&command);
+			err[1] = UpdateAdcsStateMachine(&command, MANUAL_MODE);
 			//todo: SM Log
 			ActiveStateMachine = FALSE;
 		}
@@ -59,11 +67,11 @@ void AdcsTask()
 			continue;
 		}
 
-		err[2] = GatherTlmAndData(Data);
+		err[2] = GatherTlmAndData();
 		vTaskDelay(ADCS_LOOP_DELAY);
 
 		//todo: move into a separate function
-		if(IsAdcsQueueEmpty())//check if queue is empty
+		if(IsAdcsQueueEmpty())
 		{
 			ActiveStateMachine = FALSE;
 		}

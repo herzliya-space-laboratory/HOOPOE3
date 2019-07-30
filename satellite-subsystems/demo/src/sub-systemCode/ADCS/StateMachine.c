@@ -24,10 +24,11 @@
 
 TroubleErrCode AdcsAutoControl(TC_spl *decode);
 TroubleErrCode AdcsManualControl(TC_spl *decode);
+int AdcsConfigPart(char * Data, int offset,int leangth,char * Config);
 
 TroubleErrCode UpdateAdcsStateMachine(TC_spl *decode, OperationMode Mode)
 {
-	if(NULL == command){
+	if(NULL == decode){
 		return TRBL_NULL_DATA;	//TODO: use
 	}
 
@@ -40,7 +41,7 @@ TroubleErrCode UpdateAdcsStateMachine(TC_spl *decode, OperationMode Mode)
 		Auto_control(decode);
 	}
 
-	AdcsStateMachineCMD cmd = command->subType; //TODO: maybe in a separate parse function
+	AdcsStateMachineCMD cmd = decode->subType; //TODO: maybe in a separate parse function
 	return TRBL_NO_ERROR;
 }
 
@@ -55,93 +56,104 @@ TroubleErrCode AdcsManualControl(TC_spl *decode)
 	switch(decode->subType)
 	{
 	case(ADCS_GENRIC_ST):
-
+			err = ADCS_command(decode);
 		break;
 	case(ADCS_SAVE_VICTOR_ST):
-
+		err = UpdateTlmSaveVector(decode->data);
 		break;
 	case(ADCS_MODE_ST):
-
+		err = ChangeOperationMode(decode->data);
 		break;
 
 	case(SAVE_CONFIG_ST):
-
+		err = cspaceADCS_saveConfig(ADCS_ID);
 		break;
 	case(SET_MAG_OFFEST_SCALE_ST):
-
+		err = cspaceADCS_setMagOffsetScalingConfig(ADCS_ID, decode->data);
 		break;
 	case(SET_MAG_SENSE_ST):
-
+		err = cspaceADCS_setMagSensConfig(ADCS_ID, decode->data);
 		break;
 	case(SET_UNIX_TIME_ST):
-
+		err = cspaceADCS_setCurrentTime(ADCS_ID, decode->data);
 		break;
 	case(CACHE_STATE_ST):
-
+		err = cspaceADCS_cacheStateADCS(ADCS_ID, decode->data);
 		break;
 	case(ADCS_CONFIG_PART_ST):
-
+		err = AdcsConfigPart(decode->data,decode->data,decode->length);
 		break;
 	case(INITIALIZE_ST):
-
+		err = cspaceADCS_initialize(ADCS_ID, decode->data);
 	    break;
 	case(COMPONENT_RESET_ST):
-
+		err = cspaceADCS_componentReset(ADCS_ID);
 	    break;
 	case(SET_RUN_MODE_ST):
-
+		err = cspaceADCS_setRunMode(ADCS_ID);
 	    break;
 	case(SET_PWR_CTRL_DEVICE_ST):
-
+		err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, decode->data);
 	    break;
 	case(ADCS_CLEAR_ERRORS_FLAG_ST):
-
+		err = cspaceADCS_clearErrors(ADCS_ID, decode->data);
 	    break;
 	case(SET_MAG_OUTPUT_ST):
-
+		err = cspaceADCS_setMagOutput(ADCS_ID, decode->data);
 	    break;
 	case(SET_WHEEL_SPEED_ST):
-
+		err = cspaceADCS_setWheelSpeed(ADCS_ID, decode->data);
 	    break;
 	case(DEPLOY_MAG_BOOM_ADCS_ST):
-
+#ifndef TESTING
+		//todo: err = cspaceADCS_deployMagBoomADCS(ADCS_ID, decode->data);
+#else
+		printf("MAG BOOM deployed!");
+		err = TRBL_NO_ERROR;
+#endif
 	    break;
 	case(SET_ATT_CTRL_MODE_ST):
-
+		err = cspaceADCS_setAttCtrlMode(ADCS_ID, decode->data);
 	    break;
 	case(SET_ATT_EST_MODE_ST):
-
+		err = cspaceADCS_setAttEstMode(ADCS_ID, decode->data);
 	    break;
 	case(SET_CAM1_SENSOR_CONFIG_ST):
-
+		err = cspaceADCS_setCam1SensorConfig(ADCS_ID, decode->data);
 	    break;
 	case(SET_CAM2_SENSOR_CONFIG_ST):
-
+		err = cspaceADCS_setCam2SensorConfig(ADCS_ID, decode->data);
 	    break;
 	case(SET_MAG_MOUNT_CONFIG_ST):
-
+		err = cspaceADCS_setMagMountConfig(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 	    break;
 	case(SET_RATE_SENSOR_CONFIG_ST):
-
+		err = cspaceADCS_setMagSensConfig(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 	    break;
+	case(SET_RATE_SENSOR_CONFIG_ST):
+		err = cspaceADCS_setRateSensorConfig(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
+		break;
 	case(SET_ESTIMATION_PARAM1_ST):
-
+		err = cspaceADCS_setEstimationParam1(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 	    break;
 	case(SET_ESTIMATION_PARAM2_ST):
-
+		err = cspaceADCS_setEstimationParam2(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 	    break;
 	case(SET_MAGNETOMTER_MODE_ST):
-
+		err = cspaceADCS_setMagnetometerMode(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 	    break;
 	case(SET_SGP4_ORBIT_PARM_ST):
-
+		err = cspaceADCS_setSGP4OrbitParameters(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 		break;
 	case(SAVE_IMAGE_ST):
-
+		err = cspaceADCS_saveImage(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 	    break;
 	case(BL_SETBOOT_INDEX_ST):
-
+		err = cspaceADCS_BLSetBootIndex(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
 	    break;
+	case(BL_RUN_SELECTED_PROGRAM_ST):
+		err = cspaceADCS_BLRunSelectedProgram(unsigned char index, cspace_adcs_magmountcfg_t* config_data);
+		break;
 
 	}
 
@@ -242,11 +254,7 @@ int ReadACK(int cmd)
 	int ret = data[2];
 	return ret;
 }
-//int Save_Config()
-//{
-//	return cspaceADCS_saveConfig(ADCS_ID);
-//}
-//
+
 //int Save_Orbit_Param()
 //{
 //	return cspaceADCS_saveOrbitParam(ADCS_ID);
@@ -281,9 +289,10 @@ int ReadACK(int cmd)
 //	return cspaceADCS_cacheStateADCS(ADCS_ID, state);
 //}
 //
-//int AdcsConfigPart(char * Data, int offset,int leangth,char * Config)
-//{
-//	if(Data == NULL){return -1;}
-//	memcpy(Config[offset],Data,leangth);
-//	return FRAM_write(Data, ADCS_CONFIG_START + offset,leangth);
-//}
+int AdcsConfigPart(char * Data, int offset, int leangth, char * Config)
+{
+if(Data == NULL){return -1;}
+memcpy(Config[offset],Data,leangth);
+return FRAM_write(Data, ADCS_CONFIG_START + offset,leangth);
+}
+
