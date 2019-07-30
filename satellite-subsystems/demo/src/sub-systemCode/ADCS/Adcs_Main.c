@@ -55,7 +55,6 @@ void AdcsTask()
 
 		if(ActiveStateMachine == TRUE)
 		{
-			err[1] = UpdateAdcsStateMachine(&command);
 			err[1] = UpdateAdcsStateMachine(&command, MANUAL_MODE);
 			//todo: SM Log
 			ActiveStateMachine = FALSE;
