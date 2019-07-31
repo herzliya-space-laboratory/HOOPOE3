@@ -208,7 +208,7 @@ void reset_EPS_voltages()
 }
 
 
-void battery_downward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
+void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
@@ -216,12 +216,12 @@ void battery_downward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
 
 	printf(". downward ");
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
-		if (previuse_VBatt < voltage_table[0][i])
-			if (previuseVBatt > voltage_table[0][i])
+		if (current_VBatt < voltage_table[0][i])
+			if (previuosVBatt > voltage_table[0][i])
 				enterMode[i].fun(&switches_states, &batteryLastMode);
 }
 
-void battery_upward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
+void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
@@ -230,8 +230,8 @@ void battery_upward(voltage_t previuse_VBatt, voltage_t previuseVBatt)
 	printf(". upward ");
 
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
-		if (previuse_VBatt > voltage_table[1][i])
-			if (previuseVBatt < voltage_table[1][i])
+		if (current_VBatt > voltage_table[1][i])
+			if (previuosVBatt < voltage_table[1][i])
 				enterMode[NUM_BATTERY_MODE - 1 - i].fun(&switches_states, &batteryLastMode);
 }
 
@@ -248,7 +248,7 @@ void EPS_Conditioning()
 	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
 	voltage_t VBatt_filtered = (voltage_t)(current_VBatt * alpha + (1 - alpha) * VBatt_previous);
 
-	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuse Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
+	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
 	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 
 	if (VBatt_filtered < VBatt_previous)
