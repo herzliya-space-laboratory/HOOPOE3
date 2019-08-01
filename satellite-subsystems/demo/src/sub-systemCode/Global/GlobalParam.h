@@ -59,7 +59,6 @@ typedef struct __attribute__ ((__packed__))
 	unsigned short TxRefl;
 	unsigned short TxForw;
 
-	stageTable ST;
 	short Attitude[3];
 
 	uint8_t numOfPics;//number of pictures saved in the file system of the satellite

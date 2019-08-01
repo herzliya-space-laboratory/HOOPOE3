@@ -35,6 +35,8 @@
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
 
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
+
 #define DEBUGMODE
 
 #ifndef DEBUGMODE
@@ -82,18 +84,39 @@ void taskMain()
 	InitSubsystems();
 
 	vTaskDelay(100);
-	printf("init\n");
+	printf("init finished\n");
 	SubSystemTaskStart();
-	printf("Task Main start\n");
+	printf("Task Main start: ADCS test mode\n");
+	printf("Send new command\n");
 
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
+	
+	TC_spl adcsCmd;
+	adcsCmd.id = TC_ADCS_T;
+
+	int input;
+	int err;
 
 	while(1)
 	{
-		EPS_Conditioning();
-		Command_logic();
-		save_time();
+		// EPS_Conditioning();
+		// Command_logic();
+		// save_time();
+		
+		if (UTIL_DbguGetIntegerMinMax(&(adcsCmd.subType), 0,666) != 0){
+			printf("Enter ADCS command data\n");
+			UTIL_DbguGetString(&(adcsCmd.data), SIZE_OF_COMMAND+1);
+			err = AddAdcsCmdToQueue(adcsCmd);
+			printf("ADCS command error = %d\n\n\n", err);
+			printf("Send new command\n");
+			printf("Enter ADCS sub type\n");
+		}
+		
+		if (UTIL_DbguGetIntegerMinMax(&input, 900,1000) != 0){
+			printf("Print the data\n");
+		}
+		
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
