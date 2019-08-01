@@ -8,17 +8,15 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <satellite-subsystems/GomEPS.h>
-
 #include <hal/Storage/FRAM.h>
 #include <hal/Timing/Time.h>
 
 #include <at91/peripherals/pio/pio.h>
 
+#include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
-// #include <satellite-subsystems/SCS_Gecko/gecko_use_cases.h>
 
-#include "Camera.h"
+#include "GeckoCameraDriver.h"
 
 #define Result(value, errorType)	if(value != 0) { return errorType; }
 
@@ -99,12 +97,9 @@ int initGecko()
 	return GECKO_Init( (SPIslaveParameters){ bus1_spi, mode0_spi, slave1_spi, 100, 1, _SPI_GECKO_BUS_SPEED, 0 } );
 }
 
-GeckoTakeResult GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
+int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
 {
-	unsigned char somebyte = 0;
-	GomEpsPing(0, 0, &somebyte);
-
-	printf("GomEpsResetWDT = %d\n", GomEpsResetWDT(0));
+	GomEpsResetWDT(0);
 
 	// Setting PGA Gain:
 	int result = GECKO_SetPgaGain(pgaGain);
@@ -210,13 +205,10 @@ GeckoTakeResult GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t expo
 	return 0;
 }
 
-GeckoReadResult GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
+int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 {
-	unsigned char somebyte = 0;
-	GomEpsPing(0, 0, &somebyte);
+	GomEpsResetWDT(0);
 
-	printf("GomEpsResetWDT = %d\n", GomEpsResetWDT(0));
-	printf("starting read\n");
 	// Init Flash:
 	int result, i = 0;
 	do
@@ -277,12 +269,9 @@ GeckoReadResult GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 	return 0;
 }
 
-GeckoEraseResult GECKO_EraseBlock( uint32_t imageID )
+int GECKO_EraseBlock( uint32_t imageID )
 {
-	unsigned char somebyte = 0;
-	GomEpsPing(0, 0, &somebyte);
-
-	printf("GomEpsResetWDT = %d\n", GomEpsResetWDT(0));
+	GomEpsResetWDT(0);
 
 	// Setting image ID:
 	int result_setImageId = GECKO_SetImageID(imageID);

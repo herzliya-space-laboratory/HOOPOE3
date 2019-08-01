@@ -1,12 +1,14 @@
 /*
  * FRAM_Extended.h
  *
- *  Created on: 7 боай 2019
+ *  Created on: 7 пїЅпїЅпїЅпїЅ 2019
  *      Author: I7COMPUTER
  */
 
 #ifndef FRAM_EXTENDED_H_
 #define FRAM_EXTENDED_H_
+
+#include <hal/boolean.h>
 
 /*
  * Will read from the FRAM and progress the address variable according to the number of bytes that were read from the FRAM
@@ -25,11 +27,5 @@ int FRAM_readAndProgress(unsigned char *data, unsigned int *address, unsigned in
  * @return returns FRAM_write function's result
 */
 int FRAM_writeAndProgress(unsigned char *data, unsigned int *address, unsigned int size);
-
-/*!
- *	a seek function for the FRAM...
- */
-int FRAM_seek(unsigned int *address, unsigned int num);
-
 
 #endif /* FRAM_EXTENDED_H_ */

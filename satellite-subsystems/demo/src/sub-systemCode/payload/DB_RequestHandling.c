@@ -9,11 +9,11 @@
 
 #include <string.h>
 
-#include "Camera.h"
+#include "GeckoCameraDriver.h"
 
 #include "DB_RequestHandling.h"
 
-DataBaseResult TakePicture(DataBase database, unsigned char* data)
+ImageDataBaseResult TakePicture(ImageDataBase database, unsigned char* data)
 {
 	Boolean8bit isTestPattern;
 
@@ -21,11 +21,11 @@ DataBaseResult TakePicture(DataBase database, unsigned char* data)
 
 	TurnOnGecko();
 
-	DataBaseResult DB_result = takePicture(database, isTestPattern);
+	ImageDataBaseResult DB_result = takePicture(database, isTestPattern);
 
 	return DB_result;
 }
-DataBaseResult TakeSpecialPicture(DataBase database, unsigned char* data)
+ImageDataBaseResult TakeSpecialPicture(ImageDataBase database, unsigned char* data)
 {
 	Boolean8bit isTestPattern;
 	unsigned int frameAmount;
@@ -43,11 +43,11 @@ DataBaseResult TakeSpecialPicture(DataBase database, unsigned char* data)
 
 	TurnOnGecko();
 
-	DataBaseResult DB_result = takePicture_withSpecialParameters(database, frameAmount, frameRate, adcGain, pgaGain, exposure, isTestPattern);
+	ImageDataBaseResult DB_result = takePicture_withSpecialParameters(database, frameAmount, frameRate, adcGain, pgaGain, exposure, isTestPattern);
 
 	return DB_result;
 }
-DataBaseResult DeletePicture(DataBase database, unsigned char* data)
+ImageDataBaseResult DeletePicture(ImageDataBase database, unsigned char* data)
 {
 	unsigned int cameraID;
 	byte GroundFileType;
@@ -61,7 +61,7 @@ DataBaseResult DeletePicture(DataBase database, unsigned char* data)
 	{
 		if (cameraID == 0)
 		{
-			return clearDataBase(database);
+			return clearImageDataBase(database);
 		}
 		else
 		{
@@ -73,7 +73,7 @@ DataBaseResult DeletePicture(DataBase database, unsigned char* data)
 		return DeleteImageFromOBC(database, cameraID, GroundFileType);
 	}
 }
-DataBaseResult TransferPicture(DataBase database, unsigned char* data)
+ImageDataBaseResult TransferPicture(ImageDataBase database, unsigned char* data)
 {
 	unsigned int cameraID;
 
@@ -81,20 +81,20 @@ DataBaseResult TransferPicture(DataBase database, unsigned char* data)
 
 	TurnOnGecko();
 
-	DataBaseResult DB_result = transferImageToSD(database, cameraID);
+	ImageDataBaseResult DB_result = transferImageToSD(database, cameraID);
 
 	return DB_result;
 }
-byte* GetDataBase(DataBase database, unsigned char* data)
+byte* GetImageDataBase(ImageDataBase database, unsigned char* data)
 {
 	unsigned int start, end;
 
 	memcpy(&start, data, 4);
 	memcpy(&end, data + 4, 4);
 
-	return getDataBaseBuffer(database, start, end);
+	return getImageDataBaseBuffer(database, start, end);
 }
-DataBaseResult CreateThumbnail(DataBase database, unsigned char* data)
+ImageDataBaseResult CreateThumbnail(unsigned char* data)
 {
 	unsigned int cameraID;
 	byte reductionLevel;
@@ -104,11 +104,11 @@ DataBaseResult CreateThumbnail(DataBase database, unsigned char* data)
 	memcpy(&reductionLevel, data + 4, sizeof(byte));
 	memcpy(&Skipping, data + 5, sizeof(byte));
 
-	DataBaseResult DB_result = BinImage(database, cameraID, reductionLevel, Skipping);
+	ImageDataBaseResult DB_result = CreateImageThumbnail(cameraID, reductionLevel, Skipping);
 
 	return DB_result;
 }
-DataBaseResult CreateJPG(DataBase database, unsigned char* data)
+ImageDataBaseResult CreateJPG(unsigned char* data)
 {
 	unsigned int cameraID;
 	unsigned int quality_factor;
@@ -118,11 +118,11 @@ DataBaseResult CreateJPG(DataBase database, unsigned char* data)
 	memcpy(&quality_factor, data + 4, sizeof(int));
 	memcpy(&reductionLevel, data + 8, sizeof(byte));
 
-	DataBaseResult DB_result = compressImage(database, cameraID, quality_factor, reductionLevel);
+	ImageDataBaseResult DB_result = compressImage(cameraID, quality_factor, reductionLevel);
 
 	return DB_result;
 }
-DataBaseResult UpdatePhotographyValues(DataBase database, unsigned char* data)
+ImageDataBaseResult UpdatePhotographyValues(ImageDataBase database, unsigned char* data)
 {
 	unsigned int frameAmount;
 	unsigned int frameRate;
@@ -136,7 +136,7 @@ DataBaseResult UpdatePhotographyValues(DataBase database, unsigned char* data)
 	memcpy(&pgaGain, data + 9, sizeof(char));
 	memcpy(&exposure, data + 10, sizeof(int));
 
-	updateCameraParameters(database, frameRate, adcGain, pgaGain, exposure, frameAmount);
+	setCameraPhotographyValues(database, frameRate, adcGain, pgaGain, exposure, frameAmount);
 
 	return DataBaseSuccess;
 }

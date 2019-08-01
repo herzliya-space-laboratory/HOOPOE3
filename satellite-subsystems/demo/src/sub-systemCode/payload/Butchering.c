@@ -116,6 +116,9 @@ ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image,
 
 pixel_t* SimpleButcher(pixel_t* data, unsigned int sizeofData, unsigned int size, unsigned int index)
 {
+	if (size*index >= sizeofData + size)
+		return NULL;
+
 	pixel_t* buffer = malloc(size);
 
 	memcpy(buffer, data + size*index, size);

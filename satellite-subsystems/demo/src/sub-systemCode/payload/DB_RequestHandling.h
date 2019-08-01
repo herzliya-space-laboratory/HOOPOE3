@@ -11,6 +11,8 @@
 #include <freertos/FreeRTOS.h>
 
 #include "../Global/Global.h"
+
+#include "ImageConversion.h"
 #include "DataBase.h"
 
 typedef enum
@@ -21,17 +23,18 @@ typedef enum
 	ThumbnailLevel3,
 	ThumbnailLevel4,
 	ThumbnailLevel5,
+	ThumbnailLevel6,
 	JPG,
 	GeckoSD
 } GroundFileTypes;
 
-DataBaseResult TakePicture(DataBase database, unsigned char data[]);
-DataBaseResult TakeSpecialPicture(DataBase database, unsigned char data[]);
-DataBaseResult DeletePicture(DataBase database, unsigned char data[]);
-DataBaseResult TransferPicture(DataBase database, unsigned char data[]);
-byte* GetDataBase(DataBase database, unsigned char data[]);
-DataBaseResult CreateThumbnail(DataBase database, unsigned char data[]);
-DataBaseResult CreateJPG(DataBase database, unsigned char* data);
-DataBaseResult UpdatePhotographyValues(DataBase database, unsigned char data[]);
+ImageDataBaseResult TakePicture(ImageDataBase database, unsigned char data[]);
+ImageDataBaseResult TakeSpecialPicture(ImageDataBase database, unsigned char data[]);
+ImageDataBaseResult DeletePicture(ImageDataBase database, unsigned char data[]);
+ImageDataBaseResult TransferPicture(ImageDataBase database, unsigned char data[]);
+byte* GetImageDataBase(ImageDataBase database, unsigned char data[]);
+ImageDataBaseResult CreateThumbnail(unsigned char* data);
+ImageDataBaseResult CreateJPG(unsigned char* data);
+ImageDataBaseResult UpdatePhotographyValues(ImageDataBase database, unsigned char data[]);
 
 #endif /* DB_REQUESTHANDLING_H_ */

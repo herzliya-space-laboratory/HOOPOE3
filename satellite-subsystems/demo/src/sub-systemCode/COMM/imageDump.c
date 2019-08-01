@@ -103,7 +103,9 @@ int bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmd
 {
 	int error;
 
-	char* file_name = GetImageFileName(image_id, comprasionType);
+	char file_name[FILE_NAME_SIZE];
+	GetImageFileName(image_id, comprasionType, file_name);
+
 	F_FILE* current_file = f_open(file_name, "r");;
 
 	int image_size = f_filelength(file_name);
@@ -145,7 +147,9 @@ int thumbnail_Dump(imageid* ID_list, command_id cmdId)
 	{
 		memcpy(&image_id, ID_list + ((j+1)*sizeof(imageid)), sizeof(imageid));
 
-		char* file_name = GetImageFileName(image_id, DEFALT_REDUCTION_LEVEL);
+		char file_name[FILE_NAME_SIZE];
+		GetImageFileName(image_id, DEFALT_REDUCTION_LEVEL, file_name);
+
 		F_FILE* current_file = f_open(file_name, "r");;
 
 		int image_size = f_filelength(file_name);
@@ -247,7 +251,9 @@ void imageDump_task(void* param)
 		unsigned short lastIndex;
 		memcpy(&lastIndex, request.command_parameters + 7, sizeof(short));
 
-		char* file_name = GetImageFileName(image_id, comprasionType);
+		char file_name[FILE_NAME_SIZE];
+		GetImageFileName(image_id, comprasionType, file_name);
+
 		F_FILE* current_file = f_open(file_name, "r");;
 
 		int image_size = f_filelength(file_name);

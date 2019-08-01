@@ -5,6 +5,7 @@
  *      Author: DBTn
  */
 #include <freertos/FreeRTOS.h>
+
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 #include <freertos/queue.h>
@@ -26,10 +27,12 @@
 
 #include "DataBase.h"
 #include "CameraManager.h"
-#include "Camera.h"
+#include "GeckoCameraDriver.h"
 #include "DB_RequestHandling.h"
 
 #include "../COMM/imageDump.h"
+
+#include "../Global/GlobalParam.h"
 
 #include "../TRXVU.h"
 #include "../Main/HouseKeeping.h"
@@ -38,7 +41,7 @@
 #define CameraManagmentTask_Name ("Camera Management Task")
 #define CameraDumpTask_Name ("Camera Dump Task")
 
-#define MAX_NUMBER_OF_PICTURES_TO_BE_HANDLED 2
+#define NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME 2
 
 static xQueueHandle interfaceQueue;
 xTaskHandle	camManeger_handler;
@@ -47,16 +50,14 @@ static time_unix lastPicture_time;
 static time_unix timeBetweenPictures;
 static uint32_t numberOfPicturesLeftToBeTaken;
 
-command_id cmd_id_4_takePicturesWithTimeInBetween;
-
-static imageid lastPicture_id;
-static unsigned int numberOfFrames;
+command_id cmd_id_for_takePicturesWithTimeInBetween;
 
 static time_unix turnedOnCamera;
-
-DataBase imageDataBase;
-
 static time_unix cameraActivation_duration; // the duration the camera will stay turned on after being activated
+
+global_param global_parameters;
+ImageDataBase imageDataBase;
+
 
 /*
  * Handle the functionality of every request.
@@ -83,44 +84,26 @@ void Take_pictures_with_time_in_between();
 
 /*
  * The task who handle all the requests from the system
+
  * @param[in]	Pointer to an unsigned short representing the number of seconds
  * 				to keep the camera on after the request have been done
  */
+
 void CameraManagerTaskMain()
 {
-	int err = f_enterFS();
-	if (err != 0)
-		printf("\n*ERROR* - eentering file system (%d)\n\n", err);
-
-	F_FILE* a = f_open("pic123.bla", "w+");
-	if (a == NULL)
-		printf("\n\n\n*ERROR* - FS\n\n\n");
-	f_close(a);
+	f_enterFS();
 
 	Camera_Request req;
 	time_unix timeNow;
 
-	F_FILE* b = f_open("pic123.bla", "w+");
-	if (b == NULL)
-		printf("\n\n\n*ERROR* - FS\n\n\n");
-	f_close(b);
-
 	while(TRUE)
 	{
-		F_FILE* e = f_open("pic123.bla", "w+");
-		if (e == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(e);
+		get_current_global_param(&global_parameters);
 
 		if (removeRequestFromQueue(&req) > -1)
 		{
 			act_upon_request(req);
 		}
-
-		F_FILE* b = f_open("pic123.bla", "w+");
-		if (b == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(b);
 
 		Time_getUnixEpoch(&timeNow);
 		if (timeNow > ( turnedOnCamera + cameraActivation_duration ) && turnedOnCamera != 0)
@@ -129,27 +112,15 @@ void CameraManagerTaskMain()
 			turnedOnCamera = 0;
 		}
 
-		F_FILE* c = f_open("pic123.bla", "w+");
-		if (c == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(c);
-
 		Take_pictures_with_time_in_between();
 
 		vTaskDelay(1000);
 
-		F_FILE* d = f_open("pic123.bla", "w+");
-		if (d == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(d);
-
-
-		if (!get_ground_conn())
+		if (!global_parameters.ground_conn)
 		{
-			DataBaseResult error = handleMarkedPictures(imageDataBase, MAX_NUMBER_OF_PICTURES_TO_BE_HANDLED, &turnedOnCamera);
+			ImageDataBaseResult error = handleMarkedPictures(imageDataBase, NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
 
-			if (error != DataBase_thereWereNoPicturesToBeHandled)
-				save_ACK(ACK_CAMERA, error + 30, cmd_id_4_takePicturesWithTimeInBetween);
+			save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween); // ToDo: How do we handle errors? (error log...)
 		}
 
 		vTaskDelay(SYSTEM_DEALY);
@@ -164,7 +135,7 @@ int initCamera(Boolean firstActivation)
 
 	Initialized_GPIO();
 
-	imageDataBase = initDataBase(firstActivation);
+	imageDataBase = initImageDataBase(firstActivation);
 	if (imageDataBase == NULL)
 		error = -1;
 
@@ -233,9 +204,6 @@ void Take_pictures_with_time_in_between()
 
 		takePicture(imageDataBase, FALSE_8BIT);
 
-		imageid id = getLatestID(imageDataBase);
-		markPicture(imageDataBase, id);
-
 		numberOfPicturesLeftToBeTaken--;
 	}
 }
@@ -268,7 +236,7 @@ void handleDump(Camera_Request request)
 		time_unix endTime = *((time_unix*)request.data + 4);
 		memcpy(&endTime, request.data + 4, sizeof(time_unix));
 
-		imageid* ID_list = get_ID_list_withDefaltThumbnail(imageDataBase, startingTime, endTime);
+		imageid* ID_list = get_ID_list_withDefaltThumbnail(startingTime, endTime);
 		memcpy(DumpRequest.command_parameters, ID_list, sizeof(ID_list));
 	}
 
@@ -281,7 +249,7 @@ void handleDump(Camera_Request request)
 		time_unix endTime = *((time_unix*)request.data + 4);
 		memcpy(&endTime, request.data + 4, sizeof(time_unix));
 
-		byte* buffer = getDataBaseBuffer(imageDataBase, startingTime, endTime);
+		byte* buffer = getImageDataBaseBuffer(imageDataBase, startingTime, endTime);
 		memcpy(DumpRequest.command_parameters, buffer, sizeof(buffer));
 	}
 
@@ -291,38 +259,14 @@ void handleDump(Camera_Request request)
 
 void act_upon_request(Camera_Request request)
 {
-	DataBaseResult error = DataBaseSuccess;
-
-	F_FILE* a = f_open("pic123.bla", "w+");
-	if (a == NULL)
-		printf("\n\n\n*ERROR* - FS\n\n\n");
-	f_close(a);
-
-	F_FILE* l;
+	ImageDataBaseResult error = DataBaseSuccess;
 
 	switch (request.id)
 	{
 	case take_picture:
 		error = TakePicture(imageDataBase, request.data);
 
-		F_FILE* b = f_open("pic123.bla", "w+");
-		if (b == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(b);
-
 		Time_getUnixEpoch(&turnedOnCamera);
-
-		lastPicture_id = getLatestID(imageDataBase);
-		numberOfFrames = getNumberOfFrames(imageDataBase);
-
-		F_FILE* c = f_open("pic123.bla", "w+");
-		if (c == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(c);
-
-		for (unsigned int i = 0; i < numberOfFrames; i++) {
-			markPicture(imageDataBase, lastPicture_id - i);
-		}
 
 		break;
 
@@ -331,12 +275,6 @@ void act_upon_request(Camera_Request request)
 		Time_getUnixEpoch(&turnedOnCamera);
 
 		error = TakeSpecialPicture(imageDataBase, request.data);
-
-		lastPicture_id = getLatestID(imageDataBase);
-		numberOfFrames = getNumberOfFrames(imageDataBase);
-		for (unsigned int i = 1; i < numberOfFrames; i++) {
-			markPicture(imageDataBase, lastPicture_id - i);
-		}
 
 		break;
 
@@ -347,7 +285,7 @@ void act_upon_request(Camera_Request request)
 
 		Time_getUnixEpoch(&lastPicture_time);
 
-		cmd_id_4_takePicturesWithTimeInBetween = request.cmd_id;
+		cmd_id_for_takePicturesWithTimeInBetween = request.cmd_id;
 
 		break;
 
@@ -361,7 +299,7 @@ void act_upon_request(Camera_Request request)
 
 
 	case transfer_image_to_OBC:
-		if (get_ground_conn())
+		if (global_parameters.ground_conn)
 		{
 			addRequestToQueue(request);
 		}
@@ -374,12 +312,12 @@ void act_upon_request(Camera_Request request)
 
 
 	case create_thumbnail:
-		error = CreateThumbnail(imageDataBase, request.data);
+		error = CreateThumbnail(request.data);
 		break;
 
 
 	case create_jpg:
-		error = CreateJPG(imageDataBase, request.data);
+		error = CreateJPG(request.data);
 		break;
 
 
@@ -389,7 +327,7 @@ void act_upon_request(Camera_Request request)
 
 
 	case reset_DataBase:
-		imageDataBase = resetDataBase(imageDataBase);
+		error = resetImageDataBase(imageDataBase);
 		break;
 
 
@@ -407,25 +345,9 @@ void act_upon_request(Camera_Request request)
 
 
 	case Turn_On_Camera:
-
-		l = f_open("pic123.bla", "w+");
-		if (l == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(l);
-
 		TurnOnGecko();
 
-		F_FILE* h = f_open("pic123.bla", "w+");
-		if (h == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(h);
-
 		Time_getUnixEpoch(&turnedOnCamera);
-
-		F_FILE* g = f_open("pic123.bla", "w+");
-		if (g == NULL)
-			printf("\n\n\n*ERROR* - FS\n\n\n");
-		f_close(g);
 
 		break;
 
@@ -438,11 +360,6 @@ void act_upon_request(Camera_Request request)
 		return;
 		break;
 	}
-
-	F_FILE* d = f_open("pic123.bla", "w+");
-	if (d == NULL)
-		printf("\n\n\n*ERROR* - FS\n\n\n");
-	f_close(d);
 
 	save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 }

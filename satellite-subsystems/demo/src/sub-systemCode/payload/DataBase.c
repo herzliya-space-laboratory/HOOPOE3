@@ -1,19 +1,18 @@
 /*
- * DataBase.c
+ * ImageDataBase.c
  *
- *  Created on: 7 ׳‘׳�׳�׳™ 2019
+ *  Created on: 7 במאי 2019
  *      Author: I7COMPUTER
  */
 
 #include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>		//TODO: remove before flight. including printfs
 #include <stdint.h>
 #include <math.h>
-
-#include <freertos/task.h>
 
 #include <hcc/api_fat.h>
 #include <hal/Boolean.h>
@@ -25,59 +24,49 @@
 
 #include "../Global/GlobalParam.h"
 
-// #include <satellite-subsystems/SCS_Gecko/gecko_use_cases.h>
-#include "Camera.h"
-
-#include "jpeg/ImgCompressor.h"
-
+#include "GeckoCameraDriver.h"
 #include "Boolean_bit.h"
-#include "FRAM_Extended.h"
+#include "FRAM_DataStructure.h"
+#include "Macros.h"
 
+#include "ImageConversion.h"
 #include "DataBase.h"
 
-typedef struct
-{
-	// size = 66 bytes
-	imageid cameraId;
-
-	time_unix timestamp;
-
-	char fileTypes;
-
-	unsigned short angles[3];
-
-	Boolean8bit markedFor_4thTumbnailCreation;
-} ImageDetails;
-
-typedef struct
+typedef struct __attribute__ ((__packed__))
 {
 	uint32_t frameAmount;
 	uint32_t frameRate;
 	uint8_t adcGain;
 	uint8_t pgaGain;
 	uint32_t exposure;
-} CameraParameters;
+} CameraPhotographyValues;
 
-struct DataBase_t
+struct __attribute__ ((__packed__)) ImageDataBase_t
 {
 	// size = 22 bytes (padded to 24)
-	unsigned int numberOfPictures;		// current number of pictures saved on the satellite
-	unsigned int nextId;				// the next id we will use for a picture, (camera id)
-	CameraParameters cameraParameters;
+	unsigned int numberOfPictures;		///< current number of pictures saved on the satellite
+	imageid nextId;						///< the next id we will use for a picture, (camera id)
+	CameraPhotographyValues cameraParameters;
+	Boolean8bit AutoThumbnailCreation;
 };
+#define SIZEOF_IMAGE_DATABASE sizeof(struct ImageDataBase_t)
 
-static uint8_t imageBuffer[IMAGE_HEIGHT][IMAGE_WIDTH];
+// The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
+#define DATABASE_FRAM_START DATABASEFRAMADDRESS +  SIZEOF_IMAGE_DATABASE
 
-// ----------INTERNAL FUNCTIONS----------
+// The ImageDataBases ending address in the FRAM
+#define DATABASE_FRAM_END DATABASE_FRAM_START + MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata)
+
+//---------------------------------------------------------------
 
 /*
  * Will put in the string the supposed filename of an picture based on its id
  * @param soon2Bstring the number you want to convert into string form,
  * string will contain the number in string form
 */
-static void getFileName(unsigned int id, fileType type, char string[FILE_NAME_SIZE])
+static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 {
-	unsigned int num = id;
+	imageid num = id;
 	char digit[10] = "0123456789";
 
 	char baseString[FILE_NAME_SIZE] = "i0000000.raw";
@@ -129,52 +118,26 @@ static void getFileName(unsigned int id, fileType type, char string[FILE_NAME_SI
 }
 
 /*
- * Will return the DataBases starting address in the FRAM
- * meaning not including the general fields at the start of the database
-*/
-static unsigned int getDatabaseStart()
-{
-	return DATABASEFRAMADDRESS +  sizeof(struct DataBase_t);
-}
-
-/*
- * Will return the DataBases ending address in the FRAM
-*/
-static unsigned int getDatabaseEnd()
-{
-	return getDatabaseStart() + ((MAX_NUMBER_OF_PICTURES) * sizeof(ImageDetails));
-}
-
-/*
  * Will restart the database (only FRAM), deleting all of its contents
 */
-DataBaseResult zeroDataBase(DataBase database)
+ImageDataBaseResult zeroImageDataBase()
 {
-	printf("\n----------zeroDataBase----------\n");
-
-	uint8_t data = 0;
+	uint8_t zero = 0;
 	int result;
-	for (unsigned int i = DATABASEFRAMADDRESS; i < getDatabaseEnd(database); i += sizeof(uint8_t))
-	{
-		result = FRAM_write((unsigned char*)&data, i, sizeof(uint8_t));
-		if (result != 0)
-		{
-			return DataBaseFramFail;
-		}
 
-		//Test:
-		result = FRAM_read((unsigned char*)&data, i, sizeof(uint8_t));
+	for (unsigned int i = DATABASEFRAMADDRESS; i < DATABASE_FRAM_END; i += sizeof(uint8_t))
+	{
+		result = FRAM_write((unsigned char*)&zero, i, sizeof(uint8_t));
 		if (result != 0)
 		{
 			return DataBaseFramFail;
 		}
-		printf("%u, ", data);
 	}
 
 	return DataBaseSuccess;
 }
 
-static DataBaseResult updateGeneralParameters(DataBase database)
+ImageDataBaseResult updateGeneralDataBaseParameters(ImageDataBase database)
 {
 	if(database == NULL)
 	{
@@ -182,144 +145,247 @@ static DataBaseResult updateGeneralParameters(DataBase database)
 		return DataBaseNullPointer;
 	}
 
-	unsigned int currentPosition = DATABASEFRAMADDRESS;
-	int FRAM_result1 = FRAM_writeAndProgress((unsigned char*)(&database->numberOfPictures),  &currentPosition, sizeof(unsigned int));
-	FRAM_result1 += FRAM_writeAndProgress((unsigned char*)(&database->nextId),  &currentPosition, sizeof(int));
-	FRAM_result1 += FRAM_writeAndProgress((unsigned char*)(&database->cameraParameters),  &currentPosition, sizeof(CameraParameters));
-	if(FRAM_result1 != 0)									// checking if the read from theFRAM succeeded
+	int FRAM_result = FRAM_write((unsigned char*)(database), DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
+	if(FRAM_result != 0)	// checking if the read from theFRAM succeeded
 	{
-		free(database);
 		return DataBaseFramFail;
 	}
+
 	return DataBaseSuccess;
 }
 
-// ----------BASIC FUNCTIONS----------
+//---------------------------------------------------------------
 
-imageid getLatestID(DataBase database)
+Boolean checkForID(ImageMetadata* image_metadata, imageid* id)
+{
+	if (memcmp(&image_metadata->cameraId, id, sizeof(imageid)) == 0)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address)
+{
+	uint32_t database_start_address = DATABASE_FRAM_START;
+	uint32_t database_end_address = DATABASE_FRAM_END;
+
+	int result = FRAM_DataStructure_search(database_start_address, database_end_address,
+			sizeof(ImageMetadata), image_metadata, image_address,
+			(Boolean (*)(void*, void*))&checkForID, &id);
+	if (result != 0)
+		return DataBaseIdNotFound;
+
+	// Checking for more images with the same id:
+
+	if (id != 0)
+	{
+		database_start_address = *(image_address);
+
+		ImageMetadata check_image_metadata;
+		uint32_t check_image_address;
+
+		result = FRAM_DataStructure_search(database_start_address, database_end_address,
+				sizeof(ImageMetadata), &check_image_metadata, &check_image_address,
+				(Boolean (*)(void*, void*))&checkForID, &id);
+		if (result != -1)
+			return DataBaseIllegalId;
+	}
+
+	return DataBaseSuccess;
+}
+
+//---------------------------------------------------------------
+
+ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType reductionLevel)
+{
+	bit fileTypes[8];
+	char2bits(image_metadata.fileTypes, fileTypes);
+
+	if (!fileTypes[reductionLevel].value)
+		return DataBaseNotInSD;
+	else
+		return DataBaseSuccess;
+}
+
+void updateFileTypes(ImageMetadata image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value)
+{
+	bit fileTypes[8];
+	char2bits(image_metadata.fileTypes, fileTypes);
+
+	if (value)
+		fileTypes[reductionLevel].value = TRUE_bit;
+	else
+		fileTypes[reductionLevel].value = FALSE_bit;
+
+	image_metadata.fileTypes = bits2char(fileTypes);
+
+	FRAM_write((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+}
+
+uint32_t GetImageFactor(fileType image_type)
+{
+	uint32_t factor = 1;
+
+	switch(image_type)
+	{
+		case raw: factor = 1; break;
+		case t02: factor = 2; break;
+		case t04: factor = 4; break;
+		case t08: factor = 8; break;
+		case t16: factor = 16; break;
+		case t32: factor = 32; break;
+		case t64: factor = 64; break;
+		default: factor = 0;
+	}
+
+	return factor;
+}
+
+//---------------------------------------------------------------
+
+ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type)
+{
+	char fileName[FILE_NAME_SIZE];
+
+	ImageDataBaseResult result = GetImageFileName(id, image_type, fileName);
+	DB_RETURN_ERROR(result);
+
+	F_FILE *file;
+	OPEN_FILE(file, fileName, "r", DataBaseFileSystemError);	// open file for writing in safe mode
+
+	uint32_t factor = GetImageFactor(image_type);
+	READ_FROM_FILE(file, imageBuffer, sizeof(imageBuffer) / (factor * factor), 1, DataBaseFileSystemError);
+
+	CLOSE_FILE(file, DataBaseFileSystemError);
+
+	return DataBaseSuccess;
+}
+
+ImageDataBaseResult saveImageFromBuffer(imageid id, fileType image_type)
+{
+	char fileName[FILE_NAME_SIZE];
+
+	ImageDataBaseResult result = GetImageFileName(id, image_type, fileName);
+	DB_RETURN_ERROR(result);
+
+	F_FILE *file;
+	OPEN_FILE(file, fileName, "w+", DataBaseFileSystemError);	// open file for writing in safe mode
+
+	uint32_t factor = GetImageFactor(image_type);
+	WRITE_TO_FILE(file, imageBuffer, sizeof(imageBuffer) / (factor * factor), 1, DataBaseFileSystemError);
+	f_flush( file );	// only after flushing can data be considered safe
+
+	CLOSE_FILE(file, DataBaseFileSystemError);	// data is also considered safe when file is closed
+
+	return DataBaseSuccess;
+}
+
+//---------------------------------------------------------------
+
+imageid getLatestID(ImageDataBase database)
 {
 	return database->nextId - 1;
 }
 
-unsigned int getNumberOfFrames(DataBase database)
+unsigned int getNumberOfFrames(ImageDataBase database)
 {
 	return database->cameraParameters.frameAmount;
 }
 
-DataBaseResult markPicture(DataBase database, imageid id)
+//---------------------------------------------------------------
+
+Boolean checkForMark(ImageMetadata* image_metadata, void* placeholder)
 {
-	unsigned int currentPosition = getDatabaseStart(database);
-	unsigned int endPosition = getDatabaseEnd(database);
-
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
-
-	while(currentPosition < endPosition)  // as long as we are not in the end of the file ,we will continue
-	{
-		vTaskDelay(100);
-
-		FRAM_readAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-		if (currentImageDetails.cameraId == id) // check if the current id is the requested id
-		{
-			if (currentImageDetails.markedFor_4thTumbnailCreation)
-				return DataBaseAlreadyMarked;
-
-			currentImageDetails.markedFor_4thTumbnailCreation = TRUE_8BIT;
-
-			currentPosition -= sizeof(ImageDetails);
-			FRAM_writeAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-			return DataBaseSuccess;
-		}
-	}
-
-	return DataBaseIllegalId;
+	if (image_metadata->cameraId != 0 && image_metadata->markedFor_TumbnailCreation)
+		return TRUE;
+	else
+		return FALSE;
 }
 
-DataBaseResult handleMarkedPictures(DataBase database, uint32_t maxNumberOfPicturesToBeHandled, time_unix* turnedOnCamera)
+ImageDataBaseResult handleMarkedPictures(ImageDataBase database, uint32_t nuberOfPicturesToBeHandled)
 {
-	F_FILE* a = f_open("pic123.bla", "w+");
-	if (a == NULL)
-		printf("\n\n\n*ERROR* - FS\n\n\n");
-	f_close(a);
+	ImageMetadata image_metadata;
+	uint32_t image_address;
 
-	unsigned int currentPosition = getDatabaseStart(database);
-	unsigned int endPosition = getDatabaseEnd(database);
+	uint32_t database_start_address = DATABASE_FRAM_START;
+	uint32_t database_end_address = DATABASE_FRAM_END;
 
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
+	int result;
+	ImageDataBaseResult DB_result;
 
-	DataBaseResult DB_result;
-
-	uint32_t numberOfPicturesHandled = 0;
-
-	while(currentPosition < endPosition)  // as long as we are not in the end of the file ,we will continue
+	for (uint32_t i = 0; i < nuberOfPicturesToBeHandled; i++)
 	{
-		vTaskDelay(100);
+		result = FRAM_DataStructure_search(database_start_address, database_end_address,
+				sizeof(ImageMetadata), &image_metadata, &image_address,
+				(Boolean (*)(void*, void*))&checkForMark, NULL);
+		database_start_address = image_address;
 
-		if (numberOfPicturesHandled == maxNumberOfPicturesToBeHandled)
-			break;
-
-		FRAM_readAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-		if (currentImageDetails.markedFor_4thTumbnailCreation && currentImageDetails.cameraId != 0)
+		if ( result == 0 )
 		{
 			TurnOnGecko();
-			Time_getUnixEpoch(turnedOnCamera);
 
-			numberOfPicturesHandled++;
+			DB_result = transferImageToSD(database, image_metadata.cameraId);
+			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
+				return DB_result;
 
-			F_FILE* a = f_open("pic123.bla", "w+");
-			if (a == NULL)
-				printf("\n\n\n*ERROR* - FS\n\n\n");
-			f_close(a);
+			TurnOffGecko();
 
-			DB_result = transferImageToSD(database, currentImageDetails.cameraId);
+			vTaskDelay(1000);
+
+			DB_result = CreateImageThumbnail(image_metadata.cameraId, 4, TRUE);
 			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
 				return DB_result;
 
 			vTaskDelay(1000);
 
-			DB_result = BinImage(database, currentImageDetails.cameraId, 4, TRUE);
-			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
-				return DB_result;
-
-			vTaskDelay(1000);
-
-			DB_result = DeleteImageFromOBC(database, currentImageDetails.cameraId, raw);
-			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
-				return DB_result;
+			DB_result = DeleteImageFromOBC(database, image_metadata.cameraId, raw);
+			DB_RETURN_ERROR(DB_result);
 
 			// making sure i wont lose the data written in the functions above to the FRAM:
-			currentPosition -= sizeof(ImageDetails);
-			FRAM_read( (unsigned char*)&currentImageDetails, (unsigned int)currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
+			FRAM_read( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
 
-			currentImageDetails.markedFor_4thTumbnailCreation = FALSE_8BIT;
-			FRAM_writeAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
+			image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
+			FRAM_write( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
 		}
 	}
-
-	if (numberOfPicturesHandled == 0)
-		return DataBase_thereWereNoPicturesToBeHandled;
 
 	return DataBaseSuccess;
 }
 
-DataBase initDataBase(Boolean8bit reset)
-{
-	DataBase database = malloc(sizeof(*database));	// allocate the memory for the database's variables
+//---------------------------------------------------------------
 
-	if(database == NULL)
+ImageDataBaseResult setDataBaseValues(ImageDataBase database)
+{
+	CHECK_FOR_NULL(database, DataBaseNullPointer);
+
+	database->numberOfPictures = 0;
+	database->nextId = 1;
+	database->AutoThumbnailCreation = TRUE_8BIT;
+	setCameraPhotographyValues(database, DEFALT_FRAME_RATE, DEFALT_ADC_GAIN, DEFALT_PGA_GAIN, DEFALT_EXPOSURE, DEFALT_FRAME_AMOUNT);
+
+	ImageDataBaseResult result = updateGeneralDataBaseParameters(database);
+	DB_RETURN_ERROR(result);
+
+	printf("\nRe: database->numberOfPictures = %u, database->nextId = %u; CameraParameters: frameAmount = %lu,"
+			" frameRate = %lu, adcGain = %u, pgaGain = %u, exposure = %lu\n", database->numberOfPictures,
+			database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate,
+			database->cameraParameters.adcGain, database->cameraParameters.pgaGain,
+			database->cameraParameters.exposure);
+
+	return DataBaseSuccess;
+}
+
+ImageDataBase initImageDataBase()
+{
+	ImageDataBase database = malloc(SIZEOF_IMAGE_DATABASE);	// allocate the memory for the database's variables
+	if (database == NULL)	// ToDo: use check for NULL!
 	{
-		printf("\n *ERROR* - NULL POINTER\n");
 		free(database);
 		return NULL;
 	}
 
-	unsigned int currentPosition = DATABASEFRAMADDRESS;
-	int FRAM_result1 = FRAM_readAndProgress((unsigned char*)(&database->numberOfPictures),  &currentPosition, sizeof(unsigned int));
-	FRAM_result1 += FRAM_readAndProgress((unsigned char*)(&database->nextId),  &currentPosition, sizeof(unsigned int));
-	FRAM_result1 += FRAM_readAndProgress((unsigned char*)(&database->cameraParameters),  &currentPosition, sizeof(CameraParameters));
-	if(FRAM_result1 != 0)				// checking if the read from theFRAM succeeded
+	int FRAM_result = FRAM_read((unsigned char*)(database),  DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
+	if(FRAM_result != 0)	// checking if the read from theFRAM succeeded
 	{
 		free(database);
 		return NULL;
@@ -327,50 +393,32 @@ DataBase initDataBase(Boolean8bit reset)
 
 	printf("numberOfPictures = %u, nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure);
 
-	if (database->nextId == 0 || reset)	// The FRAM is empty and the DataBase wasn't initialized beforehand
+	if (database->nextId == 0)	// The FRAM is empty and the ImageDataBase wasn't initialized beforehand
 	{
-		// Resetting the DataBase itself (on the FRAM)
-		DataBaseResult DB_result = zeroDataBase(database);
-		if (DB_result != DataBaseSuccess)
-		{
-			printf("Init DB - *ERROR* zero database (%u)", DB_result);
-			return NULL;
-		}
-
-		// Writing default values: (the number of pictures currently on the satellite is 0 so the next one's id will be 1.)
-
-		database->numberOfPictures = 0;
-
-		database->nextId = 1;
-		updateCameraParameters(database, DEFALT_FRAME_RATE, DEFALT_ADC_GAIN, DEFALT_PGA_GAIN, DEFALT_EXPOSURE, DEFALT_FRAME_AMOUNT);
-		updateGeneralParameters(database);
-
-		printf("\nRe: database->numberOfPictures = %u, database->nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure);
+		setDataBaseValues(database);
 	}
 
 	return database;
 }
 
-DataBase resetDataBase(DataBase database)
+ImageDataBaseResult resetImageDataBase(ImageDataBase database)
 {
-	printf("\n----------resetDataBase----------\n");
+	CHECK_FOR_NULL(database, DataBaseNullPointer);
+/*
+	ImageDataBaseResult result = clearImageDataBase(database);
+	if (result != DataBaseSuccess)
+		return NULL;
+*/
 
-	DataBaseResult DB_result = DataBaseSuccess;
+	ImageDataBaseResult result = setDataBaseValues(database);
+	DB_RETURN_ERROR(result);
 
-	// Deleting all pictures saved on iOBC SD so we wont have doubles later
-	for (int i = 0; i < NumberOfFileTypes; i++) {
-		DB_result = DeleteImageFromOBC(database, 0, i);
-		if(DB_result != DataBaseSuccess)
-			return NULL;
-	}
-
-	// Reinitializing the database:
-	free(database);
-
-	return initDataBase(TRUE_8BIT);
+	return DataBaseSuccess;
 }
 
-void updateCameraParameters(DataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount)
+//---------------------------------------------------------------
+
+void setCameraPhotographyValues(ImageDataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount)
 {
 	database->cameraParameters.frameAmount = frameAmount;
 	database->cameraParameters.frameRate = frameRate;
@@ -378,228 +426,95 @@ void updateCameraParameters(DataBase database, uint32_t frameRate, uint8_t adcGa
 	database->cameraParameters.pgaGain = pgaGain;
 	database->cameraParameters.exposure = exposure;
 
-	updateGeneralParameters(database);
+	updateGeneralDataBaseParameters(database);
 }
 
-DataBaseResult transferImageToSD(DataBase database, imageid cameraId)
+//---------------------------------------------------------------
+
+ImageDataBaseResult transferImageToSD(ImageDataBase database, imageid cameraId)
 {
-	printf("\n----------transferImageToSD----------\n");
-
-	if(database == NULL)	// Checking for NULL pointer
-	{
-		return DataBaseNullPointer;
-	}
-
-	F_FILE* a = f_open("pic123.bla", "w+");
-	if (a == NULL)
-		printf("\n\n\n*ERROR* - FS\n\n\n");
-	f_close(a);
-
+	CHECK_FOR_NULL(database, DataBaseNullPointer);
 
 	int err = GomEpsResetWDT(0);
 	printf("err DB eps: %d\n", err);
-/*
+
 	err = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
 	if( err )
 	{
 		printf("\ntransferImageToSD Error = (%d) reading image!\n\r",err);
 		return (GECKO_Read_Success - err);
 	}
-	*/
 
 	vTaskDelay(500);
 
 	// Creating a file for the picture at iOBC sd:
 	char fileName[FILE_NAME_SIZE];
 	getFileName(cameraId, raw, fileName);
-	int err2 = f_enterFS();
-	if(err2!=0)
-	{
-		printf("int err = f_enterFS(); error: %d\n",err2);
-	}
-	F_FILE *PictureFile = f_open(fileName, "w+" );	// open a new file for writing in safe mode
-	if(PictureFile == NULL)
-	{
-		int a = f_getlasterror();
-		printf("transferImageToSD - f_open (%d)\n", a);	// if file pointer is NULL, get an error
-		return DataBaseFail;
-	}
+
+	F_FILE *PictureFile;
+	OPEN_FILE(PictureFile, fileName, "w+", DataBaseFileSystemError);
 
 	err = GomEpsResetWDT(0);
 	printf("err DB eps: %d\n", err);
 
-
-	unsigned int elementsWritten = f_write(imageBuffer, sizeof(uint8_t), IMAGE_SIZE, PictureFile);
-
-	if (elementsWritten != IMAGE_SIZE)
-	{
-		// if bytes to write doesn't equal bytes written, get the error
-		printf("transferImageToSD - f_write");
-		return DataBaseFail;
-	}
+	WRITE_TO_FILE(PictureFile, imageBuffer, sizeof(uint8_t), IMAGE_SIZE, DataBaseFileSystemError);
 
 	f_flush(PictureFile );	// only after flushing can data be considered safe
 
-	err = f_close(PictureFile);	// data is also considered safe when file is closed
-	if( err )
-	{
-		printf("transferImageToSD - f_close");
-		return DataBaseFail;
-	}
+	CLOSE_FILE(PictureFile, DataBaseFileSystemError);
 
+	// searching for the image on the database:
 
-	// Updating the file_name of this specific picture at the database:
-	unsigned int currentPosition;
-	unsigned int endPosition;
-	currentPosition = getDatabaseStart(database);
-	endPosition = getDatabaseEnd(database);
+	ImageMetadata image_metadata;
+	uint32_t image_address;
 
+	int result;
 
-	ImageDetails currentImageDetails;	// will contain our current ID while going through the ImageDescriptors at the database
-	int FRAM_result;
+	result = SearchDataBase_byID(cameraId, &image_metadata, &image_address);
+	DB_RETURN_ERROR(result);
 
-	while(currentPosition < endPosition)	// as long as we are not in the end of the file ,we will continue
-	{
-		vTaskDelay(100);
+	result = checkForFileType(image_metadata, raw);
+	DB_RETURN_ERROR(result);
 
-		FRAM_result = FRAM_readAndProgress((unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails));	// reading the id from the ImageDescriptor file
-		if (FRAM_result != 0)
-		{
-			printf("DB ERROR - FRAM fail\n");
-			return DataBaseFramFail;
-		}
+	updateFileTypes(image_metadata, image_address, raw, TRUE);
 
-		bit fileTypes[8];
+	updateGeneralDataBaseParameters(database);
 
-		char2bits(currentImageDetails.fileTypes, fileTypes);
-
-		printf("TransferImageToOBC - current id = %u, current position = %u\n", currentImageDetails.cameraId, (unsigned int)(currentPosition - sizeof(imageid)));
-
-		if (currentImageDetails.cameraId == cameraId)	// check if the current id is the requested id
-		{
-			if (fileTypes[raw].value)
-				return DataBasealreadyInSD;
-
-			fileTypes[raw].value = TRUE_bit;
-
-			currentPosition -= sizeof(ImageDetails);
-
-			currentImageDetails.fileTypes = bits2char(fileTypes);
-
-			FRAM_result = FRAM_writeAndProgress((unsigned char*)&currentImageDetails, &currentPosition, (unsigned int)sizeof(ImageDetails));	// reading the name of the file from the ImageDescriptor file
-
-			if (FRAM_result != 0)
-			{
-				printf("DB ERROR - FRAM fail\n");
-				return DataBaseFramFail;
-			}
-
-			updateGeneralParameters(database);
-
-			return DataBaseSuccess;
-		}
-	}
-	printf("DB ERROR - Illegal ID\n");
-	return DataBaseIllegalId;	// Does not exist
+	return DataBaseSuccess;
 }
 
-DataBaseResult DeleteImageFromOBC(DataBase database, imageid cameraId, fileType type)
+//---------------------------------------------------------------
+
+ImageDataBaseResult DeleteImageFromOBC(ImageDataBase database, imageid cameraId, fileType type)
 {
-	printf("\n----------DeleteImageFromOBC----------\n");
-
-	if (database == NULL) // making sure that database isn't a NULL pointer
-	{
-		printf("null");
-		return DataBaseNullPointer;
-	}
-
-    ImageDetails currentImageDetails;	// the struct that will contain the information about each image
+	CHECK_FOR_NULL(database, DataBaseNullPointer);
 
     char fileName[FILE_NAME_SIZE];
     getFileName(cameraId, type, fileName);
 
-	unsigned int currentPosition;
-	unsigned int endPosition;
-	currentPosition = getDatabaseStart(database);
-	endPosition = getDatabaseEnd(database);
+	ImageMetadata image_metadata;
+	uint32_t image_address;
 
+	ImageDataBaseResult result = SearchDataBase_byID(cameraId, &image_metadata, &image_address);
+	DB_RETURN_ERROR(result);
 
-    while (currentPosition < endPosition)	// as long as we are not in the end of the file ,we will continue
-    {
-    	vTaskDelay(100);
+	result = checkForFileType(image_metadata, type);
+	DB_RETURN_ERROR(result);
 
-    	FRAM_readAndProgress((unsigned char*)&currentImageDetails, &currentPosition, sizeof(ImageDetails)); // coping data from image descriptor to ImageDetails
+	DELETE_FILE(fileName, DataBaseFileSystemError);
 
-    	bit fileTypes[8];
-    	char2bits(currentImageDetails.fileTypes, fileTypes);
+	updateFileTypes(image_metadata, image_address, type, FALSE);
 
-    	printf("id = %u, file type = %u, file_name = %s\n", currentImageDetails.cameraId, type, fileName);
-
-    	if (currentImageDetails.cameraId != 0)
-    	{
-    		if (cameraId == 0)
-    		{
-    			if (fileTypes[type].value)
-    			{
-    				int file_result = f_delete(fileName); // will delete the file
-    				if(file_result != 0) // remove returns -1 if the deletion process failed
-   					{
-    					printf("DeleteImageFromOBC Fail - file deletion fail (%u)\n", file_result);
-    					return DataBaseFail;
-    				}
-    			}
-    		}
-    		else if (currentImageDetails.cameraId == cameraId)	// if we dont skip on that id
-    		{
-    			if(!fileTypes[type].value)
-   				{
-   					printf("Not in SD\n");
-    				return DataBaseNotInSD;
-    			}
-    			int file_result = f_delete(fileName); // will delete the file
-    			if(file_result != 0) // remove returns -1 if the deletion process failed
-    			{
-    				printf("DeleteImageFromOBC Fail - file deletion fail\n");
-    				return DataBaseFail;
-    			}
-    		}
-
-    		if (cameraId == 0 || currentImageDetails.cameraId == cameraId)
-    		{
-    			fileTypes[type].value = FALSE_bit;
-
-    			currentImageDetails.fileTypes = bits2char(fileTypes);
-
-    			currentPosition -= sizeof(ImageDetails); // we jump back in the ImageDescriptor to the start of the filename (tight after id)
-    			FRAM_writeAndProgress((unsigned char*)&currentImageDetails, &currentPosition, sizeof(ImageDetails)); // writing zeroes over the file name of the current ImageDescriptor
-    		}
-
-    		if (currentImageDetails.cameraId == cameraId)
-    		{
-    			printf("c id = %u, id = %u\n", currentImageDetails.cameraId, cameraId);
-    			printf("id = %u, file type = %u, file_name = %u\ncurrentPosition = %u, DB end = %u\n", currentImageDetails.cameraId, type, fileTypes[type].value, currentPosition, getDatabaseEnd(database));
-    			break;
-    		}
-    	}
-    }
-
-	updateGeneralParameters(database);
+	updateGeneralDataBaseParameters(database);
 
     return DataBaseSuccess;
 }
 
-DataBaseResult DeleteImageFromPayload(DataBase database, imageid id)
+ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 {
-	printf("\n----------DeleteImageFromPayload----------\n");
+	CHECK_FOR_NULL(database, DataBaseNullPointer);
 
-	if (database == NULL) // making sure that database isn't a NULL pointer
-	{
-		printf("\nNULL pointer\n");
-		return DataBaseNullPointer;
-	}
-
-	int WDerr = GomEpsResetWDT(0);
-	printf("err DB eps: %d\n", WDerr);
+	GomEpsResetWDT(0);
 
 	int err = GECKO_EraseBlock(id);
 	if( err )
@@ -610,669 +525,39 @@ DataBaseResult DeleteImageFromPayload(DataBase database, imageid id)
 
 	vTaskDelay(500);
 
-	uint8_t temp = 0; // a  variable that we will use to delete stuff from the ImageDescriptor later in the function
+	ImageMetadata image_metadata;
+	uint32_t image_address;
 
-	unsigned int currentPosition;
-	unsigned int endPosition;
-	currentPosition = getDatabaseStart(database);
-	endPosition = getDatabaseEnd(database);
+	ImageDataBaseResult result = SearchDataBase_byID(id, &image_metadata, &image_address);
+	DB_RETURN_ERROR(result);
 
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
-
-	Boolean Found = FALSE;
-
-	while(currentPosition < endPosition)  // as long as we are not in the end of the file ,we will continue
+	for (fileType i = 0; i < NumberOfFileTypes; i++)
 	{
-		vTaskDelay(100);
-
-		FRAM_readAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-    	bit fileTypes[8];
-    	char2bits(currentImageDetails.fileTypes, fileTypes);
-
-		if (currentImageDetails.cameraId == id) // check if the current id is the requested id
+		if(checkForFileType(image_metadata, i) == DataBaseSuccess)
 		{
-			printf("current id = %u\n", currentImageDetails.cameraId);
-
-			// Checking if the one we found is a double:
-			if (Found == TRUE)
-			{
-				printf("\nDouble\n");
-				return DataBaseIllegalId;
-			}
-
-			Found = TRUE;
-
-			for (unsigned int i = 0; i < NumberOfFileTypes; i++) {
-				if(fileTypes[i].value)
-				{
-					DataBaseResult DB_result = DeleteImageFromOBC(database, id, i);
-					if (DB_result != DataBaseSuccess)
-					{
-						return DB_result;
-					}
-					break;
-				}
-			}
-
-			// Clearing the portion of the database:
-			currentPosition -= sizeof(ImageDetails);
-
-			for(unsigned int i = 0; i < sizeof(ImageDetails); i += sizeof(uint8_t))
-			{
-				int FRAM_result = FRAM_writeAndProgress( &temp, &currentPosition, sizeof(uint8_t)); // writing zeroes over the ImageDescriptor
-
-				if (FRAM_result != 0)
-				{
-					printf("\nFRAM\n");
-					return DataBaseFramFail;
-				}
-			}
-
-			database->numberOfPictures--;
-
-			updateGeneralParameters(database);
+			updateFileTypes(image_metadata, image_address, i, FALSE);
 		}
 	}
 
-	// Checking if id was found at all: (meaning did it even exists?)
-	if (Found == FALSE)
-		return DataBaseIllegalId;
+	uint8_t zero = 0;
+	for(unsigned int i = 0; i < sizeof(ImageMetadata); i += sizeof(uint8_t))
+	{
+		int FRAM_result = FRAM_write(&zero, image_address + i, sizeof(uint8_t));
+		CMP_AND_RETURN(FRAM_result, 0, DataBaseFramFail);
+	}
 
-	updateGeneralParameters(database);
+	database->numberOfPictures--;
+
+	updateGeneralDataBaseParameters(database);
 
 	return DataBaseSuccess;
 }
 
-DataBaseResult takePicture(DataBase database, Boolean8bit testPattern)
+ImageDataBaseResult clearImageDataBase(ImageDataBase database)
 {
-	printf("\n----------TAKE PICTURE----------\n");
+	printf("\n----------resetImageDataBase----------\n");
 
-	unsigned int currentDate = 0;
-	Time_getUnixEpoch(&currentDate);
-	printf("currentDate = %u", currentDate);
-
-	global_param globalParameters;
-	get_current_global_param(&globalParameters);
-
-	int err = 0;
-	for (unsigned int i = 0; i < database->cameraParameters.frameAmount; i++)
-	{
-		err = GomEpsResetWDT(0);
-		printf("err DB eps: %d\n", err);
-		// Erasing previous image before taking one to clear this part of the SDs
-		err = GECKO_EraseBlock(database->nextId + i);
-		if (err)
-		{
-			printf("Error (%d) erasing image!\n",err);
-			return (GECKO_Erase_Success - err);
-		}
-		vTaskDelay(500);
-	}
-
-
-	int WDerr = GomEpsResetWDT(0);
-	printf("err DB eps: %d\n", WDerr);
-
-	// Taking images:
-
-	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
-
-	vTaskDelay(500);
-	if(err)
-	{
-		printf("Error (%d) taking image!\n",err);
-		return (GECKO_Take_Success - err);
-	}
-
-
-	// DataBase handling:
-
-	err = 0;
-
-	unsigned int numOfFramesTaken;
-	for (numOfFramesTaken = 0; numOfFramesTaken < database->cameraParameters.frameAmount; numOfFramesTaken++)
-	{
-		vTaskDelay(100);
-
-		printf("database->nextId = %u, database->numberOfPictures = %u\n", database->nextId, database->numberOfPictures);
-
-		ImageDetails currentImageDetails; //id, filename, score, type, timestamp
-
-		// Writing current time to the DataBase(in Unix):
-		currentImageDetails.timestamp = currentDate + (database->cameraParameters.frameRate * numOfFramesTaken);
-
-		//ImageDetails.timestamp += numOfFramesTaken*frameRate;	// handling the time stamp of multiple frames
-		printf("ImageDetails.timestamp = %d\n", currentImageDetails.timestamp);
-
-		// Finding space at the database(FRAM) for the image's ImageDetails:
-		printf("\nFinding space at the database(FRAM) for the image's ImageDetails:\n");
-
-		unsigned int currentPosition;
-		currentPosition = getDatabaseStart(database);
-
-		Boolean IsEmpty = FALSE;
-
-		while(currentPosition < getDatabaseEnd(database)) // as long as we are not in the end of the file ,we will continue
-		{
-			int FRAM_result = FRAM_readAndProgress((unsigned char*)&currentImageDetails.cameraId, (unsigned int*)&currentPosition, (unsigned int)sizeof(imageid));
-			if (FRAM_result != 0)
-				return DataBaseFramFail;
-
-			printf("\n currentPosition = %d, current id = %d\n", (unsigned int)(currentPosition - sizeof(imageid)), currentImageDetails.cameraId);
-
-			if (currentImageDetails.cameraId == 0)
-			{
-				IsEmpty = TRUE;
-				break;
-			}
-			else
-			{
-				currentPosition += sizeof(ImageDetails) - sizeof(imageid);
-			}
-		}
-
-		if (IsEmpty == TRUE)
-		{
-			currentPosition -= sizeof(imageid);
-
-			currentImageDetails.cameraId = database->nextId;
-
-			// saving the angles to ImageDetails
-			memcpy(&currentImageDetails.angles, &globalParameters.Attitude, sizeof(short) * 3);
-
-			currentImageDetails.markedFor_4thTumbnailCreation = FALSE_8BIT;
-
-			database->nextId++;
-			database->numberOfPictures++;
-
-			printf("\nid: %d, inOBC:", currentImageDetails.cameraId);
-
-	    	bit fileTypes[8];
-
-			for (int i = 0; i < NumberOfFileTypes; i++) {
-				fileTypes[i].value = FALSE_bit;
-				printf(" %u", fileTypes[i].value);
-			}
-
-			currentImageDetails.fileTypes = bits2char(fileTypes);
-
-			FRAM_writeAndProgress((unsigned char*)&currentImageDetails, &currentPosition, sizeof(ImageDetails)); // writing data from image descriptor to ImageDetails
-
-			printf(", timestamp: %u, angles = %u %u %u\n", currentImageDetails.timestamp, currentImageDetails.angles[0], currentImageDetails.angles[1], currentImageDetails.angles[2]);
-		}
-		else	// If we got here and didn't find space at the database it is probably full:
-		{
-			database->nextId -= numOfFramesTaken;
-			database->numberOfPictures -= numOfFramesTaken;
-
-			updateGeneralParameters(database);
-
-			return DataBaseFull;
-		}
-	}
-
-	updateGeneralParameters(database);
-
-	printf("\nSo guys we did it! we reached a quarter of a million subscribers!\n");
-
-	return DataBaseSuccess;
-}
-
-DataBaseResult takePicture_withSpecialParameters(DataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, Boolean8bit testPattern)
-{
-	CameraParameters regularParameters;
-	regularParameters.adcGain = database->cameraParameters.adcGain;
-	regularParameters.pgaGain = database->cameraParameters.pgaGain;
-	regularParameters.exposure = database->cameraParameters.exposure;
-	regularParameters.frameRate = database->cameraParameters.frameRate;
-	regularParameters.frameAmount = database->cameraParameters.frameAmount;
-
-	updateCameraParameters(database, frameRate, adcGain, pgaGain, exposure, frameAmount);
-
-	DataBaseResult DB_result = takePicture(database, testPattern);
-
-	updateCameraParameters(database, regularParameters.frameRate, regularParameters.adcGain, regularParameters.pgaGain, regularParameters.exposure, regularParameters.frameAmount);
-
-	return DB_result;
-}
-
-char* GetImageFileName(imageid cameraId, fileType fileType)
-{
-	printf("\n----------GetImageFile----------\n");
-
-	unsigned int currentPosition = getDatabaseStart();
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
-
-	while(currentPosition < getDatabaseEnd()) // as long as we are not in the end of the file ,we will continue
-	{
-		FRAM_readAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-    	bit fileTypes[8];
-    	char2bits(currentImageDetails.fileTypes, fileTypes);
-
-		if (currentImageDetails.cameraId == cameraId) // check if the current id is the requested id
-		{
-			if (fileTypes[fileType].value || fileType == bmp)
-			{
-				char* fileName = malloc(FILE_NAME_SIZE);
-				getFileName(cameraId, fileType, fileName);
-				return fileName;
-			}
-			else
-				return NULL;
-		}
-	}
-	return NULL;
-}
-
-byte* getDataBaseBuffer(DataBase database, time_unix start, time_unix end)
-{
-	byte* buffer = malloc(sizeof(int));
-	if (buffer == NULL)
-		return NULL;
-
-	unsigned int size = 0; // will be the first value in the array and will indicate its length (including itself!)
-
-	memcpy(buffer + 0, &size, sizeof(size));
-	size += sizeof(size);
-
-	memcpy(buffer + size, &database->numberOfPictures, sizeof(database->numberOfPictures));
-	size+= sizeof(database->numberOfPictures);
-
-	memcpy(buffer + size, &database->nextId, sizeof(database->nextId));
-	size+= sizeof(database->nextId);
-
-	printf("numberOfPictures = %u, nextId = %u, ", database->numberOfPictures, database->nextId);
-
-	memcpy(buffer + size, &database->cameraParameters.frameAmount, sizeof(database->cameraParameters.frameAmount));
-	size+= sizeof(database->cameraParameters.frameAmount);
-	memcpy(buffer + size, &database->cameraParameters.frameRate, sizeof(database->cameraParameters.frameRate));
-	size+= sizeof(database->cameraParameters.frameRate);
-	memcpy(buffer + size, &database->cameraParameters.adcGain, sizeof(database->cameraParameters.adcGain));
-	size+= sizeof(database->cameraParameters.adcGain);
-	memcpy(buffer + size, &database->cameraParameters.pgaGain, sizeof(database->cameraParameters.pgaGain));
-	size+= sizeof(database->cameraParameters.pgaGain);
-	memcpy(buffer + size, &database->cameraParameters.exposure, sizeof(database->cameraParameters.exposure));
-	size+= sizeof(database->cameraParameters.exposure);
-
-	printf("cameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %lu, pgaGain = %lu, exposure = %lu\n", database->cameraParameters.frameAmount, database->cameraParameters.frameRate, (uint32_t)database->cameraParameters.adcGain, (uint32_t)database->cameraParameters.pgaGain, database->cameraParameters.exposure);
-
-	// Write MetaData:
-
-	ImageDetails imageDetails;
-
-	unsigned int currentPosition = getDatabaseStart(database);
-
-	while(currentPosition < getDatabaseEnd(database))
-	{
-		vTaskDelay(100);
-
-		FRAM_readAndProgress((unsigned char*)&imageDetails, &currentPosition, sizeof(ImageDetails));
-
-		if (imageDetails.cameraId != 0 && (imageDetails.timestamp >= start && imageDetails.timestamp <= end)) // check if the current id is the requested id
-		{
-			realloc(buffer, size + sizeof(ImageDetails));
-
-			memcpy(buffer + size, &imageDetails.cameraId, sizeof(imageDetails.cameraId));
-			size += sizeof(imageDetails.cameraId);
-
-			memcpy(buffer + size, &imageDetails.timestamp, sizeof(imageDetails.timestamp));
-			size += sizeof(imageDetails.timestamp);
-
-			memcpy(buffer + size, &imageDetails.fileTypes, sizeof(imageDetails.fileTypes));
-			size += sizeof(imageDetails.fileTypes);
-
-			memcpy(buffer + size, &imageDetails.angles, sizeof(imageDetails.angles));
-			size += sizeof(imageDetails.angles);
-
-			memcpy(buffer + size, &imageDetails.markedFor_4thTumbnailCreation, sizeof(imageDetails.markedFor_4thTumbnailCreation));
-			size += sizeof(imageDetails.markedFor_4thTumbnailCreation);
-
-			// printing for tests:
-
-			printf("cameraId: %d, timestamp: %u, inOBC:", imageDetails.cameraId, imageDetails.timestamp);
-
-			bit fileTypes[8];
-			char2bits(imageDetails.fileTypes, fileTypes);
-
-			printf(", files:");
-			for (int j = 0; j < 8; j++) {
-				printf(" %u", fileTypes[j].value);
-			}
-			printf(", ");
-
-			printf(", angles: %u %u %u, markedFor_4thTumbnailCreation = %u\n", imageDetails.angles[0], imageDetails.angles[1], imageDetails.angles[2], imageDetails.markedFor_4thTumbnailCreation);
-		}
-	}
-
-	memcpy(buffer + 0, &size, sizeof(size));
-
-	return buffer;
-}
-
-byte* GetImageMetaData_byID(DataBase database, imageid id)
-{
-	byte* buffer = malloc(sizeof(ImageDetails) + sizeof(int));
-	if (buffer == NULL)
-		return NULL;
-
-	unsigned int size = 0;
-
-	memcpy(buffer + 0, &size, sizeof(size));
-	size += sizeof(size);
-
-	ImageDetails imageDetails;
-
-	unsigned int currentPosition = getDatabaseStart(database) + sizeof(*database);
-
-	while(currentPosition < getDatabaseEnd(database))
-	{
-		vTaskDelay(100);
-
-		FRAM_readAndProgress((unsigned char*)&imageDetails, &currentPosition, sizeof(ImageDetails));
-
-		if (imageDetails.cameraId == id)
-		{
-			memcpy(buffer + size, &imageDetails.cameraId, sizeof(imageDetails.cameraId));
-			size += sizeof(imageDetails.cameraId);
-
-			memcpy(buffer + size, &imageDetails.timestamp, sizeof(imageDetails.timestamp));
-			size += sizeof(imageDetails.timestamp);
-
-			memcpy(buffer + size, &imageDetails.fileTypes, sizeof(imageDetails.fileTypes));
-			size += sizeof(imageDetails.fileTypes);
-
-			memcpy(buffer + size, &imageDetails.angles, sizeof(imageDetails.angles));
-			size += sizeof(imageDetails.angles);
-
-			memcpy(buffer + size, &imageDetails.markedFor_4thTumbnailCreation, sizeof(imageDetails.markedFor_4thTumbnailCreation));
-			size += sizeof(imageDetails.markedFor_4thTumbnailCreation);
-
-			memcpy(buffer + 0, &size, sizeof(size));
-
-			// printing for tests:
-
-			printf("cameraId: %d, timestamp: %u, inOBC:", imageDetails.cameraId, imageDetails.timestamp);
-
-	    	bit fileTypes[8];
-	    	char2bits(imageDetails.fileTypes, fileTypes);
-
-			printf(", files:");
-			for (int j = 0; j < 8; j++) {
-				printf(" %u", fileTypes[j].value);
-			}
-			printf(", ");
-
-			printf(", angles: %u %u %u, markedFor_4thTumbnailCreation = %u\n", imageDetails.angles[0], imageDetails.angles[1], imageDetails.angles[2], imageDetails.markedFor_4thTumbnailCreation);
-
-			return buffer;
-		}
-	}
-
-	return NULL;
-}
-
-static uint8_t GetBinnedPixel(uint8_t binPixelSize, int x, int y)
-{
-	uint16_t value = 0;
-	int i,j;
-	for(j = 0; j < binPixelSize; j++)
-	{
-		for(i = 0; i < binPixelSize; i++)
-		{
-			value += imageBuffer[y+j*2][x+i*2]; // need to jump 2 because of bayer pattern
-		}
-	}
-	return (uint8_t)(value/(binPixelSize*binPixelSize));
-
-	return 0;
-}
-
-DataBaseResult BinImage_Average(DataBase database, imageid id, byte reductionLevel)	// where 2^(bin level) is the size reduction of the image
-{
-	unsigned int currentPosition = getDatabaseStart(database);
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
-
-	while(currentPosition < getDatabaseEnd(database)) // as long as we are not in the end of the file ,we will continue
-	{
-		FRAM_readAndProgress((unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-    	bit fileTypes[8];
-    	char2bits(currentImageDetails.fileTypes, fileTypes);
-
-		if (currentImageDetails.cameraId == id) // check if the current id is the requested id
-		{
-			if (fileTypes[raw + reductionLevel].value)
-				return DataBasealreadyInSD;
-			else if (!fileTypes[raw ].value)
-				return DataBaseNotInSD;
-			else
-			{
-				fileTypes[raw + reductionLevel].value = TRUE_bit;
-
-		    	currentImageDetails.fileTypes = bits2char(fileTypes);
-
-				currentPosition -= sizeof(ImageDetails);
-				FRAM_writeAndProgress((unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails));
-
-				break;
-			}
-		}
-	}
-
-	char fileName[FILE_NAME_SIZE];
-	getFileName(id, raw, fileName);
-
-	F_FILE *file = f_open(fileName, "r" ); // open file for writing in safe mode
-	if(file == NULL)
-	{
-		return DataBaseFail;
-	}
-
-	unsigned int br = f_read(imageBuffer, 1, sizeof(imageBuffer), file);
-	if( sizeof(imageBuffer) != br )
-	{
-		TRACE_ERROR("f_read pb: %d\n\r", f_getlasterror() ); // if bytes to write doesn't equal bytes written, get the error
-	}
-
-	int err1 = f_close( file ); // data is also considered safe when file is closed
-	if( err1 )
-	{
-		TRACE_ERROR("f_close pb: %d\n\r", err1);
-	}
-
-	// bin data:
-	uint8_t binPixelSize = (1 << reductionLevel);
-	uint8_t (*binBuffer)[IMAGE_HEIGHT / binPixelSize][IMAGE_WIDTH / binPixelSize] = (uint8_t(*)[][IMAGE_WIDTH/binPixelSize])imageBuffer;
-
-	for(unsigned int y = 0; y < IMAGE_HEIGHT / binPixelSize; y += 2)
-	{
-		for(unsigned int x = 0; x < IMAGE_WIDTH / binPixelSize; x += 2)
-		{
-			(*binBuffer)[y][x] = GetBinnedPixel(binPixelSize,x*binPixelSize,y*binPixelSize);         // Red pixel
-			(*binBuffer)[y][x+1] = GetBinnedPixel(binPixelSize,x*binPixelSize+1,y*binPixelSize);     // Green pixel
-			(*binBuffer)[y+1][x] = GetBinnedPixel(binPixelSize,x*binPixelSize,y*binPixelSize+1);     // Green pixel
-			(*binBuffer)[y+1][x+1] = GetBinnedPixel(binPixelSize,x*binPixelSize+1,y*binPixelSize+1); // Blue pixel
-		}
-	}
-
-	// save data
-	getFileName(id, raw + reductionLevel, fileName);
-
-	file = f_open( fileName, "w+" ); /* open file for writing in safe mode */
-	if( !file )
-	{
-		return DataBaseFail;
-	}
-
-	unsigned int bw = f_write(imageBuffer, 1, sizeof(*binBuffer), file );
-	if(sizeof(*binBuffer) != bw )
-	{
-		return DataBaseFail;
-	}
-
-	f_flush( file ); /* only after flushing can data be considered safe */
-
-	int err = f_close( file ); /* data is also considered safe when file is closed */
-	if( err )
-	{
-		return DataBaseFail;
-	}
-
-	updateGeneralParameters(database);
-
-	return DataBaseSuccess;
-}
-
-DataBaseResult BinImage_Skipping(DataBase database, imageid id, byte reductionLevel)	// where 2^(bin level) is the size reduction of the image
-{
-	unsigned int currentPosition = getDatabaseStart(database);
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
-
-	while(currentPosition < getDatabaseEnd(database)) // as long as we are not in the end of the file ,we will continue
-	{
-		FRAM_readAndProgress((unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-    	bit fileTypes[8];
-    	char2bits(currentImageDetails.fileTypes, fileTypes);
-
-		if (currentImageDetails.cameraId == id) // check if the current id is the requested id
-		{
-			if (fileTypes[raw + reductionLevel].value)
-				return DataBasealreadyInSD;
-			else if (!fileTypes[raw ].value)
-				return DataBaseNotInSD;
-			else
-			{
-				fileTypes[raw + reductionLevel].value = TRUE_bit;
-
-		    	currentImageDetails.fileTypes = bits2char(fileTypes);
-
-				currentPosition -= sizeof(ImageDetails);
-				FRAM_writeAndProgress((unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails));
-
-				break;
-			}
-		}
-	}
-
-	char fileName[FILE_NAME_SIZE];
-	getFileName(id, raw, fileName);
-
-	F_FILE *file = f_open(fileName, "r" ); // open file for writing in safe mode
-	if(file == NULL)
-	{
-		return DataBaseFail;
-	}
-
-	unsigned int br = f_read(imageBuffer, 1, sizeof(imageBuffer), file);
-	if( sizeof(imageBuffer) != br )
-	{
-		TRACE_ERROR("f_read pb: %d\n\r", f_getlasterror() ); // if bytes to write doesn't equal bytes written, get the error
-	}
-
-	int err1 = f_close( file ); // data is also considered safe when file is closed
-	if( err1 )
-	{
-		TRACE_ERROR("f_close pb: %d\n\r", err1);
-	}
-
-	unsigned int imageFactor = (unsigned int)pow(2, (double)reductionLevel);
-	uint8_t (*binBuffer)[IMAGE_HEIGHT / imageFactor][IMAGE_WIDTH / imageFactor] = (uint8_t(*)[IMAGE_HEIGHT/imageFactor][IMAGE_WIDTH/imageFactor])imageBuffer;
-
-	for(unsigned int y = 0; y < IMAGE_HEIGHT / imageFactor; y += 2)
-	{
-		for(unsigned int x = 0; x < IMAGE_WIDTH / imageFactor; x += 2)
-		{
-			(*binBuffer)[y][x] = imageBuffer[y*imageFactor][x*imageFactor];				// Red pixel
-			(*binBuffer)[y][x+1] = imageBuffer[y*imageFactor][x*imageFactor+1];			// Green pixel
-			(*binBuffer)[y+1][x] = imageBuffer[y*imageFactor+1][x*imageFactor];			// Green pixel
-			(*binBuffer)[y+1][x+1] = imageBuffer[y*imageFactor+1][x*imageFactor+1];		// Blue pixel
-		}
-	}
-
-	// save data
-	getFileName(id, raw + reductionLevel, fileName);
-
-	file = f_open( fileName, "w+" ); /* open file for writing in safe mode */
-	if( !file )
-	{
-		return DataBaseFail;
-	}
-
-	unsigned int bw = f_write(imageBuffer, 1, sizeof(*binBuffer), file );
-	if(sizeof(*binBuffer) != bw )
-	{
-		return DataBaseFail;
-	}
-
-	f_flush( file ); /* only after flushing can data be considered safe */
-
-	int err = f_close( file ); /* data is also considered safe when file is closed */
-	if( err )
-	{
-		return DataBaseFail;
-	}
-
-	updateGeneralParameters(database);
-
-	return DataBaseSuccess;
-}
-
-DataBaseResult BinImage(DataBase database, imageid id, byte reductionLevel, Boolean Skipping)
-{
-	if (Skipping)
-		return BinImage_Skipping(database, id, reductionLevel);
-	else
-		return BinImage_Average(database, id, reductionLevel);
-}
-
-DataBaseResult compressImage(DataBase database, imageid id, unsigned int quality_factor, fileType reductionLevel)
-{
-	unsigned int currentPosition = getDatabaseStart(database);
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
-
-	while(currentPosition < getDatabaseEnd(database)) // as long as we are not in the end of the file ,we will continue
-	{
-		FRAM_readAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the id from the ImageDescriptor file
-
-    	bit fileTypes[8];
-    	char2bits(currentImageDetails.fileTypes, fileTypes);
-
-		if (currentImageDetails.cameraId == id) // check if the current id is the requested id
-		{
-			if (fileTypes[jpg].value)
-			{
-				return DataBasealreadyInSD;
-			}
-			else
-			{
-				fileTypes[jpg].value = TRUE_bit;
-
-				currentImageDetails.fileTypes = bits2char(fileTypes);
-
-				currentPosition -= sizeof(ImageDetails);
-				FRAM_writeAndProgress((unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails));
-
-				break;
-			}
-		}
-	}
-
-	int err = GomEpsResetWDT(0);
-	printf("err DB eps: %d\n", err);
-
-	CompressImage(id, reductionLevel, quality_factor);	// ToDo: JPEG error might be here...
-
-	return DataBaseSuccess;
-}
-
-DataBaseResult clearDataBase(DataBase database)
-{
-	printf("\n----------resetDataBase----------\n");
-
-	DataBaseResult DB_result = DataBaseSuccess;
+	ImageDataBaseResult DB_result = DataBaseSuccess;
 
 	// Deleting all pictures saved on iOBC SD so we wont have doubles later
 	for (int i = 0; i < NumberOfFileTypes; i++) {
@@ -1281,40 +566,217 @@ DataBaseResult clearDataBase(DataBase database)
 			return DB_result;
 	}
 
-	uint8_t data = 0;
-	int result;
-	for (unsigned int i = getDatabaseStart(database); i < getDatabaseEnd(database); i += sizeof(uint8_t))
-	{
-		result = FRAM_write((unsigned char*)&data, i, sizeof(uint8_t));
-		if (result != 0)
-		{
-			return DataBaseFramFail;
-		}
-	}
+	zeroImageDataBase(database);
 
 	return DataBaseSuccess;
 }
 
-imageid* get_ID_list_withDefaltThumbnail(DataBase database, time_unix startingTime, time_unix endTime)
+//---------------------------------------------------------------
+
+ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, ImageMetadata image_metadata, uint32_t image_address, uint32_t time_image_taken, global_param globalParameters)
+{
+	ImageDataBaseResult result = SearchDataBase_byID(0, &image_metadata, &image_address);	// Finding space at the database(FRAM) for the image's ImageMetadata:
+	CMP_AND_RETURN(result, DataBaseSuccess, DataBaseFull);
+
+	image_metadata.cameraId = database->nextId;
+	image_metadata.timestamp = time_image_taken;
+	memcpy(&image_metadata.angles, &globalParameters.Attitude, sizeof(short) * 3);
+
+	if (database->AutoThumbnailCreation)
+		image_metadata.markedFor_TumbnailCreation = TRUE_8BIT;
+	else
+		image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
+
+	for (fileType i = 0; i < NumberOfFileTypes; i++) {
+		updateFileTypes(image_metadata, image_address, i, FALSE_bit);
+	}
+
+	database->nextId++;
+	database->numberOfPictures++;
+
+	return DataBaseSuccess;
+}
+
+ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
+{
+	global_param globalParameters;
+	get_current_global_param(&globalParameters);
+
+	int err = 0;
+
+	// Erasing previous image before taking one to clear this part of the SDs:
+
+	for (unsigned int i = 0; i < database->cameraParameters.frameAmount; i++)
+	{
+		err = GECKO_EraseBlock(database->nextId + i);
+		CMP_AND_RETURN(err, 0, GECKO_Erase_Success - err);
+
+		vTaskDelay(500);
+	}
+
+	unsigned int currentDate = 0;
+	Time_getUnixEpoch(&currentDate);
+
+	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
+	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);
+
+	vTaskDelay(500);
+
+	// ImageDataBase handling:
+
+	ImageDataBaseResult result;
+
+	ImageMetadata image_metadata;
+	uint32_t image_address = 0;
+
+	for (uint32_t numOfFramesTaken = 0; numOfFramesTaken < database->cameraParameters.frameAmount; numOfFramesTaken++)
+	{
+		vTaskDelay(100);
+
+		result = writeNewImageMetaDataToFRAM(database, image_metadata, image_address, currentDate, globalParameters);
+		DB_RETURN_ERROR(result);
+
+		currentDate += database->cameraParameters.frameRate;
+	}
+
+	updateGeneralDataBaseParameters(database);
+
+	return DataBaseSuccess;
+}
+
+ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, Boolean8bit testPattern)
+{
+	CameraPhotographyValues regularParameters;
+	memcpy(&regularParameters, &database->cameraParameters, sizeof(CameraPhotographyValues));
+
+	setCameraPhotographyValues(database, frameRate, adcGain, pgaGain, exposure, frameAmount);
+
+	ImageDataBaseResult DB_result = takePicture(database, testPattern);
+
+	setCameraPhotographyValues(database, regularParameters.frameRate, regularParameters.adcGain, regularParameters.pgaGain, regularParameters.exposure, regularParameters.frameAmount);
+
+	return DB_result;
+}
+
+//---------------------------------------------------------------
+
+ImageDataBaseResult GetImageFileName(imageid id, fileType fileType, char fileName[FILE_NAME_SIZE])
+{
+	ImageMetadata image_metadata;
+	uint32_t image_address;
+
+	ImageDataBaseResult result = SearchDataBase_byID(id, &image_metadata, &image_address);
+	DB_RETURN_ERROR(result);
+
+	if (fileType != bmp)
+	{
+		result = checkForFileType(image_metadata, fileType);
+		DB_RETURN_ERROR(result);
+	}
+
+	getFileName(id, fileType, fileName);
+
+	return DataBaseSuccess;
+}
+
+//---------------------------------------------------------------
+
+Boolean checkIfInRange(ImageMetadata* image_metadata, time_unix* time_range)
+{
+	time_unix start, end;
+
+	memcpy(&start, time_range, sizeof(time_unix));
+	memcpy(&end, time_range + sizeof(time_unix), sizeof(time_unix));
+
+	if (image_metadata->cameraId != 0 && (image_metadata->timestamp >= start && image_metadata->timestamp <= end)) // check if the current id is the requested id
+		return TRUE;
+	else
+		return FALSE;
+}
+
+byte* getImageDataBaseBuffer(ImageDataBase database, time_unix start, time_unix end)
+{
+	// will be the first value in the array and will indicate its length (including itself!)
+	uint32_t size = sizeof(int) + SIZEOF_IMAGE_DATABASE;
+
+	byte* buffer = malloc(size);
+	if (buffer == NULL)
+		return NULL;
+
+	memcpy(buffer + sizeof(int), database, SIZEOF_IMAGE_DATABASE);
+
+	// printing for tests:
+	printf("numberOfPictures = %u, nextId = %u, cameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %lu, pgaGain = %lu, exposure = %lu\n",
+			 database->numberOfPictures, database->nextId,
+			 database->cameraParameters.frameAmount, database->cameraParameters.frameRate,
+			 (uint32_t)database->cameraParameters.adcGain, (uint32_t)database->cameraParameters.pgaGain, database->cameraParameters.exposure);
+
+	// Write MetaData:
+
+	ImageMetadata image_metadata;
+	uint32_t image_address;
+
+	uint32_t database_start_address = DATABASE_FRAM_START;
+	uint32_t database_end_address = DATABASE_FRAM_END;
+
+	time_unix* time_range = malloc(sizeof(time_unix) * 2);
+	memcpy(time_range, &start, sizeof(time_unix));
+	memcpy(time_range + sizeof(time_unix), &end, sizeof(time_unix));
+
+	int result = 0;
+
+	while(result == 0)
+	{
+		result = FRAM_DataStructure_search(database_start_address, database_end_address,
+				sizeof(ImageMetadata), &image_metadata, &image_address,
+				(Boolean (*)(void*, void*))&checkIfInRange, time_range);
+		database_start_address = image_address + sizeof(ImageMetadata);
+
+		if (result == 0)
+		{
+			memcpy(buffer + size, &image_metadata, sizeof(ImageMetadata));
+
+			size += sizeof(ImageMetadata);
+			realloc(buffer, size);
+
+			// printing for tests:
+			printf("cameraId: %d, timestamp: %u, inOBC:", image_metadata.cameraId, image_metadata.timestamp);
+			bit fileTypes[8];
+			char2bits(image_metadata.fileTypes, fileTypes);
+			printf(", files:");
+			for (int j = 0; j < 8; j++) {
+				printf(" %u", fileTypes[j].value);
+			}
+			printf(", ");
+			printf(", angles: %u %u %u, markedFor_TumbnailCreation = %u\n",
+					image_metadata.angles[0], image_metadata.angles[1], image_metadata.angles[2], image_metadata.markedFor_TumbnailCreation);
+		}
+	}
+
+	memcpy(buffer, &size, sizeof(size));
+
+	free(time_range);
+	return buffer;
+}
+
+imageid* get_ID_list_withDefaltThumbnail(time_unix startingTime, time_unix endTime)
 {
 	unsigned int numberOfIDs = 0;
 	imageid* ID_list = malloc((numberOfIDs + 1) * sizeof(imageid));
 
-	unsigned int currentPosition = getDatabaseStart(database);
-	ImageDetails currentImageDetails; // will contain our current ID while going through the ImageDescriptor
+	unsigned int currentPosition = DATABASE_FRAM_START;
+	ImageMetadata currentImageMetadata; // will contain our current ID while going through the ImageDescriptor
 
-	while(currentPosition < getDatabaseEnd(database)) // as long as we are not in the end of the file ,we will continue
+	while(currentPosition <  DATABASE_FRAM_END) // as long as we are not in the end of the file ,we will continue
 	{
-		FRAM_readAndProgress( (unsigned char*)&currentImageDetails, (unsigned int*)&currentPosition, (unsigned int)sizeof(ImageDetails)); // reading the ID from the ImageDescriptor file
+		FRAM_read( (unsigned char*)&currentImageMetadata, (unsigned int)currentPosition, (unsigned int)sizeof(ImageMetadata)); // reading the ID from the ImageDescriptor file
+		currentPosition += sizeof(ImageMetadata);
 
-    	bit fileTypes[8];
-    	char2bits(currentImageDetails.fileTypes, fileTypes);
-
-		if (fileTypes[DEFALT_REDUCTION_LEVEL].value && (currentImageDetails.timestamp >=startingTime && currentImageDetails.timestamp <=endTime)) // check if the current ID is the requested ID
+		if (checkForFileType(currentImageMetadata, DEFALT_REDUCTION_LEVEL) == DataBaseSuccess && (currentImageMetadata.timestamp >=startingTime && currentImageMetadata.timestamp <=endTime)) // check if the current ID is the requested ID
 		{
 			numberOfIDs += 1;
 			realloc(ID_list, (numberOfIDs + 1) * sizeof(imageid));
-			memcpy(ID_list + numberOfIDs*sizeof(imageid), &currentImageDetails.cameraId, sizeof(imageid));
+			memcpy(ID_list + numberOfIDs*sizeof(imageid), &currentImageMetadata.cameraId, sizeof(imageid));
 		}
 	}
 

@@ -12,9 +12,10 @@
 
 typedef enum
 {
-	JpegCompressionSuccess,
+	JpegCompression_Success,
 	JpegCompression_qualityFactor_outOFRange,
 	JpegCompression_ImageLoadingFailure,
+	JpegCompression_FileSystemFailure,
 	JpegCompression_FailedWritingToOutputFile
 } JpegCompressionResult;
 
