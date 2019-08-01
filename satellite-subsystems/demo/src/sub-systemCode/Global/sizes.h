@@ -36,7 +36,7 @@
 #define CMD_ID_SIZE	4
 #define ADCS_STAGE_SIZE 10
 #define RESTART_FLAG_SIZE 1
-#define BEACON_LENGTH 59	//beacon data length
+#define BEACON_LENGTH 50	//beacon data length
 #define ACK_DATA_LENGTH 6
 
 #define SPL_TM_HEADER_SIZE 		8
