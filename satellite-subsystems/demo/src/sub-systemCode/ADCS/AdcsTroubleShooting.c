@@ -3,7 +3,7 @@
 
 int AdcsTroubleShooting(TroubleErrCode *trbl)
 {
-
+	(void)trbl;	// to remove "unused parameter" warning
 	return 0;
 }
 
@@ -11,5 +11,5 @@ int AdcsTroubleShooting(TroubleErrCode *trbl)
 TroubleErrCode FindErr()
 {
 
-	return TRBL_NO_ERROR;
+	return TRBL_SUCCESS;
 }

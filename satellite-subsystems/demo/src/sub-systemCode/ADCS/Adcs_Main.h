@@ -1,7 +1,10 @@
 #ifndef ADCS_MAIN_H_
 #define ADCS_MAIN_H_
 
+#define ADCS_ID 0
+#define ADCS_I2C_ADRR 0x57
 
+#include "AdcsTroubleShooting.h"
 
 
 typedef enum
@@ -11,10 +14,12 @@ typedef enum
 
 }AdcsStateMachineCMD;
 
-xTaskHandle AdcsTaskHandle = NULL;	// a handle to the adcs task.
-
 //ADCS main
+
+int AddCommandToAdcsQueue();
+
 void AdcsTask();
-void InitAdcs();
+
+TroubleErrCode InitAdcs();
 
 #endif // !ADCS_MAIN_H_

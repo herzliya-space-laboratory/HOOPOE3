@@ -4,14 +4,16 @@
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 #include <hcc/api_fs_err.h>
-#include "Adcs_Main.h"
-#include "../Main/commands.h"
-#include "Adcs_Config.h"
 
+#include "../Main/commands.h"
 #include "../Main/CMD/ADCS_CMD.h"
-#include "StateMachine.h"
+#include "sub-systemCode/Global/GlobalParam.h"
+
+#include "Adcs_Main.h"
+#include "Adcs_Config.h"
 #include "AdcsTroubleShooting.h"
 #include "AdcsGetDataAndTlm.h"
+#include "StateMachine.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,65 +23,40 @@
 #define ADCS_LOOP_DELAY 1000 //the loop runs in 1Hz
 
 
-int ActiveStateMachine = TRUE;
+int AddCommandToAdcsQueue()
+{
+	return 0;
+}
+
+int GetCmdFromQueue(TC_spl *command)
+{
+	(void)command;
+	return TRBL_SUCCESS;
+}
 
 TroubleErrCode InitAdcs()
 {
-	TroubleErrCode trbl = TRBL_NO_ERROR;
-	//TODO: finish initialization of the ADCS. see the demos for further reference
+	TroubleErrCode trbl = TRBL_SUCCESS;
+
+	unsigned char adcs_i2c = ADCS_I2C_ADRR;
+	int rv;
+
+	rv = cspaceADCS_initialize(&adcs_i2c, 1);
+	if(rv != E_NO_SS_ERR && rv != E_IS_INITIALIZED){
+		//TODO: log error
+		return TRBL_ADCS_INIT_ERR;
+	}
+
 	if(F_NO_ERROR !=  f_enterFS()){
 		//TODO: handle file error
 		return -1; //TODO: return appropriate TRBL
 	}
-	trbl = InitStateMachine();
-	if(TRBL_NO_ERROR != trbl){
-		return -1;//TODO: return appropriate TRBL
-	}
-	//todo: check xQueueCreate
-	Boolean err = CreateTlmElementFiles();
-	if(FALSE == err)
-		return -1; //TODO: return appropriate TRBL
+
+	return TRBL_SUCCESS;
 }
 
 void AdcsTask()
 {
-	TroubleErrCode err = {0};
-	TC_spl command = {0};
-	while(TRUE)
-	{
-		if(SWITCH_OFF == get_system_state(ADCS_param))
-		{
-			vTaskDelay(ADCS_RESPONSE_DELAY);
-			continue;
-		}
 
-		if(ActiveStateMachine == TRUE)
-		{
-			err[1] = UpdateAdcsStateMachine(&command, MANUAL_MODE);
-			//todo: SM Log
-			ActiveStateMachine = FALSE;
-		}
-
-		if(AdcsTroubleShooting(err) != TRBL_NO_ERROR)
-		{
-			ActiveStateMachine = TRUE;
-			continue;
-		}
-
-		err[2] = GatherTlmAndData();
-		vTaskDelay(ADCS_LOOP_DELAY);
-
-		//todo: move into a separate function
-		if(IsAdcsQueueEmpty())
-		{
-			ActiveStateMachine = FALSE;
-		}
-		else
-		{
-			GetCmdFromQueue(&command);
-			ActiveStateMachine = TRUE;
-			//todo: System Log
-		}
-	}
 }
 

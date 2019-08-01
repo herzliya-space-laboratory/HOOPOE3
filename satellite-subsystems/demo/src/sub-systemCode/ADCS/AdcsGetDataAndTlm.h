@@ -28,6 +28,14 @@
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
+typedef struct __attribute__ ((__packed__))
+{
+	Boolean8bit ToSave;					//<! A flag stating whether to save this specific telemetry
+	unsigned char TlmElementeSize;		//<! size of the telemetry to be collected
+	AdcsTlmCollectFunc TlmCollectFunc;	//<! A function that collects the TLM (An ISIS driver function)
+	char TlmFileName[FN_MAXNAME];		//<! The filename in which the TLM will be saved
+	Boolean8bit OperatingFlag;			//<! A flag stating if the TLM is working correctly and no errors occuredd in the file creation or TLM collection
+} AdcsTlmElement;
 
 /*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD
