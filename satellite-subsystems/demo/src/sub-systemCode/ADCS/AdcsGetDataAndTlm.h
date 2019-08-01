@@ -62,7 +62,7 @@ void UpdateTlmElementAtIndex(int index,AdcsTlmCollectFunc func,unsigned char Tlm
  * @get all ADCS data and TLM and save if need to
  * @get the data from the ADCS computer.
  */
-void GatherTlmAndData();
+TroubleErrCode GatherTlmAndData();
 
 /*!
  * 	@brief Initializes the telemetry array.

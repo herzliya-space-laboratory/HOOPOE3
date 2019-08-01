@@ -10,7 +10,7 @@
 #include <hal/Storage/FRAM.h>
 #include <hcc/api_fat.h>
 
-#include "Adcs_Main.h"
+#include "AdcsMain.h"
 #include "Adcs_Config.h"
 #include "StateMachine.h"
 #include "AdcsGetDataAndTlm.h"

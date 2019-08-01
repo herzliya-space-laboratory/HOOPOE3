@@ -117,8 +117,8 @@ int SetRateSensorOffset(unsigned char *data)
 	}
 	//TODO: finsih- need to read the current config and change only the rate offset
 	int err = 0;
-	cspaceADCS_setRateSensorConfig rate_sensor;
-	err = cspaceADCS_setRateSensorConfig(ADCS_ID,&data)
+	//cspace_adcs_ratesencfg_t rate_sensor;
+	err = cspaceADCS_setRateSensorConfig(ADCS_ID,&data);
 	//TODO: send ack with 'rv'
 	return err;
 
@@ -209,7 +209,10 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		break;
 
 	case ADCS_DEPLOY_MAG_BOOM_ST:
-		err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);
+		//err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);
+#ifdef TESTING
+		printf("magnetometer not deployed \nBOOM\n");
+#endif
 		break;
 
 	case ADCS_RUN_MODE_ST:
@@ -307,7 +310,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		break;
 
 	case ADCS_RATE_SENSOR_OFFSET_ST:
-		err = AdcsI2cCmdWithID(SET_RATE_SENSOR_CONFIG_CMD_ID,cmd->data,SET_RATE_SENSOR_CONFIG_DATA_LENGTH);
+		err = AdcsI2cCmdWithID(SET_RATE_SENSOR_CONFIG_CMD_ID,cmd->data,SET_RATE_SENSOR_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
 		break;
 
@@ -331,7 +334,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		break;
 	case ADCS_GET_FULL_CONFIG_ST:
 
-		err = AdcsI2cCmdWithID(GET_ADCS_FULL_CONFIG_CMD_ID,cmd->data,GET_ADCS_FULL_CONFIG_DATA_LENGTH);
+		err = AdcsI2cCmdWithID(GET_ADCS_FULL_CONFIG_CMD_ID,cmd->data,GET_ADCS_FULL_CONFIG_DATA_LENGTH,&rv);
 				//TODO: send ack with 'rv'
 		break;
 	default:

@@ -1,6 +1,8 @@
 #ifndef ADCS_MAIN_H_
 #define ADCS_MAIN_H_
 
+#include "sub-systemCode/COMM/GSC.h"
+
 #define ADCS_ID 0
 #define ADCS_I2C_ADRR 0x57
 
@@ -21,14 +23,15 @@ typedef enum{
 	QUEUE_WAIT_TIME
 }AdcsFramParameters;
 
-TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data)
+TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data);
 
 TroubleErrCode GetQueueCmdCount();
 
-TroubleErrCode AddCommandToAdcsQueue();
+TroubleErrCode AddCommandToAdcsQueue(TC_spl *cmd);
+
+TroubleErrCode AdcsInit();
 
 void AdcsTask();
 
-TroubleErrCode InitAdcs();
 
 #endif // !ADCS_MAIN_H_

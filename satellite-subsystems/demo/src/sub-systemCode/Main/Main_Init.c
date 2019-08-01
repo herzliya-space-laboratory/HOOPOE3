@@ -44,10 +44,9 @@
 
 #include "../ADCS/AdcsMain.h"
 
-#include "../ADCS/Adcs_Main.h"
-#include "../ADCS/Stage_Table.h"
 
 #include "../TRXVU.h"
+#include "sub-systemCode/ADCS/AdcsMain.h"
 #include "HouseKeeping.h"
 #include "commands.h"
 
@@ -58,7 +57,7 @@
 // will Boot- deploy all  appropriate subsytems
 
 //extern unsigned short* Vbat_Prv;
-stageTable ST;
+
 
 #ifdef TESTING
 
@@ -249,7 +248,7 @@ int InitSubsystems()
 // #endif
 // #endif
 
-	init_adcs(activation);
+	AdcsInit();
 
 	// init_trxvu();
 

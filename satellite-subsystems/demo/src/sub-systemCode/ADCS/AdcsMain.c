@@ -68,14 +68,14 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 	case DELAY_LOOP:
 		addr = ADCS_LOOP_DELAY_FRAM_ADDR;
 		size = ADCS_LOOP_DELAY_FRAM_SIZE;
-		ptr = &delay_loop;
+		ptr = (void*)&delay_loop;
 
 		break;
 
 	case QUEUE_WAIT_TIME:
 		addr = ADCS_LOOP_DELAY_FRAM_ADDR;
 		size = ADCS_LOOP_DELAY_FRAM_SIZE;
-		ptr = &queue_wait;
+		ptr = (void*)&queue_wait;
 		break;
 	default:
 		return TRBL_FAIL;

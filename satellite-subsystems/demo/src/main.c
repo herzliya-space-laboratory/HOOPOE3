@@ -2,6 +2,10 @@
  * main.c
  *      Author: Akhil
  */
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+
 #include <satellite-subsystems/version/version.h>
 
 #include <at91/utility/exithandler.h>
@@ -9,9 +13,6 @@
 #include <at91/utility/trace.h>
 #include <at91/peripherals/cp15/cp15.h>
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <freertos/semphr.h>
 
 #include <hal/Utility/util.h>
 #include <hal/Timing/WatchDogTimer.h>
@@ -35,7 +36,8 @@
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
 
-#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
+//#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
+#include "sub-systemCode/ADCS/AdcsMain.h"
 
 #define DEBUGMODE
 
@@ -107,7 +109,7 @@ void taskMain()
 		if (UTIL_DbguGetIntegerMinMax(&(adcsCmd.subType), 0,666) != 0){
 			printf("Enter ADCS command data\n");
 			UTIL_DbguGetString(&(adcsCmd.data), SIZE_OF_COMMAND+1);
-			err = AddAdcsCmdToQueue(adcsCmd);
+			err = AddCommandToAdcsQueue(&adcsCmd);
 			printf("ADCS command error = %d\n\n\n", err);
 			printf("Send new command\n");
 			printf("Enter ADCS sub type\n");
