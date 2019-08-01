@@ -10,7 +10,6 @@
 #include "AdcsGetDataAndTlm.h"
 
 
-
 AdcsTlmElement TlmElements[NUM_OF_ADCS_TLM];
 
 #define ADCS_DEFAULT_TLM_VECTOR	\
@@ -31,7 +30,6 @@ AdcsTlmElement TlmElements[NUM_OF_ADCS_TLM];
 
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
 
-
 TroubleErrCode GetTlmElements(unsigned char *data)
 {
 	if(NULL == data){
@@ -43,6 +41,7 @@ TroubleErrCode GetTlmElements(unsigned char *data)
 	}
 	return TRBL_SUCCESS;
 }
+
 int UpdateTlmSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 {
 	if (NULL == save_tlm_flag) {
@@ -64,17 +63,20 @@ int UpdateTlmSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 	return 0;
 }
 
-void GatherTlmAndData()
+TroubleErrCode GatherTlmAndData()
 {
 	TroubleErrCode err = TRBL_SUCCESS;
+	TroubleErrCode err_occured = TRBL_SUCCESS;
 	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
 		err = SaveElementTlmAtIndex(i);
 		if (TRBL_SUCCESS != err) {
+			err_occured = TRBL_TLM_ERR;
 			TlmElements[i].ToSave = FALSE_8BIT;			// stop saving tlm if error
 			TlmElements[i].OperatingFlag = FALSE_8BIT;	// raise the 'not operating correctly' flag
 			//TODO: log err
 		}
 	}
+	return err;
 }
 
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index)

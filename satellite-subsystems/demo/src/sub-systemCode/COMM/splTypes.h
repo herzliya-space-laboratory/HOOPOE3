@@ -176,6 +176,7 @@
 #define ADCS_NOISE_CONFIG_ST			151
 #define ADCS_USE_IN_EKF_ST				152
 #define ADCS_SET_EST_MODE				153
+#define ADCS_GET_FULL_CONFIG_ST			154
 //#define ADCS_
 
 //sw

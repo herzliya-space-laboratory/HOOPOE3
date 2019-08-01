@@ -41,6 +41,9 @@
 #define SET_PROD_INERTIA_DATA_LENGTH 		12
 
 
+#define GET_ADCS_FULL_CONFIG_CMD_ID 		206
+#define GET_ADCS_FULL_CONFIG_DATA_LENGTH 	272
+
 /*!
  * @brief allows the user to send a read request directly to the I2C.
  * @param[out] rv return value from the ADCS I2C ACK request

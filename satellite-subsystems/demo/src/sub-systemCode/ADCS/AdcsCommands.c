@@ -6,7 +6,7 @@
 #include <hal/errors.h>
 
 #include "AdcsCommands.h"
-#include "Adcs_Main.h"
+#include "AdcsMain.h"
 
 #include <satellite-subsystems/cspaceADCS_types.h>
 #include <satellite-subsystems/cspaceADCS.h>
@@ -329,7 +329,11 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		memcpy(&att,cmd->data,sizeof(att));
 		err = cspaceADCS_setAttEstMode(ADCS_ID,att);
 		break;
+	case ADCS_GET_FULL_CONFIG_ST:
 
+		err = AdcsI2cCmdWithID(GET_ADCS_FULL_CONFIG_CMD_ID,cmd->data,GET_ADCS_FULL_CONFIG_DATA_LENGTH);
+				//TODO: send ack with 'rv'
+		break;
 	default:
 		//TODO: return unknown cmd
 		break;

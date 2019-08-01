@@ -13,11 +13,16 @@ typedef enum TroubleErrCode
 	TRBL_WRONG_SUB_TYPE,
 	TRBL_WRONG_TYPE,
 	TRBL_NULL_DATA,
+	TRBL_FS_INIT_ERR,
 	TRBL_FS_WRITE_ERR,
 	TRBL_FS_READ_ERR,
 	TRBL_FRAM_WRITE_ERR,
 	TRBL_FRAM_READ_ERR,
-	TRBL_INPUT_PARAM_ERR
+	TRBL_INPUT_PARAM_ERR,
+	TRBL_QUEUE_CREATE_ERR,
+	TRBL_SEMAPHORE_CREATE_ERR,
+	TRBL_TLM_ERR,
+	TRBL_QUEUE_EMPTY
 
 }TroubleErrCode;
 
@@ -30,7 +35,7 @@ typedef enum TroubleErrCode
  * return:
  * 		log code todo:check what log get?
  */
-int AdcsTroubleShooting(TroubleErrCode *trbl);
+int AdcsTroubleShooting(TroubleErrCode trbl);
 
 TroubleErrCode FindErr();
 
