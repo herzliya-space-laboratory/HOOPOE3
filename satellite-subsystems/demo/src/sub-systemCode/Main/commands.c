@@ -35,10 +35,6 @@
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
 
-#ifdef TESTING
-#include "CMD/test_CMD.h"
-#endif
-
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
