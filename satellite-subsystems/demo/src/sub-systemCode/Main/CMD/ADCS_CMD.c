@@ -1,34 +1,47 @@
 #include "Adcs_Cmd.h"
 
 //static ADCS_CMD_t ADCS_cmd[ADCS_CMD_LEN];
-static xQueueHandle AdcsCmdQueue;
+static xQueueHandle AdcsCmdQueue = NULL;
 
-ERR_type InitAdcsCmdQueue(){
-	AdcsCmdQueue = xQueueCreate(COMMAND_LIST_SIZE,sizeof(TC_spl));
-	if (AdcsCmdQueue == 0){
-		return ERR_FAIL;
+TroubleErrCode AdcsCmdQueueInit(){
+	AdcsCmdQueue = xQueueCreate(MAX_ADCS_QUEUE_LENGTH,sizeof(TC_spl));
+	if (AdcsCmdQueue == NULL){
+		return TRBL_QUEUE_CREATE_ERR;
 	}else{
-		return ERR_SUCCESS;
+		return TRBL_SUCCESS;
 	}
 }
 
-ERR_type GetAdcsCmdFromQueue(TC_spl *request){
-	if (xQueueReceive(AdcsCmdQueue, request, MAX_DELAY) == pdTRUE){
-		return ERR_SUCCESS;
+TroubleErrCode AdcsCmdQueueGet(TC_spl *cmd){
+	if(cmd == NULL){
+		return TRBL_NULL_DATA;
+	}
+	if(AdcsCmdQueueIsEmpty()){
+		return TRBL_QUEUE_EMPTY;
+	}
+	if (xQueueReceive(AdcsCmdQueue, cmd, MAX_DELAY) == pdTRUE){
+		return TRBL_SUCCESS;
 	}else{
-		return ERR_FAIL;
+		return TRBL_FAIL;
 	}
 }
 
-ERR_type AddAdcsCmdToQueue(TC_spl *cmd){
-	if (xQueueSend(AdcsCmdQueue, cmd, MAX_DELAY) == pdTRUE){
-		return ERR_SUCCESS;
+TroubleErrCode AdcsCmdQueueAdd(TC_spl *cmd){
+	if(NULL == cmd){
+		return TRBL_NULL_DATA;
+	}
+	if (xQueueSend(AdcsCmdQueue, cmd, queue_wait) == pdTRUE){
+		return TRBL_SUCCESS;
 	}else{
-		return ERR_FAIL;
+		return TRBL_FAIL;
 	}
 }
 
-Boolean IsAdcsCmdQueueEmpty(){
+TroubleErrCode AdcsCmdQueueGetCount(){
+	return uxQueueMessagesWaiting(xAdcsCmdQueue);
+}
+
+Boolean AdcsCmdQueueIsEmpty(){
 	if(uxQueueMessagesWaiting(AdcsCmdQueue) == 0){//cheak if queue is empty
 		return TRUE;
 	}else{

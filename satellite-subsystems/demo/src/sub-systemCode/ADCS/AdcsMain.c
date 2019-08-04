@@ -24,37 +24,7 @@
 
 time_unix delay_loop = 0;
 time_unix queue_wait = 0;
-xQueueHandle xAdcsCmdQueue = NULL;
 xSemaphoreHandle xAdcs_loop_param_mutex = NULL;	//TODO: need to check if need this
-
-TroubleErrCode AddCommandToAdcsQueue(TC_spl *cmd)
-{
-	if(NULL == cmd){
-		return TRBL_NULL_DATA;
-	}
-	if(pdTRUE == xQueueSend(xAdcsCmdQueue,cmd,queue_wait)){
-		return TRBL_SUCCESS;
-	}
-	return TRBL_FAIL;
-}
-
-TroubleErrCode GetQueueCmdCount(){
-	return uxQueueMessagesWaiting(xAdcsCmdQueue);
-}
-
-TroubleErrCode GetCmdFromQueue(TC_spl *cmd)
-{
-	if(NULL == cmd){
-		return TRBL_NULL_DATA;
-	}
-	if(0 == GetQueueCmdCount()){
-		return TRBL_QUEUE_EMPTY;
-	}
-	if(pdTRUE == xQueueReceive(xAdcsCmdQueue, cmd, queue_wait)){
-		return TRBL_SUCCESS;
-	}
-	return TRBL_FAIL;
-}
 
 TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data)
 {
@@ -107,9 +77,10 @@ TroubleErrCode AdcsInit()
 	if(F_NO_ERROR !=  f_enterFS()){
 		return TRBL_FS_INIT_ERR;
 	}
-	xAdcsCmdQueue = xQueueCreate(MAX_ADCS_QUEUE_LENGTH, sizeof(TC_spl));
-	if (NULL == xAdcsCmdQueue){
-		return TRBL_QUEUE_CREATE_ERR;
+	
+	trbl = AdcsCmdQueueInit();
+	if (trbl != TRBL_SUCCESS){
+		return trbl;
 	}
 
 	if(0 != FRAM_read(&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
@@ -134,20 +105,22 @@ void AdcsTask()
 	{
 		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
 
-		if(TRBL_SUCCESS == GetCmdFromQueue(&cmd)){
+		if(!AdcsCmdQueueIsEmpty()){
+			trbl = AdcsCmdQueueGet(&cmd);
+			if(TRBL_SUCCESS != trbl){
+				AdcsTroubleShooting(trbl);
+			}
 			trbl = AdcsExecuteCommand(cmd);
 			if(TRBL_SUCCESS != trbl){
 				AdcsTroubleShooting(trbl);
 			}
 			//todo: log cmd received
-		}else{
-
-			trbl = GatherTlmAndData(); //TODO: check if enough time has passed
-			if(TRBL_SUCCESS != trbl){
-				AdcsTroubleShooting(trbl);
-			}
-			vTaskDelay(delay_loop);
 		}
+		trbl = GatherTlmAndData(); //TODO: check if enough time has passed
+		if(TRBL_SUCCESS != trbl){
+			AdcsTroubleShooting(trbl);
+		}
+		vTaskDelay(delay_loop);
 	}
 }
 

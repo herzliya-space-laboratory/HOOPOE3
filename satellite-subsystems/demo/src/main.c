@@ -36,7 +36,7 @@
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
 
-//#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 #include "sub-systemCode/ADCS/AdcsMain.h"
 
 #define DEBUGMODE
@@ -109,7 +109,7 @@ void taskMain()
 		if (UTIL_DbguGetIntegerMinMax(&(adcsCmd.subType), 0,666) != 0){
 			printf("Enter ADCS command data\n");
 			UTIL_DbguGetString(&(adcsCmd.data), SIZE_OF_COMMAND+1);
-			err = AddCommandToAdcsQueue(&adcsCmd);
+			err = AdcsCmdQueueAdd(&adcsCmd);
 			printf("ADCS command error = %d\n\n\n", err);
 			printf("Send new command\n");
 			printf("Enter ADCS sub type\n");
