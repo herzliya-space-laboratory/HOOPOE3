@@ -123,6 +123,8 @@ void taskMain()
 	}
 }
 
+void 
+
 int main()
 {
 	TRACE_CONFIGURE_ISP(DBGU_STANDARD, 2000000, BOARD_MCK);

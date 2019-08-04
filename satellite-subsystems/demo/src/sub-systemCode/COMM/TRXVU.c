@@ -689,71 +689,7 @@ void reset_FRAM_TRXVU()
 
 int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 {
-	int i_error = 0, retVal = 0;
-	portBASE_TYPE lu_error = 0;
-	if (get_system_state(mute_param) == SWITCH_ON)
-	{
-		//mute
-		return -3;
-	}
-	if (get_system_state(Tx_param) == SWITCH_OFF)
-	{
-		//tx off
-		return -4;
-	}
-	if (get_system_state(transponder_active_param) == SWITCH_ON)
-	{
-		//we in transponder mode
-		return -5;
-	}
-
-	if (xSemaphoreTake(xIsTransmitting, MAX_DELAY))
-	{
-		if (bitRate != trxvu_bitrate_9600)
-		{
-			i_error = IsisTrxvu_tcSetAx25Bitrate(0, bitRate);
-			check_int("TRX_sendFrame, IsisTrxvu_tcSetAx25Bitrate", i_error);
-		}
-
-		unsigned char avalFrames = VALUE_TX_BUFFER_FULL;
-
-		int count = 0;
-		do
-		{
-			i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
-			check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
-			retVal = 0;
-			if (count % 10 == 1)
-			{
-				vTaskDelay((portTickType)(length * 20));
-				printf("Tx buffer is full\n");
-				retVal = -1;
-			}
-			count++;
-		}while(avalFrames == VALUE_TX_BUFFER_FULL);
-
-		//delay so Tx buffer will never be full
-		if (bitRate == trxvu_bitrate_1200 && retVal == 0)
-		{
-			vTaskDelay(TRANSMMIT_DELAY_1200(length));
-		}
-
-		//returns bit rate to normal (9600)
-		i_error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-		check_int("TRX_sendFrame, IsisTrxvu_tcSetAx25Bitrate", i_error);
-
-		// returns xIsTransmitting semaphore
-		lu_error = xSemaphoreGive(xIsTransmitting);
-		check_portBASE_TYPE("TRX_sendFrame, xSemaphoreGive", lu_error);
-		retVal = 0;
-	}
-	else
-	{
-		// can't take semaphore, big problem...
-		retVal = -2;
-	}
-
-	return retVal;
+	printf("ADCS sent back info= %d\n\n", data);
 }
 
 int TRX_getFrameData(unsigned int *length, byte* data_out)
