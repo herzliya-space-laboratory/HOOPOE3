@@ -17,6 +17,7 @@
 #define ACK_ST 90
 #define TM_ADCS_ST 	42
 #define ADCS_SC_ST	55
+#define ONLINE_TM_T	55//todo: find value
 
 //Types (TC)
 

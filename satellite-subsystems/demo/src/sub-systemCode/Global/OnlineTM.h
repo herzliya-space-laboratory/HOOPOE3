@@ -10,6 +10,10 @@
 
 #include "Global.h"
 #include "TM_managment.h"
+#include "../COMM/GSC.h"
+#include "../COMM/splTypes.h"
+
+#define DEFULT_INDEX	0
 
 typedef struct __attribute__ ((__packed__)) {
 	void* TM_param;
@@ -21,9 +25,15 @@ typedef struct __attribute__ ((__packed__)) {
 typedef struct __attribute__ ((__packed__)) {
 	onlineTM_param *type;
 	time_unix stopTime;
-	int period;
+	time_unix lastSave;
+	uint period;
 }saveTM;
 
 void init_onlineParam();
 
+int get_online_packet(int TM_index, TM_spl* packet);
+
+int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTime);
+
+void save_onlineTM_task();
 #endif /* ONLINETM_H_ */

@@ -38,9 +38,11 @@ int IsisAntS_getTemperature_sideB(unsigned char index, unsigned short* temperatu
 	return IsisAntS_getTemperature(index, isisants_sideB, temperature);
 }
 
-onlineTM_param onlineTM_list[18];
+#define NUMBER_OF_ONLIME_TM_PACKETS	18
+onlineTM_param onlineTM_list[NUMBER_OF_ONLIME_TM_PACKETS];
 
-saveTM onlineTM_save_list[];
+#define MAX_NUMBER_OF_ONLINE_TM_SAVE	10
+saveTM onlineTM_save_list[MAX_NUMBER_OF_ONLINE_TM_SAVE];
 
 void init_onlineParam()
 {
@@ -133,4 +135,133 @@ void init_onlineParam()
 	onlineTM_list[17].TM_param_length = sizeof(unsigned short);
 	onlineTM_list[17].TM_param = malloc(onlineTM_list[5].TM_param_length);
 	strcpy(onlineTM_list[17].name, "ANF");
+
+	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+	{
+		onlineTM_save_list[i].type = NULL;
+	}
+}
+
+int get_online_packet(int TM_index, TM_spl* packet)
+{
+	if (TM_index >= NUMBER_OF_ONLIME_TM_PACKETS || TM_index < 0)
+		return -1;
+	if (packet == NULL)
+		return -2;
+
+	int error = onlineTM_list[TM_index].fn(DEFULT_INDEX, onlineTM_list[TM_index].TM_param);
+	if (error != 0)
+		return error;
+
+	packet->type = ONLINE_TM_T;
+	packet->subType = TM_index;
+	packet->length = onlineTM_list[TM_index].TM_param_length;
+	Time_getUnixEpoch(&(packet->time));
+
+	memcpy(packet->data, onlineTM_list[TM_index].TM_param, onlineTM_list[TM_index].TM_param_length);
+
+	return 0;
+}
+
+int save_onlineTM_param(saveTM param)
+{
+	if (param.type == NULL)
+		return -2;
+
+	int error = param.type->fn(DEFULT_INDEX, param.type->TM_param);
+	if (error != 0)
+		return error;
+
+	FileSystemResult FS_result= c_fileWrite(param.type->name, param.type->TM_param);
+	if (FS_result == FS_NOT_EXIST)
+	{
+		FS_result = c_fileCreate(param.type->name, param.type->TM_param_length);
+		if (FS_result != FS_SUCCSESS)
+			return 2;
+		FS_result= c_fileWrite(param.type->name, param.type->TM_param);
+		if (FS_result != FS_SUCCSESS)
+			return 3;
+	}
+	else if (FS_result != FS_SUCCSESS)
+		return 3;
+
+	return 0;
+}
+
+int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTime)
+{
+	if (TM_index >= NUMBER_OF_ONLIME_TM_PACKETS || TM_index < 0)
+		return -1;
+	if (period == 0)
+		return -1;
+
+	time_unix time_now;
+	Time_getUnixEpoch(&time_now);
+
+	if (time_now <= stopTime)
+		return -1;
+
+	Boolean addedToLit = FALSE;
+	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+	{
+		if (onlineTM_save_list[i].type == NULL && !addedToLit)
+		{
+			onlineTM_save_list[i].type = onlineTM_list + TM_index;
+			onlineTM_save_list[i].period = period;
+			onlineTM_save_list[i].stopTime = stopTime;
+			onlineTM_save_list[i].lastSave = 0;
+			addedToLit = TRUE;
+		}
+		else
+		{
+			if (onlineTM_save_list[i].type == onlineTM_list + TM_index)
+			{
+				if (addedToLit)
+				{
+					onlineTM_save_list[i].type = NULL;
+				}
+				else
+				{
+					onlineTM_save_list[i].period = period;
+					onlineTM_save_list[i].stopTime = stopTime;
+				}
+			}
+		}
+	}
+
+	if (addedToLit)
+		return 0;
+	else
+		return -3;
+}
+
+void save_onlineTM_task()
+{
+	portTickType xLastWakeTime = xTaskGetTickCount();
+	const portTickType xFrequency = 1000;
+
+	time_unix time_now;
+
+	while(TRUE)
+	{
+		Time_getUnixEpoch(&time_now);
+		for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+		{
+			if (onlineTM_save_list[i].type == NULL)
+				continue;
+			else if (onlineTM_save_list[i].lastSave <= time_now)
+			{
+				onlineTM_save_list[i].type = NULL;
+				onlineTM_save_list[i].lastSave = 0;
+				onlineTM_save_list[i].period = 0;
+				onlineTM_save_list[i].stopTime = 0;
+			}
+			else if (onlineTM_save_list[i].period + onlineTM_save_list[i].lastSave <= time_now)
+			{
+				save_onlineTM_param(onlineTM_save_list[i]);
+				onlineTM_save_list[i].lastSave = time_now;
+			}
+		}
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+	}
 }
