@@ -25,10 +25,6 @@ typedef enum{
 
 TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data);
 
-TroubleErrCode GetQueueCmdCount();
-
-TroubleErrCode AddCommandToAdcsQueue(TC_spl *cmd);
-
 TroubleErrCode AdcsInit();
 
 void AdcsTask();
