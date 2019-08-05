@@ -11,6 +11,7 @@
 //#include "../../COMM/splTypes.h"
 //#include "../HouseKeeping.h"
 #include "../commands.h"
+#include "../../ADCS/AdcsTroubleShooting.h"
 //#include <hal/Drivers/I2C.h>
 //#include <stdlib.h>
 //#include <string.h>
@@ -21,7 +22,7 @@
  * 	ERR_SUCCESS - if the queue created successfully
  * 	ERR_FAIL - if it failed to create the queue
  */
-ERR_type InitAdcsCmdQueue();
+TroubleErrCode AdcsCmdQueueInit();
 
 /*
  * GetAdcsCmdFromQueue - pull the first command from the ADCS command queue
@@ -30,7 +31,7 @@ ERR_type InitAdcsCmdQueue();
  * 	ERR_SUCCESS - if a command was pulled successfully
  * 	ERR_FAIL - if it failed to pull a command from the queue
  */
-ERR_type GetAdcsCmdFromQueue(TC_spl *request);
+TroubleErrCode AdcsCmdQueueGet(TC_spl *request);
 
 /*
  * AddAdcsCmdToQueue - push a new ADCS command to the queue end
@@ -39,7 +40,7 @@ ERR_type GetAdcsCmdFromQueue(TC_spl *request);
  * 	ERR_SUCCESS - if a command was pushed successfully
  * 	ERR_FAIL - if it failed to push a command to the queue because queue is full
  */
-ERR_type AddAdcsCmdToQueue(TC_spl *cmd);
+TroubleErrCode AdcsCmdQueueAdd(TC_spl *cmd);
 
 /*
  * IsAdcsCmdQueueEmpty - check if the ADCS command queue is empty
@@ -47,7 +48,9 @@ ERR_type AddAdcsCmdToQueue(TC_spl *cmd);
  * 	TRUE - if the queue is empty
  * 	FALSE - if there are waiting commands in the queue
  */
-Boolean IsAdcsCmdQueueEmpty();
+int AdcsCmdQueueIsEmpty();
+
+time_unix* getAdcsQueueWaitPointer();
 
 #endif // !ADCS_CMD_H_
 

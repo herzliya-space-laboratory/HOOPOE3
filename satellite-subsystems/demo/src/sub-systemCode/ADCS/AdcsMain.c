@@ -13,6 +13,7 @@
 #include "AdcsTroubleShooting.h"
 #include "AdcsGetDataAndTlm.h"
 #include "StateMachine.h"
+#include "AdcsCommands.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +24,6 @@
 #define DEFAULT_ADCS_QUEUE_WAIT_TIME	 100	// amount of time to wait or cmd to arrive into Queue
 
 time_unix delay_loop = 0;
-time_unix queue_wait = 0;
 xSemaphoreHandle xAdcs_loop_param_mutex = NULL;	//TODO: need to check if need this
 
 TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data)
@@ -45,7 +45,7 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 	case QUEUE_WAIT_TIME:
 		addr = ADCS_LOOP_DELAY_FRAM_ADDR;
 		size = ADCS_LOOP_DELAY_FRAM_SIZE;
-		ptr = (void*)&queue_wait;
+		ptr = (void*)getAdcsQueueWaitPointer();
 		break;
 	default:
 		return TRBL_FAIL;
@@ -83,13 +83,14 @@ TroubleErrCode AdcsInit()
 		return trbl;
 	}
 
-	if(0 != FRAM_read(&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
+	if(0 != FRAM_read((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 		//todo: log error
 	}
 
-	if(0 != FRAM_read(&queue_wait,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
-		queue_wait = DEFAULT_ADCS_QUEUE_WAIT_TIME;
+	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
+	if(0 != FRAM_read((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
+		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
 	}
 	return TRBL_SUCCESS;
@@ -110,7 +111,7 @@ void AdcsTask()
 			if(TRBL_SUCCESS != trbl){
 				AdcsTroubleShooting(trbl);
 			}
-			trbl = AdcsExecuteCommand(cmd);
+			trbl = AdcsExecuteCommand(&cmd);
 			if(TRBL_SUCCESS != trbl){
 				AdcsTroubleShooting(trbl);
 			}

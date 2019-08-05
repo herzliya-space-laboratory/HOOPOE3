@@ -6,8 +6,6 @@
 #define ADCS_ID 0
 #define ADCS_I2C_ADRR 0x57
 
-#define MAX_ADCS_QUEUE_LENGTH 42
-
 #include "AdcsTroubleShooting.h"
 
 

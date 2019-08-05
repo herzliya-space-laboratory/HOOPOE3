@@ -689,7 +689,10 @@ void reset_FRAM_TRXVU()
 
 int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 {
-	printf("ADCS sent back info= %d\n\n", data);
+	int l = length;
+	int test = bitRate;
+	printf("ADCS sent back info= %d\n\n", (int)&data);
+	return 0;
 }
 
 int TRX_getFrameData(unsigned int *length, byte* data_out)

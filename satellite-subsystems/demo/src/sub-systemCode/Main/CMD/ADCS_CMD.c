@@ -1,7 +1,15 @@
 #include "Adcs_Cmd.h"
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/queue.h>
+
+#include "../../ADCS/AdcsMain.h"
+
+#define MAX_ADCS_QUEUE_LENGTH 42
+
 //static ADCS_CMD_t ADCS_cmd[ADCS_CMD_LEN];
 static xQueueHandle AdcsCmdQueue = NULL;
+time_unix queue_wait = 0;
 
 TroubleErrCode AdcsCmdQueueInit(){
 	AdcsCmdQueue = xQueueCreate(MAX_ADCS_QUEUE_LENGTH,sizeof(TC_spl));
@@ -16,7 +24,7 @@ TroubleErrCode AdcsCmdQueueGet(TC_spl *cmd){
 	if(cmd == NULL){
 		return TRBL_NULL_DATA;
 	}
-	if(AdcsCmdQueueIsEmpty()){
+	if(AdcsCmdQueueIsEmpty() == FALSE){
 		return TRBL_QUEUE_EMPTY;
 	}
 	if (xQueueReceive(AdcsCmdQueue, cmd, MAX_DELAY) == pdTRUE){
@@ -38,15 +46,19 @@ TroubleErrCode AdcsCmdQueueAdd(TC_spl *cmd){
 }
 
 TroubleErrCode AdcsCmdQueueGetCount(){
-	return uxQueueMessagesWaiting(xAdcsCmdQueue);
+	return uxQueueMessagesWaiting(AdcsCmdQueue);
 }
 
-Boolean AdcsCmdQueueIsEmpty(){
+int AdcsCmdQueueIsEmpty(){
 	if(uxQueueMessagesWaiting(AdcsCmdQueue) == 0){//cheak if queue is empty
 		return TRUE;
 	}else{
 		return FALSE;
 	}
+}
+
+time_unix* getAdcsQueueWaitPointer(){
+	return &queue_wait;
 }
 
 

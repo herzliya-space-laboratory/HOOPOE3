@@ -13,6 +13,7 @@
 
 #include "sub-systemCode/COMM/splTypes.h"	// for ADCS command subtypes
 
+#include "../COMM/GSC.h"
 #include "../TRXVU.h"
 
 
@@ -120,14 +121,27 @@ int SetRateSensorOffset(unsigned char *data)
 	//TODO: finsih- need to read the current config and change only the rate offset
 	int err = 0;
 	//cspace_adcs_ratesencfg_t rate_sensor;
-	err = cspaceADCS_setRateSensorConfig(ADCS_ID,&data);
+	err = cspaceADCS_setRateSensorConfig(ADCS_ID, data);
 	//TODO: send ack with 'rv'
 	return err;
 
 }
 
-void SendAckWithInfo(int info){
-	TRX_sendFrame(&rv, sizeof(int), 9600);
+void SendAckWithInfo(byte info, int subType){
+	TM_spl tm;
+	time_unix time_now;
+	Time_getUnixEpoch(&time_now);	//get time
+	tm.time = time_now;
+	tm.type = TC_ADCS_T;
+	tm.subType = subType;
+	tm.data[0] = info;
+	tm.length = sizeof(byte);
+
+	byte rawData[SPL_TM_HEADER_SIZE + tm.length];
+	int rawDataLength = 0;
+
+	encode_TMpacket(rawData, &rawDataLength, tm);
+	TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
@@ -230,7 +244,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_SET_MTQ_CONFIG_ST:
 		err = AdcsI2cCmdWithID(MTQ_CONFIG_CMD_ID,cmd->data,MTQ_CONFIG_CMD_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_SET_MTQ_CONFIG_ST);
 		break;
 
 	case ADCS_SET_MAGNETMTR_MOUNT_ST:
@@ -248,29 +262,29 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_SET_DETUMB_CTRL_PARAM_ST:
 		err = AdcsI2cCmdWithID(DETUMB_CTRL_PARAM_CMD_ID,cmd->data,DETUMB_CTRL_PARAM_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_SET_DETUMB_CTRL_PARAM_ST);
 		break;
 
 	case ADCS_SET_YWHEEL_CTRL_PARAM_ST:
 		err = AdcsI2cCmdWithID(SET_YWHEEL_CTRL_PARAM_CMD_ID,cmd->data,SET_YWHEEL_CTRL_PARAM_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_SET_YWHEEL_CTRL_PARAM_ST);
 		break;
 
 	case ADCS_SET_RWHEEL_CTRL_PARAM_ST:
 		err = AdcsI2cCmdWithID(SET_RWHEEL_CTRL_PARAM_CMD_ID,cmd->data,SET_RWHEEL_CTRL_PARAM_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_SET_RWHEEL_CTRL_PARAM_ST);
 		break;
 	case ADCS_SET_MOMENT_INTERTIA_ST:
 		err = AdcsI2cCmdWithID(SET_MOMENT_INERTIA_CMD_ID,cmd->data,SET_MOMENT_INERTIA_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_SET_MOMENT_INTERTIA_ST);
 		break;
 	case ADCS_PROD_INERTIA_ST:
 		err = AdcsI2cCmdWithID(SET_PROD_INERTIA_CMD_ID,cmd->data,12,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_PROD_INERTIA_ST);
 		break;
 	case ADCS_ESTIMATION_PARAM1_ST:
 		err =  cspaceADCS_setEstimationParam1(ADCS_ID,(cspace_adcs_estparam1_t*)cmd->data);
@@ -281,7 +295,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_GET_CURR_UNIX_TIME_ST:
 		err = cspaceADCS_getCurrentTime(ADCS_ID,&time);
 		//TODO: send 'time' as ack or something
-		SendAckWithInfo(time);
+		//SendAckWithInfo(time);
 		break;
 
 	case ADCS_MTQ_CONFIG_ST:
@@ -291,25 +305,25 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_RW_CONFIG_ST:
 		err = AdcsI2cCmdWithID(SET_WHEEL_CONFIG_CMD_ID,cmd->data,SET_WHEEL_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_RW_CONFIG_ST);
 		break;
 
 	case ADCS_GYRO_CONFIG_ST:
 		err = AdcsI2cCmdWithID(SET_GYRO_CONFIG_CMD_ID,cmd->data,SET_GYRO_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_GYRO_CONFIG_ST);
 		break;
 
 	case ADCS_CSS_CONFIG_ST:
 		err = AdcsI2cCmdWithID(SET_CSS_CONFIG_CMD_ID,cmd->data,SET_CSS_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_CSS_CONFIG_ST);
 		break;
 
 	case ADCS_CSS_RELATIVE_SCALE_ST:
 		err = AdcsI2cCmdWithID(SET_CSS_SCALE_CMD_ID,cmd->data,SET_CSS_SCALE_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv,ADCS_CSS_RELATIVE_SCALE_ST);
 		break;
 
 	case ADCS_CSS_THRESHOLD_ST:
@@ -330,7 +344,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_RATE_SENSOR_OFFSET_ST:
 		err = AdcsI2cCmdWithID(SET_RATE_SENSOR_CONFIG_CMD_ID,cmd->data,SET_RATE_SENSOR_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_RATE_SENSOR_OFFSET_ST);
 		break;
 
 	case ADCS_RATE_SENSOR_MULT_ST:
@@ -355,7 +369,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 		err = AdcsI2cCmdWithID(GET_ADCS_FULL_CONFIG_CMD_ID,cmd->data,GET_ADCS_FULL_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv);
+		SendAckWithInfo(rv, ADCS_GET_FULL_CONFIG_ST);
 		break;
 	default:
 		//TODO: return unknown cmd

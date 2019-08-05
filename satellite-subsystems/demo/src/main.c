@@ -97,7 +97,7 @@ void taskMain()
 	TC_spl adcsCmd;
 	adcsCmd.id = TC_ADCS_T;
 
-	int input;
+	uint input;
 	int err;
 
 	while(1)
@@ -122,8 +122,6 @@ void taskMain()
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
-
-void 
 
 int main()
 {
