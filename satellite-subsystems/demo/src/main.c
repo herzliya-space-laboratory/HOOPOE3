@@ -35,6 +35,8 @@
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
 
+#include "sub-systemCode/Global/OnlineTM.h"
+
 #define DEBUGMODE
 
 #ifndef DEBUGMODE
@@ -76,6 +78,52 @@ void Command_logic()
 	while (error == 0);
 }
 
+void online_test_menu()
+{
+	printf( "\n\r Select a test to perform: \n\r");
+	printf("\t 0) continue to code\n\r");
+	printf("\t 1) set first activation flag to TRUE\n\r");
+
+	int error;
+	unsigned int selection;
+	while(UTIL_DbguGetIntegerMinMax(&selection, 0, 2) == 0);
+	switch (selection) {
+		case 0:
+			for (int i = 0; i < 18; i++)
+			{
+				TM_spl packet;
+				error = get_online_packet(i, &packet);
+				if (error != 0)
+					printf("error from get_online_packet(%d): %d\n", i, error);
+				else
+					print_TM_spl_packet(packet);
+				vTaskDelay(700);
+			}
+			break;
+		case 1:
+			printf("add second:\n");
+			while(UTIL_DbguGetIntegerMinMax(&selection, 0, 100) == 0);
+			time_unix stopTime;
+			Time_getUnixEpoch(&stopTime);
+			stopTime += selection;
+			printf("period:\n");
+			while(UTIL_DbguGetIntegerMinMax(&selection, 0, 10000) == 0);
+			uint period = selection;
+			printf("index:\n");
+			while(UTIL_DbguGetIntegerMinMax(&selection, 0, 18) == 0);
+			error = add_onlineTM_param_to_save_list((int)selection, period, stopTime);
+			if (error != 0)
+				printf("error in add_onlineTM_param_to_save_list: %d\n", error);
+			break;
+		case 2:
+			vTaskDelay(10000);
+			break;
+		default:
+			vTaskDelay(1000);
+			break;
+	}
+}
+
 void taskMain()
 {
 	WDT_startWatchdogKickTask(10 / portTICK_RATE_MS, FALSE);
@@ -94,6 +142,7 @@ void taskMain()
 		EPS_Conditioning();
 		Command_logic();
 		save_time();
+		online_test_menu();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }

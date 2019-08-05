@@ -169,4 +169,6 @@ int build_raw_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* ra
  * 				-1 a NULL pointer
  */
 int build_data_field_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* data_feild);
+
+void print_TM_spl_packet(TM_spl packet);
 #endif /* GSC_H_ */
