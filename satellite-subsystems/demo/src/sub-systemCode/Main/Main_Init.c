@@ -39,6 +39,7 @@
 #include "../Global/Global.h"
 #include "../Global/GlobalParam.h"
 #include "../Global/TM_managment.h"
+#include "../Global/OnlineTM.h"
 #include "../EPS.h"
 #include "../Ants.h"
 #include "../ADCS.h"
@@ -57,7 +58,6 @@
 stageTable ST;
 
 #ifdef TESTING
-
 
 void test_menu()
 {
@@ -251,20 +251,22 @@ int InitSubsystems()
 
 	init_command();
 
+	init_onlineParam();
+
 	return 0;
 }
 
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
-	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	/*xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
 	xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-	vTaskDelay(100);
+	vTaskDelay(100);*/
 
-	vTaskDelay(100);
+	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	return 0;
 }
 
