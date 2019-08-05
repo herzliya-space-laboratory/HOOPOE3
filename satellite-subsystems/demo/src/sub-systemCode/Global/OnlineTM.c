@@ -235,6 +235,22 @@ int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTim
 		return -3;
 }
 
+int delete_onlineTM_param_to_save_list(int TM_index)
+{
+	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+	{
+		if (onlineTM_list[i].TM_param == NULL)
+			continue;
+		else if (onlineTM_list[i].TM_param == onlineTM_list + TM_index)
+		{
+			onlineTM_list[i].TM_param = NULL;
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
 void save_onlineTM_task()
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();

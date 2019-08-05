@@ -33,6 +33,8 @@ void init_onlineParam();
 
 int get_online_packet(int TM_index, TM_spl* packet);
 
+int delete_onlineTM_param_to_save_list(int TM_index);
+
 int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTime);
 
 void save_onlineTM_task();
