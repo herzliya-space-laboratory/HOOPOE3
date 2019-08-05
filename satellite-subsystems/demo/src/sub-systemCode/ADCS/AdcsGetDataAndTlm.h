@@ -28,6 +28,7 @@
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
+//TODO: redefine as union
 typedef struct __attribute__ ((__packed__))
 {
 	Boolean8bit ToSave;					//<! A flag stating whether to save this specific telemetry

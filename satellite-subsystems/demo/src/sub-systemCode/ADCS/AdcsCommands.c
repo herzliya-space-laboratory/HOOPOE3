@@ -56,7 +56,10 @@ int AdcsGenericI2cCmd(unsigned char* data, unsigned int length , int *ack)
 	err = AdcsReadI2cAck(ack);
 	return err;
 }
-
+//'id' the command id to send to the adcs
+//'data' data to send to the ADCS.
+//'length' length of data
+//'ack' return value of the command
 int AdcsI2cCmdWithID(unsigned char id,unsigned char* data, unsigned int length , int *ack)
 {
 	if(NULL == ack){
@@ -79,6 +82,22 @@ int AdcsI2cCmdWithID(unsigned char id,unsigned char* data, unsigned int length ,
 	}
 	free(buffer);
 	return err;
+}
+
+int AdcsI2cCmdReadTLM(unsigned char tlm_type, unsigned char* data, unsigned int length , int *ack)
+{
+	if(NULL == data){
+		return -1;
+	}
+	int err = AdcsI2cCmdWithID(&tlm_type,NULL,0,ack);
+	if(0 != err){
+		return -2;
+	}
+	err = I2C_read(ADCS_I2C_ADRR,data,length);
+	if(0 != err){
+		return err;
+	}
+	return 0;
 }
 
 int ResetBootRegisters()
@@ -127,21 +146,22 @@ int SetRateSensorOffset(unsigned char *data)
 
 }
 
-void SendAckWithInfo(byte info, int subType){
+void SendAckWithInfo(byte *info,unsigned int length, int subType){
 	TM_spl tm;
 	time_unix time_now;
 	Time_getUnixEpoch(&time_now);	//get time
 	tm.time = time_now;
 	tm.type = TC_ADCS_T;
 	tm.subType = subType;
-	tm.data[0] = info;
-	tm.length = sizeof(byte);
+	memcpy(tm.data,info,length);
+	tm.length = length;
 
 	byte rawData[SPL_TM_HEADER_SIZE + tm.length];
 	int rawDataLength = 0;
 
 	encode_TMpacket(rawData, &rawDataLength, tm);
 	TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
+
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
@@ -155,6 +175,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	int rv = 0;
 	unsigned char sub_type = cmd->subType;
 
+	unsigned char buffer[300] = {0};
+
+	cspace_adcs_geninfo_t data ={0}; //for testing only. delete
 	cspace_adcs_bootprogram bootindex;
 	cspace_adcs_runmode_t runmode;
 	cspace_adcs_unixtm_t time;
@@ -231,9 +254,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 	case ADCS_DEPLOY_MAG_BOOM_ST:
 		//err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);
-#ifdef TESTING
+	#ifdef TESTING
 		printf("magnetometer not deployed \nBOOM\n");
-#endif
+	#endif
 		break;
 
 	case ADCS_RUN_MODE_ST:
@@ -244,7 +267,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_SET_MTQ_CONFIG_ST:
 		err = AdcsI2cCmdWithID(MTQ_CONFIG_CMD_ID,cmd->data,MTQ_CONFIG_CMD_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_SET_MTQ_CONFIG_ST);
+		SendAckWithInfo(&rv,1, ADCS_SET_MTQ_CONFIG_ST);
 		break;
 
 	case ADCS_SET_MAGNETMTR_MOUNT_ST:
@@ -262,29 +285,29 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_SET_DETUMB_CTRL_PARAM_ST:
 		err = AdcsI2cCmdWithID(DETUMB_CTRL_PARAM_CMD_ID,cmd->data,DETUMB_CTRL_PARAM_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_SET_DETUMB_CTRL_PARAM_ST);
+		SendAckWithInfo(&rv,1, ADCS_SET_DETUMB_CTRL_PARAM_ST);
 		break;
 
 	case ADCS_SET_YWHEEL_CTRL_PARAM_ST:
 		err = AdcsI2cCmdWithID(SET_YWHEEL_CTRL_PARAM_CMD_ID,cmd->data,SET_YWHEEL_CTRL_PARAM_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_SET_YWHEEL_CTRL_PARAM_ST);
+		SendAckWithInfo(&rv,1, ADCS_SET_YWHEEL_CTRL_PARAM_ST);
 		break;
 
 	case ADCS_SET_RWHEEL_CTRL_PARAM_ST:
 		err = AdcsI2cCmdWithID(SET_RWHEEL_CTRL_PARAM_CMD_ID,cmd->data,SET_RWHEEL_CTRL_PARAM_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_SET_RWHEEL_CTRL_PARAM_ST);
+		SendAckWithInfo(&rv,1, ADCS_SET_RWHEEL_CTRL_PARAM_ST);
 		break;
 	case ADCS_SET_MOMENT_INTERTIA_ST:
 		err = AdcsI2cCmdWithID(SET_MOMENT_INERTIA_CMD_ID,cmd->data,SET_MOMENT_INERTIA_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_SET_MOMENT_INTERTIA_ST);
+		SendAckWithInfo(&rv,1, ADCS_SET_MOMENT_INTERTIA_ST);
 		break;
 	case ADCS_PROD_INERTIA_ST:
 		err = AdcsI2cCmdWithID(SET_PROD_INERTIA_CMD_ID,cmd->data,12,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_PROD_INERTIA_ST);
+		SendAckWithInfo(&rv,1, ADCS_PROD_INERTIA_ST);
 		break;
 	case ADCS_ESTIMATION_PARAM1_ST:
 		err =  cspaceADCS_setEstimationParam1(ADCS_ID,(cspace_adcs_estparam1_t*)cmd->data);
@@ -305,25 +328,25 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_RW_CONFIG_ST:
 		err = AdcsI2cCmdWithID(SET_WHEEL_CONFIG_CMD_ID,cmd->data,SET_WHEEL_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_RW_CONFIG_ST);
+		SendAckWithInfo(&rv,1, ADCS_RW_CONFIG_ST);
 		break;
 
 	case ADCS_GYRO_CONFIG_ST:
 		err = AdcsI2cCmdWithID(SET_GYRO_CONFIG_CMD_ID,cmd->data,SET_GYRO_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_GYRO_CONFIG_ST);
+		SendAckWithInfo(&rv,1, ADCS_GYRO_CONFIG_ST);
 		break;
 
 	case ADCS_CSS_CONFIG_ST:
 		err = AdcsI2cCmdWithID(SET_CSS_CONFIG_CMD_ID,cmd->data,SET_CSS_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_CSS_CONFIG_ST);
+		SendAckWithInfo(&rv,1, ADCS_CSS_CONFIG_ST);
 		break;
 
 	case ADCS_CSS_RELATIVE_SCALE_ST:
 		err = AdcsI2cCmdWithID(SET_CSS_SCALE_CMD_ID,cmd->data,SET_CSS_SCALE_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv,ADCS_CSS_RELATIVE_SCALE_ST);
+		SendAckWithInfo(&rv,1,ADCS_CSS_RELATIVE_SCALE_ST);
 		break;
 
 	case ADCS_CSS_THRESHOLD_ST:
@@ -344,7 +367,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_RATE_SENSOR_OFFSET_ST:
 		err = AdcsI2cCmdWithID(SET_RATE_SENSOR_CONFIG_CMD_ID,cmd->data,SET_RATE_SENSOR_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_RATE_SENSOR_OFFSET_ST);
+		SendAckWithInfo(&rv,1, ADCS_RATE_SENSOR_OFFSET_ST);
 		break;
 
 	case ADCS_RATE_SENSOR_MULT_ST:
@@ -369,9 +392,20 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 		err = AdcsI2cCmdWithID(GET_ADCS_FULL_CONFIG_CMD_ID,cmd->data,GET_ADCS_FULL_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(rv, ADCS_GET_FULL_CONFIG_ST);
+		SendAckWithInfo(&rv,1, ADCS_GET_FULL_CONFIG_ST);
 		break;
-	default:
+	case ADCS_DUMMY_FUNC:
+		rv = cspaceADCS_getGeneralInfo(ADCS_ID,&data);
+		SendAckWithInfo(&rv,1,ADCS_DUMMY_FUNC);
+		printf("uptime = %d\n",data.fields.uptime_secs);
+		//TODO: change this into a real command and send to GS
+		break;
+
+	case ADCS_GET_TLM_BY_ID_ST:
+		AdcsI2cCmdReadTLM(cmd->data[0],buffer,cmd->data[1],&rv);	//TODO: add to command dictionary
+		SendAckWithInfo((byte*)buffer,cmd->data[1],cmd->data[0]);
+		break;
+default:
 		//TODO: return unknown cmd
 		break;
 	}

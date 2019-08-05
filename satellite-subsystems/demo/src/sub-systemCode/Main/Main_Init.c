@@ -230,7 +230,7 @@ int InitSubsystems()
 
 	create_files(activation);
 
-	// EPS_Init();
+	 EPS_Init();
 
 // #ifdef ANTS_ON
 	// init_Ants();
@@ -257,6 +257,28 @@ int InitSubsystems()
 	return 0;
 }
 
+void no_reset_task()
+{
+	gom_eps_hk_t eps_tlm;
+	gom_eps_channelstates_t state;
+	state.fields.channel3V3_1 = 1;
+	state.fields.channel5V_1 = 1;
+	int err=0;
+	while(1)
+	{
+		err = GomEpsGetHkData_general(0, &eps_tlm);
+		if (err == 0)
+		{
+			if (eps_tlm.fields.output[0] == 0 || eps_tlm.fields.output[3] == 0)
+			{
+				err = GomEpsSetOutput(0, state);
+				check_int("GomEpsSetOutput, in no reset", err);
+			}
+		}
+		vTaskDelay(1000);
+	}
+}
+
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
@@ -266,7 +288,7 @@ int SubSystemTaskStart()
 	// xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	// xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	// vTaskDelay(100);
-
+	xTaskCreate(no_reset_task, (const signed char*)("reset_no"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 	return 0;

@@ -177,6 +177,8 @@
 #define ADCS_USE_IN_EKF_ST				152
 #define ADCS_SET_EST_MODE				153
 #define ADCS_GET_FULL_CONFIG_ST			154
+#define ADCS_GET_TLM_BY_ID_ST			172
+#define ADCS_DUMMY_FUNC					199
 //#define ADCS_
 
 //sw

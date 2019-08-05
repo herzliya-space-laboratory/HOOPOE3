@@ -18,13 +18,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+typedef enum __attribute__ ((__packed__)){
+	DELAY_LOOP,
+	QUEUE_WAIT_TIME
+}AdcsFramParameters;
 
 #define DEFAULT_ADCS_LOOP_DELAY 		1000 	//the loop runs in 1Hz
 #define DEFAULT_ADCS_QUEUE_WAIT_TIME	 100	// amount of time to wait or cmd to arrive into Queue
 
-time_unix delay_loop = 0;
+time_unix delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 xSemaphoreHandle xAdcs_loop_param_mutex = NULL;	//TODO: need to check if need this
+
 
 TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data)
 {
@@ -34,7 +38,9 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 	unsigned int addr = 0;
 	unsigned int size = 0;
 	unsigned char *ptr = NULL;
-	switch(param){
+
+	switch(param)
+	{
 	case DELAY_LOOP:
 		addr = ADCS_LOOP_DELAY_FRAM_ADDR;
 		size = ADCS_LOOP_DELAY_FRAM_SIZE;
@@ -61,6 +67,7 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 
 }
 
+#define FIRST_ADCS_ACTIVATION
 TroubleErrCode AdcsInit()
 {
 	TroubleErrCode trbl = TRBL_SUCCESS;
@@ -83,12 +90,18 @@ TroubleErrCode AdcsInit()
 		return trbl;
 	}
 
+	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
+#ifdef FIRST_ADCS_ACTIVATION
+	delay_loop = DEFAULT_ADCS_LOOP_DELAY;
+	FRAM_write((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE);
+	*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
+	FRAM_write((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE);
+#endif
 	if(0 != FRAM_read((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 		//todo: log error
 	}
 
-	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 	if(0 != FRAM_read((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
@@ -104,6 +117,10 @@ void AdcsTask()
 
 	while(TRUE)
 	{
+		if(SWITCH_OFF == get_system_state(ADCS_param)){
+			vTaskDelay(delay_loop);
+			continue;
+		}
 		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
 
 		if(!AdcsCmdQueueIsEmpty()){

@@ -2,12 +2,10 @@
 #define ADCS_MAIN_H_
 
 #include "sub-systemCode/COMM/GSC.h"
+#include "AdcsTroubleShooting.h"
 
 #define ADCS_ID 0
 #define ADCS_I2C_ADRR 0x57
-
-#include "AdcsTroubleShooting.h"
-
 
 typedef enum
 {
@@ -16,12 +14,8 @@ typedef enum
 
 }AdcsStateMachineCMD;
 
-typedef enum{
-	DELAY_LOOP,
-	QUEUE_WAIT_TIME
-}AdcsFramParameters;
 
-TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data);
+//TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data);
 
 TroubleErrCode AdcsInit();
 

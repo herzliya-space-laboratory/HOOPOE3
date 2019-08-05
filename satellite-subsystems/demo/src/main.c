@@ -80,6 +80,55 @@ void Command_logic()
 	while (error == 0);
 }
 
+void TestGenericI2cTelemetry()
+{
+	int err = 0;
+	cspace_adcs_powerdev_t device_ctrl;
+	device_ctrl.fields.motor_cubecontrol= TRUE;
+	device_ctrl.fields.pwr_cubesense = TRUE;
+	device_ctrl.fields.signal_cubecontrol = TRUE;
+	err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, &device_ctrl);
+	if(0!=err){
+		printf("'cspaceADCS_setPwrCtrlDevice' = %d\n",err);
+		return;
+	}
+
+	unsigned int tlm_id = 0;
+	unsigned int tlm_length = 0;
+	printf("choose from driver telemetry? Y=1/N=0\n");
+	while(UTIL_DbguGetIntegerMinMax(&err,0,1)==0);
+
+	printf("please choose TLM id(0 to cancel):\n");
+	while(UTIL_DbguGetIntegerMinMax(&tlm_id,0,200)==0);
+	if(tlm_id == 0) return;
+
+	printf("please choose TLM length(0 to cancel):\n");
+	while(UTIL_DbguGetIntegerMinMax(&tlm_length,0,300)==0);
+	if(tlm_length == 0) return;
+
+	byte buffer[300] ={0};
+	AdcsI2cCmdReadTLM(tlm_id,buffer,tlm_length);
+
+	if(err == 1){
+		cspace_adcs_magfieldvec_t info_data;
+		switch(tlm_id){
+		case 151:
+			err = cspaceADCS_getMagneticFieldVec(ADCS_ID, &info_data);
+			err = err*1;
+			memcpy(&info_data,buffer,sizeof(info_data));
+			err = 0;
+		break;
+		}
+	}
+	else{
+		for(int i=0;i<tlm_length;i++)
+		{
+			printf("%X\t",buffer[i]);
+		}
+	}
+
+}
+
 void taskMain()
 {
 	WDT_startWatchdogKickTask(10 / portTICK_RATE_MS, FALSE);
@@ -89,7 +138,6 @@ void taskMain()
 	printf("init finished\n");
 	SubSystemTaskStart();
 	printf("Task Main start: ADCS test mode\n");
-	printf("Send new command\n");
 
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
@@ -99,27 +147,36 @@ void taskMain()
 
 	uint input;
 	int err;
-
 	while(1)
 	{
 		// EPS_Conditioning();
 		// Command_logic();
 		// save_time();
-		
-		if (UTIL_DbguGetIntegerMinMax(&(adcsCmd.subType), 0,666) != 0){
-			printf("Enter ADCS command data\n");
-			UTIL_DbguGetString(&(adcsCmd.data), SIZE_OF_COMMAND+1);
-			err = AdcsCmdQueueAdd(&adcsCmd);
-			printf("ADCS command error = %d\n\n\n", err);
-			printf("Send new command\n");
-			printf("Enter ADCS sub type\n");
+
+
+
+		printf("Send new command\n");
+		printf("Enter ADCS sub type\n");
+		UTIL_DbguGetIntegerMinMax(&input, 0,1000);
+		if (input !=0)
+		{
+			if (input < 200)
+			{
+				adcsCmd.subType = input;
+				printf("Enter ADCS command data\n");
+				while (UTIL_DbguGetIntegerMinMax(&(adcsCmd.data), 0,200) == 0);
+				err = AdcsCmdQueueAdd(&adcsCmd);
+				printf("ADCS command error = %d\n\n\n", err);
+
+			}
+			else
+			{
+				TestGenericI2cTelemetry();
+				//printf("Print the data\n\n");
+			}
 		}
-		
-		if (UTIL_DbguGetIntegerMinMax(&input, 900,1000) != 0){
-			printf("Print the data\n");
-		}
-		
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+
+		vTaskDelay(1000);
 	}
 }
 
@@ -132,8 +189,12 @@ int main()
 	WDT_start();
 
 	printf("Task Main 2121\n");
-	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 2048, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
+	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 4000, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
 	printf("start sch\n");
 	vTaskStartScheduler();
+	while(1){
+		printf("should not be here\n");
+		vTaskDelay(2000);
+	}
 	return 0;
 }

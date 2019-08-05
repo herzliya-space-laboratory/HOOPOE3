@@ -24,7 +24,7 @@ TroubleErrCode AdcsCmdQueueGet(TC_spl *cmd){
 	if(cmd == NULL){
 		return TRBL_NULL_DATA;
 	}
-	if(AdcsCmdQueueIsEmpty() == FALSE){
+	if(AdcsCmdQueueIsEmpty() == TRUE){
 		return TRBL_QUEUE_EMPTY;
 	}
 	if (xQueueReceive(AdcsCmdQueue, cmd, MAX_DELAY) == pdTRUE){
