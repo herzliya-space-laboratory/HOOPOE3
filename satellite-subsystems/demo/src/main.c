@@ -99,7 +99,7 @@ void online_test_menu()
 					printf("error from get_online_packet(%d): %d\n", i, error);
 				else
 					print_TM_spl_packet(packet);
-				vTaskDelay(700);
+				vTaskDelay(300);
 			}
 			break;
 		case 1:
@@ -165,7 +165,7 @@ int main()
 	WDT_start();
 
 	printf("Task Main 2121\n");
-	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 2048, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
+	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 8196, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
 	printf("start sch\n");
 	vTaskStartScheduler();
 	return 0;

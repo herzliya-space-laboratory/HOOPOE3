@@ -41,8 +41,8 @@ int IsisAntS_getTemperature_sideB(unsigned char index, unsigned short* temperatu
 #define NUMBER_OF_ONLIME_TM_PACKETS	18
 onlineTM_param onlineTM_list[NUMBER_OF_ONLIME_TM_PACKETS];
 
-#define MAX_NUMBER_OF_ONLINE_TM_SAVE	10
-saveTM onlineTM_save_list[MAX_NUMBER_OF_ONLINE_TM_SAVE];
+#define MAX_ITEMS_OFFLINE_LIST	10
+saveTM offline_TM_list[MAX_ITEMS_OFFLINE_LIST];
 
 void init_onlineParam()
 {
@@ -116,7 +116,7 @@ void init_onlineParam()
 	onlineTM_list[13].TM_param = malloc(onlineTM_list[13].TM_param_length);
 	strcpy(onlineTM_list[13].name, "ANB");
 
-	onlineTM_list[14].fn = (int (*)(unsigned char, void*))IsisTrxvu_tcGetTelemetryAll;
+	onlineTM_list[14].fn = (int (*)(unsigned char, void*))IsisAntS_getTemperature_sideA;
 	onlineTM_list[14].TM_param_length = sizeof(unsigned short);
 	onlineTM_list[14].TM_param = malloc(onlineTM_list[14].TM_param_length);
 	strcpy(onlineTM_list[14].name, "ANC");
@@ -136,9 +136,9 @@ void init_onlineParam()
 	onlineTM_list[17].TM_param = malloc(onlineTM_list[5].TM_param_length);
 	strcpy(onlineTM_list[17].name, "ANF");
 
-	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
-		onlineTM_save_list[i].type = NULL;
+		offline_TM_list[i].type = NULL;
 	}
 }
 
@@ -198,32 +198,32 @@ int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTim
 	time_unix time_now;
 	Time_getUnixEpoch(&time_now);
 
-	if (time_now <= stopTime)
+	if (time_now >= stopTime)
 		return -1;
 
 	Boolean addedToLit = FALSE;
-	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
-		if (onlineTM_save_list[i].type == NULL && !addedToLit)
+		if (offline_TM_list[i].type == NULL && !addedToLit)
 		{
-			onlineTM_save_list[i].type = onlineTM_list + TM_index;
-			onlineTM_save_list[i].period = period;
-			onlineTM_save_list[i].stopTime = stopTime;
-			onlineTM_save_list[i].lastSave = 0;
+			offline_TM_list[i].type = onlineTM_list + TM_index;
+			offline_TM_list[i].period = period;
+			offline_TM_list[i].stopTime = stopTime;
+			offline_TM_list[i].lastSave = 0;
 			addedToLit = TRUE;
 		}
 		else
 		{
-			if (onlineTM_save_list[i].type == onlineTM_list + TM_index)
+			if (offline_TM_list[i].type == onlineTM_list + TM_index)
 			{
 				if (addedToLit)
 				{
-					onlineTM_save_list[i].type = NULL;
+					offline_TM_list[i].type = NULL;
 				}
 				else
 				{
-					onlineTM_save_list[i].period = period;
-					onlineTM_save_list[i].stopTime = stopTime;
+					offline_TM_list[i].period = period;
+					offline_TM_list[i].stopTime = stopTime;
 				}
 			}
 		}
@@ -237,13 +237,13 @@ int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTim
 
 int delete_onlineTM_param_to_save_list(int TM_index)
 {
-	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
-		if (onlineTM_list[i].TM_param == NULL)
+		if (offline_TM_list[i].type == NULL)
 			continue;
-		else if (onlineTM_list[i].TM_param == onlineTM_list + TM_index)
+		else if (offline_TM_list[i].type == onlineTM_list + TM_index)
 		{
-			onlineTM_list[i].TM_param = NULL;
+			offline_TM_list[i].type = NULL;
 			return 0;
 		}
 	}
@@ -261,21 +261,21 @@ void save_onlineTM_task()
 	while(TRUE)
 	{
 		Time_getUnixEpoch(&time_now);
-		for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+		for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 		{
-			if (onlineTM_save_list[i].type == NULL)
+			if (offline_TM_list[i].type == NULL)
 				continue;
-			else if (onlineTM_save_list[i].lastSave <= time_now)
+			else if (offline_TM_list[i].stopTime <= time_now)
 			{
-				onlineTM_save_list[i].type = NULL;
-				onlineTM_save_list[i].lastSave = 0;
-				onlineTM_save_list[i].period = 0;
-				onlineTM_save_list[i].stopTime = 0;
+				offline_TM_list[i].type = NULL;
+				offline_TM_list[i].lastSave = 0;
+				offline_TM_list[i].period = 0;
+				offline_TM_list[i].stopTime = 0;
 			}
-			else if (onlineTM_save_list[i].period + onlineTM_save_list[i].lastSave <= time_now)
+			else if (offline_TM_list[i].period + offline_TM_list[i].lastSave <= time_now)
 			{
-				save_onlineTM_param(onlineTM_save_list[i]);
-				onlineTM_save_list[i].lastSave = time_now;
+				save_onlineTM_param(offline_TM_list[i]);
+				offline_TM_list[i].lastSave = time_now;
 			}
 		}
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
