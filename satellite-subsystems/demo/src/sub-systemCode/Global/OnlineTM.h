@@ -31,6 +31,8 @@ typedef struct __attribute__ ((__packed__)) {
 
 void init_onlineParam();
 
+void reset_offline_TM_list();
+
 int get_online_packet(int TM_index, TM_spl* packet);
 
 int delete_onlineTM_param_to_save_list(int TM_index);

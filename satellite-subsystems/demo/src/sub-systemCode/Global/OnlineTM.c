@@ -136,7 +136,16 @@ void init_onlineParam()
 	onlineTM_list[17].TM_param = malloc(onlineTM_list[5].TM_param_length);
 	strcpy(onlineTM_list[17].name, "ANF");
 
+<<<<<<< HEAD
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
+=======
+	reset_offline_TM_list();
+}
+
+void reset_offline_TM_list()
+{
+	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
+>>>>>>> Elai
 	{
 		offline_TM_list[i].type = NULL;
 	}
