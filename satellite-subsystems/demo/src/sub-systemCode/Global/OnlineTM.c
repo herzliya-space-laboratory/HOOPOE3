@@ -136,6 +136,11 @@ void init_onlineParam()
 	onlineTM_list[17].TM_param = malloc(onlineTM_list[5].TM_param_length);
 	strcpy(onlineTM_list[17].name, "ANF");
 
+	reset_onlineTM_save_list();
+}
+
+void reset_onlineTM_save_list()
+{
 	for (int i = 0; i < MAX_NUMBER_OF_ONLINE_TM_SAVE; i++)
 	{
 		onlineTM_save_list[i].type = NULL;
