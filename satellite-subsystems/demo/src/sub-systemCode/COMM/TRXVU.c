@@ -162,15 +162,6 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 
 	if (CHECK_STARTING_DUMP_ABILITY)
 	{
-#ifdef TESTING_BRONFELD
-		for (uint8_t i = 0; i < 210; i++)
-		{
-			i_error = TRX_sendFrame(&i, (uint8_t)1, trxvu_bitrate_9600);
-			check_int("TRX_sendFrame, dump_logic", i_error);
-			printf("number of packets: %u\n", i);
-		}
-#else
-
 		for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		{
 			if (HK[i] == this_is_not_the_file_you_are_looking_for)
