@@ -57,4 +57,5 @@ void AUC_SW(TC_spl decode);
 
 void AUC_special_operation(TC_spl decode);
 
+void AUC_onlineTM(TC_spl decode);
 #endif /* COMMANDS_H_ */

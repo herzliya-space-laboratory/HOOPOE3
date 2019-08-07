@@ -159,7 +159,7 @@ int get_online_packet(int TM_index, TM_spl* packet)
 	if (error != 0)
 		return error;
 
-	packet->type = ONLINE_TM_T;
+	packet->type = TM_ONLINE_TM_T;
 	packet->subType = TM_index;
 	packet->length = onlineTM_list[TM_index].TM_param_length;
 	Time_getUnixEpoch(&(packet->time));

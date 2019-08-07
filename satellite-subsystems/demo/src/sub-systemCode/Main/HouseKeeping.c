@@ -661,147 +661,147 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		ADCS_HK_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_CSS_DATA_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_CSS_DATA_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Magnetic_filed_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_MAGNETIC_FILED_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_CSS_sun_vector_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_CSS_SUN_VECTOR_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_wheel_speed_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_WHEEL_SPEED_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_sensore_rate_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_SENSORE_RATE_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_MAG_CMD_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_MAG_CMD_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_wheel_CMD_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_WHEEL_CMD_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Mag_raw_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_MAG_RAW_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_IGRF_MODEL_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_IGRF_MODEL_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Gyro_BIAS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_GYRO_BIAS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Inno_Vextor_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_INNO_VEXTOR_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Error_Vec_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ERROR_VEC_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_QUATERNION_COVARIANCE_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_QUATERNION_COVARIANCE_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ANGULAR_RATE_COVARIANCE_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ANGULAR_RATE_COVARIANCE_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ESTIMATED_ANGLES_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ESTIMATED_ANGLES_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Estimated_AR_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ESTIMATED_AR_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ECI_POS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ECI_POS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_SAV_Vel_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_SAV_VEL_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ECEF_POS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ECEF_POS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_LLH_POS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_LLH_POS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_EST_QUATERNION_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_EST_QUATERNION_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;

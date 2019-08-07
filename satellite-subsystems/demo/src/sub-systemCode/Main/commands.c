@@ -180,6 +180,9 @@ void act_upon_command(TC_spl decode)
 	case (SPECIAL_OPERATIONS_T):
 		AUC_special_operation(decode);
 		break;
+	case (TC_ONLINE_TM_T):
+		AUC_onlineTM(decode);
+		break;
 	default:
 		printf("wrong type: %d\n", decode.type);
 		break;
@@ -414,6 +417,35 @@ void AUC_SW(TC_spl decode)
 		break;
 	case (RESET_FRAM_ST):
 		cmd_reset_FRAM(&type, &err, decode);
+		break;
+	default:
+		cmd_error(&type, &err);
+		break;
+	}
+	//Builds ACK
+#ifndef NOT_USE_ACK_HK
+	save_ACK(type, err, decode.id);
+#endif
+}
+
+void AUC_onlineTM(TC_spl decode)
+{
+	Ack_type type;
+	ERR_type err;
+
+	switch (decode.subType)
+	{
+	case (GET_ONLINE_TM_INDEX_ST):
+		cmd_get_onlineTM(&type, &err, decode);
+		break;
+	case (RESET_OFF_LINE_LIST_ST):
+		cmd_reset_off_line(&type, &err, decode);
+		break;
+	case (ADD_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
+		break;
+	case (DELETE_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
 		break;
 	default:
 		cmd_error(&type, &err);
