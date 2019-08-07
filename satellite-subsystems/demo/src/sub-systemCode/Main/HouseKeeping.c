@@ -42,7 +42,6 @@
 #include "../Global/sizes.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
-#include "../ADCS.h"
 
 
 
