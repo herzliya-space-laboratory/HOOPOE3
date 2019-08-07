@@ -65,7 +65,8 @@ typedef enum HK_dump_types{
 	ADCS_SAV_Vel_T = 37,
 	ADCS_ECEF_POS_T = 38,
 	ADCS_LLH_POS_T = 39,
-	ADCS_EST_QUATERNION_T = 40
+	ADCS_EST_QUATERNION_T = 40,
+	OnlineTM_first_type = 120
 }HK_types;
 
 typedef union __attribute__ ((__packed__))

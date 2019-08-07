@@ -199,7 +199,6 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 			}
 			while (FS_result == FS_BUFFER_OVERFLOW);
 		}
-#endif
 	}
 
 	save_ACK(ACK_DUMP, err, cmdID);

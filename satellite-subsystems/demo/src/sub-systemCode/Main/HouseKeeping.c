@@ -135,6 +135,15 @@ int find_fileName(HK_types type, char *fileName)
 		strcpy(fileName, ESTIMATED_QUATERNION_FILE);
 		break;
 	default:
+		if (type >= OnlineTM_first_type)
+		{
+			onlineTM_param param = get_item_by_index((int)(type - (int)OnlineTM_first_type));
+			if (param.TM_param_length != 0)
+			{
+				strcpy(fileName, param.name);
+				break;
+			}
+		}
 		return -1;
 		break;
 	}
@@ -158,7 +167,14 @@ int size_of_element(HK_types type)
 		return ADCS_SC_SIZE;
 	if (ADCS_ECI_VEL_T == type)
 		return ADCS_SC_SIZE;
-
+	if (type >= OnlineTM_first_type)
+	{
+		onlineTM_param param = get_item_by_index((int)(type - (int)OnlineTM_first_type));
+		if (param.TM_param_length != 0)
+		{
+			return param.TM_param_length;
+		}
+	}
 	return 0;
 }
 
@@ -809,6 +825,19 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	default:
+		if (type >= OnlineTM_first_type)
+		{
+			onlineTM_param param = get_item_by_index((int)(type - (int)OnlineTM_first_type));
+			if (param.TM_param_length != 0)
+			{
+				packet->type = TM_ONLINE_TM_T;
+				packet->subType = type - OnlineTM_first_type;
+				packet->length = param.TM_param_length;
+				packet->time = data_time;
+				memcpy(packet->data, raw_data + TIME_SIZE, param.TM_param_length);
+				return 0;
+			}
+		}
 		return -1;
 		break;
 	}

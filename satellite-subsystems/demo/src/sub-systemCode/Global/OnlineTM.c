@@ -10,8 +10,9 @@
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/IsisTRXVU.h>
 #include <satellite-subsystems/IsisAntS.h>
-
 #include "OnlineTM.h"
+
+#define CHECK_TM_INDEX_RANGE(index) ((index >= 0) && (index < NUMBER_OF_ONLIME_TM_PACKETS))
 
 int IsisAntS_getStatusData_sideA(unsigned char index, ISISantsStatus* status)
 {
@@ -38,11 +39,18 @@ int IsisAntS_getTemperature_sideB(unsigned char index, unsigned short* temperatu
 	return IsisAntS_getTemperature(index, isisants_sideB, temperature);
 }
 
-#define NUMBER_OF_ONLIME_TM_PACKETS	18
 onlineTM_param onlineTM_list[NUMBER_OF_ONLIME_TM_PACKETS];
 
-#define MAX_ITEMS_OFFLINE_LIST	10
 saveTM offline_TM_list[MAX_ITEMS_OFFLINE_LIST];
+
+onlineTM_param get_item_by_index(int TMIndex)
+{
+	onlineTM_param item;
+	item.TM_param = NULL;
+	item.TM_param_length = onlineTM_list[TMIndex].TM_param_length;
+	strcpy(item.name, onlineTM_list[TMIndex].name);
+	return item;
+}
 
 void init_onlineParam()
 {

@@ -16,6 +16,8 @@
 #define USE_DIFFERENT_TASK_ONLINE_TM
 
 #define DEFULT_INDEX	0
+#define NUMBER_OF_ONLIME_TM_PACKETS	18
+#define MAX_ITEMS_OFFLINE_LIST	10
 
 typedef struct __attribute__ ((__packed__)) {
 	void* TM_param;
@@ -30,6 +32,8 @@ typedef struct __attribute__ ((__packed__)) {
 	time_unix lastSave;
 	uint period;
 }saveTM;
+
+onlineTM_param get_item_by_index(int TMIndex);
 
 void init_onlineParam();
 
