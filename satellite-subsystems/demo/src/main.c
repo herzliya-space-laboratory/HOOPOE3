@@ -2,6 +2,10 @@
  * main.c
  *      Author: Akhil
  */
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+
 #include <satellite-subsystems/version/version.h>
 
 #include <at91/utility/exithandler.h>
@@ -9,9 +13,6 @@
 #include <at91/utility/trace.h>
 #include <at91/peripherals/cp15/cp15.h>
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <freertos/semphr.h>
 
 #include <hal/Utility/util.h>
 #include <hal/Timing/WatchDogTimer.h>
@@ -34,6 +35,9 @@
 #include "sub-systemCode/Main/Main_Init.h"
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
+
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
+#include "sub-systemCode/ADCS/AdcsMain.h"
 
 #define DEBUGMODE
 
@@ -82,19 +86,24 @@ void taskMain()
 	InitSubsystems();
 
 	vTaskDelay(100);
-	printf("init\n");
+	printf("init finished\n");
 	SubSystemTaskStart();
 	printf("Task Main start\n");
 
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
+	
+	TC_spl adcsCmd;
+	adcsCmd.id = TC_ADCS_T;
 
+	uint input;
+	int err;
 	while(1)
 	{
 		EPS_Conditioning();
 		Command_logic();
 		save_time();
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		vTaskDelay(1000);
 	}
 }
 
@@ -107,8 +116,12 @@ int main()
 	WDT_start();
 
 	printf("Task Main 2121\n");
-	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 2048, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
+	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 4000, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
 	printf("start sch\n");
 	vTaskStartScheduler();
+	while(1){
+		printf("should not be here\n");
+		vTaskDelay(2000);
+	}
 	return 0;
 }

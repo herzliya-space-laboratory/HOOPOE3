@@ -39,7 +39,14 @@
 #define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
 
 //ADCS
-#define STAGE_TABLE_ADDR 0x9044
+#define ADCS_LOOP_DELAY_FRAM_ADDR 0X6543			// main loop delay
+#define ADCS_LOOP_DELAY_FRAM_SIZE 4
+
+#define ADCS_RESPONSE_DELAY_FRAM_ADDR 0x6548
+#define ADCS_RESPONSE_DELAY_FRAM_SIZE 4
+
+#define ADCS_QUEUE_WAIT_TIME_FRAM_ADDR 0X6552		// max wait time for the adcs cmd queue
+#define ADCS_QUEUE_WAIT_TIME_FRAM_SIZE 4
 
 //CAMERA
 #define AUTO_PILOT_STATE_ADDR			0x9FFB

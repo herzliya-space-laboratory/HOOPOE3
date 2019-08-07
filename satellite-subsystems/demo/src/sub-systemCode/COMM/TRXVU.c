@@ -36,7 +36,6 @@
 #include "splTypes.h"
 #include "APRS.h"
 #include "../Global/GlobalParam.h"
-#include "../ADCS/Stage_Table.h"
 #include "DelayedCommand_list.h"
 
 #define FIRST 0
@@ -625,42 +624,30 @@ void buildAndSend_beacon(ISIStrxvuBitrate bitRate)
 	beacon.data[29] = beacon_param.TxRefl;
 	beacon.data[30] = beacon_param.TxForw << 8;
 	beacon.data[31] = beacon_param.TxForw;
-	// 4.4. ADCS
-	byte raw_stageTable[STAGE_TABLE_SIZE];
-	getTableTo(get_ST(), raw_stageTable);
-	beacon.data[32] = raw_stageTable[2];
-	beacon.data[33] = raw_stageTable[1];
-	beacon.data[34] = raw_stageTable[0];
-	beacon.data[35] = raw_stageTable[3];
-	beacon.data[36] = raw_stageTable[4];
-	beacon.data[37] = raw_stageTable[5];
-	beacon.data[38] = raw_stageTable[8];
-	beacon.data[39] = raw_stageTable[7];
-	beacon.data[40] = raw_stageTable[6];
 	for (i = 0; i < 3; i++)
 	{
 		raw_param = (byte*)&(beacon_param.Attitude[i]);
 		for (l = 0; l < 2; l++)
 		{
-			beacon.data[41 + i * 2 + l] = raw_param[l];
+			beacon.data[32 + i * 2 + l] = raw_param[l];
 		}
 	}
 	// 4.5. stats
-	beacon.data[47] = beacon_param.numOfPics;
-	beacon.data[48] = beacon_param.numOfAPRS;
-	beacon.data[49] = beacon_param.numOfDelayedCommand;
+	beacon.data[38] = beacon_param.numOfPics;
+	beacon.data[39] = beacon_param.numOfAPRS;
+	beacon.data[40] = beacon_param.numOfDelayedCommand;
 	raw_param = (byte*)&beacon_param.numOfResets;
 	for(i = 0; i < 4; i++)
 	{
-		beacon.data[50 + i] = raw_param[3 - i];
+		beacon.data[41 + i] = raw_param[3 - i];
 	}
 	raw_param = (byte*)&beacon_param.lastReset;
 	for(i = 0; i < 4; i++)
 	{
-		beacon.data[54 + i] = raw_param[3 - i];
+		beacon.data[45 + i] = raw_param[3 - i];
 	}
 	// 4.6. states
-	beacon.data[58] = beacon_param.state.raw;
+	beacon.data[49] = beacon_param.state.raw;
 	// 5. Encoding beacon for sending
 	byte rawData[BEACON_LENGTH + SPL_TM_HEADER_SIZE];
 	int size = 0;

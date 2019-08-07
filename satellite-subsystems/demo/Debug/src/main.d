@@ -1,4 +1,5 @@
 src/main.d: ../src/main.c \
+<<<<<<< HEAD
  C:/Hoopoe3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h \
@@ -11,6 +12,16 @@ src/main.d: ../src/main.c \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/projdefs.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOSConfig.h \
+=======
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/projdefs.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOSConfig.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/board.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/at91sam9g20/AT91SAM9G20.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/trace.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/dbgu/dbgu.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/pio/pio.h \
+>>>>>>> itai
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/assert.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/portable.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/portable/GCC/ARM9_AT91SAM9G20/portmacro.h \
@@ -20,6 +31,13 @@ src/main.d: ../src/main.c \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/list.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h \
+<<<<<<< HEAD
+=======
+ C:/Hoopoe3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h \
+ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h \
+>>>>>>> itai
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/WatchDogTimer.h \
  C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/include/hal/boolean.h \
@@ -54,6 +72,7 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Global/Global.h ../src/sub-systemCode/EPS.h \
  ../src/sub-systemCode/Global/FRAMadress.h \
  ../src/sub-systemCode/Global/Global.h \
+<<<<<<< HEAD
  ../src/sub-systemCode/Global/sizes.h
 
 C:/Hoopoe3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h:
@@ -63,15 +82,37 @@ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exitha
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h:
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/trace.h:
+=======
+ ../src/sub-systemCode/Global/sizes.h \
+ ../src/sub-systemCode/Main/CMD/ADCS_CMD.h \
+ ../src/sub-systemCode/Main/CMD/../../COMM/GSC.h \
+ ../src/sub-systemCode/Main/CMD/../commands.h \
+ ../src/sub-systemCode/Main/CMD/../../ADCS/AdcsTroubleShooting.h \
+ ../src/sub-systemCode/ADCS/AdcsMain.h \
+ C:\Hoopoe3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h \
+ ../src/sub-systemCode/ADCS/AdcsTroubleShooting.h
+
+C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h:
+
+C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/projdefs.h:
+
+C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOSConfig.h:
+>>>>>>> itai
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/board.h:
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/at91sam9g20/AT91SAM9G20.h:
 
+<<<<<<< HEAD
+=======
+C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/trace.h:
+
+>>>>>>> itai
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/dbgu/dbgu.h:
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/pio/pio.h:
 
+<<<<<<< HEAD
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h:
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h:
@@ -80,6 +121,8 @@ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/projde
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOSConfig.h:
 
+=======
+>>>>>>> itai
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/assert.h:
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/portable.h:
@@ -98,6 +141,17 @@ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h:
 
+<<<<<<< HEAD
+=======
+C:/Hoopoe3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h:
+
+C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h:
+
+C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h:
+
+C:/Hoopoe3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h:
+
+>>>>>>> itai
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h:
 
 C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/WatchDogTimer.h:
@@ -169,3 +223,20 @@ C:/Hoopoe3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
 ../src/sub-systemCode/Global/Global.h:
 
 ../src/sub-systemCode/Global/sizes.h:
+<<<<<<< HEAD
+=======
+
+../src/sub-systemCode/Main/CMD/ADCS_CMD.h:
+
+../src/sub-systemCode/Main/CMD/../../COMM/GSC.h:
+
+../src/sub-systemCode/Main/CMD/../commands.h:
+
+../src/sub-systemCode/Main/CMD/../../ADCS/AdcsTroubleShooting.h:
+
+../src/sub-systemCode/ADCS/AdcsMain.h:
+
+C:\Hoopoe3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h:
+
+../src/sub-systemCode/ADCS/AdcsTroubleShooting.h:
+>>>>>>> itai

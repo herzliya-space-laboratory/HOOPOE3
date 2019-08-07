@@ -42,7 +42,6 @@
 #include "../Global/sizes.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
-#include "../ADCS.h"
 
 
 int find_fileName(HK_types type, char *fileName)
@@ -70,69 +69,69 @@ int find_fileName(HK_types type, char *fileName)
 	case SP_HK_T:
 		strcpy(fileName, SP_HK_FILE_NAME);
 		break;
-	case ADCS_CSS_DATA_T:
-		strcpy(fileName, NAME_OF_CSS_DATA_FILE);
-		break;
-	case ADCS_Magnetic_filed_T:
-		strcpy(fileName, NAME_OF_MAGNETIC_FIELD_DATA_FILE);
-		break;
-	case ADCS_CSS_sun_vector_T:
-		strcpy(fileName, CSS_SUN_VECTOR_DATA_FILE);
-		break;
-	case ADCS_wheel_speed_T:
-		strcpy(fileName, WHEEL_SPEED_DATA_FILE);
-		break;
-	case ADCS_sensore_rate_T:
-		strcpy(fileName, SENSOR_RATE_DATA_FILE);
-		break;
-	case ADCS_MAG_CMD_T:
-		strcpy(fileName, MAGNETORQUER_CMD_FILE);
-		break;
-	case ADCS_wheel_CMD_T:
-		strcpy(fileName, WHEEL_SPEED_CMD_FILE);
-		break;
-	case ADCS_Mag_raw_T:
-		strcpy(fileName, RAW_MAGNETOMETER_FILE);
-		break;
-	case ADCS_IGRF_MODEL_T:
-		strcpy(fileName, IGRF_MODEL_MAGNETIC_FIELD_VECTOR_FILE);
-		break;
-	case ADCS_Gyro_BIAS_T:
-		strcpy(fileName, GYRO_BIAS_FILE);
-		break;
-	case ADCS_Inno_Vextor_T:
-		strcpy(fileName, INNOVATION_VECTOR_FILE);
-		break;
-	case ADCS_Error_Vec_T:
-		strcpy(fileName, ERROR_VECTOR_FILE);
-		break;
-	case ADCS_QUATERNION_COVARIANCE_T:
-		strcpy(fileName, QUATERNION_COVARIANCE_FILE);
-		break;
-	case ADCS_ANGULAR_RATE_COVARIANCE_T:
-		strcpy(fileName, ANGULAR_RATE_COVARIANCE_FILE);
-		break;
-	case ADCS_ESTIMATED_ANGLES_T:
-		strcpy(fileName, ESTIMATED_ANGLES_FILE);
-		break;
-	case ADCS_Estimated_AR_T:
-		strcpy(fileName, ESTIMATED_ANGULAR_RATE_FILE);
-		break;
-	case ADCS_ECI_POS_T:
-		strcpy(fileName, NAME_OF_ECI_POSITION_DATA_FILE);
-		break;
-	case ADCS_SAV_Vel_T:
-		strcpy(fileName, NAME_OF_SATALLITE_VELOCITY_DATA_FILE);
-		break;
-	case ADCS_ECEF_POS_T:
-		strcpy(fileName, NAME_OF_ECEF_POSITION_DATA_FILE);
-		break;
-	case ADCS_LLH_POS_T:
-		strcpy(fileName, NAME_OF_LLH_POSTION_DATA_FILE);
-		break;
-	case ADCS_EST_QUATERNION_T:
-		strcpy(fileName, ESTIMATED_QUATERNION_FILE);
-		break;
+//	case ADCS_CSS_DATA_T:
+//		strcpy(fileName, NAME_OF_CSS_DATA_FILE);
+//		break;
+//	case ADCS_Magnetic_filed_T:
+//		strcpy(fileName, NAME_OF_MAGNETIC_FIELD_DATA_FILE);
+//		break;
+//	case ADCS_CSS_sun_vector_T:
+//		strcpy(fileName, CSS_SUN_VECTOR_DATA_FILE);
+//		break;
+//	case ADCS_wheel_speed_T:
+//		strcpy(fileName, WHEEL_SPEED_DATA_FILE);
+//		break;
+//	case ADCS_sensore_rate_T:
+//		strcpy(fileName, SENSOR_RATE_DATA_FILE);
+//		break;
+//	case ADCS_MAG_CMD_T:
+//		strcpy(fileName, MAGNETORQUER_CMD_FILE);
+//		break;
+//	case ADCS_wheel_CMD_T:
+//		strcpy(fileName, WHEEL_SPEED_CMD_FILE);
+//		break;
+//	case ADCS_Mag_raw_T:
+//		strcpy(fileName, RAW_MAGNETOMETER_FILE);
+//		break;
+//	case ADCS_IGRF_MODEL_T:
+//		strcpy(fileName, IGRF_MODEL_MAGNETIC_FIELD_VECTOR_FILE);
+//		break;
+//	case ADCS_Gyro_BIAS_T:
+//		strcpy(fileName, GYRO_BIAS_FILE);
+//		break;
+//	case ADCS_Inno_Vextor_T:
+//		strcpy(fileName, INNOVATION_VECTOR_FILE);
+//		break;
+//	case ADCS_Error_Vec_T:
+//		strcpy(fileName, ERROR_VECTOR_FILE);
+//		break;
+//	case ADCS_QUATERNION_COVARIANCE_T:
+//		strcpy(fileName, QUATERNION_COVARIANCE_FILE);
+//		break;
+//	case ADCS_ANGULAR_RATE_COVARIANCE_T:
+//		strcpy(fileName, ANGULAR_RATE_COVARIANCE_FILE);
+//		break;
+//	case ADCS_ESTIMATED_ANGLES_T:
+//		strcpy(fileName, ESTIMATED_ANGLES_FILE);
+//		break;
+//	case ADCS_Estimated_AR_T:
+//		strcpy(fileName, ESTIMATED_ANGULAR_RATE_FILE);
+//		break;
+//	case ADCS_ECI_POS_T:
+//		strcpy(fileName, NAME_OF_ECI_POSITION_DATA_FILE);
+//		break;
+//	case ADCS_SAV_Vel_T:
+//		strcpy(fileName, NAME_OF_SATALLITE_VELOCITY_DATA_FILE);
+//		break;
+//	case ADCS_ECEF_POS_T:
+//		strcpy(fileName, NAME_OF_ECEF_POSITION_DATA_FILE);
+//		break;
+//	case ADCS_LLH_POS_T:
+//		strcpy(fileName, NAME_OF_LLH_POSTION_DATA_FILE);
+//		break;
+//	case ADCS_EST_QUATERNION_T:
+//		strcpy(fileName, ESTIMATED_QUATERNION_FILE);
+//		break;
 	default:
 		return -1;
 		break;

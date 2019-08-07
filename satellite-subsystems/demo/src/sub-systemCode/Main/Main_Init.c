@@ -41,8 +41,10 @@
 #include "../Global/TM_managment.h"
 #include "../EPS.h"
 #include "../Ants.h"
-#include "../ADCS.h"
-#include "../ADCS/Stage_Table.h"
+
+#include "../ADCS/AdcsMain.h"
+
+
 #include "../TRXVU.h"
 #include "HouseKeeping.h"
 #include "commands.h"
@@ -54,7 +56,7 @@
 // will Boot- deploy all  appropriate subsytems
 
 //extern unsigned short* Vbat_Prv;
-stageTable ST;
+
 
 #ifdef TESTING
 
@@ -179,9 +181,6 @@ Boolean first_activation()
 	return TRUE;
 }
 
-#define BUFFLEN 30+F_MAXNAME
-
-
 void resetSD()
 {
 	F_FIND find;
@@ -227,7 +226,7 @@ int InitSubsystems()
 
 	create_files(activation);
 
-	EPS_Init();
+	 EPS_Init();
 
 #ifdef ANTS_ON
 	init_Ants();
@@ -241,11 +240,11 @@ int InitSubsystems()
 
 #ifdef TESTING
 	printf("after deploy\n");
-	readAntsState();
+	 readAntsState();
 #endif
 #endif
 
-	init_adcs(activation);
+	AdcsInit();
 
 	init_trxvu();
 
@@ -264,6 +263,7 @@ int SubSystemTaskStart()
 	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
+	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 	return 0;
 }
