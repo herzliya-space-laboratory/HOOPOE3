@@ -35,10 +35,6 @@
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
 
-#ifdef TESTING
-#include "CMD/test_CMD.h"
-#endif
-
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
@@ -388,7 +384,7 @@ void AUC_GS(TC_spl decode)
 		cmd_dummy_func(&type, &err);
 		break;
 	case (REDEPLOY):
-
+		cmd_deploy_ants(&type, &err, decode);
 		break;
 	case (ARM_DISARM):
 		cmd_ARM_DIARM(&type, &err, decode);
@@ -457,25 +453,3 @@ void AUC_special_operation(TC_spl decode)
 	save_ACK(type, err, decode.id);
 #endif
 }
-
-#ifdef TESTING
-void AUC_test(TC_spl decode)
-{
-	Ack_type type;
-	ERR_type err;
-
-	switch (decode.subType)
-	{
-	case IMAGE_DUMP_ST:
-
-		break;
-	default:
-		cmd_error(&type, &err);
-		break;
-	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
-#endif
-}
-#endif

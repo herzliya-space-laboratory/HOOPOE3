@@ -269,20 +269,23 @@ void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	*err = ERR_SUCCESS;
 
 }
-void cmd_deploy_ants(Ack_type* type, ERR_type* err)
+void cmd_deploy_ants(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	(void)type;
-	(void)err;
-	/*type = ACK_REDEPLOY;
+	*type = ACK_REDEPLOY;
+	if (cmd.length)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
 #ifndef ANTS_DO_NOT_DEPLOY
-	int error = deploye_ants();
+	int error = deploye_ants(cmd.data[0]);
 	if (error == -2)
 	{
 		*err = ERR_NOT_INITIALIZED;
 	}
 	else if (error != 0)
 	{
-		if (err == 666)
+		if (error == 666)
 		{
 			printf("FUN FACT: deploy ants when you don't have permission can summon the DEVIL!!!\nerror: %d\n", error);
 		}
@@ -296,5 +299,5 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 #else
 	printf("sho! sho!, get out before i kill you\n");
 	*err = ERR_TETST;
-#endif*/
+#endif
 }

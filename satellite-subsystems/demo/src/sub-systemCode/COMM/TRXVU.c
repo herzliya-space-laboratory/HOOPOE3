@@ -548,12 +548,6 @@ void Beacon_task()
 		i_error = FRAM_read((byte*)&low_v_beacon, BEACON_LOW_BATTERY_STATE_ADDR, 2);
 		check_int("beacon_task, FRAM_write(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 
-#ifdef TESTING
-		if (7400 < low_v_beacon || low_v_beacon < 7200)
-		{
-			low_v_beacon = 7250;
-		}
-#endif
 		// 7. check if low vBatt
 		portTickType delay = CONVERT_SECONDS_TO_MS(delayBaecon);//normal
 		if (low_v_beacon > get_Vbatt())

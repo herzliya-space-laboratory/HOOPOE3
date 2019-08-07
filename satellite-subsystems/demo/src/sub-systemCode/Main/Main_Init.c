@@ -56,39 +56,6 @@
 //extern unsigned short* Vbat_Prv;
 stageTable ST;
 
-#ifdef TESTING
-
-
-void test_menu()
-{
-	byte dataFRAM = FALSE_8BIT;
-	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
-
-	Boolean exit = FALSE;
-	unsigned int selection;
-	byte data;
-	while (!exit)
-	{
-		printf( "\n\r Select a test to perform: \n\r");
-		printf("\t 0) continue to code\n\r");
-		printf("\t 1) set first activation flag to TRUE\n\r");
-
-		exit = FALSE;
-		while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
-
-		switch(selection)
-		{
-		case 0:
-			exit = TRUE;
-			break;
-		case 1:
-			FRAM_write(&data, FIRST_ACTIVATION_ADDR, 1);
-			break;
-		}
-	}
-}
-#endif
-
 void numberOfRestarts()
 {
 	byte raw[4];
@@ -210,10 +177,6 @@ int InitSubsystems()
 	StartSPI();
 
 	StartFRAM();
-
-#ifdef TESTING
-	test_menu();
-#endif
 
 	Boolean activation = first_activation();
 
