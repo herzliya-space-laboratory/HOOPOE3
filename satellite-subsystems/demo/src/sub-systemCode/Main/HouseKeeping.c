@@ -42,6 +42,7 @@
 #include "../Global/sizes.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
+#include "../Global/OnlineTM.h"
 #include "../ADCS.h"
 
 
@@ -832,6 +833,10 @@ void HouseKeeping_highRate_Task()
 			save_COMM_HK();
 
 			//save_ADCS_HK();
+
+#ifndef USE_DIFFERENT_TASK_ONLINE_TM
+		save_onlineTM_logic();
+#endif
 		}
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);

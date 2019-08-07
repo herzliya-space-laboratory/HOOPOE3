@@ -257,33 +257,37 @@ int delete_onlineTM_param_to_save_list(int TM_index)
 	return -1;
 }
 
+void save_onlineTM_logic()
+{
+	time_unix time_now;
+	Time_getUnixEpoch(&time_now);
+	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
+	{
+		if (offline_TM_list[i].type == NULL)
+			continue;
+		else if (offline_TM_list[i].stopTime <= time_now)
+		{
+			offline_TM_list[i].type = NULL;
+			offline_TM_list[i].lastSave = 0;
+			offline_TM_list[i].period = 0;
+			offline_TM_list[i].stopTime = 0;
+		}
+		else if (offline_TM_list[i].period + offline_TM_list[i].lastSave <= time_now)
+		{
+			save_onlineTM_param(offline_TM_list[i]);
+			offline_TM_list[i].lastSave = time_now;
+		}
+	}
+}
+
 void save_onlineTM_task()
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
 
-	time_unix time_now;
-
 	while(TRUE)
 	{
-		Time_getUnixEpoch(&time_now);
-		for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
-		{
-			if (offline_TM_list[i].type == NULL)
-				continue;
-			else if (offline_TM_list[i].stopTime <= time_now)
-			{
-				offline_TM_list[i].type = NULL;
-				offline_TM_list[i].lastSave = 0;
-				offline_TM_list[i].period = 0;
-				offline_TM_list[i].stopTime = 0;
-			}
-			else if (offline_TM_list[i].period + offline_TM_list[i].lastSave <= time_now)
-			{
-				save_onlineTM_param(offline_TM_list[i]);
-				offline_TM_list[i].lastSave = time_now;
-			}
-		}
+		save_onlineTM_logic();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
