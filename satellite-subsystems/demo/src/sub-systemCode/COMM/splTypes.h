@@ -175,8 +175,9 @@
 #define ADCS_MOMENT_INERTIA_ST			150
 #define ADCS_NOISE_CONFIG_ST			151
 #define ADCS_USE_IN_EKF_ST				152
-#define ADCS_SET_EST_MODE				153
 #define ADCS_GET_FULL_CONFIG_ST			154
+#define ADCS_SET_CTRL_MODE_ST			170	//TODO: add to dictionary
+#define ADCS_SET_EST_MODE_ST			171	//TODO: add to dictionary
 #define ADCS_GET_TLM_BY_ID_ST			172
 #define ADCS_DUMMY_FUNC					199
 //#define ADCS_

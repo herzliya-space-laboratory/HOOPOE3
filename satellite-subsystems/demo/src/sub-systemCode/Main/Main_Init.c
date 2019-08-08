@@ -264,15 +264,21 @@ void no_reset_task()
 	state.fields.channel3V3_1 = 1;
 	state.fields.channel5V_1 = 1;
 	int err=0;
+int sum =0;
 	while(1)
 	{
 		err = GomEpsGetHkData_general(0, &eps_tlm);
+
 		if (err == 0)
 		{
 			if (eps_tlm.fields.output[0] == 0 || eps_tlm.fields.output[3] == 0)
 			{
 				err = GomEpsSetOutput(0, state);
-				check_int("GomEpsSetOutput, in no reset", err);
+				printf("\nEps channels:\n[");
+				for(int i = 0; i < 8 ; i++){
+					printf("%X,",eps_tlm.fields.output[i]);
+				}
+				printf("]\n");
 			}
 		}
 		vTaskDelay(1000);

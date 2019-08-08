@@ -51,6 +51,8 @@
  */
 int AdcsReadI2cAck(int *rv);
 
+int AdcsI2cCmdReadTLM(unsigned char tlm_type, unsigned char* data, unsigned int length , int *ack);
+
 /*!
  * @brief allows the user to send a command directly to the I2C bus to the ADCS.
  * @param[in] data data to send to the ADCS on the I2C bus.

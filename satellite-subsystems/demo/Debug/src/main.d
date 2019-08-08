@@ -61,7 +61,8 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Main/CMD/../../ADCS/AdcsTroubleShooting.h \
  ../src/sub-systemCode/ADCS/AdcsMain.h \
  C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h \
- ../src/sub-systemCode/ADCS/AdcsTroubleShooting.h
+ ../src/sub-systemCode/ADCS/AdcsTroubleShooting.h \
+ ../src/sub-systemCode/ADCS/AdcsCommands.h
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h:
 
@@ -190,3 +191,5 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
 C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h:
 
 ../src/sub-systemCode/ADCS/AdcsTroubleShooting.h:
+
+../src/sub-systemCode/ADCS/AdcsCommands.h:

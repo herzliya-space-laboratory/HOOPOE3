@@ -177,11 +177,13 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 	unsigned char buffer[300] = {0};
 
-	cspace_adcs_geninfo_t data ={0}; //for testing only. delete
+	cspace_adcs_geninfo_t data; //TODO: for testing only. delete
 	cspace_adcs_bootprogram bootindex;
 	cspace_adcs_runmode_t runmode;
 	cspace_adcs_unixtm_t time;
 	cspace_adcs_estmode_sel att;
+	 cspace_adcs_attctrl_mod_t att_ctrl;
+
 	switch(sub_type)
 	{
 
@@ -383,20 +385,22 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	case ADCS_USE_IN_EKF_ST:
 		err = cspaceADCS_setAttEstMode(ADCS_ID,estmode_full_state_ekf);
 		break;
-
-	case ADCS_SET_EST_MODE:
+	case ADCS_SET_CTRL_MODE_ST:
+		memcpy(&att,cmd->data,sizeof(att_ctrl));
+		cspaceADCS_setAttCtrlMode(ADCS_ID,&att_ctrl);
+		break;
+	case ADCS_SET_EST_MODE_ST:
 		memcpy(&att,cmd->data,sizeof(att));
 		err = cspaceADCS_setAttEstMode(ADCS_ID,att);
 		break;
 	case ADCS_GET_FULL_CONFIG_ST:
-
 		err = AdcsI2cCmdWithID(GET_ADCS_FULL_CONFIG_CMD_ID,cmd->data,GET_ADCS_FULL_CONFIG_DATA_LENGTH,&rv);
 		//TODO: send ack with 'rv'
-		SendAckWithInfo(&rv,1, ADCS_GET_FULL_CONFIG_ST);
+		SendAckWithInfo((byte*)&rv,1, ADCS_GET_FULL_CONFIG_ST);
 		break;
 	case ADCS_DUMMY_FUNC:
 		rv = cspaceADCS_getGeneralInfo(ADCS_ID,&data);
-		SendAckWithInfo(&rv,1,ADCS_DUMMY_FUNC);
+		SendAckWithInfo((byte*)&rv,1,ADCS_DUMMY_FUNC);
 		printf("uptime = %d\n",data.fields.uptime_secs);
 		//TODO: change this into a real command and send to GS
 		break;

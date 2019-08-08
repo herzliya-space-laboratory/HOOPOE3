@@ -38,6 +38,7 @@
 
 #include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 #include "sub-systemCode/ADCS/AdcsMain.h"
+#include "sub-systemCode/ADCS/AdcsCommands.h"
 
 #define DEBUGMODE
 
@@ -83,33 +84,24 @@ void Command_logic()
 void TestGenericI2cTelemetry()
 {
 	int err = 0;
-	cspace_adcs_powerdev_t device_ctrl;
-	device_ctrl.fields.motor_cubecontrol= TRUE;
-	device_ctrl.fields.pwr_cubesense = TRUE;
-	device_ctrl.fields.signal_cubecontrol = TRUE;
-	err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, &device_ctrl);
-	if(0!=err){
-		printf("'cspaceADCS_setPwrCtrlDevice' = %d\n",err);
-		return;
-	}
-
+	int from_driver = 0;
 	unsigned int tlm_id = 0;
 	unsigned int tlm_length = 0;
 	printf("choose from driver telemetry? Y=1/N=0\n");
-	while(UTIL_DbguGetIntegerMinMax(&err,0,1)==0);
+	while(UTIL_DbguGetIntegerMinMax(&from_driver,0,1)==0);
 
-	printf("please choose TLM id(0 to cancel):\n");
+	printf("please choose TLM id(0 to exit):\n");
 	while(UTIL_DbguGetIntegerMinMax(&tlm_id,0,200)==0);
 	if(tlm_id == 0) return;
 
-	printf("please choose TLM length(0 to cancel):\n");
+	printf("please choose TLM length(0 to exit):\n");
 	while(UTIL_DbguGetIntegerMinMax(&tlm_length,0,300)==0);
 	if(tlm_length == 0) return;
 
 	byte buffer[300] ={0};
-	AdcsI2cCmdReadTLM(tlm_id,buffer,tlm_length);
+	AdcsI2cCmdReadTLM(tlm_id,buffer,tlm_length,&err);
 
-	if(err == 1){
+	if(from_driver == 1){
 		cspace_adcs_magfieldvec_t info_data;
 		switch(tlm_id){
 		case 151:
@@ -121,11 +113,69 @@ void TestGenericI2cTelemetry()
 		}
 	}
 	else{
-		for(int i=0;i<tlm_length;i++)
+		for(unsigned int i=0;i<tlm_length;i++)
 		{
 			printf("%X\t",buffer[i]);
 		}
 	}
+
+}
+
+#define PRINT_IF_NO_ERROR(err,data,function) 	\
+if(0 != err){\
+printf("error in " #function "= %d\n",err);return;\
+} else{\
+printf("\n[");\
+for(int i =0; i <sizeof(data);i++){\
+printf("%X, ",data.raw[i]);\
+}\
+printf("]\n");\
+}
+
+void TestEstimationModesAndTLM(){
+	int err =0;
+	cspace_adcs_runmode_t runmode = runmode_enabled;
+	err = cspaceADCS_setRunMode(ADCS_ID,  runmode);
+	vTaskDelay(2000);
+	if(0 != err){
+		printf("error in 'cspaceADCS_setAttEstMode'=%d\n",err);
+		return;
+	}else{
+		printf("runmode = %d\n",runmode);
+	}
+
+	cspace_adcs_attctrl_mod_t ctrl_mode;
+	printf("choose control mode mode:\n");
+	while(UTIL_DbguGetIntegerMinMax((unsigned int*)&ctrl_mode.fields.ctrl_mode,0,13) == 0);
+	err = cspaceADCS_setAttCtrlMode(ADCS_ID,&ctrl_mode);
+	PRINT_IF_NO_ERROR(err,ctrl_mode,cspaceADCS_setAttCtrlMode);
+	vTaskDelay(2000);
+
+	cspace_adcs_estmode_sel estimation_mode;
+	printf("choose estimation mode:\n");
+	while(UTIL_DbguGetIntegerMinMax((unsigned int*)&estimation_mode,0,6) == 0);
+
+	err = cspaceADCS_setAttEstMode(ADCS_ID,estimation_mode);
+	if(0 != err){
+		printf("error in 'cspaceADCS_setAttEstMode'=%d\n",err);
+		return;
+	}else{
+		printf("estimation_mode = %d\n",estimation_mode);
+	}
+
+	cspace_adcs_magfieldvec_t vec;
+	err = cspaceADCS_getMagneticFieldVec(ADCS_ID,&vec);
+	PRINT_IF_NO_ERROR(err,vec,cspaceADCS_getMagneticFieldVec)
+
+	cspace_adcs_rawmagmeter_t raw_mag;
+	err = cspaceADCS_getRawMagnetometerMeas(ADCS_ID, &raw_mag);
+	PRINT_IF_NO_ERROR(err,raw_mag,cspaceADCS_getRawMagnetometerMeas)
+
+	cspace_adcs_estmetadata_t metadata;
+	err = cspaceADCS_getEstimationMetadata(ADCS_ID, &metadata);
+	PRINT_IF_NO_ERROR(err,metadata,cspaceADCS_getEstimationMetadata)
+
+
 
 }
 
@@ -171,7 +221,8 @@ void taskMain()
 			}
 			else
 			{
-				TestGenericI2cTelemetry();
+				TestEstimationModesAndTLM();
+				//TestGenericI2cTelemetry();
 				//printf("Print the data\n\n");
 			}
 		}
