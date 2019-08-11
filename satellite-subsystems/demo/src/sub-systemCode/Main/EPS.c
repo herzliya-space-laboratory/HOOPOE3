@@ -188,6 +188,9 @@ void reset_FRAM_EPS()
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	i_error = FRAM_write(&data, SHUT_CAM_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
+	alpha = EPS_ALPHA_DEFFAULT_VALUE;
+	i_error = FRAM_write((byte*)&alpha, EPS_ALPHA_ADDR, sizeof(double));
+	check_int("can't FRAM_write(EPS_ALPHA_ADDR), reset_FRAM_EPS", i_error);
 }
 
 void reset_EPS_voltages()
@@ -244,6 +247,14 @@ void EPS_Conditioning()
 	if (i_error != 0)
 		return;
 	set_Vbatt(eps_tlm.fields.vbatt);
+
+	alpha = EPS_ALPHA_DEFFAULT_VALUE;
+	i_error = FRAM_read((byte*)&alpha, EPS_ALPHA_ADDR, sizeof(double));
+	check_int("can't FRAM_read(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
+	if (!CHECK_EPS_ALPHA_VALUE(alpha))
+	{
+		alpha = EPS_ALPHA_ADDR;
+	}
 
 	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
 	voltage_t VBatt_filtered = (voltage_t)(current_VBatt * alpha + (1 - alpha) * VBatt_previous);

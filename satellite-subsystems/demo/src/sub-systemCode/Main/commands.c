@@ -335,6 +335,9 @@ void AUC_EPS(TC_spl decode)
 	case (SHUT_CAM_ST):
 		cmd_SHUT_CAM(&type, &err, decode);
 		break;
+	case (UPDATE_EPS_ALPHA_ST):
+		cmd_update_alpha(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;

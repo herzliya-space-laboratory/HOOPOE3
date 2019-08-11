@@ -209,3 +209,30 @@ void cmd_allow_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 	*err = ERR_SUCCESS;
 	shut_ADCS(SWITCH_OFF);
 }
+void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_EPS_ALPHA;
+	if (cmd.length != sizeof(double))
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	double alpha;
+	memcpy(&alpha, cmd.data, sizeof(double));
+	if (CHECK_EPS_ALPHA_VALUE(alpha))
+	{
+		int error = FRAM_write(cmd.data, EPS_ALPHA_ADDR, sizeof(double));
+		if (error)
+		{
+			*err = ERR_FRAM_WRITE_FAIL;
+			return;
+		}
+		check_int("cmd_update_alpha, FRAM_write(EPS_ALPHA_ADDR)", error);
+		*err = ERR_SUCCESS;
+	}
+	else
+	{
+		*err = ERR_PARAMETERS;
+	}
+}
