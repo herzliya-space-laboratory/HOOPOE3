@@ -53,7 +53,7 @@ xTaskHandle xBeaconTask;
 static byte Dump_buffer[DUMP_BUFFER_SIZE];
 
 
-void init_trxvu(void)
+void TRXVU_init_hardWare()
 {
 	int retValInt = 0;
 
@@ -94,17 +94,27 @@ void init_trxvu(void)
 
 	retValInt = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
 	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
-
-	/*retValInt = IsisTrxvu_tcSetDefFromClSign(0, TRXVU_FROM_CALSIGN);
-	check_int("init_trxvu, frommm call sign", retValInt);
-
-	retValInt = IsisTrxvu_tcSetDefToClSign(0, TRXVU_TO_CALSIGN);
-	check_int("init_trxvu, tooo call sign", retValInt);*/
 }
-
-void TRXVU_task()
+void TRXVU_init_softWare()
 {
-	portBASE_TYPE lu_error = 0;
+	get_APRS_list();
+	get_delayCommand_list();
+
+	byte dat;
+	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
+	check_int("TRXVU_init_softWare, FRAM_read", error);
+	ISIStrxvuBitrate newParam = trxvu_bitrate_9600;
+	for (uint8_t i = 0; i < 9; i *= 2)
+	{
+		if (dat == i)
+		{
+			newParam = (ISIStrxvuBitrate)dat;
+			break;
+		}
+	}
+	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
+	check_int("IsisTrxvu_tcSetAx25Bitrate, cmd_change_def_bit_rate", error);
+
 	//1. create binary semaphore for transmitting
 	vSemaphoreCreateBinary(xIsTransmitting);
 	vTaskDelay(SYSTEM_DEALY);
@@ -116,10 +126,20 @@ void TRXVU_task()
 	if (xDumpQueue == NULL || xTransponderQueue == NULL || xIsTransmitting == NULL)
 	{
 		//2.1. in case the semaphore and queues are damaged
-		return;
+		printf("abort! abort!!!\n");
 	}
+}
+
+void init_trxvu(void)
+{
+	TRXVU_init_hardWare();
+	TRXVU_init_softWare();
+}
+
+void TRXVU_task()
+{
 	//3. create beacon task
-	lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xBeaconTask);
+	portBASE_TYPE lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xBeaconTask);
 	check_portBASE_TYPE("could not create Beacon Task.", lu_error);
 	vTaskDelay(SYSTEM_DEALY);
 	//4. checks if theres was a dump before the reset and turned him off
@@ -128,9 +148,6 @@ void TRXVU_task()
 		//4.1. stop allowing transponder
 		set_system_state(dump_param, SWITCH_OFF);
 	}
-	//5. gets FRAM lists to ram
-	get_APRS_list();
-	get_delayCommand_list();
 	//6. entering infinite loop
 	while(1)
 	{

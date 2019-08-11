@@ -84,6 +84,7 @@
 #define APRS_DUMP_ST				90
 #define STOP_DUMP_ST				91
 #define TIME_FREQUENCY_ST			5
+#define UPDATE_BIT_RATE_ST			55
 
 //general
 #define SOFT_RESET_ST			68

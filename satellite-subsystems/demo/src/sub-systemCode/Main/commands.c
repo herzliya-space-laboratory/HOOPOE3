@@ -221,6 +221,9 @@ void AUC_COMM(TC_spl decode)
 	case (TIME_FREQUENCY_ST):
 		cmd_time_frequency(&type, &err, decode);
 		break;
+	case (UPDATE_BIT_RATE_ST):
+		cmd_change_def_bit_rate(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;

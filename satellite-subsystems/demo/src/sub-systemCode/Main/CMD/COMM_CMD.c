@@ -142,3 +142,47 @@ void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_SUCCESS;
 	}
 }
+void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_UPDATE_BIT_RATE;
+	if (cmd.length != 1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	ISIStrxvuBitrate newParam;
+	Boolean validValue = FALSE;
+	for (uint8_t i = 0; i < 9; i *= 2)
+	{
+		if (cmd.data[0] == i)
+		{
+			newParam = (ISIStrxvuBitrate)cmd.data[0];
+			validValue = TRUE;
+			break;
+		}
+	}
+
+	if (validValue)
+	{
+		int error = FRAM_write(cmd.data, BIT_RATE_ADDR, 1);
+		check_int("FRAM_write, cmd_change_def_bit_rate", error);
+		if (error)
+		{
+			*err = ERR_FRAM_WRITE_FAIL;
+			return;
+		}
+		error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
+		check_int("IsisTrxvu_tcSetAx25Bitrate, cmd_change_def_bit_rate", error);
+		if (error)
+		{
+			*err = ERR_FAIL;
+			return;
+		}
+		*err = ERR_SUCCESS;
+	}
+	else
+	{
+		*err = ERR_PARAMETERS;
+	}
+}
