@@ -94,7 +94,7 @@ TroubleErrCode AdcsInit()
 	}
 	return TRBL_SUCCESS;
 }
-
+#define CHANNEL_OFF_DELAY 100	///< amount of miili-sec to wait for the ADCS to turn on
 void AdcsTask()
 {
 	TC_spl cmd = {0};
@@ -104,7 +104,9 @@ void AdcsTask()
 	while(TRUE)
 	{
 		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
-
+		if(SWITCH_OFF == get_system_state(ADCS_param)){
+			vTaskDelay(CHANNEL_OFF_DELAY);
+		}
 		if(!AdcsCmdQueueIsEmpty()){
 			trbl = AdcsCmdQueueGet(&cmd);
 			if(TRBL_SUCCESS != trbl){

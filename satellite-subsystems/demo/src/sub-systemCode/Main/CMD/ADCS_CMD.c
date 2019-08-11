@@ -1,5 +1,5 @@
 #include "Adcs_Cmd.h"
-
+//todo: remaind tomer include AdcsMain
 //static ADCS_CMD_t ADCS_cmd[ADCS_CMD_LEN];
 static xQueueHandle AdcsCmdQueue = NULL;
 
@@ -38,7 +38,7 @@ TroubleErrCode AdcsCmdQueueAdd(TC_spl *cmd){
 }
 
 TroubleErrCode AdcsCmdQueueGetCount(){
-	return uxQueueMessagesWaiting(xAdcsCmdQueue);
+	return uxQueueMessagesWaiting(xAdcsCmdQueue);//todo remove this x
 }
 
 Boolean AdcsCmdQueueIsEmpty(){
