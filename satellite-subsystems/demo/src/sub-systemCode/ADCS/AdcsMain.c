@@ -61,8 +61,16 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 
 }
 
+	///< amount of miili-sec to wait for the ADCS to turn on
 TroubleErrCode AdcsInit()
 {
+	if(SWITCH_OFF == get_system_state(ADCS_param))
+	{
+		while(SWITCH_OFF == get_system_state(ADCS_param)){
+			vTaskDelay(CHANNEL_OFF_DELAY);
+		}
+	}
+
 	TroubleErrCode trbl = TRBL_SUCCESS;
 
 	unsigned char adcs_i2c = ADCS_I2C_ADRR;
@@ -94,7 +102,7 @@ TroubleErrCode AdcsInit()
 	}
 	return TRBL_SUCCESS;
 }
-#define CHANNEL_OFF_DELAY 100	///< amount of miili-sec to wait for the ADCS to turn on
+
 void AdcsTask()
 {
 	TC_spl cmd = {0};
@@ -106,7 +114,9 @@ void AdcsTask()
 		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
 			vTaskDelay(CHANNEL_OFF_DELAY);
+			continue;
 		}
+
 		if(!AdcsCmdQueueIsEmpty()){
 			trbl = AdcsCmdQueueGet(&cmd);
 			if(TRBL_SUCCESS != trbl){
@@ -118,10 +128,12 @@ void AdcsTask()
 			}
 			//todo: log cmd received
 		}
+
 		trbl = GatherTlmAndData(); //TODO: check if enough time has passed
 		if(TRBL_SUCCESS != trbl){
 			AdcsTroubleShooting(trbl);
 		}
+
 		vTaskDelay(delay_loop);
 	}
 }

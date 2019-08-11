@@ -1,23 +1,32 @@
 #include "AdcsTroubleShooting.h"
 #include "../Main/CMD/ADCS_CMD.h"
 #include "AdcsMain.h"
+#include "../Main/CMD/General_CMD.h"
 
 int AdcsTroubleShooting(TroubleErrCode trbl)
 {
 	//todo: Add log
+	byte *data;
 	switch(trbl)
 		{
 		case(TRBL_FAIL):
-
-				break;
+			cspaceADCS_componentReset(ADCS_ID);
+			break;
 		case(TRBL_ADCS_INIT_ERR):
-				//todo: the init function return this err can't be called twice
-				break;
+			cspaceADCS_componentReset(ADCS_ID);
+			//todo: the init function return this err can't be called twice
+			break;
 		case(TRBL_BOOT_ERROR):
-				cspaceADCS_BLSetBootIndex(ADCS_ID,1);
-				cspaceADCS_BLRunSelectedProgram(ADCS_ID);
-				break;
+			cspaceADCS_componentReset(ADCS_ID);
+			data = malloc(sizeof(cspace_adcs_geninfo_t));
+			cspaceADCS_getGeneralInfo(ADCS_ID, data);
+			cspaceADCS_BLSetBootIndex(ADCS_ID,1);
+			cspaceADCS_BLRunSelectedProgram(ADCS_ID);
+			break;
 		case(TRBL_CHANNEL_OFF):
+			while(SWITCH_OFF == get_system_state(ADCS_param)){
+				vTaskDelay(CHANNEL_OFF_DELAY);
+			}
 				// todo: check channel while()
 
 				break;
@@ -57,7 +66,7 @@ int AdcsTroubleShooting(TroubleErrCode trbl)
 				}
 				break;
 		case(TRBL_SEMAPHORE_CREATE_ERR):
-				//todo: SEMAPHORE
+				//todo: SEMAPHORE?
 				break;
 		case(TRBL_TLM_ERR):
 				//todo:make it more spacifc

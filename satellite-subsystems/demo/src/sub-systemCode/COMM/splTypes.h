@@ -126,6 +126,8 @@
 
 //adcs
 #define ADCS_GENRIC_ST 					11
+#define SET_ATT_CTR_MODE				96
+#define SET_PWR_CTRL 					97
 #define ADCS_SET_BOOT_INDEX_ST			98
 #define ADCS_RUN_BOOT_PROGRAM_ST		99
 #define ADCS_SET_SGP4_ORBIT_PARAMS_ST	100

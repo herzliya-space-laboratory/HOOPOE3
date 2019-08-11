@@ -1,6 +1,8 @@
 #ifndef ADCSTROUBLESHOOTING_H_
 #define ADCSTROUBLESHOOTING_H_
 
+#define CHANNEL_OFF_DELAY 50
+
 //the err code for the trouble shooting
 typedef enum TroubleErrCode
 {

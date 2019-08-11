@@ -39,6 +39,7 @@
 #include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 #include "sub-systemCode/ADCS/AdcsMain.h"
 
+#include "sub-systemCode/ADCS/AdcsTest.h"
 #define DEBUGMODE
 
 #ifndef DEBUGMODE
@@ -94,9 +95,11 @@ void taskMain()
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
 	
-	TC_spl adcsCmd;
-	adcsCmd.id = TC_ADCS_T;
 
+
+
+
+	tests testId;
 	int input;
 	int err;
 
@@ -105,21 +108,32 @@ void taskMain()
 		// EPS_Conditioning();
 		// Command_logic();
 		// save_time();
-		
-		if (UTIL_DbguGetIntegerMinMax(&(adcsCmd.subType), 0,666) != 0){
-			printf("Enter ADCS command data\n");
-			UTIL_DbguGetString(&(adcsCmd.data), SIZE_OF_COMMAND+1);
-			err = AdcsCmdQueueAdd(&adcsCmd);
-			printf("ADCS command error = %d\n\n\n", err);
-			printf("Send new command\n");
-			printf("Enter ADCS sub type\n");
+		UTIL_DbguGetIntegerMinMax(testId,0,TEST_AMOUNT);
+		switch(testId)
+		{
+			case SEND_CMD:
+				AddCommendToQ();
+				break;
+			case MAG_TEST:
+				Mag_Test();
+			break;
+			case ADCS_RUN_MODE:
+
+				break;
+			case ADCS_GENERIC_I2C:
+				break;
+			case MAG_CMD:
+				break;
+			case ERR_FLAG_TEST:
+				ErrFlagTest();
+				break;
+			case PRINT_ERR_FLAG:
+				printErrFlag();
+				break;
+			case TEST_AMOUNT:
+				break;
 		}
 		
-		if (UTIL_DbguGetIntegerMinMax(&input, 900,1000) != 0){
-			printf("Print the data\n");
-		}
-		
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
 

@@ -15,85 +15,6 @@
 
 #include "../TRXVU.h"
 
-//todo: fill the macros.
-//< No control
-#define CONROLE_MODE0_MACRO()\
-{\
-}
-
-//< Detumbling control
-#define CONROLE_MODE1_MACRO()\
-{\
-}
-
-//< Y-Thompson spin
-#define CONROLE_MODE2_MACRO() \
-{\
-}
-
-//< Y-Wheel momentum stabilized - Initial Pitch Acquisition
-#define CONROLE_MODE3_MACRO()\
-{\
-}
-
-//< Y-Wheel momentum stabilized - Steady State
-#define CONROLE_MODE4_MACRO()\
-{\
-}
-
-//< 10Hz Detumbling control within Cube Control
-#define CONROLE_MODE8_MACRO()\
-{\
-}
-//< Fast Detumbling control
-#define CONROLE_MODE9_MACRO()\
-{\
-}
-
-//	estmode_noatt_est = 0, ///<
-//	estmode_mems_rate = 1, ///<
-//	estmode_mag_ratefilt = 2, ///<
-//	estmode_mag_ratefilt_pitch_est = 3, ///<
-//	estmode_mag_fine_suntriad = 4, ///<
-//	estmode_full_state_ekf = 5, ///<
-//	estmode_mems_gyro_ekf = 6 ///<
-
-// No attitude estimation
-#define EST_MODE_0()\
-{\
-}
-
-//MEMS rate sensing
-#define CONROLE_MODE1_MACRO()\
-{\
-}
-
-//< Magnetometer rate filter
-#define CONROLE_MODE2_MACRO() \
-{\
-}
-
-// Magnetometer rate filter with pitch estimation
-#define CONROLE_MODE3_MACRO()\
-{\
-}
-
-//Magnetometer and Fine-sun TRIAD algorithm
-#define CONROLE_MODE4_MACRO()\
-{\
-}
-
-//Full-state EKF
-#define CONROLE_MODE8_MACRO()\
-{\
-}
-
-//MEMS gyro EKF
-#define CONROLE_MODE9_MACRO()\
-{\
-}
-
-
 int AdcsReadI2cAck(int *rv)
 {
 
@@ -226,6 +147,13 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	cspace_adcs_estmode_sel att;
 	switch(sub_type)
 	{
+	case SET_ATT_CTR_MODE:
+		cspaceADCS_setAttCtrlMode(ADCS_ID, cmd->data);
+		break;
+
+	case SET_PWR_CTRL:
+		cspaceADCS_setPwrCtrlDevice(ADCS_ID, cmd->data);
+		break;
 
 	case ADCS_GENRIC_ST:
 		err = AdcsGenericI2cCmd(cmd->data,cmd->length,&rv);
