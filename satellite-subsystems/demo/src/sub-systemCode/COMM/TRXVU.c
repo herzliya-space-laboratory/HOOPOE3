@@ -162,6 +162,8 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 
 	if (CHECK_STARTING_DUMP_ABILITY)
 	{
+		i_error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
+		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", i_error);
 		for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		{
 			if (HK[i] == this_is_not_the_file_you_are_looking_for)
@@ -189,7 +191,7 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 					if (last_send + (time_unix)resulotion <= packet.time || HK[i] == ACK_T)
 					{
 						last_send = packet.time;
-						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet, trxvu_bitrate_9600);
+						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
 						check_int("TRX_sendFrame, dump_logic", i_error);
 						printf("number of packets: %d\n", numberOfPackets++);
 						vTaskDelay(SYSTEM_DEALY);
@@ -427,7 +429,7 @@ void Rx_logic()
 				byte rawACK[ACK_RAW_SIZE];
 				build_raw_ACK(ACK_RECEIVE_COMM, ERR_SUCCESS, packet.id, rawACK);
 				printf("Send ACK\n");
-				TRX_sendFrame(rawACK, ACK_RAW_SIZE, trxvu_bitrate_9600);
+				TRX_sendFrame(rawACK, ACK_RAW_SIZE);
 
 				i_error = Time_getUnixEpoch(&time_now);
 				check_int("trxvu_logic, Time_getUnixEpoch", i_error);
@@ -506,26 +508,13 @@ void Beacon_task()
 	// 0. Creating variables for task, initialize variables
 	uint8_t delayBaecon = DEFULT_BEACON_DELAY;
 	portTickType last_time = xTaskGetTickCount();
-	int beacon_count = 0;
-	ISIStrxvuBitrate bitrate = trxvu_bitrate_9600;
 	voltage_t low_v_beacon;
 	while(1)
 	{
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
-		{
-			// 2. check if this is the third beacon in a row
-			if (beacon_count % 3 == 0)
-				bitrate = trxvu_bitrate_1200;
-			else
-				bitrate = trxvu_bitrate_9600;
+			buildAndSend_beacon();
 
-			// 3. build and send beacon
-			buildAndSend_beacon(bitrate);
-			// 4. adding last beacon to count
-			beacon_count++;
-		}
-		// 5. reading from FRAM the low vBatt in wich the beacon is once in a minute
 		i_error = FRAM_read(&delayBaecon, BEACON_TIME_ADDR, 1);
 		check_int("beacon_task, FRAM_write(BEACON_TIME_ADDR)", i_error);
 		// 6. check if value in range
@@ -556,7 +545,7 @@ void Beacon_task()
 	}
 }
 
-void buildAndSend_beacon(ISIStrxvuBitrate bitRate)
+void buildAndSend_beacon()
 {
 	// 1. Declaring variables
 	TM_spl beacon;
@@ -658,7 +647,7 @@ void buildAndSend_beacon(ISIStrxvuBitrate bitRate)
 	//11. sending beacon
 	for (i = 0; i < 1; i++)
 	{
-		TRX_sendFrame(rawData, size, bitRate);
+		TRX_sendFrame(rawData, size);
 	}
 }
 
@@ -690,7 +679,7 @@ void reset_FRAM_TRXVU()
 }
 
 
-int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
+int TRX_sendFrame(byte* data, uint8_t length)
 {
 	int i_error = 0, retVal = 0;
 	portBASE_TYPE lu_error = 0;
@@ -712,12 +701,6 @@ int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 
 	if (xSemaphoreTake(xIsTransmitting, MAX_DELAY))
 	{
-		if (bitRate != trxvu_bitrate_9600)
-		{
-			i_error = IsisTrxvu_tcSetAx25Bitrate(0, bitRate);
-			check_int("TRX_sendFrame, IsisTrxvu_tcSetAx25Bitrate", i_error);
-		}
-
 		unsigned char avalFrames = VALUE_TX_BUFFER_FULL;
 
 		int count = 0;
@@ -726,24 +709,15 @@ int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 			i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
 			check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
 			retVal = 0;
+			if (count > 0)
+				vTaskDelay(200);
 			if (count % 10 == 1)
 			{
-				vTaskDelay((portTickType)(length * 20));
 				printf("Tx buffer is full\n");
 				retVal = -1;
 			}
 			count++;
 		}while(avalFrames == VALUE_TX_BUFFER_FULL);
-
-		//delay so Tx buffer will never be full
-		if (bitRate == trxvu_bitrate_1200 && retVal == 0)
-		{
-			vTaskDelay(TRANSMMIT_DELAY_1200(length));
-		}
-
-		//returns bit rate to normal (9600)
-		i_error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-		check_int("TRX_sendFrame, IsisTrxvu_tcSetAx25Bitrate", i_error);
 
 		// returns xIsTransmitting semaphore
 		lu_error = xSemaphoreGive(xIsTransmitting);

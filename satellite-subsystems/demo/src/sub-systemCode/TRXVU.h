@@ -126,7 +126,7 @@ void Transponder_task(void *arg);
  * 	@brief		build and send beacon packet
  * 	@param[in]	the bitRate to send the beacon in
  */
-void buildAndSend_beacon(ISIStrxvuBitrate bitRate);
+void buildAndSend_beacon();
 
 /**
  * 	@brief	the task in charge of sending a beacon once in defined time
@@ -167,7 +167,7 @@ void lookForRequestToDelete_transponder(command_id cmdID);
  * @param[in]	data to send, can't be over
  * @param[in]	length of data to send as an AX.25 frame
  */
-int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate);
+int TRX_sendFrame(byte* data, uint8_t length);
 
 /**
  * @brief		gets data from Rx buffer
