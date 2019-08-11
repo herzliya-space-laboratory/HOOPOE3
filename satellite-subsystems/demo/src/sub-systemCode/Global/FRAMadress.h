@@ -36,8 +36,8 @@
 #define APRS_PACKETS_ADDR 0x8CEF// << 20 * 18 = 360 >>
 #define BEACON_BIT_RATE_ADDR 0x8E57// << 1 byte >>
 #define BEACON_TIME_ADDR 0x8E58// << 1 byte >>
-#define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
-#define BIT_RATE_ADDR		0x8E5A //<<1 bytes>>
+#define MUTE_TIME_ADDR		0x8E59//<<4 bytes>>
+#define BIT_RATE_ADDR		0x8E5D //<<1 bytes>>
 
 //ADCS
 #define STAGE_TABLE_ADDR 0x9044
