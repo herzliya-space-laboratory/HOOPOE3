@@ -103,8 +103,8 @@ void TRXVU_init_softWare()
 	byte dat;
 	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
 	check_int("TRXVU_init_softWare, FRAM_read", error);
-	ISIStrxvuBitrate newParam = trxvu_bitrate_9600;
-	for (uint8_t i = 0; i < 9; i *= 2)
+	ISIStrxvuBitrate newParam = DEFAULT_BIT_RATE;
+	for (uint8_t i = 1; i < 9; i *= 2)
 	{
 		if (dat == i)
 		{
@@ -179,8 +179,6 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 
 	if (CHECK_STARTING_DUMP_ABILITY)
 	{
-		i_error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", i_error);
 		for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		{
 			if (HK[i] == this_is_not_the_file_you_are_looking_for)

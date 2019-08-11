@@ -153,7 +153,7 @@ void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	ISIStrxvuBitrate newParam;
 	Boolean validValue = FALSE;
-	for (uint8_t i = 0; i < 9; i *= 2)
+	for (uint8_t i = 1; i < 9; i *= 2)
 	{
 		if (cmd.data[0] == i)
 		{

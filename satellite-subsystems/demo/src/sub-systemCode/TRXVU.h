@@ -17,6 +17,7 @@
 
 #include "Global/Global.h"
 #include "COMM/GSC.h"
+
 #define APRS_ON
 
 #define TRXVU_TO_CALSIGN "GS1"
@@ -24,6 +25,8 @@
 
 #define VALUE_TX_BUFFER_FULL 0xff
 #define NUM_FILES_IN_DUMP	5
+
+#define DEFAULT_BIT_RATE	trxvu_bitrate_9600
 
 #define NOMINAL_MODE TRUE
 #define TRANSPONDER_MODE FALSE
