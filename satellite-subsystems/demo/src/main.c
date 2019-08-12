@@ -39,6 +39,7 @@
 #include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 #include "sub-systemCode/ADCS/AdcsMain.h"
 
+#include "sub-systemCode/ADCS/AdcsTest.h"
 #define DEBUGMODE
 
 #ifndef DEBUGMODE
@@ -142,18 +143,14 @@ void taskMain()
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
 	
-	TC_spl adcsCmd;
-	adcsCmd.id = TC_ADCS_T;
-
-	uint input;
+	tests testId;
+	int input;
 	int err;
 	while(1)
 	{
 		// EPS_Conditioning();
 		// Command_logic();
 		// save_time();
-
-
 
 		printf("Send new command\n");
 		printf("Enter ADCS sub type\n");
@@ -177,8 +174,35 @@ void taskMain()
 		}
 
 		vTaskDelay(1000);
+		/* UTIL_DbguGetIntegerMinMax(testId,0,TEST_AMOUNT);
+		switch(testId)
+		{
+			case SEND_CMD:
+				AddCommendToQ();
+				break;
+			case MAG_TEST:
+				Mag_Test();
+			break;
+			case ADCS_RUN_MODE:
+
+				break;
+			case ADCS_GENERIC_I2C:
+				break;
+			case MAG_CMD:
+				break;
+			case ERR_FLAG_TEST:
+				ErrFlagTest();
+				break;
+			case PRINT_ERR_FLAG:
+				printErrFlag();
+				break;
+			case TEST_AMOUNT:
+				break;
+		} */
 	}
 }
+
+void 
 
 int main()
 {

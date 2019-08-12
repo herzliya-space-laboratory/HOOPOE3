@@ -16,9 +16,9 @@
 #include "../COMM/GSC.h"
 #include "../TRXVU.h"
 
-
 int AdcsReadI2cAck(int *rv)
 {
+
 	if(NULL == rv){
 		return -2;
 	}
@@ -162,7 +162,6 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType, boolean isOnlineT
 
 	encode_TMpacket(rawData, &rawDataLength, tm);
 	TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
-
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
@@ -185,6 +184,13 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	cspace_adcs_estmode_sel att;
 	switch(sub_type)
 	{
+		case SET_ATT_CTR_MODE:
+			cspaceADCS_setAttCtrlMode(ADCS_ID, cmd->data);
+			break;
+
+		case SET_PWR_CTRL:
+			cspaceADCS_setPwrCtrlDevice(ADCS_ID, cmd->data);
+			break;
 		case ADCS_GENRIC_ST:
 			err = AdcsGenericI2cCmd(cmd->data,cmd->length,&rv);
 			//TODO: log 'rv'. maybe send it in ACK form
