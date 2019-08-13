@@ -57,6 +57,7 @@
 
 #define MIN_TRANS_RSSI 	0
 #define MAX_TRANS_RSSI 	4095
+#define DEFAULT_TRANS_RSSI	1500
 
 typedef enum
 {

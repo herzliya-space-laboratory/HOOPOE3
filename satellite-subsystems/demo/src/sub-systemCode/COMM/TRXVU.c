@@ -707,6 +707,17 @@ void reset_FRAM_TRXVU()
 	i_error = FRAM_write(data, BEACON_TIME_ADDR, 1);
 	check_int("reset_FRAM_TRXVU,, FRAM_write(BEACON_TIME_ADDR)", i_error);
 
+	data[0] = DEFAULT_BIT_RATE;
+	i_error = FRAM_write(data, BIT_RATE_ADDR, 1);
+	check_int("reset_FRAM_TRXVU,, FRAM_write(BIT_RATE_ADDR)", i_error);
+
+	time_unix mute_time = 0;
+	i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	check_int("reset_FRAM_TRXVU, FRAM_read(MUTE_TIME_ADDR)", i_error);
+
+	unsigned short trans_rssi = DEFAULT_TRANS_RSSI;
+	i_error = FRAM_write((byte*)&trans_rssi, TRANSPONDER_RSSI_ADDR, sizeof(unsigned short));
+	check_int("TRANSPONDER_RSSI_ADDR, FRAM_write", i_error);
 }
 
 
@@ -875,11 +886,16 @@ temp_t check_Tx_temp()
 //I2C functions
 void change_TRXVU_state(Boolean state)
 {
+	byte rssiData[2];
 	byte data[2];
+	int i_error;
 	//command id
 	data[0] = 0x38;
 	if (state == NOMINAL_MODE)
 	{
+		i_error = FRAM_read(rssiData, TRANSPONDER_RSSI_ADDR, 2);
+		check_int("change_TRXVU_state, FRAM_read", i_error);
+		change_trans_RSSI(rssiData);
 		//nominal mode
 		printf("\tTransponder is disabled\n\n");
 		data[1] = 0x01;
@@ -893,7 +909,7 @@ void change_TRXVU_state(Boolean state)
 		set_system_state(transponder_active_param, SWITCH_ON);
 	}
 	//sends I2C command
-	int i_error = I2C_write(I2C_TRXVU_TC_ADDR, data, 2);
+	i_error = I2C_write(I2C_TRXVU_TC_ADDR, data, 2);
 	check_int("change_TRXVU_state, I2C_write", i_error);
 }
 

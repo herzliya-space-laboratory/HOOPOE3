@@ -91,8 +91,13 @@ void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 
-	*err = ERR_SUCCESS;
 	change_trans_RSSI(cmd.data);
+	int error = FRAM_write(cmd.data, TRANSPONDER_RSSI_ADDR, 2);
+	check_int("cmd_change_trans_rssi, FRAM_write", error);
+	if (error == 0)
+		*err = ERR_SUCCESS;
+	else
+		*err = ERR_FRAM_WRITE_FAIL;
 }
 void cmd_aprs_dump(Ack_type* type, ERR_type* err)
 {
