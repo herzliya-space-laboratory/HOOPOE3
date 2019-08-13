@@ -6,6 +6,8 @@
 
 #define ADCS_I2C_TELEMETRY_ACK_REQUEST 240 // this i2c command request an ack with data from the ADCS
 
+#define RESET_BOOT_REGISTER_CMD_ID			6
+#define RESET_BOOT_REGISTER_LENGTH 			3
 
 #define MTQ_CONFIG_CMD_ID 					21
 #define MTQ_CONFIG_CMD_DATA_LENGTH 			3
@@ -40,27 +42,20 @@
 #define SET_PROD_INERTIA_CMD_ID 			42
 #define SET_PROD_INERTIA_DATA_LENGTH 		12
 
+#define SET_SGP4_ORBIT_INC_CMD_ID		 	46
+#define SET_SGP4_ORBIT_ECC_CMD_ID 			47
+#define SET_SGP4_ORBIT_RAAN_CMD_ID 			48
+#define SET_SGP4_ORBIT_ARG_OF_PER_CMD_ID 	49
+#define SET_SGP4_ORBIT_BSTAR_DRAG_CMD_ID 	50
+#define SET_SGP4_ORBIT_MEAN_MOT_CMD_ID		51
+#define SET_SGP4_ORBIT_MEAN_ANOM_CMD_ID 	52
+#define SET_SGP4_ORBIT_EPOCH_CMD_ID 		53
+#define SET_SGP4_ORBIT_DATA_LENGTH	 		8
 
-#define GET_ADCS_FULL_CONFIG_CMD_ID 		206
-#define GET_ADCS_FULL_CONFIG_DATA_LENGTH 	272
+#define ADCS_FULL_CONFIG_DATA_LENGTH 		272
+#define ADCS_SGP4_ORBIT_PARAMS_DATA_LENGTH 	68
 
-/*!
- * @brief allows the user to send a read request directly to the I2C.
- * @param[out] rv return value from the ADCS I2C ACK request
- * @return Errors according to "<hal/Drivers/I2C.h>"
- */
-int AdcsReadI2cAck(int *rv);
-
-/*!
- * @brief allows the user to send a command directly to the I2C bus to the ADCS.
- * @param[in] data data to send to the ADCS on the I2C bus.
- * @param[in] length length of the data
- * @param[in] ack acknowledge from the ADCS after command was sent
- * @return Errors according to "<hal/Drivers/I2C.h>"
- */
-int AdcsGenericI2cCmd(unsigned char *data, unsigned int length, int *ack);
-
-
+#define ADCS_CMD_MAX_DATA_LENGTH			300
 /*!
  * @brief Executes the command sent to the ADCS
  * @param[in] cmd the command to be executed
