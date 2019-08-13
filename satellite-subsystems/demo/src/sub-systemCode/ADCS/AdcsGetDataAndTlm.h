@@ -9,6 +9,10 @@
 #define TLM_SAVE_VECTOR_START_ADDR 	(0x4242)		//<! FRAM start address
 #define TLM_SAVE_VECTOR_END_ADDR 	(TLM_SAVE_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) //<! FRAM end address
 
+#define TLM_PERIOD_VECTOR_START_ADDR 	(TLM_SAVE_VECTOR_END_ADDR+1)		//<! FRAM start address
+#define TLM_PERIOD_VECTOR_END_ADDR 		(TLM_PERIOD_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) //<! FRAM end address
+
+
 #define ADCS_MAX_TLM_SIZE 272
 
 #define ADCS_STATE_TLM_FILENAME 		("StateTlm")
@@ -28,15 +32,7 @@
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
-//TODO: redefine as union
-typedef struct __attribute__ ((__packed__))
-{
-	Boolean8bit ToSave;					//<! A flag stating whether to save this specific telemetry
-	unsigned char TlmElementeSize;		//<! size of the telemetry to be collected
-	AdcsTlmCollectFunc TlmCollectFunc;	//<! A function that collects the TLM (An ISIS driver function)
-	char TlmFileName[FN_MAXNAME];		//<! The filename in which the TLM will be saved
-	Boolean8bit OperatingFlag;			//<! A flag stating if the TLM is working correctly and no errors occuredd in the file creation or TLM collection
-} AdcsTlmElement;
+#define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1)
 
 /*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD
@@ -54,10 +50,11 @@ int UpdateTlmSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
  * @param[in] 	TlmElementSize	size of the telemetry
  * @param[in]	ToSave		save telemetry flag(TRUE = save; FALSE = don't save)
  * @param[in]	file_name	the file name to be updated
+ * @param[in] 	Period 		TLM save period- time in seconds between TLM saves
  * @note if you don't want to update an element put NULL in it
  */
 void UpdateTlmElementAtIndex(int index,AdcsTlmCollectFunc func,unsigned char TlmElementSize,
-		Boolean8bit ToSave, char file_name[FN_MAXNAME]);
+		Boolean8bit ToSave, char file_name[FN_MAXNAME], char Period);
 
 /*!
  * @get all ADCS data and TLM and save if need to
