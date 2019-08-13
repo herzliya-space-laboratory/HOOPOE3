@@ -23,7 +23,7 @@ void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	*type = ACK_GENERIC_I2C_CMD;
 
-	int error = I2C_write((unsigned int)cmd.data[0], &cmd.data[2] ,cmd.data[1]);
+	int error = I2C_write((unsigned int)cmd.data[0], &cmd.data[2] ,cmd.data[1] + 1);
 
 	if (error == 0)
 		*err = ERR_SUCCESS;
@@ -163,7 +163,7 @@ void cmd_hard_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error = soft_reset_subsystem((subSystem_indx)cmd.data);
+	int error = hard_reset_subsystem((subSystem_indx)cmd.data);
 	switch (error)
 	{
 	case 0:

@@ -138,6 +138,9 @@ int hard_reset_subsystem(subSystem_indx reset_idx)
 		error = GomEpsSetOutput(0, channel);
 		check_int("Hard reset ADCS, turn off EPS channels", error);
 		break;
+	case CAMMERA:
+		//todo:
+		break;
 	default:
 		return -444;
 	break;
