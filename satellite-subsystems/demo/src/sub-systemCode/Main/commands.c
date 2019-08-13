@@ -190,6 +190,13 @@ void act_upon_command(TC_spl decode)
 }
 
 
+void cmd_error(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_NOTHING;
+	*err = ERR_FAIL;
+}
+
+
 void AUC_COMM(TC_spl decode)
 {
 	Ack_type type;

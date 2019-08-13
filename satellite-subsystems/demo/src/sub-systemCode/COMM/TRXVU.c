@@ -52,6 +52,15 @@ xTaskHandle xBeaconTask;
 
 static byte Dump_buffer[DUMP_BUFFER_SIZE];
 
+void toggle_idle_state()
+{
+	int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
+	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
+	vTaskDelay(500);
+	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
+	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
+	vTaskDelay(500);
+}
 
 void TRXVU_init_hardWare()
 {
@@ -75,25 +84,11 @@ void TRXVU_init_hardWare()
 	retValInt = IsisTrxvu_initialize(myTRXVUAddress, myTRXVUBuffers, myTRXVUBitrates, 1);
 	check_int("init_trxvu, IsisTrxvu_initialize", retValInt);
 
-
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
-	vTaskDelay(500);
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
-	vTaskDelay(500);
-
-	change_TRXVU_state(NOMINAL_MODE);
-
-	vTaskDelay(500);
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
-	vTaskDelay(500);
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
-
-	retValInt = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
+	if (!get_system_state(mute_param))
+	{
+		toggle_idle_state();
+		change_TRXVU_state(NOMINAL_MODE);
+	}
 }
 void TRXVU_init_softWare()
 {
@@ -209,13 +204,30 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
 						check_int("TRX_sendFrame, dump_logic", i_error);
 						printf("number of packets: %d\n", numberOfPackets++);
+
+						if (i_error == 4)
+						{
+							err = ERR_SYSTEM_OFF;
+							break;
+						}
+						else if (i_error == 5)
+						{
+							err = ERR_FAIL;
+							break;
+						}
+
 						vTaskDelay(SYSTEM_DEALY);
 					}
+
 					lookForRequestToDelete_dump(cmdID);
 				}
 			}
 			while (FS_result == FS_BUFFER_OVERFLOW);
 		}
+	}
+	else
+	{
+		err = ERR_FAIL;
 	}
 
 	save_ACK(ACK_DUMP, err, cmdID);
@@ -335,6 +347,10 @@ void Transponder_task(void *arg)
 			change_TRXVU_state(TRANSPONDER_MODE);
 			xQueueReset(xTransponderQueue);
 			transponder_logic(time, cmdId);
+		}
+		else
+		{
+			save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
 		}
 	}
 
@@ -701,17 +717,17 @@ int TRX_sendFrame(byte* data, uint8_t length)
 	if (get_system_state(mute_param) == SWITCH_ON)
 	{
 		//mute
-		return -3;
+		return 3;
 	}
 	if (get_system_state(Tx_param) == SWITCH_OFF)
 	{
 		//tx off
-		return -4;
+		return 4;
 	}
 	if (get_system_state(transponder_active_param) == SWITCH_ON)
 	{
 		//we in transponder mode
-		return -5;
+		return 5;
 	}
 
 	if (xSemaphoreTake(xIsTransmitting, MAX_DELAY))
@@ -799,6 +815,9 @@ void unmute_Tx()
 	set_system_state(mute_param, SWITCH_OFF);
 	int i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
 	check_int("unmute_Tx, FRAM_read(MUTE_TIME_ADDR)", i_error);
+	toggle_idle_state();
+
+	change_TRXVU_state(NOMINAL_MODE);
 }
 
 void check_time_off_mute()
@@ -810,7 +829,7 @@ void check_time_off_mute()
 
 	i_error = FRAM_read((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
 	check_int("check_time_off_mute, FRAM_read(MUTE_TIME_ADDR)", i_error);
-	if (time_now >= mute_time)
+	if (time_now >= mute_time && get_system_state(mute_param))
 		unmute_Tx();
 }
 

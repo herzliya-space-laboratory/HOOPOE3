@@ -17,11 +17,6 @@
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
-void cmd_error(Ack_type* type, ERR_type* err)
-{
-	*type = ACK_NOTHING;
-	*err = ERR_FAIL;
-}
 void cmd_mute(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	//1. send ACK before mutes satellite

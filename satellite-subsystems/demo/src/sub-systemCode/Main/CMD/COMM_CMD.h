@@ -11,8 +11,6 @@
 #include "../../COMM/GSC.h"
 #include "../../Global/Global.h"
 
-void cmd_error(Ack_type* type, ERR_type* err);
-
 void cmd_mute(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_unmute(Ack_type* type, ERR_type* err);
