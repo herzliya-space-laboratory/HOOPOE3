@@ -29,6 +29,8 @@ void cmd_gracefull_reset_satellite(Ack_type* type, ERR_type* err);
 
 void cmd_hard_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd);
 
+void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err);
+
 void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd);

@@ -382,6 +382,7 @@ void AUC_GS(TC_spl decode)
 		cmd_reset_file(&type, &err, decode);
 		break;
 	case (RESTSRT_FS_ST):
+		cmd_reset_TLM_SD(&type, &err);
 		break;
 	case (DUMMY_FUNC_ST):
 		cmd_dummy_func(&type, &err);

@@ -49,6 +49,7 @@ void cmd_dump(TC_spl cmd)
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
+	int i_error = 0;
 	*type = ACK_MEMORY;
 	if (cmd.length != 13)
 	{
@@ -77,9 +78,10 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	{
 		if (files[i] != this_is_not_the_file_you_are_looking_for)
 		{
-			find_fileName(files[i], file_name);
-			//todo: find the function for delete elements
-			//result = c_fileDeleteElements(file_name, start_time, end_time);
+			i_error = find_fileName(files[i], file_name);
+			if (i_error != 0)
+				continue;
+			result = c_fileDeleteElements(file_name, start_time, end_time);
 			if (result != FS_SUCCSESS)
 			{
 				errorRes = FS_FAIL;
@@ -114,7 +116,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 
 	char file_name[MAX_F_FILE_NAME_SIZE];
-	FileSystemResult reslt;
+	FileSystemResult reslt = FS_SUCCSESS;
 	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 	{
 		if ((HK_types)cmd.data[i] == this_is_not_the_file_you_are_looking_for)
@@ -132,6 +134,12 @@ void cmd_dummy_func(Ack_type* type, ERR_type* err)
 	printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
 	*type = ACK_THE_MIGHTY_DUMMY_FUNC;
 	*err = ERR_SUCCESS;
+}
+void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_RESET_SD_TLM;
+	*err = ERR_SUCCESS;
+	delete_allTMFilesFromSD();
 }
 
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
