@@ -145,7 +145,7 @@ ImageDataBaseResult updateGeneralDataBaseParameters(ImageDataBase database);
  * @return data base handler,
  * NULL on fail.
  */
-ImageDataBase initImageDataBase();
+ImageDataBase initImageDataBase(Boolean first_activation);
 /*
  * Ressets the whole database: the FRAM, the handler and deletes all of the pictures saved on OBC sd
  * @param database the ImageDataBase's handler

@@ -2,7 +2,7 @@
  * TRXVU.h
  *
  *  Created on: Oct 20, 2018
- *      Author: DBTn
+ *      Author: elain
  */
 
 #ifndef TRXVU_H_
@@ -17,17 +17,16 @@
 
 #include "Global/Global.h"
 #include "COMM/GSC.h"
-#include "payload/DataBase/DataBase.h"
-#include "payload/Request Management/Dump/Butchering.h"
 
 #define APRS_ON
 
-#define VALUE_TX_BUFFER_FULL 0xff
-
 #define TRXVU_TO_CALSIGN "GS1"
-#define TRXVU_FROM_CALSIGN "4x4hsc1"
+#define TRXVU_FROM_CALSIGN "4x4HSL1"
 
+#define VALUE_TX_BUFFER_FULL 0xff
 #define NUM_FILES_IN_DUMP	5
+
+#define DEFAULT_BIT_RATE	trxvu_bitrate_9600
 
 #define NOMINAL_MODE TRUE
 #define TRANSPONDER_MODE FALSE
@@ -47,16 +46,18 @@
 #define MIN_TIME_DELAY_BEACON	1
 #define MAX_TIME_DELAY_BEACON 	40
 
-#define TRANSMMIT_DELAY_9600(length) (portTickType)((length + 30) * (5 / 6) + 30)
-#define TRANSMMIT_DELAY_1200(length) (portTickType)(TRANSMMIT_DELAY_9600(length) * 100)
+#define TRANSMMIT_DELAY_9600(length) (length - length)
+//(portTickType)((length + 30) * (5 / 6) + 30)
+#define TRANSMMIT_DELAY_1200(length) (portTickType)(20 * 100)
 
-#define GROUND_PASSING_TIME	(60*10)//todo: find real values
+#define GROUND_PASSING_TIME	(10)//todo: find real values
 
 //todo: find real values
 #define DEFULT_COMM_VOL		7250
 
 #define MIN_TRANS_RSSI 	0
 #define MAX_TRANS_RSSI 	4095
+#define DEFAULT_TRANS_RSSI	1500
 
 typedef enum
 {
@@ -129,7 +130,7 @@ void Transponder_task(void *arg);
  * 	@brief		build and send beacon packet
  * 	@param[in]	the bitRate to send the beacon in
  */
-void buildAndSend_beacon(ISIStrxvuBitrate bitRate);
+void buildAndSend_beacon();
 
 /**
  * 	@brief	the task in charge of sending a beacon once in defined time
@@ -170,7 +171,7 @@ void lookForRequestToDelete_transponder(command_id cmdID);
  * @param[in]	data to send, can't be over
  * @param[in]	length of data to send as an AX.25 frame
  */
-int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate);
+int TRX_sendFrame(byte* data, uint8_t length);
 
 /**
  * @brief		gets data from Rx buffer

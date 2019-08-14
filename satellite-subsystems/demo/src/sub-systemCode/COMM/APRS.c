@@ -76,7 +76,7 @@ int send_APRS_Dump()
 		// 4. Sends packet twice
 		for (j = 0; j < 2; j++)
 		{
-			TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
+			TRX_sendFrame(rawData, (unsigned char)rawDataLength);
 		}
 	}
 

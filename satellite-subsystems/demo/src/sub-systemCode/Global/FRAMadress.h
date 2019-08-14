@@ -27,50 +27,47 @@
 #define EPS_STATES_ADDR 0x211C // << 1 byte >> Address of consumption state
 
 //TRX
-#define FRAME_COUNT_ADDR 0x311C // << 1 byte >>
 #define BEACON_LOW_BATTERY_STATE_ADDR 0x311D // << 2 bytes >>
 #define TRANS_LOW_BATTERY_STATE_ADDR 0x311F
 #define NUMBER_COMMAND_FRAM_ADDR  0x3121 // << 1 byte >> The number of delayed command stored in the FRAM
 #define DELAY_COMMAD_FRAM_ADDR	0x3122 //<<100 * SIZE_OF_COMMAND = 30080 bytes >> All delayed command will be stored in this address ass one big array of bytes
 #define NUMBER_PACKET_APRS_ADDR 0x8CEE // << 1 byte >> number of APRS packets in the FRAM
 #define APRS_PACKETS_ADDR 0x8CEF// << 20 * 18 = 360 >>
-#define BEACON_BIT_RATE_ADDR 0x8E57// << 1 byte >>
 #define BEACON_TIME_ADDR 0x8E58// << 1 byte >>
-#define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
+#define MUTE_TIME_ADDR		0x8E59//<<4 bytes>>
+#define BIT_RATE_ADDR		0x8E5D //<<1 bytes>>
+#define TRANSPONDER_RSSI_ADDR	0x8E5E// << 2 bytes>
 
 //ADCS
 #define STAGE_TABLE_ADDR 0x9044
 
 //CAMERA
-#define AUTO_PILOT_STATE_ADDR			0x8FFB
-#define CAMERA_LAST_PICTUR_TIME_ADDR	0x8FFC // <<4 bytes>>
+#define AUTO_PILOT_STATE_ADDR			0x9FFB
+#define CAMERA_LAST_PICTUR_TIME_ADDR	0x9FFC // <<4 bytes>>
 
-#define GECKO_STATUS_FLAG_ADDR 0x9000
+#define GECKO_STATUS_FLAG_ADDR 0xA000
 #define GECKO_STATUS_FLAG_SIZE 1
 
-#define GECKO_ADC_GAIN_ADDR 0x9001
+#define GECKO_ADC_GAIN_ADDR 0xA001
 #define GECKO_ADC_GAIN_SIZE 1
 
-#define GECKO_PGA_GAIN_ADDR 0x9002
+#define GECKO_PGA_GAIN_ADDR 0xA002
 #define GECKO_PGA_GAIN_SIZE 1
 
-#define GECKO_EXPOSURE_ADDR 0x9003
+#define GECKO_EXPOSURE_ADDR 0xA003
 #define GECKO_EXPOSURE_SIZE 4
 
-#define GECKO_FRAME_AMOUNT_ADDR 0x9007
+#define GECKO_FRAME_AMOUNT_ADDR 0xA007
 #define GECKO_FRAME_AMOUNT_SIZE 4
 
-#define GECKO_FRAME_RATE_ADDR 0x9011
+#define GECKO_FRAME_RATE_ADDR 0xA011
 #define GECKO_FRAME_RATE_SIZE 4
 
-#define GECKO_FAST_ADDR 0x9015
+#define GECKO_FAST_ADDR 0xA015
 #define GECKO_FAST_SIZE 4
 
-#define GECKO_MAX_ON_TIME_ADDR 0x9019
+#define GECKO_MAX_ON_TIME_ADDR 0xA019
 #define GECKO_MAX_ON_TIME_SIZE 4
 
 #define DATABASEFRAMADDRESS 0x10000	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
-
-#define FRAM_END 0x3FFFF
-
 #endif /* FRAMADRESS_H_ */

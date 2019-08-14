@@ -36,19 +36,12 @@
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
 
-#define ENABLE_MAIN_TRACES 1
-#if ENABLE_MAIN_TRACES
-	#define MAIN_TRACE_INFO			TRACE_INFO
-	#define MAIN_TRACE_DEBUG		TRACE_DEBUG
-	#define MAIN_TRACE_WARNING		TRACE_WARNING
-	#define MAIN_TRACE_ERROR		TRACE_ERROR
-	#define MAIN_TRACE_FATAL		TRACE_FATAL
-#else
-	#define MAIN_TRACE_INFO(...)	{ }
-	#define MAIN_TRACE_DEBUG(...)	{ }
-	#define MAIN_TRACE_WARNING(...)	{ }
-	#define MAIN_TRACE_ERROR		TRACE_ERROR
-	#define MAIN_TRACE_FATAL		TRACE_FATAL
+#include "sub-systemCode/Global/OnlineTM.h"
+
+#define DEBUGMODE
+
+#ifndef DEBUGMODE
+	#define DEBUGMODE
 #endif
 
 void save_time()
@@ -117,10 +110,9 @@ int main()
 	// The actual watchdog is already started, this only initializes the watchdog-kick interface.
 	WDT_start();
 
-	MAIN_TRACE_DEBUG("\t main: Starting main task.. %d\n\r", 0U);
-	xTaskGenericCreate(taskMain, (const signed char*)"taskMain", 4096, NULL, configMAX_PRIORITIES-2, &taskMainHandle, NULL, NULL);
-
-	MAIN_TRACE_DEBUG("\t main: Starting scheduler.. \n\r");
+	printf("Task Main 2121\n");
+	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 8196, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
+	printf("start sch\n");
 	vTaskStartScheduler();
 
 	return 0;

@@ -206,10 +206,10 @@ ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType redu
 	bit fileTypes[8];
 	char2bits(image_metadata.fileTypes, fileTypes);
 
-	if (!fileTypes[reductionLevel].value)
-		return DataBaseNotInSD;
-	else
+	if (fileTypes[reductionLevel].value)
 		return DataBaseSuccess;
+	else
+		return DataBaseNotInSD;
 }
 
 void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value)
@@ -229,21 +229,7 @@ void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, file
 
 uint32_t GetImageFactor(fileType image_type)
 {
-	uint32_t factor = 1;
-
-	switch(image_type)
-	{
-		case raw: factor = 1; break;
-		case t02: factor = 2; break;
-		case t04: factor = 4; break;
-		case t08: factor = 8; break;
-		case t16: factor = 16; break;
-		case t32: factor = 32; break;
-		case t64: factor = 64; break;
-		default: factor = 0;
-	}
-
-	return factor;
+	return pow(2, image_type);
 }
 
 //---------------------------------------------------------------
@@ -257,6 +243,10 @@ ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type)
 
 	F_FILE *file;
 	OPEN_FILE(file, fileName, "r", DataBaseFileSystemError);	// open file for writing in safe mode
+
+	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
+	f_flush(file);
+	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
 
 	uint32_t factor = GetImageFactor(image_type);
 	READ_FROM_FILE(file, imageBuffer, sizeof(imageBuffer) / (factor * factor), 1, DataBaseFileSystemError);
@@ -274,6 +264,10 @@ ImageDataBaseResult saveImageFromBuffer(imageid id, fileType image_type)
 
 	F_FILE *file;
 	OPEN_FILE(file, fileName, "w+", DataBaseFileSystemError);	// open file for writing in safe mode
+
+	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
+	f_flush(file);
+	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
 
 	uint32_t factor = GetImageFactor(image_type);
 	WRITE_TO_FILE(file, imageBuffer, sizeof(imageBuffer) / (factor * factor), 1, DataBaseFileSystemError);
@@ -328,7 +322,7 @@ ImageDataBaseResult setDataBaseValues(ImageDataBase database)
 	return DataBaseSuccess;
 }
 
-ImageDataBase initImageDataBase()
+ImageDataBase initImageDataBase(Boolean first_activation)
 {
 	ImageDataBase database = malloc(SIZEOF_IMAGE_DATABASE);	// allocate the memory for the database's variables
 
@@ -341,8 +335,9 @@ ImageDataBase initImageDataBase()
 
 	printf("numberOfPictures = %u, nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure);
 
-	if (database->nextId == 0)	// The FRAM is empty and the ImageDataBase wasn't initialized beforehand
+	if (database->nextId == 0 || first_activation)	// The FRAM is empty and the ImageDataBase wasn't initialized beforehand
 	{
+		zeroImageDataBase();
 		setDataBaseValues(database);
 	}
 
@@ -380,12 +375,15 @@ void setCameraPhotographyValues(ImageDataBase database, uint32_t frameRate, uint
 
 ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t image_address, ImageMetadata image_metadata)
 {
+	FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+
+	int result = checkForFileType(image_metadata, raw);
+	CMP_AND_RETURN(result, DataBaseNotInSD, DataBasealreadyInSD);
+
 	// Reading the image to the buffer:
+/*
+	GomEpsResetWDT(0);
 
-	int err = GomEpsResetWDT(0);
-	printf("err DB eps: %d\n", err);
-
-#ifdef TESTING/*
 	err = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
 	if( err )
 	{
@@ -393,9 +391,8 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 		return (GECKO_Read_Success - err);
 	}
 
-	vTaskDelay(500);*/
-#endif
-
+	vTaskDelay(500);
+*/
 	// Creating a file for the picture at iOBC SD:
 
 	char fileName[FILE_NAME_SIZE];
@@ -404,8 +401,7 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 	F_FILE *PictureFile;
 	OPEN_FILE(PictureFile, fileName, "w+", DataBaseFileSystemError);
 
-	err = GomEpsResetWDT(0);
-	printf("err DB eps: %d\n", err);
+	GomEpsResetWDT(0);
 
 	WRITE_TO_FILE(PictureFile, imageBuffer, sizeof(uint8_t), IMAGE_SIZE, DataBaseFileSystemError);
 
@@ -415,10 +411,10 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 
 	// Updating the DataBase:
 
-	int result = checkForFileType(image_metadata, raw);
-	CMP_AND_RETURN(result, DataBaseNotInSD, DataBasealreadyInSD);
-
 	updateFileTypes(&image_metadata, image_address, raw, TRUE);
+
+	result = checkForFileType(image_metadata, raw);
+	CMP_AND_RETURN(result, DataBaseSuccess, DataBaseFail);
 
 	return DataBaseSuccess;
 }
@@ -444,6 +440,8 @@ ImageDataBaseResult transferImageToSD(ImageDataBase database, imageid cameraId)
 
 ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType type, uint32_t image_address, ImageMetadata image_metadata)
 {
+	FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+
 	char fileName[FILE_NAME_SIZE];
     getFileName(cameraId, type, fileName);
 
@@ -569,6 +567,8 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 			DB_result = transferImageToSD_withoutSearch(image_metadata.cameraId, image_address, image_metadata);
 			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
 				return DB_result;
+
+			printf("\n-F- file system error (%d)\n\n", f_getlasterror());
 
 			TurnOffGecko();
 

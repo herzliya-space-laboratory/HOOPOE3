@@ -35,10 +35,6 @@
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
 
-#ifdef TESTING
-#include "CMD/test_CMD.h"
-#endif
-
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
@@ -186,10 +182,20 @@ void act_upon_command(TC_spl decode)
 	case (SPECIAL_OPERATIONS_T):
 		AUC_special_operation(decode);
 		break;
+	case (TC_ONLINE_TM_T):
+		AUC_onlineTM(decode);
+		break;
 	default:
 		printf("wrong type: %d\n", decode.type);
 		break;
 	}
+}
+
+
+void cmd_error(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_NOTHING;
+	*err = ERR_FAIL;
 }
 
 
@@ -223,6 +229,9 @@ void AUC_COMM(TC_spl decode)
 		break;
 	case (TIME_FREQUENCY_ST):
 		cmd_time_frequency(&type, &err, decode);
+		break;
+	case (UPDATE_BIT_RATE_ST):
+		cmd_change_def_bit_rate(&type, &err, decode);
 		break;
 	default:
 		cmd_error(&type, &err);
@@ -457,6 +466,35 @@ void AUC_SW(TC_spl decode)
 		break;
 	case (RESET_FRAM_ST):
 		cmd_reset_FRAM(&type, &err, decode);
+		break;
+	default:
+		cmd_error(&type, &err);
+		break;
+	}
+	//Builds ACK
+#ifndef NOT_USE_ACK_HK
+	save_ACK(type, err, decode.id);
+#endif
+}
+
+void AUC_onlineTM(TC_spl decode)
+{
+	Ack_type type;
+	ERR_type err;
+
+	switch (decode.subType)
+	{
+	case (GET_ONLINE_TM_INDEX_ST):
+		cmd_get_onlineTM(&type, &err, decode);
+		break;
+	case (RESET_OFF_LINE_LIST_ST):
+		cmd_reset_off_line(&type, &err, decode);
+		break;
+	case (ADD_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
+		break;
+	case (DELETE_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
 		break;
 	default:
 		cmd_error(&type, &err);

@@ -39,6 +39,7 @@
 #include "../Global/Global.h"
 #include "../Global/GlobalParam.h"
 #include "../Global/TM_managment.h"
+#include "../Global/OnlineTM.h"
 #include "../EPS.h"
 #include "../Ants.h"
 #include "../ADCS.h"
@@ -250,15 +251,18 @@ int InitSubsystems()
 	printf("after deploy\n");
 	readAntsState();
 #endif
+
 #endif
 
-	ADCS_startLoop(activation);
+	init_adcs(activation);
 
 	init_trxvu();
 
-	initCamera();
+	initCamera(activation);
 
 	init_command();
+
+	init_onlineParam();
 
 	return 0;
 }
@@ -276,6 +280,9 @@ int SubSystemTaskStart()
 	KickStartCamera();
 
 	vTaskDelay(100);
+#ifdef USE_DIFFERENT_TASK_ONLINE_TM
+	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+#endif
 	return 0;
 }
 

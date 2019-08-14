@@ -69,7 +69,7 @@ void handleDump(Camera_Request request);
  * @param[in]	If the first time the satellite code run is now
  * @return 		return error from initGecko()
  */
-int initCamera();
+int initCamera(Boolean first_activation);
 
 /*
  * create the software components for the camera:

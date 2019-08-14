@@ -66,6 +66,8 @@ void ImageSkipping(fileType reductionLevel)	// where 2^(bin level) is the size r
 
 ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType reductionLevel, Boolean Skipping, uint32_t image_address, ImageMetadata image_metadata)
 {
+	FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+
 	bit fileTypes[8];
 	char2bits(image_metadata.fileTypes, fileTypes);
 
@@ -74,7 +76,8 @@ ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType redu
 	else if (!fileTypes[raw].value)			// if it was not created already, check if the raw is available of the creation process
 		return DataBaseNotInSD;
 
-	readImageToBuffer(id, raw);
+	int result = readImageToBuffer(id, raw);
+	DB_RETURN_ERROR(result);
 
 	// Creating the Thumbnail on imageBuffer:
 	if (Skipping)
@@ -85,7 +88,7 @@ ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType redu
 	updateFileTypes(&image_metadata, image_address, reductionLevel, TRUE);
 
 	// Saving data:
-	int result = saveImageFromBuffer(id, reductionLevel);
+	result = saveImageFromBuffer(id, reductionLevel);
 	DB_RETURN_ERROR(result);
 
 	return DataBaseSuccess;
