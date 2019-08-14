@@ -9,7 +9,7 @@
 #define ONLINETM_H_
 
 #include "Global.h"
-#include "TM_managment.h"
+#include "TLM_management.h"
 #include "../COMM/GSC.h"
 #include "../COMM/splTypes.h"
 
