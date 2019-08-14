@@ -18,9 +18,9 @@
 #define ACK_ST					90
 #define TM_ADCS_ST 				42
 #define ADCS_SC_ST				55
+#define TM_ONLINE_TM_T	        88
 
 //Types (TC)
-#define NONE_APRS_T 			33
 #define COMM_T 					13
 #define GENERAL_T 				20
 #define TC_ADCS_T 				154
@@ -28,6 +28,7 @@
 #define PAYLOAD_T				251
 #define EPS_T					6
 #define SOFTWARE_T 				42
+#define TC_ONLINE_TM_T		    TM_ONLINE_TM_T
 #define SPECIAL_OPERATIONS_T	69
 
 //SubType (TM)
@@ -91,6 +92,7 @@
 #define APRS_DUMP_ST				90
 #define STOP_DUMP_ST				91
 #define TIME_FREQUENCY_ST			5
+#define UPDATE_BIT_RATE_ST			55
 
 //general
 #define SOFT_RESET_ST			68
@@ -179,6 +181,12 @@
 #define RESET_DELAYED_CM_LIST_ST 	32
 #define RESET_APRS_LIST_ST			15
 #define RESET_FRAM_ST				42
+
+//online TM
+#define GET_ONLINE_TM_INDEX_ST		0
+#define RESET_OFF_LINE_LIST_ST		1
+#define ADD_ITEM_OFF_LINE_LIST_ST		2
+#define	DELETE_ITEM_OFF_LINE_LIST_ST		3
 
 //special operations
 #define DELETE_UNF_CUF_ST		156

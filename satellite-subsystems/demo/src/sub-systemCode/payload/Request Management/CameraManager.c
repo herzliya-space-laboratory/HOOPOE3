@@ -112,15 +112,15 @@ void CameraManagerTaskMain()
 
 		if (!get_ground_conn())
 		{
-			//ImageDataBaseResult error = handleMarkedPictures(imageDataBase, NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
-			//save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween);
+			ImageDataBaseResult error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
+			save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween);
 		}
 
 		vTaskDelay(SYSTEM_DEALY);
 	}
 }
 
-int initCamera()
+int initCamera(Boolean first_activation)
 {
 	int error = initGecko();
 	if (error)
@@ -128,9 +128,7 @@ int initCamera()
 
 	Initialized_GPIO();
 
-	zeroImageDataBase();
-
-	imageDataBase = initImageDataBase();
+	imageDataBase = initImageDataBase(first_activation);
 	if (imageDataBase == NULL)
 		error = -1;
 

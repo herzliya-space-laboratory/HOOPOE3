@@ -127,7 +127,7 @@ int buildAndSend_chunck(chunk_t chunk_data, unsigned short chunk_index, fileType
 	byte rawPacket[packet.length + SPL_TM_HEADER_SIZE];
 	encode_TMpacket(rawPacket, &rawPacket_length, packet);
 
-	return TRX_sendFrame(rawPacket, rawPacket_length, trxvu_bitrate_9600);
+	return TRX_sendFrame(rawPacket, rawPacket_length);
 }
 
 /*

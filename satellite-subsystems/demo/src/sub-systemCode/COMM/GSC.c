@@ -149,3 +149,16 @@ int build_data_field_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, b
 	data_feild[5] = (byte)err;
 	return 0;
 }
+
+void print_TM_spl_packet(TM_spl packet)
+{
+	printf("type: %u\n", packet.type);
+	printf("subType: %u\n", packet.subType);
+	printf("length: %u\n", packet.length);
+	printf("time: %u\n", packet.time);
+	for (uint8_t i = 0; (unsigned short)i < packet.length; i++)
+	{
+		printf("%x, ", packet.data[i]);
+	}
+	printf("\n\n");
+}

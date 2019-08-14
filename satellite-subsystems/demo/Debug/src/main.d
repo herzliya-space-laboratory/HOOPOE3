@@ -33,7 +33,6 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/COMM/../Global/Global.h \
  ../src/sub-systemCode/COMM/../Global/FRAMadress.h \
  ../src/sub-systemCode/COMM/../Global/sizes.h \
- ../src/sub-systemCode/COMM/../Global/../payload/Drivers/GeckoCameraDriver.h \
  ../src/sub-systemCode/COMM/splTypes.h \
  ../src/sub-systemCode/Main/commands.h \
  C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/IsisTRXVU.h \
@@ -55,7 +54,12 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Global/Global.h ../src/sub-systemCode/EPS.h \
  ../src/sub-systemCode/Global/FRAMadress.h \
  ../src/sub-systemCode/Global/Global.h \
- ../src/sub-systemCode/Global/sizes.h
+ ../src/sub-systemCode/Global/sizes.h \
+ ../src/sub-systemCode/Global/OnlineTM.h \
+ ../src/sub-systemCode/Global/Global.h \
+ ../src/sub-systemCode/Global/TM_managment.h \
+ ../src/sub-systemCode/Global/../COMM/GSC.h \
+ ../src/sub-systemCode/Global/../COMM/splTypes.h
 
 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h:
 
@@ -125,8 +129,6 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Storage/FRAM.h:
 
 ../src/sub-systemCode/COMM/../Global/sizes.h:
 
-../src/sub-systemCode/COMM/../Global/../payload/Drivers/GeckoCameraDriver.h:
-
 ../src/sub-systemCode/COMM/splTypes.h:
 
 ../src/sub-systemCode/Main/commands.h:
@@ -172,3 +174,13 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
 ../src/sub-systemCode/Global/Global.h:
 
 ../src/sub-systemCode/Global/sizes.h:
+
+../src/sub-systemCode/Global/OnlineTM.h:
+
+../src/sub-systemCode/Global/Global.h:
+
+../src/sub-systemCode/Global/TM_managment.h:
+
+../src/sub-systemCode/Global/../COMM/GSC.h:
+
+../src/sub-systemCode/Global/../COMM/splTypes.h:
