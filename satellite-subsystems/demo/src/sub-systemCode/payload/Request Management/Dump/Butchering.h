@@ -18,16 +18,15 @@ every box is a chunk and the whole is an image
 #ifndef BUTCHERING_H_
 #define BUTCHERING_H_
 
-#include "DataBase.h" // for fileType
-#include "../Global/Global.h"
+#include "../../DataBase/DataBase.h" // for fileType
+#include "../../../Global/Global.h"
 
 typedef enum BUTCHER_ERR
 {
 	BUTCHER_SUCCSESS,
 	BUTCHER_NULL_POINTER,
 	BUTHCER_PARAMATER_VALUE,
-	BUTCHER_UNDEFINED_ERR,
-	BUTCHER_BAD_WIDTH
+	BUTCHER_UNDEFINED_ERR
 } ButcherError;
 
 
@@ -47,9 +46,9 @@ typedef pixel_t image_t[IMAGE_HEIGHT][IMAGE_WIDTH];
  *			BUTHCER_PARAMATER_VALUE if indexes are out of bound
  * @note don't use for JPEG!
  */
-ButcherError GetChunksFromRange(chunk_t* chunks, unsigned int index_start, unsigned int index_end, image_t image, fileType im_type);
+ButcherError GetChunksFromRange(chunk_t* chunks, unsigned int index_start, unsigned int index_end, image_t image, fileType im_type, uint32_t image_size);
 
-ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image, fileType img_type);
+ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image, fileType img_type, uint32_t image_size);
 
 /*!
  * @brief gets a chunk specified by index from image

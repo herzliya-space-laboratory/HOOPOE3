@@ -2,7 +2,7 @@
  * Ants.h
  *
  *  Created on: Mar 27, 2019
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef ANTS_H_

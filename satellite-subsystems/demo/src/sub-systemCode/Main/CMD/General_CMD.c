@@ -2,7 +2,7 @@
  * General_CMD.c
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -128,7 +128,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_dummy_func(Ack_type* type, ERR_type* err)
 {
-	printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
+	printf("Im sorry DBT.\nI can't let you do it...\n");
 	*type = ACK_THE_MIGHTY_DUMMY_FUNC;
 	*err = ERR_SUCCESS;
 }
@@ -271,8 +271,6 @@ void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 {
-	(void)type;
-	(void)err;
 	/*type = ACK_REDEPLOY;
 #ifndef ANTS_DO_NOT_DEPLOY
 	int error = deploye_ants();

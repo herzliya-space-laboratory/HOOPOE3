@@ -9,11 +9,11 @@
 
 #ifndef CAMERAMANEGER_H_
 #define CAMERAMANEGER_H_
-#include "../Global/Global.h"
-#include "../Global/GlobalParam.h"
+#include "../../Global/Global.h"
+#include "../../Global/GlobalParam.h"
 
-#include "../COMM/GSC.h"
-#include "../Global/sizes.h"
+#include "../../COMM/GSC.h"
+#include "../../Global/sizes.h"
 
 #include <hal/boolean.h>
 
@@ -34,6 +34,7 @@ typedef enum{
 	take_picture,
 	take_picture_with_special_values,
 	take_pictures_with_time_in_between,
+	delete_picture_file,
 	delete_picture,
 	transfer_image_to_OBC,
 	create_thumbnail,
@@ -47,7 +48,8 @@ typedef enum{
 	update_defult_duration,
 	Turn_Off_Camera,
 	Turn_On_Camera,
-	far_more_requests
+	Set_Chunk_Size,
+	number_of_request_types
 }cam_Request_id_t;
 
 typedef struct __attribute__ ((__packed__))
@@ -60,12 +62,14 @@ typedef struct __attribute__ ((__packed__))
 
 void CameraManagerTaskMain();
 
+void handleDump(Camera_Request request);
+
 /*
  * Initialize all the components of the camera
  * @param[in]	If the first time the satellite code run is now
  * @return 		return error from initGecko()
  */
-int initCamera(Boolean firstActivation);
+int initCamera();
 
 /*
  * create the software components for the camera:

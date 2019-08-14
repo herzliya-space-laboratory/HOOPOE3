@@ -2,7 +2,7 @@
  * commands.c
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 #include <stdlib.h>
 
@@ -47,8 +47,8 @@
 #include "../ADCS.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
-#include "../payload/CameraManager.h"
-#include "../payload/DataBase.h"
+#include "../payload/Request Management/CameraManager.h"
+#include "../payload/DataBase/DataBase.h"
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
@@ -279,132 +279,58 @@ void AUC_payload(TC_spl decode)
 	switch (decode.subType)
 	{
 		case (SEND_PIC_CHUNCK_CHUNK_FIELD_ST):
-			if (decode.length != 13)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = Image_Dump_chunkField;
 			break;
 		case (SEND_PIC_CHUNCK_BIT_FIELD_ST):
-			if (decode.length != 197)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = Image_Dump_bitField;
 			break;
 		case (TAKE_IMG_ST):
-			if (decode.length != 1)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = take_picture;
 			break;
 		case (TAKE_IMG_SPECIAL_VAL_ST):
-			if (decode.length != 14)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = take_picture_with_special_values;
 			break;
 		case (TAKE_PICTURE_WITH_TIME_IN_BETWEEN):
-			if (decode.length != 8)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = take_pictures_with_time_in_between;
 			break;
 		case (UPDATE_PHOTOGRAPHY_VALUES_ST):
-			if (decode.length != 14)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = update_photography_values;
 			break;
+		case (DELETE_PIC_FILE_ST):
+			request.id = delete_picture_file;
+			break;
 		case (DELETE_PIC_ST):
-			if (decode.length != 5)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = delete_picture;
 			break;
 		case (MOV_IMG_CAM_OBS_ST):
-			if (decode.length != 4)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = transfer_image_to_OBC;
 			break;
 		case (CREATE_THUMBNAIL_FROM_IMAGE_ST):
-			if (decode.length != 5)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = create_thumbnail;
 			break;
 		case (CREATE_JPEG_FROM_IMAGE_ST):
-			if (decode.length != 8)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = create_jpg;
 			break;
 		case (RESET_DATA_BASE_ST):
-			if (decode.length != 0)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = reset_DataBase;
 			break;
 		case (SEND_IMAGE_DATA_BASE_ST):
-			if (decode.length != 8)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = DataBase_Dump;
 			break;
 		case (SEND_ALL_DEFALT_THUMBNAILS_ST):
-			if (decode.length != 0)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = Thumbnail_Dump;
 			break;
 		case (UPDATE_DEF_DUR_ST):
-			if (decode.length != 4)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = update_defult_duration;
 			break;
 		case (OFF_CAM_ST):
-			if (decode.length != 0)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = Turn_Off_Camera;
 			break;
 		case (ON_CAM_ST):
-			if (decode.length != 0)
-			{
-				err = ERR_PARAMETERS;
-				break;
-			}
 			request.id = Turn_On_Camera;
+			break;
+		case (SET_CHUNK_SIZE):
+			request.id = Set_Chunk_Size;
 			break;
 		default:
 			cmd_error(&type, &err);
@@ -412,10 +338,8 @@ void AUC_payload(TC_spl decode)
 	}
 
 	if (err == ERR_SUCCESS)
-	{
 		addRequestToQueue(request);
-		return;
-	}
+
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
 	save_ACK(type, err, decode.id);

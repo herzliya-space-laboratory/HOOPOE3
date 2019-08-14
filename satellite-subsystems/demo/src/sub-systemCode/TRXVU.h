@@ -2,7 +2,7 @@
  * TRXVU.h
  *
  *  Created on: Oct 20, 2018
- *      Author: elain
+ *      Author: DBTn
  */
 
 #ifndef TRXVU_H_
@@ -17,12 +17,16 @@
 
 #include "Global/Global.h"
 #include "COMM/GSC.h"
+#include "payload/DataBase/DataBase.h"
+#include "payload/Request Management/Dump/Butchering.h"
+
 #define APRS_ON
 
-#define TRXVU_TO_CALSIGN "GS1"
-#define TRXVU_FROM_CALSIGN "4x4HSL1"
-
 #define VALUE_TX_BUFFER_FULL 0xff
+
+#define TRXVU_TO_CALSIGN "GS1"
+#define TRXVU_FROM_CALSIGN "4x4hsc1"
+
 #define NUM_FILES_IN_DUMP	5
 
 #define NOMINAL_MODE TRUE
@@ -43,11 +47,10 @@
 #define MIN_TIME_DELAY_BEACON	1
 #define MAX_TIME_DELAY_BEACON 	40
 
-#define TRANSMMIT_DELAY_9600(length) (length - length)
-//(portTickType)((length + 30) * (5 / 6) + 30)
-#define TRANSMMIT_DELAY_1200(length) (portTickType)(20 * 100)
+#define TRANSMMIT_DELAY_9600(length) (portTickType)((length + 30) * (5 / 6) + 30)
+#define TRANSMMIT_DELAY_1200(length) (portTickType)(TRANSMMIT_DELAY_9600(length) * 100)
 
-#define GROUND_PASSING_TIME	(1)//todo: find real values
+#define GROUND_PASSING_TIME	(60*10)//todo: find real values
 
 //todo: find real values
 #define DEFULT_COMM_VOL		7250

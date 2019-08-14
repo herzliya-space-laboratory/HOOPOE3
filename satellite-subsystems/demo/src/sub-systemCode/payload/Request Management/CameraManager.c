@@ -25,19 +25,18 @@
 
 #include <string.h>
 
-#include "DataBase.h"
-#include "CameraManager.h"
-#include "GeckoCameraDriver.h"
+#include "../DataBase/DataBase.h"
+#include "../Drivers/GeckoCameraDriver.h"
 #include "DB_RequestHandling.h"
+#include "Dump/imageDump.h"
 
-#include "../COMM/imageDump.h"
+#include "../../Global/GlobalParam.h"
+#include "../../TRXVU.h"
+#include "../../Main/HouseKeeping.h"
 
-#include "../Global/GlobalParam.h"
+#include "CameraManager.h"
 
-#include "../TRXVU.h"
-#include "../Main/HouseKeeping.h"
-
-#define CameraManagmentTask_StackDepth /*8192*/30000
+#define CameraManagmentTask_StackDepth 30000
 #define CameraManagmentTask_Name ("Camera Management Task")
 #define CameraDumpTask_Name ("Camera Dump Task")
 
@@ -53,9 +52,8 @@ static uint32_t numberOfPicturesLeftToBeTaken;
 command_id cmd_id_for_takePicturesWithTimeInBetween;
 
 static time_unix turnedOnCamera;
-static time_unix cameraActivation_duration; // the duration the camera will stay turned on after being activated
+static time_unix cameraActivation_duration; ///< the duration the camera will stay turned on after being activated
 
-global_param global_parameters;
 ImageDataBase imageDataBase;
 
 
@@ -91,15 +89,11 @@ void Take_pictures_with_time_in_between();
 
 void CameraManagerTaskMain()
 {
-	f_enterFS();
-
 	Camera_Request req;
 	time_unix timeNow;
 
 	while(TRUE)
 	{
-		get_current_global_param(&global_parameters);
-
 		if (removeRequestFromQueue(&req) > -1)
 		{
 			act_upon_request(req);
@@ -116,18 +110,17 @@ void CameraManagerTaskMain()
 
 		vTaskDelay(1000);
 
-		if (!global_parameters.ground_conn)
+		if (!get_ground_conn())
 		{
-			ImageDataBaseResult error = handleMarkedPictures(imageDataBase, NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
-
-			save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween); // ToDo: How do we handle errors? (error log...)
+			//ImageDataBaseResult error = handleMarkedPictures(imageDataBase, NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
+			//save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween);
 		}
 
 		vTaskDelay(SYSTEM_DEALY);
 	}
 }
 
-int initCamera(Boolean firstActivation)
+int initCamera()
 {
 	int error = initGecko();
 	if (error)
@@ -135,7 +128,9 @@ int initCamera(Boolean firstActivation)
 
 	Initialized_GPIO();
 
-	imageDataBase = initImageDataBase(firstActivation);
+	zeroImageDataBase();
+
+	imageDataBase = initImageDataBase();
 	if (imageDataBase == NULL)
 		error = -1;
 
@@ -144,7 +139,7 @@ int initCamera(Boolean firstActivation)
 
 int KickStartCamera(void)
 {
-	//Software initialize
+	// Software initialize
 	interfaceQueue = xQueueCreate(MAX_NUMBER_OF_CAMERA_REQ, sizeof(Camera_Request));
 	if (interfaceQueue == NULL)
 		return -1;
@@ -208,50 +203,45 @@ void Take_pictures_with_time_in_between()
 	}
 }
 
+void Gecko_TroubleShooter(ImageDataBaseResult error)
+{
+	Boolean should_reset_take = error > GECKO_Take_Success && error < GECKO_Read_Success;
+	Boolean should_reset_read = error > GECKO_Read_Success && error < GECKO_Erase_Success;
+	Boolean should_reset_erase = error > GECKO_Erase_Success && error <= GECKO_Erase_Error_ClearEraseDoneFlag;
+
+	Boolean should_reset = should_reset_take || should_reset_read || should_reset_erase;
+
+	if (should_reset)
+	{
+		TurnOffGecko();
+		TurnOnGecko();
+	}
+}
+
 void handleDump(Camera_Request request)
 {
 	request_image DumpRequest;
 	DumpRequest.cmdId = request.cmd_id;
 
-	if (request.id == Image_Dump_chunkField)
+	switch (request.id)
 	{
-		DumpRequest.type = chunkField_imageDump_;
-
-		memcpy(DumpRequest.command_parameters, request.data, MAX_DATA_CAM_REQ);
+		case Image_Dump_chunkField:
+			DumpRequest.type = chunkField_imageDump_;
+			break;
+		case Image_Dump_bitField:
+			DumpRequest.type = bitField_imageDump_;
+			break;
+		case Thumbnail_Dump:
+			DumpRequest.type = thumbnail_imageDump_;
+			break;
+		case DataBase_Dump:
+			DumpRequest.type = imageDataBaseDump_;
+			break;
+		default:
+			break;
 	}
 
-	else if (request.id == Image_Dump_bitField)
-	{
-		DumpRequest.type = bitField_imageDump_;
-
-		memcpy(DumpRequest.command_parameters, request.data, MAX_DATA_CAM_REQ);
-	}
-
-	else if (request.id == Thumbnail_Dump)
-	{
-		DumpRequest.type = thumbnail_imageDump_;
-
-		time_unix startingTime = *((time_unix*)request.data);
-		memcpy(&startingTime, request.data, sizeof(time_unix));
-		time_unix endTime = *((time_unix*)request.data + 4);
-		memcpy(&endTime, request.data + 4, sizeof(time_unix));
-
-		imageid* ID_list = get_ID_list_withDefaltThumbnail(startingTime, endTime);
-		memcpy(DumpRequest.command_parameters, ID_list, sizeof(ID_list));
-	}
-
-	else if (request.id == DataBase_Dump)
-	{
-		DumpRequest.type = imageDataBaseDump_;
-
-		time_unix startingTime = *((time_unix*)request.data);
-		memcpy(&startingTime, request.data, sizeof(time_unix));
-		time_unix endTime = *((time_unix*)request.data + 4);
-		memcpy(&endTime, request.data + 4, sizeof(time_unix));
-
-		byte* buffer = getImageDataBaseBuffer(imageDataBase, startingTime, endTime);
-		memcpy(DumpRequest.command_parameters, buffer, sizeof(buffer));
-	}
+	memcpy(DumpRequest.command_parameters, request.data, MAX_DATA_CAM_REQ);
 
 	//imageDump_task(&DumpRequest);
 	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraManagmentTask_StackDepth, &DumpRequest, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 1), NULL);
@@ -264,42 +254,33 @@ void act_upon_request(Camera_Request request)
 	switch (request.id)
 	{
 	case take_picture:
-		error = TakePicture(imageDataBase, request.data);
-
 		Time_getUnixEpoch(&turnedOnCamera);
-
+		error = TakePicture(imageDataBase, request.data);
 		break;
-
 
 	case take_picture_with_special_values:
 		Time_getUnixEpoch(&turnedOnCamera);
-
 		error = TakeSpecialPicture(imageDataBase, request.data);
-
 		break;
-
 
 	case take_pictures_with_time_in_between:
 		memcpy(&numberOfPicturesLeftToBeTaken, request.data, sizeof(int));
 		memcpy(&timeBetweenPictures, request.data + 4, sizeof(int));
-
 		Time_getUnixEpoch(&lastPicture_time);
-
 		cmd_id_for_takePicturesWithTimeInBetween = request.cmd_id;
-
 		break;
 
+	case delete_picture_file:
+		error = DeletePictureFile(imageDataBase, request.data);
+		break;
 
 	case delete_picture:
 		error = DeletePicture(imageDataBase, request.data);
-
 		Time_getUnixEpoch(&turnedOnCamera);
-
 		break;
 
-
 	case transfer_image_to_OBC:
-		if (global_parameters.ground_conn)
+		if (get_ground_conn())
 		{
 			addRequestToQueue(request);
 		}
@@ -307,29 +288,23 @@ void act_upon_request(Camera_Request request)
 		{
 			error = TransferPicture(imageDataBase, request.data);
 		}
-
 		break;
-
 
 	case create_thumbnail:
 		error = CreateThumbnail(request.data);
 		break;
 
-
 	case create_jpg:
 		error = CreateJPG(request.data);
 		break;
-
 
 	case update_photography_values:
 		error = UpdatePhotographyValues(imageDataBase, request.data);
 		break;
 
-
 	case reset_DataBase:
 		error = resetImageDataBase(imageDataBase);
 		break;
-
 
 	case Image_Dump_chunkField:
 	case Image_Dump_bitField:
@@ -338,28 +313,28 @@ void act_upon_request(Camera_Request request)
 		handleDump(request);
 		break;
 
-
 	case update_defult_duration:
 		memcpy(&cameraActivation_duration, request.data, sizeof(time_unix));
 		break;
 
-
 	case Turn_On_Camera:
 		TurnOnGecko();
-
 		Time_getUnixEpoch(&turnedOnCamera);
-
 		break;
 
 	case Turn_Off_Camera:
 		TurnOffGecko();
 		break;
 
+	case Set_Chunk_Size:
+		// ToDo: du it!
+		break;
 
 	default:
 		return;
 		break;
 	}
 
+	Gecko_TroubleShooter(error);
 	save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 }

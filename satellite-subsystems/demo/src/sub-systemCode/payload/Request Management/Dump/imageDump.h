@@ -8,12 +8,12 @@
 #ifndef IMAGEDUMP_H_
 #define IMAGEDUMP_H_
 
-#include "../Global/sizes.h"
-#include "../Global/Global.h"
-#include "../Global/GlobalParam.h"
-#include "../TRXVU.h"
+#include "../../../Global/sizes.h"
+#include "../../../Global/Global.h"
+#include "../../../Global/GlobalParam.h"
+#include "../../../TRXVU.h"
 
-#define SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP sizeof(imageid)+sizeof(byte)+sizeof(short)
+#define SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP sizeof(imageid) + sizeof(byte) + sizeof(uint16_t)
 #define BIT_FIELD_SIZE SPL_TC_DATA_SIZE - SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP
 
 #define NUMBER_OF_CHUNKS_IN_CMD BIT_FIELD_SIZE * 8

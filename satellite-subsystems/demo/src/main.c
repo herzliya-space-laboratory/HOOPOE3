@@ -2,6 +2,7 @@
  * main.c
  *      Author: Akhil
  */
+
 #include <satellite-subsystems/version/version.h>
 
 #include <at91/utility/exithandler.h>
@@ -35,15 +36,20 @@
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
 
-#define DEBUGMODE
-
-#ifndef DEBUGMODE
-	#define DEBUGMODE
+#define ENABLE_MAIN_TRACES 1
+#if ENABLE_MAIN_TRACES
+	#define MAIN_TRACE_INFO			TRACE_INFO
+	#define MAIN_TRACE_DEBUG		TRACE_DEBUG
+	#define MAIN_TRACE_WARNING		TRACE_WARNING
+	#define MAIN_TRACE_ERROR		TRACE_ERROR
+	#define MAIN_TRACE_FATAL		TRACE_FATAL
+#else
+	#define MAIN_TRACE_INFO(...)	{ }
+	#define MAIN_TRACE_DEBUG(...)	{ }
+	#define MAIN_TRACE_WARNING(...)	{ }
+	#define MAIN_TRACE_ERROR		TRACE_ERROR
+	#define MAIN_TRACE_FATAL		TRACE_FATAL
 #endif
-
-
-#define HK_DELAY_SEC 10
-#define MAX_SIZE_COMMAND_Q 20
 
 void save_time()
 {
@@ -79,10 +85,12 @@ void Command_logic()
 void taskMain()
 {
 	WDT_startWatchdogKickTask(10 / portTICK_RATE_MS, FALSE);
+
 	InitSubsystems();
+	printf("init\n");
 
 	vTaskDelay(100);
-	printf("init\n");
+
 	SubSystemTaskStart();
 	printf("Task Main start\n");
 
@@ -100,15 +108,20 @@ void taskMain()
 
 int main()
 {
+	xTaskHandle taskMainHandle;
+
 	TRACE_CONFIGURE_ISP(DBGU_STANDARD, 2000000, BOARD_MCK);
 	// Enable the Instruction cache of the ARM9 core. Keep the MMU and Data Cache disabled.
 	CP15_Enable_I_Cache();
 
+	// The actual watchdog is already started, this only initializes the watchdog-kick interface.
 	WDT_start();
 
-	printf("Task Main 2121\n");
-	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 2048, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
-	printf("start sch\n");
+	MAIN_TRACE_DEBUG("\t main: Starting main task.. %d\n\r", 0U);
+	xTaskGenericCreate(taskMain, (const signed char*)"taskMain", 4096, NULL, configMAX_PRIORITIES-2, &taskMainHandle, NULL, NULL);
+
+	MAIN_TRACE_DEBUG("\t main: Starting scheduler.. \n\r");
 	vTaskStartScheduler();
+
 	return 0;
 }

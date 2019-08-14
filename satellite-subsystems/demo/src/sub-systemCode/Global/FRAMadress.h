@@ -2,7 +2,7 @@
  * FRAMadress.h
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef FRAMADRESS_H_
@@ -42,32 +42,35 @@
 #define STAGE_TABLE_ADDR 0x9044
 
 //CAMERA
-#define AUTO_PILOT_STATE_ADDR			0x9FFB
-#define CAMERA_LAST_PICTUR_TIME_ADDR	0x9FFC // <<4 bytes>>
+#define AUTO_PILOT_STATE_ADDR			0x8FFB
+#define CAMERA_LAST_PICTUR_TIME_ADDR	0x8FFC // <<4 bytes>>
 
-#define GECKO_STATUS_FLAG_ADDR 0xA000
+#define GECKO_STATUS_FLAG_ADDR 0x9000
 #define GECKO_STATUS_FLAG_SIZE 1
 
-#define GECKO_ADC_GAIN_ADDR 0xA001
+#define GECKO_ADC_GAIN_ADDR 0x9001
 #define GECKO_ADC_GAIN_SIZE 1
 
-#define GECKO_PGA_GAIN_ADDR 0xA002
+#define GECKO_PGA_GAIN_ADDR 0x9002
 #define GECKO_PGA_GAIN_SIZE 1
 
-#define GECKO_EXPOSURE_ADDR 0xA003
+#define GECKO_EXPOSURE_ADDR 0x9003
 #define GECKO_EXPOSURE_SIZE 4
 
-#define GECKO_FRAME_AMOUNT_ADDR 0xA007
+#define GECKO_FRAME_AMOUNT_ADDR 0x9007
 #define GECKO_FRAME_AMOUNT_SIZE 4
 
-#define GECKO_FRAME_RATE_ADDR 0xA011
+#define GECKO_FRAME_RATE_ADDR 0x9011
 #define GECKO_FRAME_RATE_SIZE 4
 
-#define GECKO_FAST_ADDR 0xA015
+#define GECKO_FAST_ADDR 0x9015
 #define GECKO_FAST_SIZE 4
 
-#define GECKO_MAX_ON_TIME_ADDR 0xA019
+#define GECKO_MAX_ON_TIME_ADDR 0x9019
 #define GECKO_MAX_ON_TIME_SIZE 4
 
 #define DATABASEFRAMADDRESS 0x10000	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
+
+#define FRAM_END 0x3FFFF
+
 #endif /* FRAMADRESS_H_ */

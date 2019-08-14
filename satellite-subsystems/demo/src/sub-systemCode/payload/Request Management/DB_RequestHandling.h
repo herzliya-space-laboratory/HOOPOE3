@@ -10,23 +10,10 @@
 
 #include <freertos/FreeRTOS.h>
 
-#include "../Global/Global.h"
+#include "../../Global/Global.h"
 
-#include "ImageConversion.h"
-#include "DataBase.h"
-
-typedef enum
-{
-	RawImage,
-	ThumbnailLevel1,
-	ThumbnailLevel2,
-	ThumbnailLevel3,
-	ThumbnailLevel4,
-	ThumbnailLevel5,
-	ThumbnailLevel6,
-	JPG,
-	GeckoSD
-} GroundFileTypes;
+#include "../Compression/ImageConversion.h"
+#include "../DataBase/DataBase.h"
 
 ImageDataBaseResult TakePicture(ImageDataBase database, unsigned char data[]);
 ImageDataBaseResult TakeSpecialPicture(ImageDataBase database, unsigned char data[]);
