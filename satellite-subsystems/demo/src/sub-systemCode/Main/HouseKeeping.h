@@ -10,7 +10,7 @@
 
 #include "../Global/Global.h"
 #include "../COMM/GSC.h"
-#include "../Global/TM_managment.h"
+#include "../Global/TLM_management.h"
 
 #include <satellite-subsystems/cspaceADCS_types.h>
 
