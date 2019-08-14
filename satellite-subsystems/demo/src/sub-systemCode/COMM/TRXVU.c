@@ -107,8 +107,10 @@ void TRXVU_init_softWare()
 			break;
 		}
 	}
+	vTaskDelay(2000);
 	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
 	check_int("IsisTrxvu_tcSetAx25Bitrate, cmd_change_def_bit_rate", error);
+	vTaskDelay(100);
 
 	//1. create binary semaphore for transmitting
 	vSemaphoreCreateBinary(xIsTransmitting);
