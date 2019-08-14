@@ -1,9 +1,12 @@
 /*
  *	Butchering.c
  *
- *	Created on: 7 боай 2019
+ *	Created on: 7 пїЅпїЅпїЅпїЅ 2019
  *	Author: Roy Harel
  */
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #include <math.h>
 
@@ -30,15 +33,15 @@
 #endif
 
 
-ButcherError GetChunksFromRange(chunk_t* chunks, unsigned int index_start, unsigned int index_end, image_t image, fileType im_type)
+ButcherError GetChunksFromRange(chunk_t* chunks, unsigned int index_start, unsigned int index_end, image_t image, fileType im_type, uint32_t image_size)
 {
 	if ( image == NULL || chunks == NULL )
 	{
 		return BUTCHER_NULL_POINTER;
 	}
 
-	unsigned int effective_im_size = IMAGE_SIZE / ( (2^im_type) ^ 2 );
-	if (index_start > ceil(effective_im_size / CHUNK_SIZE) || index_start > index_end)
+	unsigned int effective_im_size = IMAGE_SIZE / pow(pow(2,im_type), 2);
+	if ( (im_type != jpg) && (index_start > ceil(effective_im_size / CHUNK_SIZE) || index_start > index_end) )
 	{
 		return BUTHCER_PARAMATER_VALUE;
 	}
@@ -46,17 +49,26 @@ ButcherError GetChunksFromRange(chunk_t* chunks, unsigned int index_start, unsig
 	int err = 0;
 	for (unsigned int i = index_start; i < index_end; i++)
 	{
-		err = GetChunkFromImage(chunks[i - index_start], i, image, im_type);
+		err = GetChunkFromImage(chunks[i - index_start], i, image, im_type, image_size);
 		if (err != BUTCHER_SUCCSESS)
 		{
 			return err;
 		}
+
+		vTaskDelay(100);
 	}
 	return BUTCHER_SUCCSESS;
 }
 
-ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image, fileType img_type)
+ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image, fileType img_type, uint32_t image_size)
 {
+	if (img_type == jpg)
+	{
+		pixel_t* temp_chunk = SimpleButcher((pixel_t*)image, image_size, CHUNK_SIZE, index);
+		memcpy(chunk, temp_chunk, CHUNK_SIZE);
+		return BUTCHER_SUCCSESS;
+	}
+
 	unsigned int factor = 1;
 	switch(img_type)
 	{
@@ -76,13 +88,13 @@ ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image,
 
 	unsigned int effective_im_height = IMAGE_HEIGHT / factor;
 	unsigned int effective_im_width = IMAGE_WIDTH / factor;
-	unsigned int effective_im_size = IMAGE_SIZE / (factor^2);
+	unsigned int effective_im_size = IMAGE_SIZE / pow(factor,2);
 
 	unsigned int num_of_chunks_Y = effective_im_height / CHUNK_HEIGHT;	// rounded down (without the reminder!)
 	unsigned int num_of_chunks_X = effective_im_width / CHUNK_WIDTH;
 
 	if ( effective_im_width % CHUNK_WIDTH != 0 )
-		return BUTCHER_BAD_WIDTH;
+		return Butcher_Parameter_Value;
 
 
 	unsigned int height_offset = (index / num_of_chunks_X) * CHUNK_HEIGHT;
@@ -122,7 +134,14 @@ pixel_t* SimpleButcher(pixel_t* data, unsigned int sizeofData, unsigned int size
 	pixel_t* buffer = malloc(size);
 
 	memcpy(buffer, data + size*index, size);
-
+/*
+	printf("\n");
+	for (unsigned int i = 0; i < size; i++)
+	{
+		printf("%u ", *(buffer + i));
+	}
+	printf("\n");
+*/
 	if (size*index > sizeofData)
 	{
 		byte zero = 0;

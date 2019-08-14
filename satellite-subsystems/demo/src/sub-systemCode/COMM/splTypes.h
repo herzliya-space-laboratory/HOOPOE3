@@ -2,7 +2,7 @@
  * splTypes.h
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DataBaseRefactorn
  */
 
 #ifndef SPLTYPES_H_
@@ -42,15 +42,18 @@
 #define SP_DUMP_ST	91
 
 //Payload dump subTypes:
-#define IMAGE_DATABASE_DUMP_ST		97
-#define IMAGE_DUMP_THUMBNAIL6_ST	98
-#define IMAGE_DUMP_THUMBNAIL5_ST	99
-#define IMAGE_DUMP_THUMBNAIL4_ST	100
-#define IMAGE_DUMP_THUMBNAIL3_ST	101
-#define IMAGE_DUMP_THUMBNAIL2_ST	102
-#define IMAGE_DUMP_THUMBNAIL1_ST	103
-#define IMAGE_DUMP_RAW_ST			104
-#define IMAGE_DUMP_JPG_ST			105
+#define IMAGE_DATABASE_DUMP_ST				96
+#define IMAGE_DATABASE_DUMP_FIRST_CHUNK_ST	97
+
+#define IMAGE_DUMP_THUMBNAIL6_ST			98
+#define IMAGE_DUMP_THUMBNAIL5_ST			99
+#define IMAGE_DUMP_THUMBNAIL4_ST			100
+#define IMAGE_DUMP_THUMBNAIL3_ST			101
+#define IMAGE_DUMP_THUMBNAIL2_ST			102
+#define IMAGE_DUMP_THUMBNAIL1_ST			103
+#define IMAGE_DUMP_RAW_ST					104
+#define IMAGE_DUMP_JPG_ST					105
+#define IMAGE_DUMP_JPG_FIRST_CHUNK_ST		106
 
 //ADCS science sub-types
 #define ADCS_CSS_DATA_ST 				122
@@ -113,16 +116,18 @@
 #define TAKE_IMG_SPECIAL_VAL_ST				4
 #define TAKE_PICTURE_WITH_TIME_IN_BETWEEN 	5
 #define UPDATE_PHOTOGRAPHY_VALUES_ST		6
-#define DELETE_PIC_ST						7
-#define MOV_IMG_CAM_OBS_ST					8
-#define CREATE_THUMBNAIL_FROM_IMAGE_ST		9
-#define CREATE_JPEG_FROM_IMAGE_ST			10
-#define RESET_DATA_BASE_ST					11
-#define SEND_IMAGE_DATA_BASE_ST				12
-#define SEND_ALL_DEFALT_THUMBNAILS_ST		13
-#define UPDATE_DEF_DUR_ST					14
-#define	OFF_CAM_ST							15
-#define ON_CAM_ST							16
+#define DELETE_PIC_FILE_ST					7
+#define DELETE_PIC_ST						8
+#define MOV_IMG_CAM_OBS_ST					9
+#define CREATE_THUMBNAIL_FROM_IMAGE_ST		10
+#define CREATE_JPEG_FROM_IMAGE_ST			11
+#define RESET_DATA_BASE_ST					12
+#define SEND_IMAGE_DATA_BASE_ST				13
+#define SEND_ALL_DEFALT_THUMBNAILS_ST		14
+#define UPDATE_DEF_DUR_ST					15
+#define	OFF_CAM_ST							16
+#define ON_CAM_ST							17
+#define SET_CHUNK_SIZE						18
 
 //eps
 #define ALLOW_ADCS_ST			99

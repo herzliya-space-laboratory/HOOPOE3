@@ -2,7 +2,7 @@
  * GSC.h
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef GSC_H_

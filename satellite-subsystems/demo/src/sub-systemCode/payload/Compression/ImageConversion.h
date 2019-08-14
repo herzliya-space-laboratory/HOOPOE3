@@ -10,8 +10,10 @@
 #ifndef IMAGECONVERSION_H_
 #define IMAGECONVERSION_H_
 
-#include "DataBase.h"
-#include "Macros.h"
+#include "../DataBase/DataBase.h"
+#include "../Misc/Macros.h"
+
+ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType reductionLevel, Boolean Skipping, uint32_t image_address, ImageMetadata image_metadata);
 
 /*!
  * Reduces the resolution of an image.
@@ -44,6 +46,6 @@ ImageDataBaseResult CreateImageThumbnail(imageid id, fileType reductionLevel, Bo
  *
  * @return An enum indicating error type and reason for exit
  */
-ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor, fileType reductionLevel);
+ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor);
 
 #endif /* IMAGECONVERSION_H_ */

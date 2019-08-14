@@ -2,7 +2,7 @@
  * COMM_CMD.c
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -51,7 +51,7 @@ void cmd_unmute(Ack_type* type, ERR_type* err)
 	//1. unmute satellite
 	*err = ERR_FRAM_WRITE_FAIL;
 	set_mute_time(0);
-	unmute_Tx();
+	mute_Tx(FALSE);
 	*err = ERR_SUCCESS;
 }
 void cmd_active_trans(Ack_type* type, ERR_type* err, TC_spl cmd)

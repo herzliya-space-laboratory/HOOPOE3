@@ -2,7 +2,7 @@
  * DelayedCommand_list.h
  *
  *  Created on: Apr 6, 2019
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef DELAYEDCOMMAND_LIST_H_

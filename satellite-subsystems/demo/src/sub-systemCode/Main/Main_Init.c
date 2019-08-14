@@ -44,9 +44,9 @@
 #include "../ADCS.h"
 #include "../ADCS/Stage_Table.h"
 #include "../TRXVU.h"
+#include "../payload/Request Management/CameraManager.h"
 #include "HouseKeeping.h"
 #include "commands.h"
-#include "../payload/CameraManager.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -58,16 +58,17 @@
 stageTable ST;
 
 #ifdef TESTING
-
+void reset_FIRST_activation(Boolean8bit dataFRAM)
+{
+	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+}
 
 void test_menu()
 {
-	byte dataFRAM = FALSE_8BIT;
-	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+	reset_FIRST_activation(FALSE_8BIT);
 
 	Boolean exit = FALSE;
 	unsigned int selection;
-	byte data;
 	while (!exit)
 	{
 		printf( "\n\r Select a test to perform: \n\r");
@@ -83,7 +84,7 @@ void test_menu()
 			exit = TRUE;
 			break;
 		case 1:
-			FRAM_write(&data, FIRST_ACTIVATION_ADDR, 1);
+			reset_FIRST_activation(TRUE_8BIT);
 			break;
 		}
 	}
@@ -225,7 +226,12 @@ int InitSubsystems()
 	numberOfRestarts();
 
 	InitializeFS(activation);
+	if (activation)
+	{
+		resetSD();
 
+		resetSD();
+	}
 	create_files(activation);
 
 	EPS_Init();
@@ -246,11 +252,11 @@ int InitSubsystems()
 #endif
 #endif
 
-	init_adcs(activation);
+	ADCS_startLoop(activation);
 
 	init_trxvu();
 
-	initCamera(activation);
+	initCamera();
 
 	init_command();
 
@@ -263,8 +269,8 @@ int SubSystemTaskStart()
 	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
-	xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	//xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	//xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
 	KickStartCamera();

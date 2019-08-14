@@ -8,7 +8,7 @@
 #ifndef IMGCOMPRESSOR_H_
 #define IMGCOMPRESSOR_H_
 
-#include "../DataBase.h"
+#include "../../DataBase/DataBase.h"
 
 typedef enum
 {
@@ -16,8 +16,13 @@ typedef enum
 	JpegCompression_qualityFactor_outOFRange,
 	JpegCompression_ImageLoadingFailure,
 	JpegCompression_FileSystemFailure,
-	JpegCompression_FailedWritingToOutputFile
+	JpegCompression_FailedWritingToOutputFile,
+	JpegCompression_ImageDataBaseFailure
 } JpegCompressionResult;
+
+JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_factor, char pDst_filename[FILE_NAME_SIZE]);
+
+JpegCompressionResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], char pSrc_filename[FILE_NAME_SIZE], unsigned int compfact);
 
 /*
  * Usage: jpge <sourcefile> <destfile> <quality_factor>

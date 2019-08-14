@@ -2,7 +2,7 @@
  * APRS.h
  *
  *  Created on: Jun 23, 2019
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef APRS_H_

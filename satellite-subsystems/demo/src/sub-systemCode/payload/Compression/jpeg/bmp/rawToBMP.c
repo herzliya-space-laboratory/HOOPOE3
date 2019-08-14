@@ -35,10 +35,14 @@ unsigned char rowOutput[MAX_IMG_WIDTH * 3];		// B,G,R
 
 void TransformRawToBMP(const char * inputF_FILE, const char * outputF_FILE, int compfact)
 {
+	f_enterFS();
+
 	F_FILE* input_fd = f_open(inputF_FILE, "r+");
 	if (input_fd == NULL)
 	{
 		printf("Failed to f_open intput F_FILE\n");
+
+		f_releaseFS();
 		return;
 	}
 	F_FILE* output_fd = f_open(outputF_FILE, "w+");
@@ -46,6 +50,8 @@ void TransformRawToBMP(const char * inputF_FILE, const char * outputF_FILE, int 
 	{
 		printf("Failed to f_open output F_FILE\n");
 		f_close(input_fd);
+
+		f_releaseFS();
 		return;
 	}
 
@@ -56,6 +62,8 @@ void TransformRawToBMP(const char * inputF_FILE, const char * outputF_FILE, int 
 	{
 		f_close(output_fd);
 		f_close(input_fd);
+
+		f_releaseFS();
 		return;
 	}
 
@@ -70,6 +78,8 @@ void TransformRawToBMP(const char * inputF_FILE, const char * outputF_FILE, int 
 		{
 			f_close(output_fd);
 			f_close(input_fd);
+
+			f_releaseFS();
 			return;
 		}
 	}
@@ -78,6 +88,8 @@ void TransformRawToBMP(const char * inputF_FILE, const char * outputF_FILE, int 
 	f_close(input_fd);
 
 	printf("Done!\n");
+
+	f_releaseFS();
 }
 
 void interpolate(F_FILE* input_fd, int row, int col, int compfact)
@@ -229,9 +241,9 @@ void interpolate(F_FILE* input_fd, int row, int col, int compfact)
 		break;
 	}
 
-	rowOutput[col * 3 + 0] = (unsigned char)blue;
+	rowOutput[col * 3 + 0] = (unsigned char)red;
 	rowOutput[col * 3 + 1] = (unsigned char)green;
-	rowOutput[col * 3 + 2] = (unsigned char)red;
+	rowOutput[col * 3 + 2] = (unsigned char)blue;
 }
 
 int IThinkItsRow = 0;

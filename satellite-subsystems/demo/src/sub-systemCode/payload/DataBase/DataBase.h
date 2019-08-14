@@ -1,8 +1,11 @@
-/*
- * ImageDataBase.h
+/*!
+ * @file ImageDataBase.h
+ * @brief ToDo: brief for database.h
+ * @date 8 May 2019
+ * ToDo: explain database.h
  *
- *  Created on: 7 במאי 2019
- *      Author: I7COMPUTER
+ * @see ToDo DB capabilities file
+ * @author Roy Harel
  */
 
 #ifndef DATABASE_H_
@@ -11,31 +14,36 @@
 #include <hal/Boolean.h>
 #include <hcc/api_fat.h>
 
-#include "../Global/FRAMadress.h"
-#include "../Global/Global.h"
+#include "../Drivers/GeckoCameraDriver.h"
+#include "../../Global/FRAMadress.h"
+#include "../../Global/Global.h"
 
-#define FILE_NAME_SIZE 12			// The size of the filename parameter. i0000001.raw (+1 for '/0')
+#define FILE_NAME_SIZE 12	///< The size of the filename parameter. i0000001.raw (+1 for '/0')
 
-#define MAX_NUMBER_OF_PICTURES 20		// The maximum number of pictures the database supports
+#ifdef TESTING
+	#define MAX_NUMBER_OF_PICTURES 20
+#else
+	#define MAX_NUMBER_OF_PICTURES 1000	///< The maximum number of pictures the database supports
+#endif
 
-#define DEFALT_FRAME_RATE 1
-#define DEFALT_FRAME_AMOUNT 1
-#define DEFALT_ADC_GAIN 53
-#define DEFALT_PGA_GAIN 3
-#define DEFALT_EXPOSURE 2048
+#define DEFALT_FRAME_RATE 1		///< The frame rate that will be used when taking a picture if the value wasn't updated with an command from the ground
+#define DEFALT_FRAME_AMOUNT 1	///< The amount of frames that will be taken when taking a picture if the value wasn't updated with an command from the ground
+#define DEFALT_ADC_GAIN 53		///< The ADC gain register value that will be used when taking a picture if the value wasn't updated with an command from the ground
+#define DEFALT_PGA_GAIN 3		///< The PGA gain register value that will be used when taking a picture if the value wasn't updated with an command from the ground
+#define DEFALT_EXPOSURE 2048	///< The exposure register value that will be used when taking a picture if the value wasn't updated with an command from the ground
 
-#define DEFALT_REDUCTION_LEVEL 5
+#define DEFALT_REDUCTION_LEVEL 5	///< After taking an image an thumbnail of that level will be created automatically
 
 // Macros:
 // ToDo: Add error log
-#define DB_RETURN_ERROR(error)					\
+#define DB_RETURN_ERROR(error)			\
 		if (error != DataBaseSuccess)	\
-		{									\
-			return error;					\
+		{								\
+			return error;				\
 		}
 
 typedef unsigned short imageid;
-typedef struct ImageDataBase_t* ImageDataBase;
+typedef struct ImageDataBase_t* ImageDataBase;	///< ADT architecture
 
 typedef struct __attribute__ ((__packed__))
 {
@@ -59,6 +67,7 @@ typedef enum
 	jpg,	// a compressed picture
 	NumberOfFileTypes,
 	bmp,	// bitmap for jpg, unavailable - deleted and created for jpg
+	GeckoSD
 } fileType;
 
 typedef enum
@@ -78,7 +87,7 @@ typedef enum
 	DataBaseFileSystemError,
 	DataBaseFail,
 
-	// Gecko Drivers Taking Image Error Messages:
+	// Gecko Drivers Image Taking Error Messages:
 	GECKO_Take_Success,						///< (0) completed successfully
 	GECKO_Take_Error_TurnOffSensor,			///< (-1) could not turn off sensor
 	GECKO_Take_Error_Set_ADC_Gain,			///< (-2) could not set ADC gain
@@ -98,7 +107,7 @@ typedef enum
 	GECKO_Take_Error_clearSampleFlag,		///< (-16) could not clear sample flag
 	GECKO_Take_Error_turnOfSensor,			///< (-17) could not turn of sensor
 
-	// Gecko Drivers Reading Image Error Messages:
+	// Gecko Drivers Image Reading Error Messages:
 	GECKO_Read_Success,						///< (0) completed successfully
 	GECKO_Read_Error_InitialiseFlash,		///< (-1) could not initialize flash
 	GECKO_Read_Error_SetImageID,			///< (-2) could not set image ID
@@ -109,18 +118,24 @@ typedef enum
 	GECKO_Read_readDoneFlagNotSet,			///< (-7) read done flag not set
 	GECKO_Read_Error_ClearReadDoneFlag,		///< (-8) could not clear read done flag
 
-	// Gecko Drivers Erasing Image Error Messages:
+	// Gecko Drivers Image Erasing Error Messages:
 	GECKO_Erase_Success,					///< (0) completed successfully
 	GECKO_Erase_Error_SetImageID,			///< (-1) could not set image ID
 	GECKO_Erase_StartErase,					///< (-2) could not start erase
 	GECKO_Erase_Timeout,					///< (-3) erase timeout
-	GECKO_Erase_Error_ClearEraseDoneFlag	///< (-4) could not clear erase done flag
+	GECKO_Erase_Error_ClearEraseDoneFlag,	///< (-4) could not clear erase done flag
+
+	// Butcher Error Messages:
+	Butcher_Success,
+	Butcher_Null_Pointer,
+	Butcher_Parameter_Value,
+	Butcher_Undefined_Error
 } ImageDataBaseResult;
 
 uint8_t imageBuffer[IMAGE_HEIGHT][IMAGE_WIDTH];
 
-uint32_t getDatabaseStart();
-uint32_t getDatabaseEnd();
+uint32_t getDataBaseStart();
+uint32_t getDataBaseEnd();
 
 ImageDataBaseResult updateGeneralDataBaseParameters(ImageDataBase database);
 
@@ -142,7 +157,7 @@ ImageDataBaseResult resetImageDataBase(ImageDataBase database);
 imageid getLatestID(ImageDataBase database);
 unsigned int getNumberOfFrames(ImageDataBase database);
 
-ImageDataBaseResult handleMarkedPictures(ImageDataBase database, uint32_t nuberOfPicturesToBeHandled);
+ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled);
 
 /*!
  * takes a picture and writes info about it
@@ -196,9 +211,9 @@ ImageDataBaseResult DeleteImageFromOBC(ImageDataBase database, imageid id, fileT
  */
 ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database,imageid id);
 /*
- * delete all images
+ * delete all images from OBC SD
  */
-ImageDataBaseResult clearImageDataBase(ImageDataBase database);
+ImageDataBaseResult clearImageDataBase(void);
 
 /*!
  * get Image file descriptor
@@ -208,16 +223,17 @@ ImageDataBaseResult clearImageDataBase(ImageDataBase database);
  */
 ImageDataBaseResult GetImageFileName(imageid cameraId, fileType fileType, char fileName[FILE_NAME_SIZE]);
 
-imageid* get_ID_list_withDefaltThumbnail(time_unix startingTime, time_unix endTime);
 /*
  * GetImageMetaData but has the general data that the DB has before the metadata about the images, at the start is the size if the array (the size is uint32)
  * @note User have to free the array
 */
-byte* getImageDataBaseBuffer(ImageDataBase database, time_unix start, time_unix end);
+byte* getImageDataBaseBuffer(imageid start, imageid end);
+
+imageid* get_ID_list_withDefaltThumbnail(imageid start, imageid end);
 
 ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type);
 ImageDataBaseResult saveImageFromBuffer(imageid id, fileType image_type);
-ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address);
-void updateFileTypes(ImageMetadata image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
+ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address);
+void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
 
 #endif /* ImageDataBase_H_ */

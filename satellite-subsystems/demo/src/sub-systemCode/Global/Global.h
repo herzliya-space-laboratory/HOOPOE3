@@ -2,13 +2,13 @@
  * Global.h
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-#define TESTING
+#define TESTING 0
 
 //#define ANTS_ON
 #define ANTS_DO_NOT_DEPLOY

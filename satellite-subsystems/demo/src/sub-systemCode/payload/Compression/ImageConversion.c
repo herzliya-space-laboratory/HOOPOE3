@@ -1,7 +1,7 @@
 /*
  * ImageConversion.c
  *
- *  Created on: 25 áéåì 2019
+ *  Created on: 25 ï¿½ï¿½ï¿½ï¿½ 2019
  *      Author: I7COMPUTER
  */
 
@@ -9,12 +9,10 @@
 
 #include <satellite-subsystems/GomEPS.h>
 
-#include "FRAM_Extended.h"
-#include "Boolean_bit.h"
+#include "../Misc/Boolean_bit.h"
 #include "jpeg/ImgCompressor.h"
 
 #include "ImageConversion.h"
-
 
 static uint8_t GetBinnedPixel(uint8_t binPixelSize, int x, int y)
 {
@@ -66,14 +64,8 @@ void ImageSkipping(fileType reductionLevel)	// where 2^(bin level) is the size r
 	}
 }
 
-ImageDataBaseResult CreateImageThumbnail(imageid id, fileType reductionLevel, Boolean Skipping)
+ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType reductionLevel, Boolean Skipping, uint32_t image_address, ImageMetadata image_metadata)
 {
-	ImageMetadata image_metadata;
-	uint32_t image_address;
-
-	ImageDataBaseResult result = SearchDataBase_byID(id, &image_metadata, &image_address);
-	DB_RETURN_ERROR(result);
-
 	bit fileTypes[8];
 	char2bits(image_metadata.fileTypes, fileTypes);
 
@@ -90,27 +82,39 @@ ImageDataBaseResult CreateImageThumbnail(imageid id, fileType reductionLevel, Bo
 	else
 		BinImage(reductionLevel);
 
+	updateFileTypes(&image_metadata, image_address, reductionLevel, TRUE);
+
 	// Saving data:
-	result = saveImageFromBuffer(id, reductionLevel);
+	int result = saveImageFromBuffer(id, reductionLevel);
 	DB_RETURN_ERROR(result);
 
-	updateFileTypes(image_metadata, image_address, reductionLevel, TRUE);
-
 	return DataBaseSuccess;
+
 }
 
-ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor, fileType reductionLevel)
+ImageDataBaseResult CreateImageThumbnail(imageid id, fileType reductionLevel, Boolean Skipping)
 {
 	ImageMetadata image_metadata;
 	uint32_t image_address;
 
-	ImageDataBaseResult result = SearchDataBase_byID(id, &image_metadata, &image_address);
+	ImageDataBaseResult result = SearchDataBase_byID(id, &image_metadata, &image_address, getDataBaseStart());
+	DB_RETURN_ERROR(result);
+
+	return CreateImageThumbnail_withoutSearch(id, reductionLevel, Skipping, image_address, image_metadata);
+}
+
+ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor)
+{
+	ImageMetadata image_metadata;
+	uint32_t image_address;
+
+	ImageDataBaseResult result = SearchDataBase_byID(id, &image_metadata, &image_address, getDataBaseStart());
 	DB_RETURN_ERROR(result);
 
 	bit fileTypes[8];
 	char2bits(image_metadata.fileTypes, fileTypes);
 
-	if (fileTypes[reductionLevel].value)	// check if the requested type was already created
+	if (fileTypes[jpg].value)	// check if the requested type was already created
 		return DataBasealreadyInSD;
 	else if (!fileTypes[raw].value)			// if it was not created already, check if the raw is available of the creation process
 		return DataBaseNotInSD;
@@ -118,11 +122,14 @@ ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor, fileT
 	int err = GomEpsResetWDT(0);
 	printf("err DB eps: %d\n", err);
 
-	JpegCompressionResult JPEG_result = CompressImage(id, reductionLevel, quality_factor);
-	if (JPEG_result != JpegCompression_Success)
-		return DataBaseJpegFail;
+	updateFileTypes(&image_metadata, image_address, jpg, TRUE);
 
-	updateFileTypes(image_metadata, image_address, reductionLevel, TRUE);
+	JpegCompressionResult JPEG_result = CompressImage(id, raw, quality_factor);
+	if (JPEG_result != JpegCompression_Success)
+	{
+		updateFileTypes(&image_metadata, image_address, jpg, FALSE);
+		return DataBaseJpegFail;
+	}
 
 	return DataBaseSuccess;
 }

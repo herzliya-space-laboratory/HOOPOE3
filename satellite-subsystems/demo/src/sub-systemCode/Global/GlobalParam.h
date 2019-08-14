@@ -2,7 +2,7 @@
  * GlobalParam.h
  *
  *  Created on: Mar 28, 2019
- *      Author: elain
+ *      Author: DBTn
  */
 
 #ifndef GLOBALPARAM_H_
@@ -50,8 +50,8 @@ typedef struct __attribute__ ((__packed__))
 	current_t cur3V3;
 	current_t cur5V;
 
-	unsigned short tempComm_LO;//current temperature of the trxvu
-	unsigned short tempComm_PA;//current temperature of the trxvu
+	short tempComm_LO;//current temperature of the trxvu
+	short tempComm_PA;//current temperature of the trxvu
 	short tempEPS[4];//current temperature of the EPS controller
 	short tempBatt[2];//current temperature of the batteries
 
@@ -61,7 +61,7 @@ typedef struct __attribute__ ((__packed__))
 	unsigned short TxForw;
 
 	stageTable ST;
-	short Attitude[3];
+	short Attitude[3];	// ToDo: use instead of the file
 
 	uint8_t numOfPics;//number of pictures saved in the file system of the satellite
 	uint8_t numOfAPRS;//number of APRS packet saved in the FRAM
@@ -71,7 +71,7 @@ typedef struct __attribute__ ((__packed__))
 
 	systems_state state;
 
-	Boolean ground_conn;	// TRUE during transitions above the ground station
+	Boolean ground_conn;
 } global_param;
 
 int init_GP();
@@ -98,16 +98,16 @@ current_t get_cur5V();
 void set_cur5V(current_t param);
 // CGP-> tempComm_LO
 temp_t get_tempComm_LO();
-void set_tempComm_LO(unsigned short param);
+void set_tempComm_LO(temp_t param);
 // CGP-> tempComm_PA
 temp_t get_tempComm_PA();
-void set_tempComm_PA(unsigned short param);
+void set_tempComm_PA(temp_t param);
 // CGP-> tempEPS
 temp_t get_tempEPS(int index);
-void set_tempEPS(int index, short param);
+void set_tempEPS(int index, temp_t param);
 // CGP-> tempBatt
 temp_t get_tempBatt(int index);
-void set_tempBatt(int index, short param);
+void set_tempBatt(int index, temp_t param);
 // CGP-> RxDoppler
 unsigned short get_RxDoppler();
 void set_RxDoppler(unsigned short param);

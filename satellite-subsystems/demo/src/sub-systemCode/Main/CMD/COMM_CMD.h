@@ -2,7 +2,7 @@
  * COMM_CMD.h
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef COMM_CMD_H_
