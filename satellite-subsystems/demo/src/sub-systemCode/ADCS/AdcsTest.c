@@ -4,9 +4,12 @@
  *  Created on: Aug 11, 2019
  *      Author: איתי
  */
+/*
 #include "AdcsMain.h"
 #include "AdcsTest.h"
 #include "../Main/CMD/General_CMD.h"
+#include <satellite-subsystems/cspaceADCS.h>
+#include <satellite-subsystems/cspaceADCS_types.h>
 #define ADCS_ID 0
 
 void ErrFlagTest()
@@ -66,4 +69,4 @@ void AddCommendToQ()
 		printf("Print the data\n");
 	}
 
-}
+}*/
