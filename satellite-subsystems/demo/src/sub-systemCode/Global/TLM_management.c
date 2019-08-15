@@ -23,7 +23,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "TM_managment.h"
+#include "TLM_management.h"
 
 #define SKIP_FILE_TIME_SEC 1000000
 #define _SD_CARD 0
@@ -123,11 +123,11 @@ int f_managed_releaseFS()
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
 }
 
-int f_managed_open(const char* file_name, const char* config, F_FILE* fileHandler)
+int f_managed_open(char* file_name, char* config, F_FILE* fileHandler)
 {
 	if (xSemaphoreTake(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
-		F_FILE* fileHandler = f_open(file_name, config);
+		fileHandler = f_open(file_name, config);
 		if (fileHandler == NULL)
 		{
 			portBASE_TYPE portRet = xSemaphoreGive(xEnterTaskFS);
@@ -360,7 +360,7 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	int error = f_managed_open(curr_file_name, "a+", file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
-	if (file == NULL || error != error != F_NO_ERROR)
+	if (file == NULL || error != F_NO_ERROR)
 		return FS_FAIL;
 	writewithEpochtime(file,element,c_file.size_of_element,curr_time);
 	c_file.last_time_modified= curr_time;
@@ -379,6 +379,72 @@ FileSystemResult fileWrite(char* file_name, void* element,int size)
 	writewithEpochtime(file,element,size,curr_time);
 	f_flush(file);
 	f_close(file);
+	return FS_SUCCSESS;
+}
+static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long from_time,
+		unsigned long to_time,int full_element_size)
+{
+	F_FILE* file = NULL;
+	int error = f_managed_open(file_name,"r", file);
+	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+		return FS_COULD_NOT_TAKE_SEMAPHORE;
+	else if (error != 0)
+		return FS_FAIL;
+	F_FILE* temp_file = NULL;
+	error = f_managed_open("temp","a+", temp_file);
+	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+		return FS_COULD_NOT_TAKE_SEMAPHORE;
+	else if (error != 0)
+		return FS_FAIL;
+	char* buffer = malloc(full_element_size);
+	for(int i = 0; i<f_filelength(file_name); i++)
+	{
+
+		f_read(buffer,1,full_element_size,file);
+		unsigned int element_time = *((unsigned int*)buffer);
+		if(element_time>=from_time&&element_time<=to_time)
+		{
+			f_write(buffer,1,full_element_size,temp_file);
+		}
+	}
+	f_managed_close(file);
+	f_managed_close(temp_file);
+	free(buffer);
+	f_delete(file_name);
+	f_rename("temp",file_name);
+	return FS_SUCCSESS;
+
+}
+FileSystemResult c_fileDeleteElements(char* c_file_name, time_unix from_time,
+		time_unix to_time)
+{
+	C_FILE c_file;
+	unsigned int addr;//FRAM ADDRESS
+	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
+	PLZNORESTART();
+	unsigned int curr_time;
+	Time_getUnixEpoch(&curr_time);
+	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
+	{
+		return FS_NOT_EXIST;
+	}
+	int first_file_index = getFileIndex(c_file.creation_time,from_time);
+	int last_file_index = getFileIndex(c_file.creation_time,to_time);
+	if(first_file_index+1<last_file_index)//delete all files between first to kast file
+	{
+		for(int i =first_file_index+1; i<last_file_index;i++)
+		{
+			get_file_name_by_index(c_file_name,i,curr_file_name);
+			f_delete(curr_file_name);
+		}
+	}
+	get_file_name_by_index(c_file_name,first_file_index,curr_file_name);
+	deleteElementsFromFile(curr_file_name,from_time,to_time,c_file.size_of_element+sizeof(int));
+	if(first_file_index!=last_file_index)
+	{
+		get_file_name_by_index(c_file_name,last_file_index,curr_file_name);
+		deleteElementsFromFile(curr_file_name,from_time,to_time,c_file.size_of_element+sizeof(int));
+	}
 	return FS_SUCCSESS;
 }
 FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
@@ -428,7 +494,6 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 {
 	C_FILE c_file;
 	unsigned int addr;//FRAM ADDRESS
-	//F_FILE *file;
 	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
 	PLZNORESTART();
 
@@ -442,7 +507,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	{
 		from_time=c_file.creation_time;
 	}
-	F_FILE* current_file;
+	F_FILE* current_file = NULL;
 	int index_current = getFileIndex(c_file.creation_time,from_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
 	unsigned int size_elementWithTimeStamp = c_file.size_of_element+sizeof(unsigned int);
@@ -497,7 +562,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 void print_file(char* c_file_name)
 {
 	C_FILE c_file;
-	F_FILE* current_file;
+	F_FILE* current_file = NULL;
 	int i = 0;
 	void* element;
 	char curr_file_name[FILE_NAME_WITH_INDEX_SIZE];//store current file's name
@@ -513,7 +578,9 @@ void print_file(char* c_file_name)
 	{
 		printf("file %d:\n",i);//print file index
 		get_file_name_by_index(c_file_name,i,curr_file_name);
-		current_file=_f_open(curr_file_name,"r");
+		int error = f_managed_open(curr_file_name, "r", current_file);
+		if (error != 0)
+			return;
 		for(int j=0;j<f_filelength(curr_file_name)/((int)c_file.size_of_element+(int)sizeof(unsigned int));j++)
 		{
 			f_read(element,c_file.size_of_element,(size_t)c_file.size_of_element+sizeof(unsigned int),current_file);
@@ -524,7 +591,7 @@ void print_file(char* c_file_name)
 			}
 			printf("\n");
 		}
-		_f_close(current_file);
+		f_managed_close(current_file);
 	}
 }
 
@@ -540,7 +607,7 @@ void DeInitializeFS( void )
 		printf("f_delvolume err %d\n", err);
 	}
 
-	_f_releaseFS(); /* release this task from the filesystem */
+	f_managed_releaseFS(); /* release this task from the filesystem */
 
 	printf("2\n");
 

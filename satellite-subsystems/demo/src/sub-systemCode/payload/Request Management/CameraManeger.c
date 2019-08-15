@@ -34,7 +34,7 @@
 #include "../../TRXVU.h"
 #include "../../Main/HouseKeeping.h"
 
-#include "CameraManager.h"
+#include "CameraManeger.h"
 
 #define CameraManagmentTask_StackDepth 30000
 #define CameraManagmentTask_Name ("Camera Management Task")

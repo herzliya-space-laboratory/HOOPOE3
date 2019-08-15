@@ -43,7 +43,7 @@
 #include "../ADCS.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
-#include "../payload/Request Management/CameraManager.h"
+#include "../payload/Request Management/CameraManeger.h"
 #include "../payload/DataBase/DataBase.h"
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);

@@ -38,14 +38,13 @@
 
 #include "../Global/Global.h"
 #include "../Global/GlobalParam.h"
-#include "../Global/TM_managment.h"
-#include "../Global/OnlineTM.h"
+#include "../Global/TLM_management.h"
 #include "../EPS.h"
 #include "../Ants.h"
 #include "../ADCS.h"
 #include "../ADCS/Stage_Table.h"
 #include "../TRXVU.h"
-#include "../payload/Request Management/CameraManager.h"
+#include "../payload/Request Management/CameraManeger.h"
 #include "HouseKeeping.h"
 #include "commands.h"
 
