@@ -18,11 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef enum __attribute__ ((__packed__)){
-	DELAY_LOOP,
-	QUEUE_WAIT_TIME
-}AdcsFramParameters;
-
 #define DEFAULT_ADCS_LOOP_DELAY 		1000 	//the loop runs in 1Hz
 #define DEFAULT_ADCS_QUEUE_WAIT_TIME	 100	// amount of time to wait or cmd to arrive into Queue
 
@@ -67,9 +62,17 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 
 }
 
-#define FIRST_ADCS_ACTIVATION
+//#define FIRST_ADCS_ACTIVATION
+
 TroubleErrCode AdcsInit()
 {
+	if(SWITCH_OFF == get_system_state(ADCS_param))
+	{
+		while(SWITCH_OFF == get_system_state(ADCS_param)){
+			vTaskDelay(CHANNEL_OFF_DELAY);
+		}
+	}
+
 	TroubleErrCode trbl = TRBL_SUCCESS;
 
 	unsigned char adcs_i2c = ADCS_I2C_ADRR;
@@ -122,6 +125,10 @@ void AdcsTask()
 			continue;
 		}
 		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
+		if(SWITCH_OFF == get_system_state(ADCS_param)){
+			vTaskDelay(CHANNEL_OFF_DELAY);
+			continue;
+		}
 
 		if(!AdcsCmdQueueIsEmpty()){
 			trbl = AdcsCmdQueueGet(&cmd);
@@ -134,10 +141,12 @@ void AdcsTask()
 			}
 			//todo: log cmd received
 		}
+
 		trbl = GatherTlmAndData(); //TODO: check if enough time has passed
 		if(TRBL_SUCCESS != trbl){
 			AdcsTroubleShooting(trbl);
 		}
+
 		vTaskDelay(delay_loop);
 	}
 }

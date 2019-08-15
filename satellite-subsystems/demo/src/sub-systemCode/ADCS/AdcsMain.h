@@ -14,8 +14,12 @@ typedef enum
 
 }AdcsStateMachineCMD;
 
+typedef enum __attribute__ ((__packed__)){
+	DELAY_LOOP,
+	QUEUE_WAIT_TIME
+}AdcsFramParameters;
 
-//TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data);
+TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data);
 
 TroubleErrCode AdcsInit();
 

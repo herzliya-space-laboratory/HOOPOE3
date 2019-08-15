@@ -44,7 +44,6 @@
 #include "../Global/Global.h"
 #include "../TRXVU.h"
 #include "../Ants.h"
-#include "../ADCS.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
 

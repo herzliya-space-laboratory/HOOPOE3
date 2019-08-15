@@ -49,7 +49,7 @@ TroubleErrCode AdcsCmdQueueGetCount(){
 	return uxQueueMessagesWaiting(AdcsCmdQueue);
 }
 
-int AdcsCmdQueueIsEmpty(){
+unsigned int AdcsCmdQueueIsEmpty(){
 	if(uxQueueMessagesWaiting(AdcsCmdQueue) == 0){//cheak if queue is empty
 		return TRUE;
 	}else{
