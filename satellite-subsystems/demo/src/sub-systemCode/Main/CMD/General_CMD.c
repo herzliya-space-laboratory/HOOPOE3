@@ -23,7 +23,7 @@ void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	*type = ACK_GENERIC_I2C_CMD;
 
-	int error = I2C_write((unsigned int)cmd.data[0], &cmd.data[2] ,cmd.data[1] + 1);
+	int error = I2C_write((unsigned int)cmd.data[0], &cmd.data[2] ,cmd.data[1]);
 
 	if (error == 0)
 		*err = ERR_SUCCESS;
@@ -141,7 +141,7 @@ void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error = soft_reset_subsystem((subSystem_indx)cmd.data);
+	int error = soft_reset_subsystem((subSystem_indx)cmd.data[0]);
 	switch (error)
 	{
 	case 0:
@@ -163,7 +163,7 @@ void cmd_hard_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error = hard_reset_subsystem((subSystem_indx)cmd.data);
+	int error = hard_reset_subsystem((subSystem_indx)cmd.data[0]);
 	switch (error)
 	{
 	case 0:
@@ -220,7 +220,7 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 	// 1. converting to time_unix
-	time_unix new_time = BigEnE_raw_to_uInt(&cmd.data[0]);
+	time_unix new_time = BigEnE_raw_to_uInt(cmd.data);
 	// 2. update time on satellite
 	if (Time_setUnixEpoch(new_time))
 	{

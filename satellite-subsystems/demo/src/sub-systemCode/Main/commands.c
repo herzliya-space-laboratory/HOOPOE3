@@ -239,8 +239,28 @@ void AUC_general(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	case (SOFT_RESET_ST):
-		cmd_soft_reset_cmponent(&type, &err, decode);
+	case (GENERIC_I2C_ST):
+		cmd_generic_I2C(&type, &err, decode);
+		break;
+	case (UPLOAD_TIME_ST):
+		cmd_upload_time(&type, &err, decode);
+		break;
+	case (DUMP_ST):
+		cmd_dump(decode);
+		return;
+		break;
+	case (DELETE_PACKETS_ST):
+		cmd_delete_TM(&type, &err, decode);
+		break;
+	case (RESET_FILE_ST):
+		cmd_reset_file(&type, &err, decode);
+		break;
+	case (RESTSRT_FS_ST):
+		break;
+	case (REDEPLOY):
+		break;
+	case (ARM_DISARM):
+		cmd_ARM_DIARM(&type, &err, decode);
 		break;
 	case (HARD_RESET_ST):
 		cmd_hard_reset_cmponent(&type, &err, decode);
@@ -248,15 +268,19 @@ void AUC_general(TC_spl decode)
 	case (RESET_SAT_ST):
 		cmd_reset_satellite(&type, &err);
 		break;
+	case (SOFT_RESET_ST):
+		cmd_soft_reset_cmponent(&type, &err, decode);
+		break;
 	case (GRACEFUL_RESET_ST):
 		cmd_gracefull_reset_satellite(&type, &err);
 		break;
-	case (UPLOAD_TIME_ST):
-		cmd_upload_time(&type, &err, decode);
+	case (DUMMY_FUNC_ST):
+		cmd_dummy_func(&type, &err);
 		break;
 	default:
 		cmd_error(&type, &err);
 		break;
+
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
@@ -352,47 +376,6 @@ void AUC_ADCS(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	default:
-		cmd_error(&type, &err);
-		break;
-	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
-#endif
-}
-
-void AUC_GS(TC_spl decode)
-{
-	Ack_type type;
-	ERR_type err;
-
-	switch (decode.subType)
-	{
-	case (GENERIC_I2C_ST):
-		cmd_generic_I2C(&type, &err, decode);
-		break;
-	case (DUMP_ST):
-		cmd_dump(decode);
-		return;
-		break;
-	case (DELETE_PACKETS_ST):
-		cmd_delete_TM(&type, &err, decode);
-		break;
-	case (RESET_FILE_ST):
-		cmd_reset_file(&type, &err, decode);
-		break;
-	case (RESTSRT_FS_ST):
-		break;
-	case (DUMMY_FUNC_ST):
-		cmd_dummy_func(&type, &err);
-		break;
-	case (REDEPLOY):
-
-		break;
-	case (ARM_DISARM):
-		cmd_ARM_DIARM(&type, &err, decode);
-		break;
 	default:
 		cmd_error(&type, &err);
 		break;
