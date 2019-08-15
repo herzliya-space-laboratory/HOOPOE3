@@ -94,7 +94,7 @@ ImageDataBaseResult CreateJPG(unsigned char* data)
 	unsigned int quality_factor = 0;
 
 	memcpy(&cameraID, data, sizeof(imageid));
-	memcpy(&quality_factor, data + 2, sizeof(int));
+	memcpy(&quality_factor, data + 2, sizeof(byte));
 
 	ImageDataBaseResult DB_result = compressImage(cameraID, quality_factor);
 

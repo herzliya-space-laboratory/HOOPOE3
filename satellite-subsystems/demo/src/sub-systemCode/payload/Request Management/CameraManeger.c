@@ -108,12 +108,12 @@ void CameraManagerTaskMain()
 
 		Take_pictures_with_time_in_between();
 
-		vTaskDelay(1000);
+		vTaskDelay(DELAY);
 
 		if (!get_ground_conn())
 		{
-			ImageDataBaseResult error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
-			save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween);
+			//ImageDataBaseResult error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
+			// ToDo: error log
 		}
 
 		vTaskDelay(SYSTEM_DEALY);

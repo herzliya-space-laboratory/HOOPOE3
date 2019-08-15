@@ -100,15 +100,15 @@ static int setNumOfFilesInFS(int new_num_of_files)
 
 int f_managed_enterFS()
 {
-	if (xSemaphoreTake(xEnterTaskFS, FS_TAKE_SEMPH_DELAY) == pdTRUE)
+	if (/*xSemaphoreTake(xEnterTaskFS, FS_TAKE_SEMPH_DELAY) == */pdTRUE)
 	{
 		int error = f_enterFS();
-		if (error != 0)
+		/*if (error != 0)
 		{
 			portBASE_TYPE portRet = xSemaphoreGive(xEnterTaskFS);
 			check_portBASE_TYPE("could not return the xEnterTaskFS", portRet);
 			return error;
-		}
+		}*/
 
 		return 0;
 	}
@@ -117,59 +117,59 @@ int f_managed_enterFS()
 int f_managed_releaseFS()
 {
 	f_releaseFS();
-	if (xSemaphoreGive(xEnterTaskFS) == pdTRUE)
+	if (/*xSemaphoreGive(xEnterTaskFS) == */pdTRUE)
 		return 0;
-
-	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
+/*
+	return COULD_NOT_GIVE_SEMAPHORE_ERROR;*/
 }
 
 int f_managed_open(char* file_name, char* config, F_FILE* fileHandler)
 {
-	if (xSemaphoreTake(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
+	if (/*xSemaphoreTake(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == */pdTRUE)
 	{
 		fileHandler = f_open(file_name, config);
-		if (fileHandler == NULL)
+		/*if (fileHandler == NULL)
 		{
 			portBASE_TYPE portRet = xSemaphoreGive(xEnterTaskFS);
 			check_portBASE_TYPE("could not return the xEnterTaskFS", portRet);
 			//TODO: write data to log error
-		}
+		}*/
 	}
-	else
+	/*else
 	{
 		return COULD_NOT_TAKE_SEMAPHORE_ERROR;
-	}
+	}*/
 
 	return f_getlasterror();
 }
 int f_managed_close(F_FILE* fileHandler)
 {
 	int error = f_close(fileHandler);
-	if (error != 0)
-		return error;
+	/*if (error != 0)
+		return error;*/
 
-	if (xSemaphoreGive(xEnterTaskFS) == pdTRUE)
+	if (/*xSemaphoreGive(xEnterTaskFS) == */pdTRUE)
 		return 0;
-
-	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
+/*
+	return COULD_NOT_GIVE_SEMAPHORE_ERROR;*/
 }
 
 FileSystemResult createSemahores_FS()
-{
+{/*
 	xFileOpenHandler = xSemaphoreCreateCounting(F_MAXFILES, 0);
 	if (xFileOpenHandler == NULL)
 		return FS_COULD_NOT_CREATE_SEMAPHORE;
 	xEnterTaskFS = xSemaphoreCreateCounting(FAT_MAXTASK, 0);
 	if (xFileOpenHandler == NULL)
-		return FS_COULD_NOT_CREATE_SEMAPHORE;
+		return FS_COULD_NOT_CREATE_SEMAPHORE;*/
 	return FS_SUCCSESS;
 }
 FileSystemResult InitializeFS(Boolean first_time)
-{
+{/*
 	FileSystemResult FS_result = createSemahores_FS();
 	if (FS_result == FS_COULD_NOT_CREATE_SEMAPHORE)
 		return FS_result;
-
+*/
 	int ret;
 	hcc_mem_init(); /* Initialize the memory to be used by filesystem */
 

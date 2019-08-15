@@ -180,9 +180,15 @@ int size_of_element(HK_types type)
 
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 {
+	FileSystemResult error = FS_SUCCSESS;
 	byte raw_ACK[ACK_DATA_LENGTH];
 	build_data_field_ACK(type, err, ACKcommandId, raw_ACK);
-	FileSystemResult error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
+	int error_i = f_managed_enterFS();
+	if (error_i == 0)
+	{
+		error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
+		f_managed_releaseFS();
+	}
 	if (error != FS_SUCCSESS)
 	{
 		printf("could not save ACK, error %d", error);
@@ -853,7 +859,8 @@ void HouseKeeping_highRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF != TRUE_8BIT)
+		int error = f_managed_enterFS();
+		if (DF != TRUE_8BIT && error == 0)
 		{
 			save_EPS_HK();
 
@@ -866,6 +873,7 @@ void HouseKeeping_highRate_Task()
 #ifndef USE_DIFFERENT_TASK_ONLINE_TM
 		save_onlineTM_logic();
 #endif
+			f_managed_releaseFS();
 		}
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
@@ -879,9 +887,11 @@ void HouseKeeping_lowRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF != TRUE_8BIT)
+		int error = f_managed_enterFS();
+		if (DF != TRUE_8BIT && error == 0)
 		{
 			save_SP_HK();
+			f_managed_releaseFS();
 		}
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);

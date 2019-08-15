@@ -119,7 +119,7 @@ ImageDataBaseResult zeroImageDataBase()
 			return DataBaseFramFail;
 		}
 
-		vTaskDelay(10);
+		vTaskDelay(DELAY);
 	}
 
 	return DataBaseSuccess;
@@ -235,7 +235,7 @@ uint32_t GetImageFactor(fileType image_type)
 
 //---------------------------------------------------------------
 
-ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type)
+ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type)
 {
 	char fileName[FILE_NAME_SIZE];
 
@@ -243,7 +243,7 @@ ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type)
 	DB_RETURN_ERROR(result);
 
 	F_FILE *file = NULL;
-	int error = OpenFile(file, fileName, "r");	// open file for writing in safe mode
+	int error = OpenFile(&file, fileName, "r");	// open file for writing in safe mode
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t factor = GetImageFactor(image_type);
@@ -258,14 +258,14 @@ ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type)
 	return DataBaseSuccess;
 }
 
-ImageDataBaseResult saveImageFromBuffer(imageid id, fileType image_type)
+ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type)
 {
 	char fileName[FILE_NAME_SIZE];
 	ImageDataBaseResult result = GetImageFileName(id, image_type, fileName);
 	DB_RETURN_ERROR(result);
 
 	F_FILE *file = NULL;
-	int error = OpenFile(file, fileName, "w+");	// open file for writing in safe mode
+	int error = OpenFile(&file, fileName, "w");	// open file for writing in safe mode
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t factor = GetImageFactor(image_type);
@@ -390,28 +390,16 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 		return (GECKO_Read_Success - error);
 	}
 
-	vTaskDelay(500);
+	vTaskDelay(DELAY);
 
 	// Creating a file for the picture at iOBC SD:
 
-	char fileName[FILE_NAME_SIZE];
-	getFileName(cameraId, raw, fileName);
+	updateFileTypes(&image_metadata, image_address, raw, TRUE);
 
-	F_FILE *PictureFile = NULL;
-	error = OpenFile(PictureFile, fileName, "w+");	// open file for writing in safe mode
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	byte* buffer = imageBuffer;
-
-	error = ReadFromFile(PictureFile, buffer, sizeof(uint8_t), IMAGE_SIZE);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	error = CloseFile(PictureFile);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+	error = saveImageToBuffer(cameraId, raw);
+	CMP_AND_RETURN(error, DataBaseSuccess, error);
 
 	// Updating the DataBase:
-
-	updateFileTypes(&image_metadata, image_address, raw, TRUE);
 
 	error = checkForFileType(image_metadata, raw);
 	CMP_AND_RETURN(error, DataBaseSuccess, DataBaseFail);
@@ -482,7 +470,7 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 		return (GECKO_Erase_Success - err);
 	}
 
-	vTaskDelay(500);
+	vTaskDelay(DELAY);
 
 	ImageMetadata image_metadata;
 	uint32_t image_address;
@@ -521,7 +509,7 @@ ImageDataBaseResult clearImageDataBase(void)
 
 	while(image_address < DATABASE_FRAM_END)
 	{
-		vTaskDelay(100);
+		vTaskDelay(DELAY);
 
 		result = FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
@@ -573,13 +561,13 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 
 			TurnOffGecko();
 
-			vTaskDelay(1000);
+			vTaskDelay(DELAY);
 
 			DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, 4, TRUE, image_address, image_metadata);
 			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
 				return DB_result;
 
-			vTaskDelay(1000);
+			vTaskDelay(DELAY);
 
 			DB_result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, raw, image_address, image_metadata);
 			DB_RETURN_ERROR(DB_result);
@@ -644,7 +632,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 		err = GECKO_EraseBlock(database->nextId + i);
 		CMP_AND_RETURN(err, 0, GECKO_Erase_Success - err);
 
-		vTaskDelay(500);
+		vTaskDelay(DELAY);
 	}
 
 	unsigned int currentDate = 0;
@@ -653,7 +641,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
 	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);
 
-	vTaskDelay(500);
+	vTaskDelay(DELAY);
 
 	// ImageDataBase handling:
 
@@ -661,7 +649,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 
 	for (uint32_t numOfFramesTaken = 0; numOfFramesTaken < database->cameraParameters.frameAmount; numOfFramesTaken++)
 	{
-		vTaskDelay(100);
+		vTaskDelay(DELAY);
 
 		result = writeNewImageMetaDataToFRAM(database, currentDate, Attitude);
 		DB_RETURN_ERROR(result);
@@ -749,7 +737,7 @@ byte* getImageDataBaseBuffer(imageid start, imageid end)
 
 	while(image_address < DATABASE_FRAM_END)
 	{
-		vTaskDelay(100);
+		vTaskDelay(DELAY);
 
 		result = FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, NULL);
@@ -799,7 +787,7 @@ imageid* get_ID_list_withDefaltThumbnail(imageid start, imageid end)
 
 	while(image_address < DATABASE_FRAM_END)
 	{
-		vTaskDelay(100);
+		vTaskDelay(DELAY);
 
 		result = FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, NULL);

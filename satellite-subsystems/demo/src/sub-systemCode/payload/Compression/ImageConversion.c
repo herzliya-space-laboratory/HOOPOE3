@@ -76,7 +76,7 @@ ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType redu
 	else if (!fileTypes[raw].value)			// if it was not created already, check if the raw is available of the creation process
 		return DataBaseRawDoesNotExist;
 
-	int result = readImageToBuffer(id, raw);
+	int result = readImageFromBuffer(id, raw);
 	DB_RETURN_ERROR(result);
 
 	// Creating the Thumbnail on imageBuffer:
@@ -88,7 +88,7 @@ ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType redu
 	updateFileTypes(&image_metadata, image_address, reductionLevel, TRUE);
 
 	// Saving data:
-	result = saveImageFromBuffer(id, reductionLevel);
+	result = saveImageToBuffer(id, reductionLevel);
 	DB_RETURN_ERROR(result);
 
 	return DataBaseSuccess;

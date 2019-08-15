@@ -188,7 +188,7 @@ ImageDataBaseResult thumbnail_Dump(imageid* ID_list, command_id cmdId)
 		int error = GetImageFileName(image_id, DEFALT_REDUCTION_LEVEL, file_name);
 		CMP_AND_RETURN(error, DataBaseSuccess, error);
 
-		F_FILE* current_file = f_open(file_name, "r");;
+		F_FILE* current_file = f_open(file_name, "r");
 
 		uint32_t image_size = f_filelength(file_name);
 
@@ -247,7 +247,7 @@ ImageDataBaseResult chunkField_imageDump(request_image request, imageid image_id
 	CMP_AND_RETURN(error, DataBaseSuccess, error);
 
 	F_FILE* current_file = NULL;
-	error = OpenFile(current_file, file_name, "r");
+	error = OpenFile(&current_file, file_name, "r");
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t image_size = f_filelength(file_name);

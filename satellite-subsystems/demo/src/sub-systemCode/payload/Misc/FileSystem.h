@@ -12,10 +12,10 @@
 #include "Macros.h"
 
 void keepTryingTo_enterFS(void);
-int OpenFile(F_FILE* file, const char* fileName, const char* mode);
+int OpenFile(F_FILE** file, const char* fileName, const char* mode);
 int CloseFile(F_FILE* file);
 int DeleteFile(const char* fileName);
-int ReadFromFile(F_FILE* file, byte* buffer, uint32_t size_of_element, uint32_t number_of_elements);
-int WriteToFile(F_FILE* file, byte* buffer, uint32_t size_of_element, uint32_t number_of_elements);
+int ReadFromFile(F_FILE* file, byte* buffer, uint32_t number_of_elements, uint32_t size_of_element);
+int WriteToFile(F_FILE* file, byte* buffer, uint32_t number_of_elements, uint32_t size_of_element);
 
 #endif /* FILESYSTEM_H_ */

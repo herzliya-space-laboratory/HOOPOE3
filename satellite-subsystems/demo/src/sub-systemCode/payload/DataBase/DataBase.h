@@ -18,6 +18,8 @@
 #include "../../Global/FRAMadress.h"
 #include "../../Global/Global.h"
 
+#define DELAY 100
+
 #define FILE_NAME_SIZE 12	///< The size of the filename parameter. i0000001.raw (+1 for '/0')
 
 #ifdef TESTING
@@ -232,8 +234,8 @@ byte* getImageDataBaseBuffer(imageid start, imageid end);
 
 imageid* get_ID_list_withDefaltThumbnail(imageid start, imageid end);
 
-ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type);
-ImageDataBaseResult saveImageFromBuffer(imageid id, fileType image_type);
+ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type);
+ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type);
 ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address);
 void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
 uint32_t GetImageFactor(fileType image_type);
