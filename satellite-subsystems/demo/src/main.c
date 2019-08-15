@@ -209,7 +209,7 @@ void taskMain()
 		printf("Send new command\n");
 		printf("Enter ADCS sub type\n");
 		UTIL_DbguGetIntegerMinMax(&input, 0,1000);
-		if (input !=0)
+		if (input != 0)
 		{
 			if (input < 200)
 			{
