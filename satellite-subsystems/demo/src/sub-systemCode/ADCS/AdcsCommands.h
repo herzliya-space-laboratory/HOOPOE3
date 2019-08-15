@@ -51,10 +51,14 @@
 #define SET_SGP4_ORBIT_MEAN_ANOM_CMD_ID 	52
 #define SET_SGP4_ORBIT_EPOCH_CMD_ID 		53
 #define SET_SGP4_ORBIT_DATA_LENGTH	 		8
-
-
 #define GET_ADCS_FULL_CONFIG_CMD_ID 		206
 #define GET_ADCS_FULL_CONFIG_DATA_LENGTH 	272
+
+
+#define ADCS_FULL_CONFIG_DATA_LENGTH 		272
+#define ADCS_SGP4_ORBIT_PARAMS_DATA_LENGTH 	68
+
+#define ADCS_CMD_MAX_DATA_LENGTH			300
 
 typedef enum __attribute__ ((__packed__)){
 	ADCS_TC__NO_ERR 			= 0,
@@ -62,6 +66,14 @@ typedef enum __attribute__ ((__packed__)){
 	ADCS_TC_INCORRECT_LENGTH 	= 2,
 	ADCS_TC_INCORRECT_PARAM 	= 3
 }AdcsTcErrorReason;
+
+typedef struct _adcs_i2c_cmd
+{
+	unsigned short id;
+	unsigned short length;
+	byte data[ADCS_CMD_MAX_DATA_LENGTH];
+	AdcsTcErrorReason ack;
+}adcs_i2c_cmd;
 
 
 /*!
@@ -73,21 +85,12 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv);
 
 /*!
  * @brief allows the user to send a command directly to the I2C bus to the ADCS.
- * @param[in][out] data CMD data to send to ADCS, either as TC or TLM buffer. First byte is ID of TLM or ID of TC.
- * If TC then the rest of 'data' is TC data.
- * If TLM then the TLM will be copied into 'data'
- * @param[in] length length of the data including ID. If TLM then length of entire TLM in bytes.
- * @param[out] ack acknowledge from the ADCS after command was sent. Can be NULL.
+ * @param[in][out] i2c_cmd executes data according to 'i2c_cmd' data. Saves ADCS ack into the struct.
  * @return Errors according to "<hal/Drivers/I2C.h>"
  */
-int AdcsGenericI2cCmd(unsigned char *data, unsigned int length, AdcsTcErrorReason *ack);
+int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd);
 
 
-#define ADCS_FULL_CONFIG_DATA_LENGTH 		272
-#define ADCS_SGP4_ORBIT_PARAMS_DATA_LENGTH 	68
-
-
-#define ADCS_CMD_MAX_DATA_LENGTH			300
 /*!
  * @brief Executes the command sent to the ADCS
  * @param[in] cmd the command to be executed

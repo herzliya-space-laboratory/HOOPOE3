@@ -88,7 +88,7 @@ TroubleErrCode GatherTlmAndData()
 			//TODO: log err
 		}
 	}
-	return err;
+	return err_occured;
 }
 
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index)

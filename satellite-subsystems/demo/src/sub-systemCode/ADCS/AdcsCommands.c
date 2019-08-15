@@ -17,31 +17,24 @@
 #include "../TRXVU.h"
 
 
+
+#ifdef TESTING
+	#define PRINT_ON_TEST(msg,err)	printf(#msg " = %d\n",err);
+#else
+	#define PRINT_ON_TEST(msg,err) ;
+#endif
+
+
 //TODO: define as enum
 #define ADCS_ACK_PROCESSED_FLAG_INDEX 1
 #define ADCS_ACK_TC_ERR_INDEX 2
 
-typedef enum __attribute__ ((__packed__)){
-	ADCS_TC__NO_ERR 			= 0,
-	ADCS_TC_INVALID_TC 			= 1,
-	ADCS_TC_INCORRECT_LENGTH 	= 2,
-	ADCS_TC_INCORRECT_PARAM 	= 3
-}AdcsTcErrorReason;
-
-typedef struct _adcs_i2c_cmd
-{
-	unsigned short id;
-	unsigned short length;
-	byte data[ADCS_CMD_MAX_DATA_LENGTH];
-	AdcsTcErrorReason ack;
-}adcs_i2c_cmd;
 
 /*!
  * @brief allows the user to send a read request directly to the I2C.
  * @param[out] rv return value from the ADCS I2C ACK request
  * @return Errors according to "<hal/Drivers/I2C.h>"
  */
-
 int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 {
 	int err = 0;
@@ -74,35 +67,6 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 }
 
 
-int AdcsGenericI2cCmd(unsigned char *data, unsigned int length , AdcsTcErrorReason *ack)
-{
-	int err = 0;
-	if(NULL == data){
-		return E_INPUT_POINTER_NULL;
-	}
-	char is_cmd = (data[0] & 0x80);
-	if(is_cmd){	// if MSB is 1 then it is TLM. if 0 then TC
-		err = I2C_write(ADCS_I2C_ADRR, data, length);
-		if(0 != err){
-			//TODO: log I2c write Err
-			return err;
-		}
-		err = AdcsReadI2cAck(ack);
-	}else{
-		err = I2C_write(ADCS_I2C_ADRR, data, 1);
-		if(0 != err){
-			//TODO: log I2c write Err
-			return err;
-		}
-		err = I2C_read(ADCS_I2C_ADRR, data, length);
-		if(0 != err){
-			//TODO: log I2c write Err
-			return err;
-		}
-		err = AdcsReadI2cAck(ack);
-	}
-	return err;
-}
 ////'id' the command id to send to the adcs
 ////'data' data to send to the ADCS.
 ////'length' length of data
@@ -150,8 +114,10 @@ int AdcsGenericI2cCmd(unsigned char *data, unsigned int length , AdcsTcErrorReas
 int ResetBootRegisters()
 {
 	unsigned char reset_boot_reg_cmd_id = 6;
-	int ack = 0;
-	return AdcsGenericI2cCmd(&reset_boot_reg_cmd_id,sizeof(reset_boot_reg_cmd_id),&ack);
+	adcs_i2c_cmd i2c_cmd;
+	memcpy(i2c_cmd.data,&reset_boot_reg_cmd_id,sizeof(reset_boot_reg_cmd_id));
+	i2c_cmd.length=sizeof(reset_boot_reg_cmd_id);
+	return AdcsGenericI2cCmd(&i2c_cmd);
 }
 
 typedef enum {
@@ -167,15 +133,6 @@ typedef enum {
 }Sgp4OrbitParam;
 
 
-/*!
- * @brief allows the user to send a command directly to the I2C bus to the ADCS.
- * @param[in][out] data CMD data to send to ADCS, either as TC or TLM buffer. First byte is ID of TLM or ID of TC.
- * If TC then the rest of 'data' is TC data.
- * If TLM then the TLM will be copied into 'data'
- * @param[in] length length of the data including ID. If TLM then length of entire TLM in bytes.
- * @param[out] ack acknowledge from the ADCS after command was sent. Can be NULL.
- * @return Errors according to "<hal/Drivers/I2C.h>"
- */
 int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 {
 	int err = 0;
@@ -184,7 +141,7 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	}
 	char is_cmd = (i2c_cmd->id & 0x80);
 	if(is_cmd){	// if MSB is 1 then it is TLM. if 0 then TC
-		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)&i2c_cmd->data, i2c_cmd->length);
+		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length);
 		if(0 != err){
 			//TODO: log I2c write Err
 			return err;
@@ -196,7 +153,7 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 			//TODO: log I2c write Err
 			return err;
 		}
-		err = I2C_read(ADCS_I2C_ADRR, (unsigned char *)&i2c_cmd->data, i2c_cmd->length);
+		err = I2C_read(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length);
 		if(0 != err){
 			//TODO: log I2c write Err
 			return err;
@@ -205,6 +162,8 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	}
 	return err;
 }
+
+
 
 void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	TM_spl tm;
@@ -241,18 +200,23 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	cspace_adcs_magmode_t magmode;
 	cspace_adcs_savimag_t savimag_param;
 	cspace_adcs_bootprogram bootindex;
-	adcs_i2c_cmd *i2c_cmd;
+
+#ifdef TESTING
+	cspace_adcs_powerdev_t pwr_device;
+#endif
+
+	adcs_i2c_cmd i2c_cmd;
 
 	switch(sub_type)
 	{
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
-			i2c_cmd = (adcs_i2c_cmd*)cmd->data;
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			if (i2c_cmd->id<128){
-				SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(int), ADCS_I2C_GENRIC_ST);
+			memcpy(i2c_cmd.data,cmd->data,sizeof(cmd->length));
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			if (i2c_cmd.id < 128){
+				SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
 			} else {
-				SendAdcsTlm((byte*)i2c_cmd->data,i2c_cmd->length, ADCS_I2C_GENRIC_ST);
+				SendAdcsTlm((byte*)&i2c_cmd.ack,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
 			}
 			//TODO: log 'rv'. maybe send it in ACK form
 
@@ -269,11 +233,11 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_cacheStateADCS(ADCS_ID, cmd->data[0]);
 			break;
 		case ADCS_RESET_BOOT_REGISTER_ST:
-			i2c_cmd->id = RESET_BOOT_REGISTER_CMD_ID;
-			i2c_cmd->length = RESET_BOOT_REGISTER_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(int), ADCS_RESET_BOOT_REGISTER_ST);
+			i2c_cmd.id = RESET_BOOT_REGISTER_CMD_ID;
+			i2c_cmd.length = RESET_BOOT_REGISTER_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(int), ADCS_RESET_BOOT_REGISTER_ST);
 			break;
 		case ADCS_DEPLOY_MAG_BOOM_ST:
 			//err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);
@@ -284,9 +248,23 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_RUN_MODE_ST:
 			memcpy(&runmode,cmd->data,sizeof(runmode));
 			err = cspaceADCS_setRunMode(ADCS_ID, runmode);
+			PRINT_ON_TEST(runmode, err);
+
 			break;
 		case ADCS_SET_PWR_CTRL_DEVICE_ST:
 			err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, (cspace_adcs_powerdev_t*)cmd->data);
+			PRINT_ON_TEST(setPwrCtrlDevice,err);
+#ifdef TESTING
+			if(0 == err)
+			{
+			err = cspaceADCS_getPwrCtrlDevice(ADCS_ID, &pwr_device);
+			PRINT_ON_TEST(getPwrCtrlDevice,err);
+			PRINT_ON_TEST(signal_cubecontrol,pwr_device.fields.signal_cubecontrol);
+			PRINT_ON_TEST(motor_cubecontrol,pwr_device.fields.motor_cubecontrol);
+			PRINT_ON_TEST(pwr_cubesense,pwr_device.fields.pwr_cubesense);
+			PRINT_ON_TEST(pwr_cubestar,pwr_device.fields.pwr_cubestar);
+			}
+#endif
 			break;
 		case ADCS_CLEAR_ERRORS_ST:
 			memcpy(&clear,cmd->data,sizeof(clear));
@@ -294,10 +272,12 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_SET_ATT_CTRL_MODE_ST:
 			err = cspaceADCS_setAttCtrlMode(ADCS_ID, (cspace_adcs_attctrl_mod_t*)cmd->data);
+			PRINT_ON_TEST(setAttCtrlMode,err);
 			break;
 		case ADCS_SET_EST_MODE_ST:
 			memcpy(&att_est,cmd->data,sizeof(att_est));
 			err = cspaceADCS_setAttEstMode(ADCS_ID,att_est);
+			PRINT_ON_TEST(setAttEstMode,err);
 			break;
 		//case ADCS_USE_IN_EKF_ST:
 			// err = cspaceADCS_setAttEstMode(ADCS_ID,estmode_full_state_ekf);
@@ -309,39 +289,39 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_setWheelSpeed(ADCS_ID, (cspace_adcs_wspeed_t*)cmd->data);
 			break;
 		case ADCS_SET_MTQ_CONFIG_ST:
-			i2c_cmd->id = MTQ_CONFIG_CMD_ID;
-			i2c_cmd->length = MTQ_CONFIG_CMD_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_MTQ_CONFIG_ST);
+			i2c_cmd.id = MTQ_CONFIG_CMD_ID;
+			i2c_cmd.length = MTQ_CONFIG_CMD_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_MTQ_CONFIG_ST);
 			break;
 		case ADCS_RW_CONFIG_ST:
-			i2c_cmd->id = SET_WHEEL_CONFIG_CMD_ID;
-			i2c_cmd->length = SET_WHEEL_CONFIG_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_RW_CONFIG_ST);
+			i2c_cmd.id = SET_WHEEL_CONFIG_CMD_ID;
+			i2c_cmd.length = SET_WHEEL_CONFIG_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_RW_CONFIG_ST);
 			break;
 		case ADCS_GYRO_CONFIG_ST:
-			i2c_cmd->id = SET_GYRO_CONFIG_CMD_ID;
-			i2c_cmd->length = SET_GYRO_CONFIG_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_GYRO_CONFIG_ST);
+			i2c_cmd.id = SET_GYRO_CONFIG_CMD_ID;
+			i2c_cmd.length = SET_GYRO_CONFIG_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_GYRO_CONFIG_ST);
 			break;
 		case ADCS_CSS_CONFIG_ST:
-			i2c_cmd->id = SET_CSS_CONFIG_CMD_ID;
-			i2c_cmd->length = SET_CSS_CONFIG_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_CSS_CONFIG_ST);
+			i2c_cmd.id = SET_CSS_CONFIG_CMD_ID;
+			i2c_cmd.length = SET_CSS_CONFIG_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_CSS_CONFIG_ST);
 			break;
 		case ADCS_CSS_RELATIVE_SCALE_ST:
-			i2c_cmd->id = SET_CSS_SCALE_CMD_ID;
-			i2c_cmd->length = SET_CSS_SCALE_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_CSS_RELATIVE_SCALE_ST);
+			i2c_cmd.id = SET_CSS_SCALE_CMD_ID;
+			i2c_cmd.length = SET_CSS_SCALE_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_CSS_RELATIVE_SCALE_ST);
 			break;
 		case ADCS_SET_MAGNETMTR_MOUNT_ST:
 			err = cspaceADCS_setMagMountConfig(ADCS_ID,(cspace_adcs_magmountcfg_t*)cmd->data);
@@ -361,39 +341,39 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_setStarTrackerConfig(ADCS_ID,(cspace_adcs_startrkcfg_t*)cmd->data);
 			break;
 		case ADCS_SET_DETUMB_CTRL_PARAM_ST:
-			i2c_cmd->id = DETUMB_CTRL_PARAM_CMD_ID;
-			i2c_cmd->length = DETUMB_CTRL_PARAM_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_DETUMB_CTRL_PARAM_ST);
+			i2c_cmd.id = DETUMB_CTRL_PARAM_CMD_ID;
+			i2c_cmd.length = DETUMB_CTRL_PARAM_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_DETUMB_CTRL_PARAM_ST);
 			break;
 		case ADCS_SET_YWHEEL_CTRL_PARAM_ST:
-			i2c_cmd->id = SET_YWHEEL_CTRL_PARAM_CMD_ID;
-			i2c_cmd->length = SET_YWHEEL_CTRL_PARAM_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_YWHEEL_CTRL_PARAM_ST);
+			i2c_cmd.id = SET_YWHEEL_CTRL_PARAM_CMD_ID;
+			i2c_cmd.length = SET_YWHEEL_CTRL_PARAM_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_YWHEEL_CTRL_PARAM_ST);
 			break;
 		case ADCS_SET_RWHEEL_CTRL_PARAM_ST:
-			i2c_cmd->id = SET_RWHEEL_CTRL_PARAM_CMD_ID;
-			i2c_cmd->length = SET_RWHEEL_CTRL_PARAM_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_RWHEEL_CTRL_PARAM_ST);
+			i2c_cmd.id = SET_RWHEEL_CTRL_PARAM_CMD_ID;
+			i2c_cmd.length = SET_RWHEEL_CTRL_PARAM_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_RWHEEL_CTRL_PARAM_ST);
 			break;
 		case ADCS_SET_MOMENT_INTERTIA_ST:
-			i2c_cmd->id = SET_MOMENT_INERTIA_CMD_ID;
-			i2c_cmd->length = SET_MOMENT_INERTIA_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_MOMENT_INTERTIA_ST);
+			i2c_cmd.id = SET_MOMENT_INERTIA_CMD_ID;
+			i2c_cmd.length = SET_MOMENT_INERTIA_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_MOMENT_INTERTIA_ST);
 			break;
 		case ADCS_PROD_INERTIA_ST:
-			i2c_cmd->id = SET_PROD_INERTIA_CMD_ID;
-			i2c_cmd->length = SET_PROD_INERTIA_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_PROD_INERTIA_ST);
+			i2c_cmd.id = SET_PROD_INERTIA_CMD_ID;
+			i2c_cmd.length = SET_PROD_INERTIA_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_PROD_INERTIA_ST);
 			break;
 		case ADCS_ESTIMATION_PARAM1_ST:
 			err =  cspaceADCS_setEstimationParam1(ADCS_ID,(cspace_adcs_estparam1_t*)cmd->data);
@@ -405,60 +385,60 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_setSGP4OrbitParameters(ADCS_ID, (double*)cmd->data);
 			break;
 		case ADCS_SET_SGP4_ORBIT_INC_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_INC_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_INC_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_INC_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_INC_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_ECC_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_ECC_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_ECC_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_ECC_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_ECC_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_RAAN_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_RAAN_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_RAAN_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_RAAN_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_RAAN_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_ARG_OF_PER_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_ARG_OF_PER_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_BSTAR_DRAG_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_BSTAR_DRAG_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_MEAN_MOT_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_MEAN_MOT_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_MEAN_ANOM_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_MEAN_ANOM_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_EPOCH_ST:
-			i2c_cmd->id = SET_SGP4_ORBIT_EPOCH_CMD_ID;
-			i2c_cmd->length = SET_SGP4_ORBIT_DATA_LENGTH;
-			memcpy(&i2c_cmd->data,cmd->data,sizeof(i2c_cmd->length));
-			err = AdcsGenericI2cCmd(i2c_cmd);
-			SendAdcsTlm((byte*)i2c_cmd->ack,sizeof(i2c_cmd->ack), ADCS_SET_SGP4_ORBIT_EPOCH_ST);
+			i2c_cmd.id = SET_SGP4_ORBIT_EPOCH_CMD_ID;
+			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_EPOCH_ST);
 			break;
 		case ADCS_SET_MAGNETOMETER_MODE_ST:
 			memcpy(&magmode,cmd->data,sizeof(magmode));

@@ -18,8 +18,9 @@ int AdcsTroubleShooting(TroubleErrCode trbl)
 			break;
 		case(TRBL_BOOT_ERROR):
 			cspaceADCS_componentReset(ADCS_ID);
-			data = malloc(sizeof(cspace_adcs_geninfo_t));
+			//data = malloc(sizeof(cspace_adcs_geninfo_t));
 			//cspaceADCS_getGeneralInfo(ADCS_ID, data);
+			//free(data);
 			cspaceADCS_BLSetBootIndex(ADCS_ID,1);
 			cspaceADCS_BLRunSelectedProgram(ADCS_ID);
 			break;

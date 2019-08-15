@@ -149,14 +149,63 @@ void taskMain()
 	TC_spl adcsCmd;
 	adcsCmd.id = TC_ADCS_T;
 	//tests testId;
-	unsigned int input;
 	int err;
+	cspace_adcs_estmode_sel est_mode = 0;
+	cspace_adcs_attctrl_mod_t ctrl_mode = {.raw = {0}};
+	cspace_adcs_runmode_t runmode = 0;
+	cspace_adcs_powerdev_t pwr_device = {.raw = {0}};
+	unsigned int input;
+	gom_eps_hk_t eps_tlm;
 	while(1)
 	{
-		// EPS_Conditioning();
-		// Command_logic();
-		// save_time();
+		GomEpsGetHkData_general(0,&eps_tlm);
+		printf("Use Driver? (1 = Y / 0 = N)\n");
+		UTIL_DbguGetIntegerMinMax(&input, 0,1);
+		if(1 == input){
+			printf("\t0) exit\n\r");
+			printf("\t1) Set run mode\n\r");
+			printf("\t2) Set control mode\n\r");
+			printf("\t3) Set estimation mode\n\r");
+			printf("\t4) Set power mode\n\r");
+			UTIL_DbguGetIntegerMinMax(&input, 0,4);
+			switch(input){
+			case 0: continue;
+			case 1:
+				printf("choose run mode(0 to 3):\n");
+				while(UTIL_DbguGetIntegerMinMax(&input, 0,3)==0);
+				err = cspaceADCS_setRunMode(ADCS_ID, runmode);
+				if(0 != err) printf("error in execution = %d\n",err);
+				break;
+			case 2:
+				printf("choose control mode with no override(0 to 6):\n");
+				while(UTIL_DbguGetIntegerMinMax(&input, 0,13)==0);
+				err = cspaceADCS_setAttCtrlMode(ADCS_ID,&ctrl_mode);
+				if(0 != err) printf("error in execution = %d\n",err);
+				break;
+			case 3:
+				printf("choose estimation(0 to 6):\n");
+				while(UTIL_DbguGetIntegerMinMax(&input, 0,6)==0);
+				err = cspaceADCS_setAttEstMode(ADCS_ID,est_mode);
+				if(0 != err) printf("error in execution = %d\n",err);
+				break;
+			case 4:
+				printf("\nChoose power mode using a 3 byte bit field, as described:\n");
+				printf("signal_cubecontrol : 2,	 ///< Power CubeControl Signal");
+				printf("motor_cubecontrol  : 2,	 ///< Power CubeControl Motor");
+				printf("pwr_cubesense	   : 2,	 ///< Power CubeSense");
+				printf("pwr_cubestar 	   : 2;	 ///< Power CubeStar");
+				printf("pwr_cubewheel1     : 2,	 ///< Power CubeWheel 1");
+				printf("pwr_cubewheel2     : 2,	 ///< Power CubeWheel 2");
+				printf("pwr_cubewheel3     : 2,	 ///< Power CubeWheel 3");
+				printf("pwr_motor 		   : 2;	 ///< Power Motor");
+				printf("pwr_gps; 		   : 8;	 ///< Power GPS LNA");
 
+				while(UTIL_DbguGetHexa32((unsigned int*)pwr_device.raw) == 0);
+				err = cspaceADCS_getPwrCtrlDevice(ADCS_ID, &pwr_device);
+				if(0 != err) printf("error in execution = %d\n",err);
+				break;
+			}
+		}
 		printf("Send new command\n");
 		printf("Enter ADCS sub type\n");
 		UTIL_DbguGetIntegerMinMax(&input, 0,1000);
@@ -165,16 +214,11 @@ void taskMain()
 			if (input < 200)
 			{
 				adcsCmd.subType = input;
-				printf("Enter ADCS command data\n");
-				while (UTIL_DbguGetIntegerMinMax(&(adcsCmd.data), 0,200) == 0);
+				printf("Enter ADCS command data in hex(Max length 200 bytes)\n");
+				while (UTIL_DbguGetHexa32((unsigned int*)adcsCmd.data) == 0);
 				err = AdcsCmdQueueAdd(&adcsCmd);
 				printf("ADCS command error = %d\n\n\n", err);
 
-			}
-			else
-			{
-				//TestGenericI2cTelemetry();
-				printf("Print the files data\n\n");
 			}
 		}
 
