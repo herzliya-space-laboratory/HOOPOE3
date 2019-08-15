@@ -44,21 +44,31 @@
 #define GET_ADCS_FULL_CONFIG_CMD_ID 		206
 #define GET_ADCS_FULL_CONFIG_DATA_LENGTH 	272
 
+typedef enum __attribute__ ((__packed__)){
+	ADCS_TC__NO_ERR 			= 0,
+	ADCS_TC_INVALID_TC 			= 1,
+	ADCS_TC_INCORRECT_LENGTH 	= 2,
+	ADCS_TC_INCORRECT_PARAM 	= 3
+}AdcsTcErrorReason;
+
+
 /*!
  * @brief allows the user to send a read request directly to the I2C.
  * @param[out] rv return value from the ADCS I2C ACK request
  * @return Errors according to "<hal/Drivers/I2C.h>"
  */
-int AdcsReadI2cAck(int *rv);
+int AdcsReadI2cAck(AdcsTcErrorReason *rv);
 
 /*!
  * @brief allows the user to send a command directly to the I2C bus to the ADCS.
- * @param[in] data data to send to the ADCS on the I2C bus.
- * @param[in] length length of the data
- * @param[in] ack acknowledge from the ADCS after command was sent
+ * @param[in][out] data CMD data to send to ADCS, either as TC or TLM buffer. First byte is ID of TLM or ID of TC.
+ * If TC then the rest of 'data' is TC data.
+ * If TLM then the TLM will be copied into 'data'
+ * @param[in] length length of the data including ID. If TLM then length of entire TLM in bytes.
+ * @param[out] ack acknowledge from the ADCS after command was sent. Can be NULL.
  * @return Errors according to "<hal/Drivers/I2C.h>"
  */
-int AdcsGenericI2cCmd(unsigned char *data, unsigned int length, int *ack);
+int AdcsGenericI2cCmd(unsigned char *data, unsigned int length, AdcsTcErrorReason *ack);
 
 
 /*!

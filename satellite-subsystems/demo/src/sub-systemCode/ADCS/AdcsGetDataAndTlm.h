@@ -15,24 +15,24 @@
 
 #define ADCS_MAX_TLM_SIZE 272
 
-#define ADCS_STATE_TLM_FILENAME 		("StateTlm")
-#define ADCS_MAG_FIELD_VEC_FILENAME 	("MagFldVec")
-#define ADCS_MAG_CMD_FILENAME 			("MagCmd")
+#define ADCS_STATE_TLM_FILENAME 		("StTlm")
+#define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldVc")
+#define ADCS_MAG_CMD_FILENAME 			("MgCmd")
 #define ADCS_CSS_FILENAME				("CSSTlm")
 #define ADCS_SENSOR_FILENAME			("Snsr")
-#define ADCS_WHEEL_SPEED_FILENAME 		("WhlSpd")
-#define ADCS_WHEEL_SPEED_CMD_FILENAME 	("WhlSpdCmd")
-#define ADCS_EST_META_DATA				("EstMetaData")
+#define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")
+#define ADCS_WHEEL_SPEED_CMD_FILENAME 	("WlSpdCmd")
+#define ADCS_EST_META_DATA				("EstMtDt")
 #define ADCS_RAW_CSS_FILENAME 			("RawCss")
 #define ADCS_RAW_MAG_FILENAME 			("RawMag")
 #define ADCS_POWER_TEMP_FILENAME		("PowTemp")
 #define ADCS_ESC_TIME_FILENAME			("ExcTime")
-#define	ADCS_MISC_CURR_FILENAME 		("MiscCurr")
-#define ADCS_TEMPERATURE_FILENAME 		("AdcsTemp")
+#define	ADCS_MISC_CURR_FILENAME 		("MscCurr")
+#define ADCS_TEMPERATURE_FILENAME 		("AdcsTmp")
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
-#define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1)
+
 
 /*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD

@@ -16,89 +16,114 @@
 #include "../COMM/GSC.h"
 #include "../TRXVU.h"
 
-int AdcsReadI2cAck(int *rv)
+
+#define ADCS_ACK_PROCESSED_FLAG_INDEX 1
+#define ADCS_ACK_TC_ERR_INDEX 2
+
+int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 {
-
-	if(NULL == rv){
-		return -2;
-	}
-
 	int err = 0;
-	unsigned char data[3] = {0};
+	unsigned char data[4] = {0};
 	unsigned char id = ADCS_I2C_TELEMETRY_ACK_REQUEST;
 	err = I2C_write(ADCS_I2C_ADRR, &id, 1);
 	if(0 != err){
 		return err;
 	}
-	//vTaskDelay(5);				// todo: check if really need this delay. the delay can overwrite the requested data
-	err = I2C_read(ADCS_I2C_ADRR,  data, sizeof(data) - 1);
-	if(0 != err){
-		return err;
+	unsigned char processed_flag = 0;
+	unsigned char counter = 0;
+	do{
+		err = I2C_read(ADCS_I2C_ADRR,  data, sizeof(data));
+		if(0 != err){
+			return err;
+		}
+		processed_flag = data[ADCS_ACK_PROCESSED_FLAG_INDEX];
+		if(0 != processed_flag ){
+			break;
+		}
+		vTaskDelay(5);
+		if(10 == counter ){	// try 10 times and then exit
+			return E_COMMAND_NACKED;
+		}
+	}while(1);
+	if(NULL != rv){
+		*rv = (AdcsTcErrorReason)data[ADCS_ACK_TC_ERR_INDEX];
 	}
-	*rv = data[2];
 	return 0;
 }
 
-int AdcsGenericI2cCmd(unsigned char* data, unsigned int length , int *ack)
+
+int AdcsGenericI2cCmd(unsigned char *data, unsigned int length , AdcsTcErrorReason *ack)
 {
-	if(ack == NULL || NULL == data){
-		return -2;
-	}
-	if(0 == length){
-		return -2;
-	}
-
-	int err = I2C_write(ADCS_I2C_ADRR, data, length);
-	if(0 != err){
-		//TODO: log I2c write Err
-		return err;
-	}
-	err = AdcsReadI2cAck(ack);
-	return err;
-}
-//'id' the command id to send to the adcs
-//'data' data to send to the ADCS.
-//'length' length of data
-//'ack' return value of the command
-int AdcsI2cCmdWithID(unsigned char id,unsigned char* data, unsigned int length , int *ack)
-{
-	if(NULL == ack){
-		return -2;
-	}
-	if(NULL == data ){
-		return AdcsGenericI2cCmd(&id,sizeof(id),ack);
-	}
-
-	unsigned char *buffer = malloc(length+sizeof(id));
-	if(NULL == buffer){
-		return -2;
-	}
-
 	int err = 0;
-	err = AdcsGenericI2cCmd(buffer,sizeof(buffer),ack);
-	if(0 != err){
-		free(buffer);
-		return err;
+	if(NULL == data){
+		return E_INPUT_POINTER_NULL;
 	}
-	free(buffer);
+	char is_cmd = (data[0] & 0x80);
+	if(is_cmd){	// if MSB is 1 then it is TLM. if 0 then TC
+		err = I2C_write(ADCS_I2C_ADRR, data, length);
+		if(0 != err){
+			//TODO: log I2c write Err
+			return err;
+		}
+		err = AdcsReadI2cAck(ack);
+	}else{
+		err = I2C_write(ADCS_I2C_ADRR, data, 1);
+		if(0 != err){
+			//TODO: log I2c write Err
+			return err;
+		}
+		err = I2C_read(ADCS_I2C_ADRR, data, length);
+		if(0 != err){
+			//TODO: log I2c write Err
+			return err;
+		}
+		err = AdcsReadI2cAck(ack);
+	}
 	return err;
 }
-
-int AdcsI2cCmdReadTLM(unsigned char tlm_type, unsigned char* data, unsigned int length , int *ack)
-{
-	if(NULL == data){
-		return -1;
-	}
-	int err = AdcsI2cCmdWithID(&tlm_type,NULL,0,ack);
-	if(0 != err){
-		return -2;
-	}
-	err = I2C_read(ADCS_I2C_ADRR,data,length);
-	if(0 != err){
-		return err;
-	}
-	return 0;
-}
+////'id' the command id to send to the adcs
+////'data' data to send to the ADCS.
+////'length' length of data
+////'ack' return value of the command
+//int AdcsI2cCmdWithID(unsigned char id,unsigned char* data, unsigned int length , int *ack)
+//{
+//	if(NULL == ack){
+//		return -2;
+//	}
+//	if(NULL == data ){
+//		return AdcsGenericI2cCmd(&id,sizeof(id),ack);
+//	}
+//
+//	unsigned char *buffer = malloc(length+sizeof(id));
+//	if(NULL == buffer){
+//		return -2;
+//	}
+//
+//	int err = 0;
+//	err = AdcsGenericI2cCmd(buffer,sizeof(buffer),ack);
+//	if(0 != err){
+//		free(buffer);
+//		return err;
+//	}
+//	free(buffer);
+//	return err;
+//}
+//
+//int AdcsI2cCmdReadTLM(unsigned char tlm_type, unsigned char* data, unsigned int length , int *ack)
+//{
+//	if(NULL == data){
+//		return -1;
+//	}
+//	int err = AdcsI2cCmdWithID(tlm_type,NULL,0,ack);
+//	if(0 != err){
+//		return -2;
+//	}
+//	err = I2C_read(ADCS_I2C_ADRR,data,length);
+//	if(0 != err){
+//		return err;
+//	}
+//	return 0;
+//}
 
 int ResetBootRegisters()
 {

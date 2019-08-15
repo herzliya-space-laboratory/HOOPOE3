@@ -10,6 +10,8 @@
 #include "AdcsGetDataAndTlm.h"
 
 
+#define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1) //TODO: check if needed
+
 typedef struct __attribute__ ((__packed__)){
 	Boolean8bit ToSave;					//<! A flag stating whether to save this specific telemetry
 	unsigned char TlmElementeSize;		//<! size of the telemetry to be collected
