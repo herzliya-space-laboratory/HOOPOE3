@@ -81,7 +81,11 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			i_error = find_fileName(files[i], file_name);
 			if (i_error != 0)
 				continue;
-			result = c_fileDeleteElements(file_name, start_time, end_time);
+			if (f_managed_enterFS() == 0)
+			{
+				result = c_fileDeleteElements(file_name, start_time, end_time);
+				f_managed_releaseFS();
+			}
 			if (result != FS_SUCCSESS)
 			{
 				errorRes = FS_FAIL;
