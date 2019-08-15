@@ -16,13 +16,12 @@
 #include "jpeg.h"
 
 #include "../../Misc/Macros.h"
+#include "../../Misc/FileSystem.h"
 #include "bmp/rawToBMP.h"
 
 #include "ImgCompressor.h"
 
 typedef unsigned int uint;
-
-static byte bmpBuffer[BMP_FILE_DATA_SIZE];
 
 JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_factor, char pDst_filename[FILE_NAME_SIZE])
 {
@@ -37,7 +36,7 @@ JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_fa
 
 	// Now create the JPEG file.
 
-	if (!compress_image_to_jpeg_file(pDst_filename, image_width, image_height, H2V2, bmpBuffer, &params))
+	if (!compress_image_to_jpeg_file(pDst_filename, image_width, image_height, H2V2, imageBuffer, &params))
 	{
 		printf("Failed writing to output file!\n");
 		return JpegCompression_FailedWritingToOutputFile;
@@ -54,14 +53,19 @@ JpegCompressionResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], ch
 
 	// Load the bmp bmp:
 
-	F_FILE* file;
-	OPEN_FILE(file, pSrc_filename, "r", JpegCompression_ImageLoadingFailure);	// open file for writing in safe mode
+	F_FILE* file = NULL;
+	int error = OpenFile(file, pSrc_filename, "r");	// open file for writing in safe mode
+	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
 
 	f_seek(file, BMP_FILE_HEADER_SIZE, SEEK_SET);	// skipping the file header
 
-	READ_FROM_FILE(file, bmpBuffer, BMP_FILE_DATA_SIZE, 1, JpegCompression_ImageLoadingFailure);
+	byte* buffer = imageBuffer;
 
-	CLOSE_FILE(file, JpegCompression_ImageLoadingFailure);
+	error = ReadFromFile(file, buffer, BMP_FILE_DATA_SIZE, 1);
+	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
+
+	error = CloseFile(file);
+	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
 
 	return JpegCompression_Success;
 }

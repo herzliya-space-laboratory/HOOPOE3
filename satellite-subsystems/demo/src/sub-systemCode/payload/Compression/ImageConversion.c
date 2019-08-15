@@ -22,7 +22,7 @@ static uint8_t GetBinnedPixel(uint8_t binPixelSize, int x, int y)
 	{
 		for (uint32_t i = 0; i < binPixelSize; i++)
 		{
-			value += imageBuffer[y+j*2][x+i*2]; // need to jump 2 because of the bayer pattern
+			value += imageBuffer[ (y+j*2)*IMAGE_WIDTH + (x+i*2) ]; // need to jump 2 because of the bayer pattern
 		}
 	}
 
@@ -56,10 +56,10 @@ void ImageSkipping(fileType reductionLevel)	// where 2^(bin level) is the size r
 	{
 		for(unsigned int x = 0; x < IMAGE_WIDTH / imageFactor; x += 2)
 		{
-			(*binBuffer)[y][x] = imageBuffer[y*imageFactor][x*imageFactor];				// Red pixel
-			(*binBuffer)[y][x+1] = imageBuffer[y*imageFactor][x*imageFactor+1];			// Green pixel
-			(*binBuffer)[y+1][x] = imageBuffer[y*imageFactor+1][x*imageFactor];			// Green pixel
-			(*binBuffer)[y+1][x+1] = imageBuffer[y*imageFactor+1][x*imageFactor+1];		// Blue pixel
+			(*binBuffer)[y][x] = imageBuffer[ (y*imageFactor)*IMAGE_WIDTH + (x*imageFactor) ];				// Red pixel
+			(*binBuffer)[y][x+1] = imageBuffer[ (y*imageFactor)*IMAGE_WIDTH + (x*imageFactor + 1) ];		// Green pixel
+			(*binBuffer)[y+1][x] = imageBuffer[ (y*imageFactor + 1)*IMAGE_WIDTH + (x*imageFactor) ];		// Green pixel
+			(*binBuffer)[y+1][x+1] = imageBuffer[ (y*imageFactor + 1)*IMAGE_WIDTH + (x*imageFactor + 1) ];	// Blue pixel
 		}
 	}
 }
@@ -74,7 +74,7 @@ ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType redu
 	if (fileTypes[reductionLevel].value)	// check if the requested type was already created
 		return DataBasealreadyInSD;
 	else if (!fileTypes[raw].value)			// if it was not created already, check if the raw is available of the creation process
-		return DataBaseNotInSD;
+		return DataBaseRawDoesNotExist;
 
 	int result = readImageToBuffer(id, raw);
 	DB_RETURN_ERROR(result);

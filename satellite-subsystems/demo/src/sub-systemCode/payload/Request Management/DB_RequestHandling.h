@@ -17,6 +17,7 @@
 
 ImageDataBaseResult TakePicture(ImageDataBase database, unsigned char data[]);
 ImageDataBaseResult TakeSpecialPicture(ImageDataBase database, unsigned char data[]);
+ImageDataBaseResult DeletePictureFile(ImageDataBase database, unsigned char* data);
 ImageDataBaseResult DeletePicture(ImageDataBase database, unsigned char data[]);
 ImageDataBaseResult TransferPicture(ImageDataBase database, unsigned char data[]);
 byte* GetImageDataBase(ImageDataBase database, unsigned char data[]);

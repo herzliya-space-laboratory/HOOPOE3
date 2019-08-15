@@ -29,11 +29,9 @@ typedef enum BUTCHER_ERR
 	BUTCHER_UNDEFINED_ERR
 } ButcherError;
 
+// chunk[i][x][y] -> *(chunk + (i * CHUNK_SIZE) + (y * CHUNK_WIDTH) + (x))
 
-typedef unsigned char pixel_t;						///< declare pixel type. each pixel is only one color(R or B or G)
-typedef pixel_t chunk_t[CHUNK_HEIGHT][CHUNK_WIDTH];	///< declare chunk type with fixed size
-typedef pixel_t image_t[IMAGE_HEIGHT][IMAGE_WIDTH];
-
+typedef unsigned char pixel_t;	///< declare pixel type. each pixel is only one color(R or B or G)
 /*!
  * @brief gets all chunks from image according to a specified index range
  * @param[out] chunks array of chunks to be filled with data from image
@@ -46,9 +44,9 @@ typedef pixel_t image_t[IMAGE_HEIGHT][IMAGE_WIDTH];
  *			BUTHCER_PARAMATER_VALUE if indexes are out of bound
  * @note don't use for JPEG!
  */
-ButcherError GetChunksFromRange(chunk_t* chunks, unsigned int index_start, unsigned int index_end, image_t image, fileType im_type, uint32_t image_size);
+ButcherError GetChunksFromRange(pixel_t* chunks, uint32_t index_start, uint32_t index_end, pixel_t* image, fileType im_type, uint32_t image_size);
 
-ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image, fileType img_type, uint32_t image_size);
+ButcherError GetChunkFromImage(pixel_t* chunk, uint32_t index, pixel_t* image, fileType img_type, uint32_t image_size);
 
 /*!
  * @brief gets a chunk specified by index from image
@@ -60,6 +58,6 @@ ButcherError GetChunkFromImage(chunk_t chunk, unsigned int index, image_t image,
  *			BUTCHER_NULL_POINTER is one or more parameters are NULL
  *			BUTHCER_PARAMATER_VALUE if indexes are out of bound
  */
-pixel_t* SimpleButcher(pixel_t* data, unsigned int sizeofData, unsigned int size, unsigned int index);
+pixel_t* SimpleButcher(pixel_t* data, uint32_t sizeofData, uint32_t size, uint32_t index);
 
 #endif

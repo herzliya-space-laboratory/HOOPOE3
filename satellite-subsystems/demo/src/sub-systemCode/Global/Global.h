@@ -8,7 +8,7 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-#define TESTING 0
+#define TESTING
 
 //#define ANTS_ON
 #define ANTS_DO_NOT_DEPLOY

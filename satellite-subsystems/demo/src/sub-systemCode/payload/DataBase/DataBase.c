@@ -1,7 +1,7 @@
 /*
  * ImageDataBase.c
  *
- *  Created on: 7 במאי 2019
+ *  Created on: 7 ׳‘׳�׳�׳™ 2019
  *      Author: I7COMPUTER
  */
 
@@ -26,6 +26,7 @@
 
 #include "../Misc/Boolean_bit.h"
 #include "../Misc/Macros.h"
+#include "../Misc/FileSystem.h"
 
 #include "../Compression//ImageConversion.h"
 #include "DataBase.h"
@@ -241,17 +242,18 @@ ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type)
 	ImageDataBaseResult result = GetImageFileName(id, image_type, fileName);
 	DB_RETURN_ERROR(result);
 
-	F_FILE *file;
-	OPEN_FILE(file, fileName, "r", DataBaseFileSystemError);	// open file for writing in safe mode
-
-	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
-	f_flush(file);
-	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
+	F_FILE *file = NULL;
+	int error = OpenFile(file, fileName, "r");	// open file for writing in safe mode
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t factor = GetImageFactor(image_type);
-	READ_FROM_FILE(file, imageBuffer, sizeof(imageBuffer) / (factor * factor), 1, DataBaseFileSystemError);
+	byte* buffer = imageBuffer;
 
-	CLOSE_FILE(file, DataBaseFileSystemError);
+	error = ReadFromFile(file, buffer, sizeof(imageBuffer) / (factor * factor), 1);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
+	error = CloseFile(file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	return DataBaseSuccess;
 }
@@ -262,19 +264,18 @@ ImageDataBaseResult saveImageFromBuffer(imageid id, fileType image_type)
 	ImageDataBaseResult result = GetImageFileName(id, image_type, fileName);
 	DB_RETURN_ERROR(result);
 
-	F_FILE *file;
-	OPEN_FILE(file, fileName, "w+", DataBaseFileSystemError);	// open file for writing in safe mode
-
-	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
-	f_flush(file);
-	printf("\n-F- file system error (%d)\n\n", f_getlasterror());
+	F_FILE *file = NULL;
+	int error = OpenFile(file, fileName, "w+");	// open file for writing in safe mode
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t factor = GetImageFactor(image_type);
-	WRITE_TO_FILE(file, imageBuffer, sizeof(imageBuffer) / (factor * factor), 1, DataBaseFileSystemError);
+	byte* buffer = imageBuffer;
 
-	FLUSH_FILE(file, DataBaseFileSystemError);	// only after flushing can data be considered safe
+	error = WriteToFile(file, buffer, sizeof(imageBuffer) / (factor * factor), 1);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	CLOSE_FILE(file, DataBaseFileSystemError);	// data is also considered safe when file is closed
+	error = CloseFile(file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	return DataBaseSuccess;
 }
@@ -377,44 +378,43 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 {
 	FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 
-	int result = checkForFileType(image_metadata, raw);
-	CMP_AND_RETURN(result, DataBaseNotInSD, DataBasealreadyInSD);
+	int error = checkForFileType(image_metadata, raw);
+	CMP_AND_RETURN(error, DataBaseNotInSD, DataBasealreadyInSD);
 
 	// Reading the image to the buffer:
-/*
-	GomEpsResetWDT(0);
 
-	err = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
-	if( err )
+	error = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
+	if( error )
 	{
-		printf("\ntransferImageToSD Error = (%d) reading image!\n\r",err);
-		return (GECKO_Read_Success - err);
+		printf("\ntransferImageToSD Error = (%d) reading image!\n\r", error);
+		return (GECKO_Read_Success - error);
 	}
 
 	vTaskDelay(500);
-*/
+
 	// Creating a file for the picture at iOBC SD:
 
 	char fileName[FILE_NAME_SIZE];
 	getFileName(cameraId, raw, fileName);
 
-	F_FILE *PictureFile;
-	OPEN_FILE(PictureFile, fileName, "w+", DataBaseFileSystemError);
+	F_FILE *PictureFile = NULL;
+	error = OpenFile(PictureFile, fileName, "w+");	// open file for writing in safe mode
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	GomEpsResetWDT(0);
+	byte* buffer = imageBuffer;
 
-	WRITE_TO_FILE(PictureFile, imageBuffer, sizeof(uint8_t), IMAGE_SIZE, DataBaseFileSystemError);
+	error = ReadFromFile(PictureFile, buffer, sizeof(uint8_t), IMAGE_SIZE);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	FLUSH_FILE(PictureFile, DataBaseFileSystemError);	// only after flushing can data be considered safe
-
-	CLOSE_FILE(PictureFile, DataBaseFileSystemError);
+	error = CloseFile(PictureFile);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	// Updating the DataBase:
 
 	updateFileTypes(&image_metadata, image_address, raw, TRUE);
 
-	result = checkForFileType(image_metadata, raw);
-	CMP_AND_RETURN(result, DataBaseSuccess, DataBaseFail);
+	error = checkForFileType(image_metadata, raw);
+	CMP_AND_RETURN(error, DataBaseSuccess, DataBaseFail);
 
 	return DataBaseSuccess;
 }
@@ -448,7 +448,8 @@ ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType 
 	int result = checkForFileType(image_metadata, type);
 	DB_RETURN_ERROR(result);
 
-	DELETE_FILE(fileName, DataBaseFileSystemError);
+	int error = DeleteFile(fileName);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	updateFileTypes(&image_metadata, image_address, type, FALSE);
 

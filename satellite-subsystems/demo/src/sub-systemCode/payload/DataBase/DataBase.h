@@ -76,6 +76,7 @@ typedef enum
 	DataBaseSuccess,
 	DataBaseNullPointer,
 	DataBaseNotInSD,
+	DataBaseRawDoesNotExist,
 	DataBasealreadyInSD,
 	DataBaseIllegalId,
 	DataBaseIdNotFound,
@@ -132,7 +133,7 @@ typedef enum
 	Butcher_Undefined_Error
 } ImageDataBaseResult;
 
-uint8_t imageBuffer[IMAGE_HEIGHT][IMAGE_WIDTH];
+uint8_t imageBuffer[IMAGE_HEIGHT*IMAGE_WIDTH*3];
 
 uint32_t getDataBaseStart();
 uint32_t getDataBaseEnd();
@@ -235,5 +236,6 @@ ImageDataBaseResult readImageToBuffer(imageid id, fileType image_type);
 ImageDataBaseResult saveImageFromBuffer(imageid id, fileType image_type);
 ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address);
 void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
+uint32_t GetImageFactor(fileType image_type);
 
 #endif /* ImageDataBase_H_ */

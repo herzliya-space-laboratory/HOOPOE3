@@ -23,10 +23,9 @@
 #include "Butchering.h"
 #include "../../DataBase/DataBase.h"
 #include "../../Misc/Macros.h"
+#include "../../Misc/FileSystem.h"
 
 #include "imageDump.h"
-
-image_t imageBuffer;
 
 /*
  * @brief		find the subType for the image
@@ -89,7 +88,7 @@ uint8_t find_subType_ofImage(fileType comprasionType, unsigned short chunk_index
  * @param[in]	the type of image
  * @param[in] 	the id of the image
  */
-int buildAndSend_chunck(chunk_t chunk_data, unsigned short chunk_index, fileType comprasionType, imageid id, uint32_t image_size, Boolean8bit isImage)
+ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chunk_index, fileType comprasionType, imageid id, uint32_t image_size, Boolean8bit isImage)
 {
 	TM_spl packet;
 
@@ -139,7 +138,7 @@ int buildAndSend_chunck(chunk_t chunk_data, unsigned short chunk_index, fileType
  * @param[in]	the bit field. every bit represent a chunk, 1 means send this chunk 0 means skip this chunk.
  * 				the first bit is for @firstChunk_index.
  */
-int bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[NUMBER_OF_CHUNKS_IN_CMD / 8])
+ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[NUMBER_OF_CHUNKS_IN_CMD / 8])
 {
 	int error;
 
@@ -153,18 +152,16 @@ int bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmd
 	error = f_read(imageBuffer,(size_t)image_size,(size_t)1,current_file);
 	check_int("f_read in bitField_imageDump", error);
 
-	chunk_t chunk_data;
+	pixel_t chunk[CHUNK_SIZE];
 	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
 	{
 		if (getBitValueByIndex(packetsToSend + i, NUMBER_OF_CHUNKS_IN_CMD / 8, i))
 		{
-			error = GetChunkFromImage(chunk_data, i + firstChunk_index, imageBuffer, comprasionType, image_size);
-			if (error != BUTCHER_SUCCSESS)
-				return error;
+			error = GetChunkFromImage(chunk, i + firstChunk_index, imageBuffer, comprasionType, image_size);
+			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
 
-			error = buildAndSend_chunck(chunk_data, (unsigned short)(i + firstChunk_index), comprasionType, image_id, image_size, TRUE_8BIT);
-			if (error < 0)
-				return -1;
+			error = buildAndSend_chunck(chunk, (unsigned short)(i + firstChunk_index), comprasionType, image_id, image_size, TRUE_8BIT);
+			CMP_AND_RETURN(error, 0, -1);
 
 			lookForRequestToDelete_dump(cmdId);
 			vTaskDelay(SYSTEM_DEALY);
@@ -174,7 +171,7 @@ int bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmd
 	return 0;
 }
 
-int thumbnail_Dump(imageid* ID_list, command_id cmdId)
+ImageDataBaseResult thumbnail_Dump(imageid* ID_list, command_id cmdId)
 {
 	unsigned int lastIndex = ceil(IMAGE_SIZE / pow( pow(2, DEFALT_REDUCTION_LEVEL), 2) / CHUNK_SIZE);
 
@@ -188,7 +185,8 @@ int thumbnail_Dump(imageid* ID_list, command_id cmdId)
 		memcpy(&image_id, ID_list + ((j+1)*sizeof(imageid)), sizeof(imageid));
 
 		char file_name[FILE_NAME_SIZE];
-		GetImageFileName(image_id, DEFALT_REDUCTION_LEVEL, file_name);
+		int error = GetImageFileName(image_id, DEFALT_REDUCTION_LEVEL, file_name);
+		CMP_AND_RETURN(error, DataBaseSuccess, error);
 
 		F_FILE* current_file = f_open(file_name, "r");;
 
@@ -196,12 +194,16 @@ int thumbnail_Dump(imageid* ID_list, command_id cmdId)
 
 		f_read(imageBuffer,(size_t)image_size,(size_t)1,current_file);
 
-		chunk_t chunks[lastIndex];
-		GetChunksFromRange(chunks, 0, lastIndex, imageBuffer, DEFALT_REDUCTION_LEVEL, image_size);
-
+		pixel_t chunk[CHUNK_SIZE];
 		for (unsigned int i = 0; i < lastIndex; i++)
 		{
-			buildAndSend_chunck(chunks[i], (unsigned short)(i), DEFALT_REDUCTION_LEVEL, image_id, image_size, TRUE_8BIT);
+
+			error = GetChunkFromImage(chunk, i, imageBuffer, DEFALT_REDUCTION_LEVEL, image_size);
+			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
+
+			error = buildAndSend_chunck(chunk, (unsigned short)(i), DEFALT_REDUCTION_LEVEL, image_id, image_size, TRUE_8BIT);
+			CMP_AND_RETURN(error, 0, -1);
+
 			lookForRequestToDelete_dump(cmdId);
 			vTaskDelay(SYSTEM_DEALY);
 		}
@@ -212,21 +214,25 @@ int thumbnail_Dump(imageid* ID_list, command_id cmdId)
 	return 0;
 }
 
-int imageDataBase_Dump(byte* DataBase_buffer, command_id cmdId)
+ImageDataBaseResult imageDataBase_Dump(request_image request, byte* DataBase_buffer)
 {
 	unsigned int bufferSize = 0;
 	memcpy(&bufferSize, DataBase_buffer, sizeof(int));
 
-	chunk_t chunk;
-	byte* chunk_;
+	int error;
 
+	byte* chunk;
 	for (unsigned short j = 0; (unsigned int)(j*IMAGE_DATA_FIELD_PACKET_SIZE) < bufferSize; j++)
 	{
-		chunk_ = SimpleButcher(DataBase_buffer, bufferSize, IMAGE_DATA_FIELD_PACKET_SIZE, (unsigned int)j);
-		memcpy(chunk, chunk_, CHUNK_SIZE);
-		free(chunk_);
+		chunk = SimpleButcher(DataBase_buffer, bufferSize, IMAGE_DATA_FIELD_PACKET_SIZE, (unsigned int)j);
+		CHECK_FOR_NULL(chunk, Butcher_Null_Pointer);
 
-		buildAndSend_chunck(chunk, j, 0, 0, bufferSize, FALSE_8BIT);
+		error = buildAndSend_chunck(chunk, j, 0, 0, bufferSize, FALSE_8BIT);
+		CMP_AND_RETURN(error, 0, -1);
+
+		free(chunk);
+
+		lookForRequestToDelete_dump(request.cmdId);
 	}
 
 	free(DataBase_buffer);
@@ -237,28 +243,30 @@ int imageDataBase_Dump(byte* DataBase_buffer, command_id cmdId)
 ImageDataBaseResult chunkField_imageDump(request_image request, imageid image_id, fileType comprasionType, uint16_t firstIndex, uint16_t lastIndex)
 {
 	char file_name[FILE_NAME_SIZE];
-	int result = GetImageFileName(image_id, comprasionType, file_name);
-	CMP_AND_RETURN(result, DataBaseSuccess, result);
+	int error = GetImageFileName(image_id, comprasionType, file_name);
+	CMP_AND_RETURN(error, DataBaseSuccess, error);
 
-	F_FILE* current_file;
-	OPEN_FILE(current_file, file_name, "r", DataBaseFileSystemError);
+	F_FILE* current_file = NULL;
+	error = OpenFile(current_file, file_name, "r");
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t image_size = f_filelength(file_name);
-
 	uint8_t* buffer = imageBuffer;
 
-	READ_FROM_FILE(current_file, buffer, image_size, 1, DataBaseFileSystemError);
+	error = ReadFromFile(current_file, buffer, image_size, 1);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	chunk_t chunk;
-
+	pixel_t* chunk = NULL;
 	for (unsigned short i = firstIndex; i < lastIndex; i++)
 	{
 		GomEpsResetWDT(0);
 
-		result = GetChunkFromImage(chunk, i, imageBuffer, comprasionType, image_size);
-		CMP_AND_RETURN(result, BUTCHER_SUCCSESS, Butcher_Success + result);
+		error = GetChunkFromImage(chunk, i, buffer, comprasionType, image_size);
+		CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
 
-		buildAndSend_chunck(chunk, i, comprasionType, image_id, image_size, TRUE_8BIT);
+		error = buildAndSend_chunck(chunk, i, comprasionType, image_id, image_size, TRUE_8BIT);
+		CMP_AND_RETURN(error, 0, -1);
+
 		lookForRequestToDelete_dump(request.cmdId);
 	}
 
@@ -281,15 +289,15 @@ void imageDump_task(void* param)
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
-	int ret = f_enterFS();
-	check_int("Dump task enter FileSystem", ret);
+	int error = f_enterFS();
+	check_int("Dump task enter FileSystem", error);
 
 	vTaskDelay(SYSTEM_DEALY);
 
 	xQueueReset(xDumpQueue);
 
-	int err = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", err);
+	error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
+	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
 
 	if (request.type == bitField_imageDump_)
 	{
@@ -303,7 +311,7 @@ void imageDump_task(void* param)
 		byte packetsToSend[BIT_FIELD_SIZE];
 		memcpy(packetsToSend, request.command_parameters + 5, BIT_FIELD_SIZE);
 
-		bitField_imageDump(image_id, comprasionType, request.cmdId, firstIndex, packetsToSend);
+		error = bitField_imageDump(image_id, comprasionType, request.cmdId, firstIndex, packetsToSend);
 	}
 
 	else if (request.type == chunkField_imageDump_)
@@ -317,7 +325,7 @@ void imageDump_task(void* param)
 		unsigned short lastIndex;
 		memcpy(&lastIndex, request.command_parameters + 7, sizeof(short));
 
-		chunkField_imageDump(request, image_id, comprasionType, firstIndex, lastIndex);
+		error = chunkField_imageDump(request, image_id, comprasionType, firstIndex, lastIndex);
 	}
 	else if (request.type == thumbnail_imageDump_)
 	{
@@ -327,8 +335,10 @@ void imageDump_task(void* param)
 		memcpy(&endTime, request.command_parameters + 4, sizeof(time_unix));
 
 		imageid* ID_list = get_ID_list_withDefaltThumbnail(startingTime, endTime);
+		if (ID_list == NULL)
+			error = DataBaseNullPointer;
 
-		thumbnail_Dump(ID_list, request.cmdId);
+		error = thumbnail_Dump(ID_list, request.cmdId);
 	}
 	else if (request.type == imageDataBaseDump_)
 	{
@@ -339,8 +349,11 @@ void imageDump_task(void* param)
 
 		byte* DataBaseBuffer = getImageDataBaseBuffer(startingTime, endTime);
 
-		imageDataBase_Dump(DataBaseBuffer, request.cmdId);
+		error = imageDataBase_Dump(request, DataBaseBuffer);
 	}
+
+	// ToDo: error log!
+	printf("\n-IMAGE DUMP- ERROR (%u), type (%u)\n\n", error, request.type);
 
 	set_system_state(dump_param, SWITCH_OFF);
 
