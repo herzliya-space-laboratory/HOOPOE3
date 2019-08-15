@@ -19,14 +19,14 @@ int AdcsTroubleShooting(TroubleErrCode trbl)
 		case(TRBL_BOOT_ERROR):
 			cspaceADCS_componentReset(ADCS_ID);
 			data = malloc(sizeof(cspace_adcs_geninfo_t));
-			cspaceADCS_getGeneralInfo(ADCS_ID, data);
+			//cspaceADCS_getGeneralInfo(ADCS_ID, data);
 			cspaceADCS_BLSetBootIndex(ADCS_ID,1);
 			cspaceADCS_BLRunSelectedProgram(ADCS_ID);
 			break;
 		case(TRBL_CHANNEL_OFF):
-			while(SWITCH_OFF == get_system_state(ADCS_param)){
-				vTaskDelay(CHANNEL_OFF_DELAY);
-			}
+			//while(SWITCH_OFF == get_system_state(ADCS_param)){
+				//vTaskDelay(CHANNEL_OFF_DELAY);
+			//}
 				// todo: check channel while()
 
 				break;
@@ -40,7 +40,7 @@ int AdcsTroubleShooting(TroubleErrCode trbl)
 				//that can never happen its in elai code
 				break;
 		case(TRBL_NULL_DATA):
-				AdcsCmdQueueAddReset();
+				//AdcsCmdQueueAddReset();
 				break;
 		case(TRBL_FS_INIT_ERR):
 				//todo:check about FS errs

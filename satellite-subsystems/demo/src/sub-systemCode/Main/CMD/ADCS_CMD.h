@@ -48,7 +48,7 @@ TroubleErrCode AdcsCmdQueueAdd(TC_spl *cmd);
  * 	TRUE - if the queue is empty
  * 	FALSE - if there are waiting commands in the queue
  */
-int AdcsCmdQueueIsEmpty();
+unsigned int AdcsCmdQueueIsEmpty();
 
 time_unix* getAdcsQueueWaitPointer();
 

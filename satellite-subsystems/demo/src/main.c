@@ -81,6 +81,7 @@ void Command_logic()
 	while (error == 0);
 }
 
+/*
 void TestGenericI2cTelemetry()
 {
 	int err = 0;
@@ -108,7 +109,9 @@ void TestGenericI2cTelemetry()
 	if(tlm_length == 0) return;
 
 	byte buffer[300] ={0};
-	AdcsI2cCmdReadTLM(tlm_id,buffer,tlm_length);
+	adcs_i2c_cmd *i2c_cmd;
+
+	AdcsGenericI2cCmd(tlm_id,buffer,tlm_length);
 
 	if(err == 1){
 		cspace_adcs_magfieldvec_t info_data;
@@ -128,7 +131,7 @@ void TestGenericI2cTelemetry()
 		}
 	}
 
-}
+}*/
 
 void taskMain()
 {
@@ -140,11 +143,13 @@ void taskMain()
 	SubSystemTaskStart();
 	printf("Task Main start: ADCS test mode\n");
 
-	portTickType xLastWakeTime = xTaskGetTickCount();
-	const portTickType xFrequency = 1000;
+	//portTickType xLastWakeTime = xTaskGetTickCount();
+	//const portTickType xFrequency = 1000;
 	
-	tests testId;
-	int input;
+	TC_spl adcsCmd;
+	adcsCmd.id = TC_ADCS_T;
+	//tests testId;
+	unsigned int input;
 	int err;
 	while(1)
 	{
@@ -168,8 +173,8 @@ void taskMain()
 			}
 			else
 			{
-				TestGenericI2cTelemetry();
-				//printf("Print the data\n\n");
+				//TestGenericI2cTelemetry();
+				printf("Print the files data\n\n");
 			}
 		}
 
@@ -202,8 +207,6 @@ void taskMain()
 	}
 }
 
-void 
-
 int main()
 {
 	TRACE_CONFIGURE_ISP(DBGU_STANDARD, 2000000, BOARD_MCK);
@@ -220,5 +223,6 @@ int main()
 		printf("should not be here\n");
 		vTaskDelay(2000);
 	}
+
 	return 0;
 }

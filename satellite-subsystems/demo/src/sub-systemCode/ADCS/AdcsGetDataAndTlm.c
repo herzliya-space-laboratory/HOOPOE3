@@ -162,7 +162,6 @@ TroubleErrCode InitTlmElements()
 	}
 	Boolean8bit *save_tlm_flag = malloc(
 			tlm_elements_length * sizeof(*save_tlm_flag));
-
 	char *Periods = malloc(tlm_elements_length*sizeof(*Periods));
 
 	if (NULL == save_tlm_flag || NULL == Periods)

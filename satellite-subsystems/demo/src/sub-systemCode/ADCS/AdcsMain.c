@@ -18,11 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef enum __attribute__ ((__packed__)){
-	DELAY_LOOP,
-	QUEUE_WAIT_TIME
-}AdcsFramParameters;
-
 #define DEFAULT_ADCS_LOOP_DELAY 		1000 	//the loop runs in 1Hz
 #define DEFAULT_ADCS_QUEUE_WAIT_TIME	 100	// amount of time to wait or cmd to arrive into Queue
 

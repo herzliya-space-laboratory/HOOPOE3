@@ -11,8 +11,6 @@
 
 #define TLM_PERIOD_VECTOR_START_ADDR 	(TLM_SAVE_VECTOR_END_ADDR+1)		//<! FRAM start address
 #define TLM_PERIOD_VECTOR_END_ADDR 		(TLM_PERIOD_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) //<! FRAM end address
-
-
 #define ADCS_MAX_TLM_SIZE 272
 
 #define ADCS_STATE_TLM_FILENAME 		("StTlm")
@@ -32,8 +30,6 @@
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
-
-
 /*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD
  * 			and which will not.
@@ -42,7 +38,6 @@ typedef int(*AdcsTlmCollectFunc)(int,void*);
  * @return	TODO: fill return values
  */
 int UpdateTlmSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
-
 
 /*!
  * @brief updates the Tlm element at index with the input parameters
