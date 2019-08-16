@@ -185,16 +185,25 @@ int save_onlineTM_param(saveTM param)
 	int error = param.type->fn(DEFULT_INDEX, param.type->TM_param);
 	if (error != 0)
 		return error;
-
-	FileSystemResult FS_result= c_fileWrite(param.type->name, param.type->TM_param);
-	if (FS_result == FS_NOT_EXIST)
+	FileSystemResult FS_result = FS_SUCCSESS;
+	if (f_managed_enterFS() == 0)
 	{
-		FS_result = c_fileCreate(param.type->name, param.type->TM_param_length);
-		if (FS_result != FS_SUCCSESS)
-			return 2;
-		FS_result= c_fileWrite(param.type->name, param.type->TM_param);
-		if (FS_result != FS_SUCCSESS)
-			return 3;
+		FS_result = c_fileWrite(param.type->name, param.type->TM_param);
+		if (FS_result == FS_NOT_EXIST)
+		{
+			FS_result = c_fileCreate(param.type->name, param.type->TM_param_length);
+			if (FS_result != FS_SUCCSESS)
+			{
+				f_managed_releaseFS();
+				return 2;
+			}
+			FS_result = c_fileWrite(param.type->name, param.type->TM_param);
+			f_managed_releaseFS();
+			if (FS_result != FS_SUCCSESS)
+			{
+				return 3;
+			}
+		}
 	}
 	else if (FS_result != FS_SUCCSESS)
 		return 3;

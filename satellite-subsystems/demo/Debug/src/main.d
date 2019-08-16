@@ -47,8 +47,14 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Main/../COMM/GSC.h \
  ../src/sub-systemCode/Main/../Global/sizes.h \
  ../src/sub-systemCode/Main/../Global/Global.h \
- ../src/sub-systemCode/Main/../Global/TM_managment.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h \
+ ../src/sub-systemCode/Main/../Global/TLM_management.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h \
  ../src/sub-systemCode/Main/../Global/../Global/Global.h \
  ../src/sub-systemCode/Main/Main_Init.h \
  ../src/sub-systemCode/Global/Global.h ../src/sub-systemCode/EPS.h \
@@ -57,7 +63,7 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Global/sizes.h \
  ../src/sub-systemCode/Global/OnlineTM.h \
  ../src/sub-systemCode/Global/Global.h \
- ../src/sub-systemCode/Global/TM_managment.h \
+ ../src/sub-systemCode/Global/TLM_management.h \
  ../src/sub-systemCode/Global/../COMM/GSC.h \
  ../src/sub-systemCode/Global/../COMM/splTypes.h
 
@@ -157,9 +163,21 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/errors.h:
 
 ../src/sub-systemCode/Main/../Global/Global.h:
 
-../src/sub-systemCode/Main/../Global/TM_managment.h:
+../src/sub-systemCode/Main/../Global/TLM_management.h:
 
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:
 
 ../src/sub-systemCode/Main/../Global/../Global/Global.h:
 
@@ -179,7 +197,7 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
 
 ../src/sub-systemCode/Global/Global.h:
 
-../src/sub-systemCode/Global/TM_managment.h:
+../src/sub-systemCode/Global/TLM_management.h:
 
 ../src/sub-systemCode/Global/../COMM/GSC.h:
 
