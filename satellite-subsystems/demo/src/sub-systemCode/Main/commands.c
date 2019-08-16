@@ -175,9 +175,6 @@ void act_upon_command(TC_spl decode)
 	case (TC_ADCS_T):
 		AUC_ADCS(decode);
 		break;
-	case (GENERALLY_SPEAKING_T):
-		AUC_GS(decode);
-		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
 		break;

@@ -24,7 +24,6 @@
 #define COMM_T 		13
 #define GENERAL_T 	20
 #define TC_ADCS_T 		154
-#define GENERALLY_SPEAKING_T		195
 #define PAYLOAD_T	251
 #define EPS_T		6
 #define SOFTWARE_T 42
@@ -89,8 +88,6 @@
 #define RESET_SAT_ST 			67
 #define GRACEFUL_RESET_ST		69
 #define UPLOAD_TIME_ST 			17
-
-//generally speaking
 #define GENERIC_I2C_ST			0
 #define DUMP_ST					33
 #define DELETE_PACKETS_ST		35
