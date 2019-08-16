@@ -119,6 +119,7 @@
 #define UPD_LOGIC_VOLT_ST		255
 #define UPD_COMM_VOLTAGE		20
 #define CHANGE_HEATER_TMP_ST	0
+#define UPDATE_EPS_ALPHA_ST		11
 
 //adcs
 #define ADCS_SET_BOOT_INDEX_ST			98

@@ -38,6 +38,8 @@
 
 #define EPS_ALPHA_DEFFAULT_VALUE 0.6
 
+#define CHECK_EPS_ALPHA_VALUE(alpha) (alpha < 1 && alpha > 0)
+
 typedef enum EPS_mode_t{
 	critical_mode = 0,
 	safe_mode = 1,
@@ -95,5 +97,7 @@ void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mod
 void WriteCurrentTelemetry(gom_eps_hk_t telemetry);
 
 void convert_raw_voltage(byte raw[EPS_VOLTAGES_SIZE_RAW], voltage_t voltages[EPS_VOLTAGE_TABLE_NUM_ELEMENTS]);
+
+Boolean check_EPSTableCorrection(voltage_t table[2][NUM_BATTERY_MODE - 1]);
 
 #endif /* EPS_H_ */
