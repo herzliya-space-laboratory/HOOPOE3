@@ -13,6 +13,7 @@
 
 #include "General_CMD.h"
 #include "../../Global/TM_managment.h"
+#include "../../Global/OnlineTM.h"
 #include "../../Main/HouseKeeping.h"
 #include "../../TRXVU.h"
 #include "../../Ants.h"
@@ -297,4 +298,83 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 	printf("sho! sho!, get out before i kill you\n");
 	*err = ERR_TETST;
 #endif*/
+}
+
+void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_ONLINE_TM_GET;
+	if (cmd.length != 1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	TM_spl packet;
+	int error = get_online_packet((int)cmd.data[0], &packet);
+
+	if (error == -1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+	else if (error == 0)
+	{
+		*err = ERR_SUCCESS;
+		return;
+	}
+	*err = ERR_FAIL;
+}
+void cmd_reset_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_RESET;
+	if (cmd.length != 0)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	reset_offline_TM_list();
+
+	*err = ERR_SUCCESS;
+}
+void cmd_add_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_OFFLINE_TM_LIST;
+	if (cmd.length != 9)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+	int index = cmd.data[0];
+	uint period;
+	memcpy(&period, cmd.data + 1, 4);
+	time_unix stopTime;
+	memcpy(&stopTime, cmd.data + 5, 4);
+
+	int error = add_onlineTM_param_to_save_list(index, period, stopTime);
+
+	if (error == 0)
+		*err = ERR_SUCCESS;
+	else if (error == -1)
+		*err = ERR_PARAMETERS;
+	else
+		*err = ERR_FAIL;
+}
+void cmd_delete_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_OFFLINE_TM_LIST;
+	if (cmd.length != 1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	int index = cmd.data[0];
+
+	int error = delete_onlineTM_param_to_save_list(index);
+
+	if (error == 0)
+		*err = ERR_SUCCESS;
+	else
+		*err = ERR_FAIL;
 }

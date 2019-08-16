@@ -19,6 +19,7 @@ typedef enum ERR_type
 	ERR_SUCCESS,
 	ERR_FAIL,
 	ERR_ACTIVE,
+	ERR_MUTE,
 	ERR_STOP_TASK,
 	ERR_TURNED_OFF,
 	ERR_PARAMETERS,
@@ -84,6 +85,9 @@ typedef enum ACK
 	ACK_EPS_SHUT_SYSTEM = 162,
 	ACK_RESET_FILE = 163,
 	ACK_EPS_ALPHA = 164,
+	ACK_ONLINE_TM_GET = 164,
+	ACK_OFFLINE_TM_LIST = 165,
+	ACK_UPDATE_BIT_RATE = 166,
 	ACK_NOTHING = 255
 }Ack_type;
 
@@ -170,4 +174,6 @@ int build_raw_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* ra
  * 				-1 a NULL pointer
  */
 int build_data_field_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* data_feild);
+
+void print_TM_spl_packet(TM_spl packet);
 #endif /* GSC_H_ */
