@@ -272,7 +272,17 @@ void Dump_task(void *arg)
 	{
 		vTaskDelay(SYSTEM_DEALY);
 		xQueueReset(xDumpQueue);
-		dump_logic(id, startTime, endTime, resulotion, HK_dump_type);
+		for (int i = 0; i < 100; i++)
+		{
+			if (f_managed_enterFS() == 0)
+			{
+				dump_logic(id, startTime, endTime, resulotion, HK_dump_type);
+				f_managed_releaseFS();
+				break;
+			}
+			vTaskDelay(SYSTEM_DEALY);
+		}
+		save_ACK(ACK_DUMP, ERR_ENTER_FS_FAL, id);
 	}
 
 	set_system_state(dump_param, SWITCH_OFF);
