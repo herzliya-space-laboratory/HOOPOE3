@@ -20,7 +20,7 @@
 
 #define DELAY 100
 
-#define FILE_NAME_SIZE 12	///< The size of the filename parameter. i0000001.raw (+1 for '/0')
+#define FILE_NAME_SIZE 11	///< The size of the filename parameter. i00001.raw (+1 for '\0')
 
 #ifdef TESTING
 	#define MAX_NUMBER_OF_PICTURES 20

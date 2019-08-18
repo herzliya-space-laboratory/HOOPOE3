@@ -118,3 +118,13 @@ ImageDataBaseResult UpdatePhotographyValues(ImageDataBase database, unsigned cha
 
 	return DataBaseSuccess;
 }
+ImageDataBaseResult setChunkDimensions(unsigned char* data)
+{
+	uint16_t width;
+	uint16_t height;
+
+	memcpy(&width, data, sizeof(uint16_t));
+	memcpy(&height, data + sizeof(uint16_t), sizeof(uint16_t));
+
+	return setChunkDimensions_inFRAM(width, height);
+}

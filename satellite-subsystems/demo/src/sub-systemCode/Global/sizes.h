@@ -8,18 +8,6 @@
 #ifndef SIZES_H_
 #define SIZES_H_
 
-
-#define IMAGE_WIDTH 2048	///< defines the image width
-#define IMAGE_HEIGHT 1088	///< defines the image height
-
-#define CHUNK_WIDTH 14		///< defines the chunk image width
-#define CHUNK_HEIGHT 16		///< defines the chunks image height
-
-
-#define CHUNK_SIZE (CHUNK_HEIGHT*CHUNK_WIDTH)			///< defines number of bytes per chunk
-#define NUM_OF_CHUNKS (IMAGE_HEIGHT/CHUNK_HEIGHT)*(IMAGE_WIDTH/CHUNK_WIDTH)	///< defines how many chunks devide an entire image
-
-
 //variables
 #define DOUBLE_SIZE	8
 #define FLOAT_SIZE	4
@@ -57,11 +45,21 @@
 #define SIZE_OF_COMMAND			SIZE_RXFRAME //max raw size of a command
 #define SIZE_OF_DELAYED_COMMAND SIZE_OF_COMMAND//max raw size of a delayed command
 
-#define IMAGE_DATA_FIELD_PACKET_SIZE	CHUNK_SIZE + 4
-#define IMAGE_PACKET_SIZE				IMAGE_DATA_FIELD_PACKET_SIZE + SPL_TM_HEADER_SIZE
 
-#define IMAGE_DB_DATA_FIELD_PACKET_SIZE	CHUNK_SIZE + 2
-#define IMAGE_DB_PACKET_SIZE			IMAGE_DB_DATA_FIELD_PACKET_SIZE + SPL_TM_HEADER_SIZE
+//Payload
+#define IMAGE_WIDTH 2048	///< defines the image width
+#define IMAGE_HEIGHT 1088	///< defines the image height
+
+#define CHUNK_SIZE(CHUNK_WIDTH, CHUNK_HEIGHT)	CHUNK_WIDTH * CHUNK_HEIGHT
+
+#define IMAGE_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE)	CHUNK_SIZE + 4
+#define IMAGE_PACKET_SIZE(CHUNK_SIZE)				IMAGE_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE) + SPL_TM_HEADER_SIZE
+
+#define IMAGE_DB_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE)	CHUNK_SIZE + 2
+#define IMAGE_DB_PACKET_SIZE(CHUNK_SIZE)			IMAGE_DB_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE) + SPL_TM_HEADER_SIZE
+
+#define MAX_CHUNK_SIZE SPL_TM_DATA_SIZE - 6
+
 
 #define STACK_DUMP_SIZE 2048//when you create the dump task, size of stack, //need to be tasted...
 #define DUMP_BUFFER_SIZE  40000

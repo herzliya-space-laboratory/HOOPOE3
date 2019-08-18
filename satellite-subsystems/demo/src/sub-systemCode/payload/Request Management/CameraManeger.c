@@ -123,14 +123,16 @@ void CameraManagerTaskMain()
 int initCamera(Boolean first_activation)
 {
 	int error = initGecko();
-	if (error)
-		return error;
+	CMP_AND_RETURN(error, 0, error);
 
 	Initialized_GPIO();
 
 	imageDataBase = initImageDataBase(first_activation);
 	if (imageDataBase == NULL)
 		error = -1;
+
+	error = setChunkDimensions_inFRAM(DEFALT_CHUNK_WIDTH, DEFALT_CHUNK_HEIGHT);
+	CMP_AND_RETURN(error, DataBaseSuccess, error);
 
 	return error;
 }
@@ -325,7 +327,7 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case Set_Chunk_Size:
-		// ToDo: du it!
+		error = setChunkDimensions(request.data);
 		break;
 
 	default:

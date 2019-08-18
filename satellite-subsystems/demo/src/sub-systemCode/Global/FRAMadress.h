@@ -18,13 +18,17 @@
 #define SHUT_ADCS_ADDR		0x10D// << 1 byte >>
 #define SHUT_CAM_ADDR		0x10E// << 1 byte >>
 #define DEPLOY_ANTS_ATTEMPTS_ADDR	0x10F// << 3 byte >>, array of 3 variables - 3 attempts
+
+
 //ANTS
 #define ARM_DEPLOY_ADDR 0x1100// << 1 byte >> , can be 0 or 255
 #define ANTS_FRAM_ADDR 0x1101
 
+
 //EPS
 #define EPS_VOLTAGES_ADDR 0x2100 // << EPS_VOLTAGES_SIZE_RAW bytes >>
 #define EPS_STATES_ADDR 0x211C // << 1 byte >> Address of consumption state
+
 
 //TRX
 #define BEACON_LOW_BATTERY_STATE_ADDR 0x311D // << 2 bytes >>
@@ -38,36 +42,18 @@
 #define BIT_RATE_ADDR		0x8E5D //<<1 bytes>>
 #define TRANSPONDER_RSSI_ADDR	0x8E5E// << 2 bytes>
 
+
 //ADCS
 #define STAGE_TABLE_ADDR 0x9044
 
+
 //CAMERA
-#define AUTO_PILOT_STATE_ADDR			0x9FFB
-#define CAMERA_LAST_PICTUR_TIME_ADDR	0x9FFC // <<4 bytes>>
+#define IMAGE_CHUNK_WIDTH_ADDR 0xD000
+#define IMAGE_CHUNK_WIDTH_SIZE 2
 
-#define GECKO_STATUS_FLAG_ADDR 0xA000
-#define GECKO_STATUS_FLAG_SIZE 1
+#define IMAGE_CHUNK_HEIGHT_ADDR 0xD002
+#define IMAGE_CHUNK_HEIGHT_SIZE 2
 
-#define GECKO_ADC_GAIN_ADDR 0xA001
-#define GECKO_ADC_GAIN_SIZE 1
-
-#define GECKO_PGA_GAIN_ADDR 0xA002
-#define GECKO_PGA_GAIN_SIZE 1
-
-#define GECKO_EXPOSURE_ADDR 0xA003
-#define GECKO_EXPOSURE_SIZE 4
-
-#define GECKO_FRAME_AMOUNT_ADDR 0xA007
-#define GECKO_FRAME_AMOUNT_SIZE 4
-
-#define GECKO_FRAME_RATE_ADDR 0xA011
-#define GECKO_FRAME_RATE_SIZE 4
-
-#define GECKO_FAST_ADDR 0xA015
-#define GECKO_FAST_SIZE 4
-
-#define GECKO_MAX_ON_TIME_ADDR 0xA019
-#define GECKO_MAX_ON_TIME_SIZE 4
 
 #define DATABASEFRAMADDRESS 0x10000	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
 #endif /* FRAMADRESS_H_ */

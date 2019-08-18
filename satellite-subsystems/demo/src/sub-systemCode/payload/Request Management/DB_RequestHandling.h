@@ -12,6 +12,7 @@
 
 #include "../../Global/Global.h"
 
+#include "Dump/imageDump.h"
 #include "../Compression/ImageConversion.h"
 #include "../DataBase/DataBase.h"
 
@@ -24,5 +25,6 @@ byte* GetImageDataBase(ImageDataBase database, unsigned char data[]);
 ImageDataBaseResult CreateThumbnail(unsigned char* data);
 ImageDataBaseResult CreateJPG(unsigned char* data);
 ImageDataBaseResult UpdatePhotographyValues(ImageDataBase database, unsigned char data[]);
+ImageDataBaseResult setChunkDimensions(unsigned char data[]);
 
 #endif /* DB_REQUESTHANDLING_H_ */

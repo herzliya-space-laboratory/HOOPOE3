@@ -44,9 +44,8 @@ typedef unsigned char pixel_t;	///< declare pixel type. each pixel is only one c
  *			BUTHCER_PARAMATER_VALUE if indexes are out of bound
  * @note don't use for JPEG!
  */
-ButcherError GetChunksFromRange(pixel_t* chunks, uint32_t index_start, uint32_t index_end, pixel_t* image, fileType im_type, uint32_t image_size);
 
-ButcherError GetChunkFromImage(pixel_t* chunk, uint32_t index, pixel_t* image, fileType img_type, uint32_t image_size);
+ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t chunk_height, uint16_t index, pixel_t* image, fileType img_type, uint32_t image_size);
 
 /*!
  * @brief gets a chunk specified by index from image
@@ -58,6 +57,6 @@ ButcherError GetChunkFromImage(pixel_t* chunk, uint32_t index, pixel_t* image, f
  *			BUTCHER_NULL_POINTER is one or more parameters are NULL
  *			BUTHCER_PARAMATER_VALUE if indexes are out of bound
  */
-pixel_t* SimpleButcher(pixel_t* data, uint32_t sizeofData, uint32_t size, uint32_t index);
+pixel_t* SimpleButcher(pixel_t* data, uint32_t size_of_Data, uint32_t size_of_chunk, uint16_t index);
 
 #endif

@@ -21,11 +21,38 @@
 #include "../../../Global/TLM_management.h"
 
 #include "Butchering.h"
-#include "../../DataBase/DataBase.h"
 #include "../../Misc/Macros.h"
 #include "../../Misc/FileSystem.h"
 
 #include "imageDump.h"
+
+static uint16_t chunk_width;
+static uint16_t chunk_height;
+
+ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height)
+{
+	if (width * height > MAX_CHUNK_SIZE)
+		return Butcher_Parameter_Value;
+
+	int error = 0;
+	error = FRAM_write((unsigned char*)&width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+	error = FRAM_write((unsigned char*)&height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+
+	return DataBaseSuccess;
+}
+
+ImageDataBaseResult readChunkDimentionsFromFRAM(void)
+{
+	int error = 0;
+	error = FRAM_read((unsigned char*)&chunk_width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+	error = FRAM_read((unsigned char*)&chunk_height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+
+	return DataBaseSuccess;
+}
 
 /*
  * @brief		find the subType for the image
@@ -95,12 +122,12 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
 	if (isImage)
 	{
 		packet.type = IMAGE_DUMP_T;
-		packet.length = IMAGE_DATA_FIELD_PACKET_SIZE;
+		packet.length = IMAGE_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE(chunk_height, chunk_width));
 	}
 	else
 	{
 		packet.type = IMAGE_DATABASE_DUMP_T;
-		packet.length = IMAGE_DB_DATA_FIELD_PACKET_SIZE;
+		packet.length = IMAGE_DB_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE(chunk_height, chunk_width));
 	}
 
 	packet.subType = find_subType_ofImage(comprasionType, chunk_index, isImage);
@@ -119,8 +146,8 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
 
 		packet.length += 4;
 	}
-	memcpy(packet.data + offset, chunk_data, CHUNK_SIZE);
-	offset += CHUNK_SIZE;
+	memcpy(packet.data + offset, chunk_data, CHUNK_SIZE(chunk_height, chunk_width));
+	offset += CHUNK_SIZE(chunk_height, chunk_width);
 
 	int rawPacket_length = 0;
 	byte rawPacket[packet.length + SPL_TM_HEADER_SIZE];
@@ -152,12 +179,12 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 	error = f_read(imageBuffer,(size_t)image_size,(size_t)1,current_file);
 	check_int("f_read in bitField_imageDump", error);
 
-	pixel_t chunk[CHUNK_SIZE];
+	pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
 	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
 	{
 		if (getBitValueByIndex(packetsToSend + i, NUMBER_OF_CHUNKS_IN_CMD / 8, i))
 		{
-			error = GetChunkFromImage(chunk, i + firstChunk_index, imageBuffer, comprasionType, image_size);
+			error = GetChunkFromImage(chunk, chunk_width, chunk_height, i + firstChunk_index, imageBuffer, comprasionType, image_size);
 			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
 
 			error = buildAndSend_chunck(chunk, (unsigned short)(i + firstChunk_index), comprasionType, image_id, image_size, TRUE_8BIT);
@@ -173,7 +200,7 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 
 ImageDataBaseResult thumbnail_Dump(imageid* ID_list, command_id cmdId)
 {
-	unsigned int lastIndex = ceil(IMAGE_SIZE / pow( pow(2, DEFALT_REDUCTION_LEVEL), 2) / CHUNK_SIZE);
+	unsigned int lastIndex = ceil(IMAGE_SIZE / pow( pow(2, DEFALT_REDUCTION_LEVEL), 2) / CHUNK_SIZE(chunk_height, chunk_width));
 
 	imageid image_id = 0;
 
@@ -194,11 +221,11 @@ ImageDataBaseResult thumbnail_Dump(imageid* ID_list, command_id cmdId)
 
 		f_read(imageBuffer,(size_t)image_size,(size_t)1,current_file);
 
-		pixel_t chunk[CHUNK_SIZE];
+		pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
 		for (unsigned int i = 0; i < lastIndex; i++)
 		{
 
-			error = GetChunkFromImage(chunk, i, imageBuffer, DEFALT_REDUCTION_LEVEL, image_size);
+			error = GetChunkFromImage(chunk, chunk_width, chunk_height, i, imageBuffer, DEFALT_REDUCTION_LEVEL, image_size);
 			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
 
 			error = buildAndSend_chunck(chunk, (unsigned short)(i), DEFALT_REDUCTION_LEVEL, image_id, image_size, TRUE_8BIT);
@@ -221,10 +248,12 @@ ImageDataBaseResult imageDataBase_Dump(request_image request, byte* DataBase_buf
 
 	int error;
 
+	uint32_t image_packet_data_field_size = IMAGE_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE(chunk_height, chunk_width));
+
 	byte* chunk;
-	for (unsigned short j = 0; (unsigned int)(j*IMAGE_DATA_FIELD_PACKET_SIZE) < bufferSize; j++)
+	for (unsigned short j = 0; (unsigned int)(j*image_packet_data_field_size) < bufferSize; j++)
 	{
-		chunk = SimpleButcher(DataBase_buffer, bufferSize, IMAGE_DATA_FIELD_PACKET_SIZE, (unsigned int)j);
+		chunk = SimpleButcher(DataBase_buffer, bufferSize, image_packet_data_field_size, (unsigned int)j);
 		CHECK_FOR_NULL(chunk, Butcher_Null_Pointer);
 
 		error = buildAndSend_chunck(chunk, j, 0, 0, bufferSize, FALSE_8BIT);
@@ -261,7 +290,7 @@ ImageDataBaseResult chunkField_imageDump(request_image request, imageid image_id
 	{
 		GomEpsResetWDT(0);
 
-		error = GetChunkFromImage(chunk, i, buffer, comprasionType, image_size);
+		error = GetChunkFromImage(chunk, chunk_width, chunk_height, i, buffer, comprasionType, image_size);
 		CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
 
 		error = buildAndSend_chunck(chunk, i, comprasionType, image_id, image_size, TRUE_8BIT);
@@ -289,12 +318,16 @@ void imageDump_task(void* param)
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
-	int error = f_enterFS();
+	int error = 0;
+
+	error = f_enterFS();
 	check_int("Dump task enter FileSystem", error);
 
 	vTaskDelay(SYSTEM_DEALY);
 
 	xQueueReset(xDumpQueue);
+
+	error = readChunkDimentionsFromFRAM();
 
 	error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
 	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
