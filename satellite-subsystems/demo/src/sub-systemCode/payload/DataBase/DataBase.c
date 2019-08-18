@@ -249,7 +249,7 @@ ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type)
 	uint32_t factor = GetImageFactor(image_type);
 	byte* buffer = imageBuffer;
 
-	error = ReadFromFile(file, buffer, sizeof(imageBuffer) / (factor * factor), 1);
+	error = ReadFromFile(file, buffer, IMAGE_SIZE / (factor * factor), 1);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	error = CloseFile(file);
@@ -271,7 +271,7 @@ ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type)
 	uint32_t factor = GetImageFactor(image_type);
 	byte* buffer = imageBuffer;
 
-	error = WriteToFile(file, buffer, sizeof(imageBuffer) / (factor * factor), 1);
+	error = WriteToFile(file, buffer, IMAGE_SIZE / (factor * factor), 1);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	error = CloseFile(file);
@@ -522,8 +522,11 @@ ImageDataBaseResult clearImageDataBase(void)
 			{
 				if(checkForFileType(image_metadata, i) == DataBaseSuccess)
 				{
-					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);
-					DB_RETURN_ERROR(result);
+					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);												return result;
+					if (result != DataBaseSuccess && result != DataBaseNotInSD)
+					{
+						return result;
+					}
 					updateFileTypes(&image_metadata, image_address, i, FALSE);
 				}
 			}

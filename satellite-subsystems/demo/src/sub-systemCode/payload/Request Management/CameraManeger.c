@@ -218,33 +218,10 @@ void Gecko_TroubleShooter(ImageDataBaseResult error)
 	}
 }
 
-void handleDump(Camera_Request request)
+void startDumpTask(Camera_Request request)
 {
-	request_image DumpRequest;
-	DumpRequest.cmdId = request.cmd_id;
-
-	switch (request.id)
-	{
-		case Image_Dump_chunkField:
-			DumpRequest.type = chunkField_imageDump_;
-			break;
-		case Image_Dump_bitField:
-			DumpRequest.type = bitField_imageDump_;
-			break;
-		case Thumbnail_Dump:
-			DumpRequest.type = thumbnail_imageDump_;
-			break;
-		case DataBase_Dump:
-			DumpRequest.type = imageDataBaseDump_;
-			break;
-		default:
-			break;
-	}
-
-	memcpy(DumpRequest.command_parameters, request.data, MAX_DATA_CAM_REQ);
-
-	//imageDump_task(&DumpRequest);
-	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraManagmentTask_StackDepth, &DumpRequest, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 1), NULL);
+	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraManagmentTask_StackDepth, &request, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 1), NULL);
+	vTaskDelay(SYSTEM_DEALY);
 }
 
 void act_upon_request(Camera_Request request)
@@ -310,7 +287,7 @@ void act_upon_request(Camera_Request request)
 	case Image_Dump_bitField:
 	case Thumbnail_Dump:
 	case DataBase_Dump:
-		handleDump(request);
+		startDumpTask(request);
 		break;
 
 	case update_defult_duration:

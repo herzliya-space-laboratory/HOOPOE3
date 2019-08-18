@@ -32,6 +32,7 @@ int releaseFS(void)
 		return error;
 	else
 		return f_getlasterror();*/
+	return 0;
 }
 
 int OpenFile(F_FILE** file, const char* fileName, const char* mode)
@@ -50,8 +51,8 @@ int CloseFile(F_FILE* file)
 	int errorMessage = 0;/*f_managed_close(file);*/
 
 	f_close(file);
+	printf("\n-F- CLOSE, file system error (%d)\n\n", f_getlasterror());
 	f_managed_releaseFS();
-	printf("\n-F- OPEN, file system error (%d)\n\n", f_getlasterror());
 	return errorMessage;
 }
 

@@ -4,6 +4,8 @@
 #include "jpeg_memory_alloc.h"
 #include <hcc/api_fat.h>
 
+#include "../../Misc/FileSystem.h"
+
 BooleanJpeg open_jpeg_file(output_stream * stream, const char *pFilename)
 {
 	if (stream->type != JPEG_FILE)
@@ -15,8 +17,9 @@ BooleanJpeg open_jpeg_file(output_stream * stream, const char *pFilename)
 	stream->data.file_stream.singles_buff = (uint8_t *)jpge_cmalloc(JPEG_SINGLES_SIZE);
 	stream->data.file_stream.m_bStatus = (stream->data.file_stream.singles_buff != NULL);
 
-	stream->data.file_stream.m_pFile = f_open(pFilename, "w+");
-	stream->data.file_stream.m_bStatus = stream->data.file_stream.m_bStatus && (stream->data.file_stream.m_pFile != NULL);
+	stream->data.file_stream.m_pFile = NULL;
+	int error = OpenFile(&stream->data.file_stream.m_pFile, pFilename, "w+");
+	stream->data.file_stream.m_bStatus = stream->data.file_stream.m_bStatus && (stream->data.file_stream.m_pFile != NULL) && !error;
 	return stream->data.file_stream.m_bStatus;
 }
 
@@ -36,7 +39,7 @@ BooleanJpeg close_jpeg_file(output_stream * stream)
 		}
 
 		f_flush(stream->data.file_stream.m_pFile);
-		if (f_close(stream->data.file_stream.m_pFile) == EOF)
+		if (CloseFile(stream->data.file_stream.m_pFile) != 0)
 		{
 			stream->data.file_stream.m_bStatus = FALSE_JPEG;
 		}

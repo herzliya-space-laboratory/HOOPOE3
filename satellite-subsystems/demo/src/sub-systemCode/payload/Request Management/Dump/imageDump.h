@@ -13,6 +13,7 @@
 #include "../../../Global/GlobalParam.h"
 #include "../../../TRXVU.h"
 
+#include "../CameraManeger.h"
 #include "../../DataBase/DataBase.h"
 
 #define DEFALT_CHUNK_HEIGHT 13
@@ -22,20 +23,6 @@
 #define BIT_FIELD_SIZE SPL_TC_DATA_SIZE - SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP
 
 #define NUMBER_OF_CHUNKS_IN_CMD BIT_FIELD_SIZE * 8
-
-typedef enum{
-	bitField_imageDump_,
-	chunkField_imageDump_,
-	thumbnail_imageDump_,
-	imageDataBaseDump_
-}imageDump_t;
-
-typedef struct __attribute__ ((__packed__))
-{
-	imageDump_t type;
-	command_id cmdId;
-	byte command_parameters[SPL_TC_DATA_SIZE];
-}request_image;
 
 ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height);
 

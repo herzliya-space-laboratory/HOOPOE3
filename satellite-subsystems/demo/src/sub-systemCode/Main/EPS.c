@@ -253,11 +253,11 @@ void EPS_Conditioning()
 
 	if (VBatt_filtered < VBatt_previous)
 	{
-		battery_downward(VBatt_filtered, VBatt_previous);
+		//battery_downward(VBatt_filtered, VBatt_previous);
 	}
 	else if (VBatt_filtered > VBatt_previous)
 	{
-		battery_upward(VBatt_filtered, VBatt_previous);
+		//battery_upward(VBatt_filtered, VBatt_previous);
 	}
 
 	update_powerLines(switches_states);

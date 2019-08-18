@@ -7,32 +7,49 @@
 #include "output_stream.h"
 #include "jpeg_encoder.h"
 
+#include "../../Misc/FileSystem.h"	// for enter and release of the file system, ToDo: replace all actions with you own.
 
 // Writes JPEG image to file.
 BooleanJpeg compress_image_to_jpeg_file(const char *pFilename, int width, int height, int num_channels, const uint8_t *pImage_data, const jpeg_params_t * comp_params)
 {
+	//keepTryingTo_enterFS();
+
 	output_stream dst_stream = {.type = JPEG_FILE, .data.file_stream = {.m_pFile = NULL, .m_bStatus = FALSE_JPEG}};
 	if (!open_jpeg_file(&dst_stream, pFilename))
+	{
+		//releaseFS();
 		return FALSE_JPEG;
+	}
 
 	jpeg_encoder_t dst_image;
 	clear(&dst_image);
 	if (!init(&dst_image, &dst_stream, width, height, num_channels, comp_params))
+	{
+		//releaseFS();
 		return FALSE_JPEG;
+	}
 
 	int i;
 	for (i = 0; i < height; i++)
 	{
 		const uint8_t * pBuf = pImage_data + i * width * num_channels;
 		if (!process_scanline(&dst_image, pBuf))
+		{
+			//releaseFS();
 			return FALSE_JPEG;
+		}
 	}
 	if (!process_scanline(&dst_image, NULL))
+	{
+		//releaseFS();
 		return FALSE_JPEG;
+	}
 
    deinit(&dst_image);
 
-   return close_jpeg_file(&dst_stream);
+   BooleanJpeg returnValue = close_jpeg_file(&dst_stream);
+   //releaseFS();
+   return returnValue;
 }
 
 BooleanJpeg compress_image_to_jpeg_file_in_memory(uint8_t ** output_buf, int * output_buf_size,

@@ -179,6 +179,9 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 	error = f_read(imageBuffer,(size_t)image_size,(size_t)1,current_file);
 	check_int("f_read in bitField_imageDump", error);
 
+	error = CloseFile(current_file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
 	pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
 	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
 	{
@@ -221,6 +224,9 @@ ImageDataBaseResult thumbnail_Dump(imageid* ID_list, command_id cmdId)
 
 		f_read(imageBuffer,(size_t)image_size,(size_t)1,current_file);
 
+		error = CloseFile(current_file);
+		CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
 		pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
 		for (unsigned int i = 0; i < lastIndex; i++)
 		{
@@ -241,7 +247,7 @@ ImageDataBaseResult thumbnail_Dump(imageid* ID_list, command_id cmdId)
 	return 0;
 }
 
-ImageDataBaseResult imageDataBase_Dump(request_image request, byte* DataBase_buffer)
+ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte* DataBase_buffer)
 {
 	unsigned int bufferSize = 0;
 	memcpy(&bufferSize, DataBase_buffer, sizeof(int));
@@ -261,7 +267,7 @@ ImageDataBaseResult imageDataBase_Dump(request_image request, byte* DataBase_buf
 
 		free(chunk);
 
-		lookForRequestToDelete_dump(request.cmdId);
+		lookForRequestToDelete_dump(request.cmd_id);
 	}
 
 	free(DataBase_buffer);
@@ -269,7 +275,7 @@ ImageDataBaseResult imageDataBase_Dump(request_image request, byte* DataBase_buf
 	return 0;
 }
 
-ImageDataBaseResult chunkField_imageDump(request_image request, imageid image_id, fileType comprasionType, uint16_t firstIndex, uint16_t lastIndex)
+ImageDataBaseResult chunkField_imageDump(Camera_Request request, imageid image_id, fileType comprasionType, uint16_t firstIndex, uint16_t lastIndex)
 {
 	char file_name[FILE_NAME_SIZE];
 	int error = GetImageFileName(image_id, comprasionType, file_name);
@@ -285,7 +291,10 @@ ImageDataBaseResult chunkField_imageDump(request_image request, imageid image_id
 	error = ReadFromFile(current_file, buffer, image_size, 1);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	pixel_t* chunk = NULL;
+	error = CloseFile(current_file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
+	pixel_t chunk[CHUNK_SIZE(chunk_width, chunk_height)];
 	for (unsigned short i = firstIndex; i < lastIndex; i++)
 	{
 		GomEpsResetWDT(0);
@@ -296,7 +305,7 @@ ImageDataBaseResult chunkField_imageDump(request_image request, imageid image_id
 		error = buildAndSend_chunck(chunk, i, comprasionType, image_id, image_size, TRUE_8BIT);
 		CMP_AND_RETURN(error, 0, -1);
 
-		lookForRequestToDelete_dump(request.cmdId);
+		lookForRequestToDelete_dump(request.cmd_id);
 	}
 
 	return DataBaseSuccess;
@@ -304,13 +313,13 @@ ImageDataBaseResult chunkField_imageDump(request_image request, imageid image_id
 
 void imageDump_task(void* param)
 {
-	request_image request;
-	memcpy(&request, param, sizeof(request_image));
+	Camera_Request request;
+	memcpy(&request, param, sizeof(Camera_Request));
 
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
-		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, request.cmdId);
+		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, request.cmd_id);
 		vTaskDelete(NULL);
 	}
 	else
@@ -332,53 +341,53 @@ void imageDump_task(void* param)
 	error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
 	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
 
-	if (request.type == bitField_imageDump_)
+	if (request.id == Image_Dump_bitField)
 	{
 		imageid image_id;
-		memcpy(&image_id, request.command_parameters, sizeof(imageid));
+		memcpy(&image_id, request.data, sizeof(imageid));
 		fileType comprasionType;
-		memcpy(&comprasionType, request.command_parameters + 2, sizeof(byte));
+		memcpy(&comprasionType, request.data + 2, sizeof(byte));
 		uint16_t firstIndex;
-		memcpy(&firstIndex, request.command_parameters + 3, sizeof(uint16_t));
+		memcpy(&firstIndex, request.data + 3, sizeof(uint16_t));
 
 		byte packetsToSend[BIT_FIELD_SIZE];
-		memcpy(packetsToSend, request.command_parameters + 5, BIT_FIELD_SIZE);
+		memcpy(packetsToSend, request.data + 5, BIT_FIELD_SIZE);
 
-		error = bitField_imageDump(image_id, comprasionType, request.cmdId, firstIndex, packetsToSend);
+		error = bitField_imageDump(image_id, comprasionType, request.cmd_id, firstIndex, packetsToSend);
 	}
 
-	else if (request.type == chunkField_imageDump_)
+	else if (request.id == Image_Dump_chunkField)
 	{
 		imageid image_id;
-		memcpy(&image_id, request.command_parameters, sizeof(imageid));
+		memcpy(&image_id, request.data, sizeof(imageid));
 		fileType comprasionType;
-		memcpy(&comprasionType, request.command_parameters + 4, sizeof(byte));
+		memcpy(&comprasionType, request.data + 4, sizeof(byte));
 		unsigned short firstIndex;
-		memcpy(&firstIndex, request.command_parameters + 5, sizeof(short));
+		memcpy(&firstIndex, request.data + 5, sizeof(short));
 		unsigned short lastIndex;
-		memcpy(&lastIndex, request.command_parameters + 7, sizeof(short));
+		memcpy(&lastIndex, request.data + 7, sizeof(short));
 
 		error = chunkField_imageDump(request, image_id, comprasionType, firstIndex, lastIndex);
 	}
-	else if (request.type == thumbnail_imageDump_)
+	else if (request.id == Thumbnail_Dump)
 	{
-		time_unix startingTime = *((time_unix*)request.command_parameters);
-		memcpy(&startingTime, request.command_parameters, sizeof(time_unix));
-		time_unix endTime = *((time_unix*)request.command_parameters + 4);
-		memcpy(&endTime, request.command_parameters + 4, sizeof(time_unix));
+		time_unix startingTime = *((time_unix*)request.data);
+		memcpy(&startingTime, request.data, sizeof(time_unix));
+		time_unix endTime = *((time_unix*)request.data + 4);
+		memcpy(&endTime, request.data + 4, sizeof(time_unix));
 
 		imageid* ID_list = get_ID_list_withDefaltThumbnail(startingTime, endTime);
 		if (ID_list == NULL)
 			error = DataBaseNullPointer;
 
-		error = thumbnail_Dump(ID_list, request.cmdId);
+		error = thumbnail_Dump(ID_list, request.cmd_id);
 	}
-	else if (request.type == imageDataBaseDump_)
+	else if (request.id == DataBase_Dump)
 	{
-		time_unix startingTime = *((time_unix*)request.command_parameters);
-		memcpy(&startingTime, request.command_parameters, sizeof(time_unix));
-		time_unix endTime = *((time_unix*)request.command_parameters + 4);
-		memcpy(&endTime, request.command_parameters + 4, sizeof(time_unix));
+		time_unix startingTime = *((time_unix*)request.data);
+		memcpy(&startingTime, request.data, sizeof(time_unix));
+		time_unix endTime = *((time_unix*)request.data + 4);
+		memcpy(&endTime, request.data + 4, sizeof(time_unix));
 
 		byte* DataBaseBuffer = getImageDataBaseBuffer(startingTime, endTime);
 
@@ -386,7 +395,7 @@ void imageDump_task(void* param)
 	}
 
 	// ToDo: error log!
-	printf("\n-IMAGE DUMP- ERROR (%u), type (%u)\n\n", error, request.type);
+	printf("\n-IMAGE DUMP- ERROR (%u), type (%u)\n\n", error, request.id);
 
 	set_system_state(dump_param, SWITCH_OFF);
 

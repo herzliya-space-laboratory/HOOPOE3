@@ -19,8 +19,6 @@
 
 #define MAX_NUMBER_OF_CAMERA_REQ	25
 
-#define MAX_DATA_CAM_REQ	SPL_TC_DATA_SIZE
-
 #define AUTO_CAMERA_SLEEP_TIMEOUT	CONVERT_MS_TO_SECONDS(30 * 60)
 
 #define MAX_TIME_TO_KEEP_ON_CAMERA	60 * 10
@@ -57,7 +55,7 @@ typedef struct __attribute__ ((__packed__))
 	command_id cmd_id;
 	cam_Request_id_t id;
 	duration_t keepOnCamera;
-	byte data[MAX_DATA_CAM_REQ];
+	byte data[SPL_TC_DATA_SIZE];
 }Camera_Request;
 
 void CameraManagerTaskMain();
