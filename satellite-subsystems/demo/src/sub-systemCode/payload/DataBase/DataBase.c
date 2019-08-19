@@ -114,12 +114,9 @@ ImageDataBaseResult zeroImageDataBase()
 	for (unsigned int i = DATABASEFRAMADDRESS; i < DATABASE_FRAM_END; i += sizeof(uint8_t))
 	{
 		result = FRAM_write((unsigned char*)&zero, i, sizeof(uint8_t));
-		if (result != 0)
-		{
-			return DataBaseFramFail;
-		}
+		CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
-		vTaskDelay(DELAY);
+		vTaskDelay(1);
 	}
 
 	return DataBaseSuccess;
@@ -383,6 +380,8 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 
 	// Reading the image to the buffer:
 
+	vTaskDelay(CAMERA_DELAY);
+
 	error = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
 	if( error )
 	{
@@ -621,10 +620,6 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 
 ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 {
-	short Attitude[3];
-	for (int i = 0; i < 3; i++) {
-		Attitude[i] = get_Attitude(i);
-	}
 
 	int err = 0;
 
@@ -634,12 +629,17 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	{
 		err = GECKO_EraseBlock(database->nextId + i);
 		CMP_AND_RETURN(err, 0, GECKO_Erase_Success - err);
-
-		vTaskDelay(DELAY);
 	}
+
+	vTaskDelay(CAMERA_DELAY);
 
 	unsigned int currentDate = 0;
 	Time_getUnixEpoch(&currentDate);
+
+	short Attitude[3];
+	for (int i = 0; i < 3; i++) {
+		Attitude[i] = get_Attitude(i);
+	}
 
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
 	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);

@@ -361,11 +361,11 @@ void imageDump_task(void* param)
 		imageid image_id;
 		memcpy(&image_id, request.data, sizeof(imageid));
 		fileType comprasionType;
-		memcpy(&comprasionType, request.data + 4, sizeof(byte));
+		memcpy(&comprasionType, request.data + sizeof(imageid), sizeof(byte));
 		unsigned short firstIndex;
-		memcpy(&firstIndex, request.data + 5, sizeof(short));
+		memcpy(&firstIndex, request.data + sizeof(imageid)+sizeof(byte), sizeof(short));
 		unsigned short lastIndex;
-		memcpy(&lastIndex, request.data + 7, sizeof(short));
+		memcpy(&lastIndex, request.data + sizeof(imageid)+sizeof(byte)+sizeof(short), sizeof(short));
 
 		error = chunkField_imageDump(request, image_id, comprasionType, firstIndex, lastIndex);
 	}

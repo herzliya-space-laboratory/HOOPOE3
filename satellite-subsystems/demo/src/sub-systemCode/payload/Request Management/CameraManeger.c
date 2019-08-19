@@ -112,6 +112,7 @@ void CameraManagerTaskMain()
 
 		if (!get_ground_conn())
 		{
+			//Time_getUnixEpoch(&turnedOnCamera);
 			//ImageDataBaseResult error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
 			// ToDo: error log
 		}
@@ -252,8 +253,8 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case delete_picture:
-		error = DeletePicture(imageDataBase, request.data);
 		Time_getUnixEpoch(&turnedOnCamera);
+		error = DeletePicture(imageDataBase, request.data);
 		break;
 
 	case transfer_image_to_OBC:
@@ -263,6 +264,7 @@ void act_upon_request(Camera_Request request)
 		}
 		else
 		{
+			Time_getUnixEpoch(&turnedOnCamera);
 			error = TransferPicture(imageDataBase, request.data);
 		}
 		break;
@@ -295,12 +297,13 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case Turn_On_Camera:
-		TurnOnGecko();
 		Time_getUnixEpoch(&turnedOnCamera);
+		TurnOnGecko();
 		break;
 
 	case Turn_Off_Camera:
 		TurnOffGecko();
+		turnedOnCamera = 0;
 		break;
 
 	case Set_Chunk_Size:
