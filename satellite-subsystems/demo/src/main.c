@@ -127,14 +127,14 @@ if(0 != err){\
 printf("error in " #function "= %d\n",err);return;\
 } else{\
 printf("\n[");\
-for(int i =0; i <sizeof(data);i++){\
+for(unsigned int i =0; i <sizeof(data);i++){\
 printf("%X, ",data.raw[i]);\
 }\
 printf("]\n");\
 }
 
 void TestEstimationModesAndTLM(){
-	int err =0;
+	unsigned int err =0;
 	cspace_adcs_runmode_t runmode = runmode_enabled;
 	err = cspaceADCS_setRunMode(ADCS_ID,  runmode);
 	vTaskDelay(2000);
@@ -197,6 +197,8 @@ void taskMain()
 	adcsCmd.id = TC_ADCS_T;
 	//tests testId;
 	int err;
+
+
 	cspace_adcs_estmode_sel est_mode = 0;
 	cspace_adcs_attctrl_mod_t ctrl_mode = {.raw = {0}};
 	cspace_adcs_runmode_t runmode = 0;
@@ -261,8 +263,12 @@ void taskMain()
 			if (input < 200)
 			{
 				adcsCmd.subType = input;
-				printf("Enter ADCS command data in hex(Max length 200 bytes)\n");
-				while (UTIL_DbguGetHexa32((unsigned int*)adcsCmd.data) == 0);
+				printf("Length Of command in bytes:\n");
+				while (UTIL_DbguGetIntegerMinMax(&input,0,200) == 0);
+				printf("Enter ADCS command data in hex[in little endian](Max length 200 bytes)\n");
+				for(unsigned int i = 0; i < input; i+=4){
+					while (UTIL_DbguGetHexa32((unsigned int*)adcsCmd.data + i) == 0);
+				}
 				err = AdcsCmdQueueAdd(&adcsCmd);
 				printf("ADCS command error = %d\n\n\n", err);
 

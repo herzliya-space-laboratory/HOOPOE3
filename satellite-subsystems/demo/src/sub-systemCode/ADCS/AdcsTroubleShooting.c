@@ -6,7 +6,7 @@
 int AdcsTroubleShooting(TroubleErrCode trbl)
 {
 	//todo: Add log
-	byte *data;
+	//byte *data;
 	switch(trbl)
 		{
 		case(TRBL_FAIL):

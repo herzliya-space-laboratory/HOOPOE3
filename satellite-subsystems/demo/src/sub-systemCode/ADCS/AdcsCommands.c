@@ -180,6 +180,13 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 
 	encode_TMpacket(rawData, &rawDataLength, tm);
 	TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
+#ifdef TESTING
+	printf("\n[");
+	for(unsigned int i=0;i<tm.length;i++){
+		printf("%X,",tm.data[i]);
+	}
+	printf("]\n");
+#endif
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
@@ -193,14 +200,11 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	int rv = 0;
 	unsigned char sub_type = cmd->subType;
 
-	unsigned char buffer[300] = {0};
+	unsigned char data[300] = {0};
 
-	cspace_adcs_geninfo_t data; //TODO: for testing only. delete
 	cspace_adcs_bootprogram bootindex;
 	cspace_adcs_runmode_t runmode;
-	cspace_adcs_unixtm_t time;
-	cspace_adcs_estmode_sel att;
-	cspace_adcs_attctrl_mod_t att_ctrl;
+	cspace_adcs_estmode_sel att_est;
 
 	cspace_adcs_clearflags_t clear;
 	cspace_adcs_magmode_t magmode;

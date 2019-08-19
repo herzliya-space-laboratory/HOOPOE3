@@ -264,7 +264,7 @@ void no_reset_task()
 	state.fields.channel3V3_1 = 1;
 	state.fields.channel5V_1 = 1;
 	int err=0;
-int sum =0;
+
 	while(1)
 	{
 		err = GomEpsGetHkData_general(0, &eps_tlm);
