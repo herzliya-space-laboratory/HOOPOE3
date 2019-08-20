@@ -1,7 +1,7 @@
 /*
  * Camera.c
  *
- *  Created on: 7 במאי 2019
+ *  Created on: 7 ׳‘׳�׳�׳™ 2019
  *      Author: I7COMPUTER
  */
 
@@ -27,21 +27,26 @@
 
 void Initialized_GPIO()
 {
+	/*
 	Pin gpio12 = PIN_GPIO12;
 	PIO_Configure(&gpio12, PIO_LISTSIZE(&gpio12));
 	vTaskDelay(10);
 	PIO_Set(&gpio12);
 	vTaskDelay(10);
+	*/
 }
 void De_Initialized_GPIO()
 {
+	/*
 	Pin Pin12 = PIN_GPIO12;
 	PIO_Clear(&Pin12);
 	vTaskDelay(10);
+	*/
 }
 
 Boolean TurnOnGecko()
 {
+	/*
 	printf("turning camera on\n");
 	Pin gpio4=PIN_GPIO04;
 	Pin gpio5=PIN_GPIO05;
@@ -66,11 +71,12 @@ Boolean TurnOnGecko()
 	vTaskDelay(10);
 
 	//Initialized_GPIO();
-
+	*/
 	return TRUE;
 }
 Boolean TurnOffGecko()
 {
+	/*
 	printf("turning camera off\n");
 	Pin gpio4=PIN_GPIO05;
 	Pin gpio5=PIN_GPIO07;
@@ -88,17 +94,20 @@ Boolean TurnOffGecko()
 	vTaskDelay(10);
 
 	//De_Initialized_GPIO();
-
+*/
 	return TRUE;
 }
 
 int initGecko()
 {
+	/*
 	return GECKO_Init( (SPIslaveParameters){ bus1_spi, mode0_spi, slave1_spi, 100, 1, _SPI_GECKO_BUS_SPEED, 0 } );
+	*/
 }
 
 int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
 {
+	/*
 	GomEpsResetWDT(0);
 
 	// Setting PGA Gain:
@@ -115,7 +124,7 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	 * Contained in register 0x0D in bits 16 to 31,
 	 * during tests with ISIS's function for taking pictures we checked the registers' values, 0x0D value was 0x3FC30335
 	 * hence the number 0x3FC3
-	 */
+	 //
 	result = GECKO_SetOffset(0x3FC3);
 	Result( result, -18);
 
@@ -201,12 +210,12 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	// Turning sensor OFF:
 	result = GECKO_SensorOff();
 	Result( result, -1);
-
+*/
 	return 0;
 }
 
 int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
-{
+{/*
 	GomEpsResetWDT(0);
 
 	// Init Flash:
@@ -244,10 +253,10 @@ int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 	} while(result == 0);
 
 	vTaskDelay(1000);
-
+*/
 	for (unsigned int i = 0; i < IMAGE_SIZE/sizeof(uint32_t); i++)
 	{
-		buffer[i] = GECKO_GetImgData();
+		buffer[i] = i;//GECKO_GetImgData();
 
 		// Printimg a value one every 40000 pixels:
 		if(i % 5000 == 0)
@@ -258,19 +267,20 @@ int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 	}
 
 	printf("ImageSize = %d\n", IMAGE_SIZE);
-
+/*
 	result = GECKO_GetReadDone();
 	if (result == 0)
 		return -7;
 
 	result = GECKO_ClearReadDone();
 	Result(result, -8);
-
+*/
 	return 0;
 }
 
 int GECKO_EraseBlock( uint32_t imageID )
 {
+	/*
 	GomEpsResetWDT(0);
 
 	// Setting image ID:
@@ -292,6 +302,6 @@ int GECKO_EraseBlock( uint32_t imageID )
 
 	int result_clearEraseDone = GECKO_ClearEraseDone();
 	Result(result_clearEraseDone, -4);
-
+*/
 	return 0;
 }
