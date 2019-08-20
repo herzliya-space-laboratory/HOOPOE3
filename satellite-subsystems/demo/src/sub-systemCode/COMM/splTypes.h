@@ -194,7 +194,7 @@
 #define ADCS_CLEAR_ERRORS_ST				12
 #define ADCS_SET_ATT_CTRL_MODE_ST			13
 #define ADCS_SET_EST_MODE_ST				14
-//#define ADCS_USE_IN_EKF_ST				14
+//#define ADCS_USE_IN_EKF_ST					15
 #define ADCS_SET_MAG_OUTPUT_ST				16
 #define ADCS_SET_WHEEL_SPEED_ST				17
 #define ADCS_SET_MTQ_CONFIG_ST				21

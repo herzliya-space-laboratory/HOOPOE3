@@ -18,7 +18,7 @@
 #define ADCS_ID 0
 #define CMD_FOR_TEST_AMUNT 34
 #define TastDelay 60000
-
+#define AMUNT_OF_STFF_TO_ADD_TO_THE_Q 3
 
 void Lupos_Test(byte Data[][])
 {
@@ -185,12 +185,12 @@ void AdcsTestTask()
 
 	byte SetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
 	Lupos_Test(SetData);
-	while(1)
+	while(TRUE)
 	{
 		int err;
 		for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
 		{
-			if(i % (MAX_ADCS_QUEUE_LENGTH/3) == 0)
+			if(i % (MAX_ADCS_QUEUE_LENGTH/AMUNT_OF_STFF_TO_ADD_TO_THE_Q) == 0)
 			{
 				vTaskDelay(TastDelay);
 			}
