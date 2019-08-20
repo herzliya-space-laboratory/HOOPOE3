@@ -52,6 +52,24 @@ xTaskHandle xBeaconTask;
 
 static byte Dump_buffer[DUMP_BUFFER_SIZE];
 
+void update_FRAM_bitRate()
+{
+	byte dat;
+	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
+	check_int("TRXVU_init_softWare, FRAM_read", error);
+	ISIStrxvuBitrate newParam = DEFAULT_BIT_RATE;
+	for (uint8_t i = 1; i < 9; i *= 2)
+	{
+		if (dat == i)
+		{
+			newParam = (ISIStrxvuBitrate)dat;
+			break;
+		}
+	}
+	vTaskDelay(2000);
+	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
+	check_int("IsisTrxvu_tcSetAx25Bitrate, update_FRAM_bitRate", error);
+}
 void toggle_idle_state()
 {
 	int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
@@ -95,21 +113,7 @@ void TRXVU_init_softWare()
 	get_APRS_list();
 	get_delayCommand_list();
 
-	byte dat;
-	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
-	check_int("TRXVU_init_softWare, FRAM_read", error);
-	ISIStrxvuBitrate newParam = DEFAULT_BIT_RATE;
-	for (uint8_t i = 1; i < 9; i *= 2)
-	{
-		if (dat == i)
-		{
-			newParam = (ISIStrxvuBitrate)dat;
-			break;
-		}
-	}
-	vTaskDelay(2000);
-	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
-	check_int("IsisTrxvu_tcSetAx25Bitrate, cmd_change_def_bit_rate", error);
+	update_FRAM_bitRate();
 	vTaskDelay(100);
 
 	//1. create binary semaphore for transmitting
@@ -912,6 +916,7 @@ void change_TRXVU_state(Boolean state)
 		printf("\tTransponder is disabled\n\n");
 		data[1] = 0x01;
 		set_system_state(transponder_active_param, SWITCH_OFF);
+		update_FRAM_bitRate();
 	}
 	else
 	{

@@ -858,8 +858,13 @@ void HouseKeeping_highRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
+		if (DF == TRUE_8BIT)
+		{
+			vTaskDelay(100);
+			continue;
+		}
 		int i_error = f_managed_enterFS();
-		if (DF != TRUE_8BIT && i_error == 0)
+		if (i_error == 0)
 		{
 			save_EPS_HK();
 
@@ -886,8 +891,13 @@ void HouseKeeping_lowRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
+		if (DF == TRUE_8BIT)
+		{
+			vTaskDelay(100);
+			continue;
+		}
 		int i_error = f_managed_enterFS();
-		if (DF != TRUE_8BIT && i_error == 0)
+		if (i_error == 0)
 		{
 			save_SP_HK();
 			f_managed_releaseFS();

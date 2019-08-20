@@ -148,7 +148,7 @@ int f_managed_close(F_FILE* fileHandler)
 	if (error != 0)
 		return error;
 
-	if (xSemaphoreGive(xEnterTaskFS) == pdTRUE)
+	if (xSemaphoreGive(xFileOpenHandler) == pdTRUE)
 		return 0;
 
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
@@ -159,7 +159,7 @@ FileSystemResult createSemahores_FS()
 	xFileOpenHandler = xSemaphoreCreateCounting(F_MAXFILES, F_MAXFILES);
 	if (xFileOpenHandler == NULL)
 		return FS_COULD_NOT_CREATE_SEMAPHORE;
-	xEnterTaskFS = xSemaphoreCreateCounting(FAT_MAXTASK, F_MAXFILES);
+	xEnterTaskFS = xSemaphoreCreateCounting(FAT_MAXTASK, FAT_MAXTASK);
 	if (xFileOpenHandler == NULL)
 		return FS_COULD_NOT_CREATE_SEMAPHORE;
 	return FS_SUCCSESS;
