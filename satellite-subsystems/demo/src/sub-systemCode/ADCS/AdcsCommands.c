@@ -215,12 +215,12 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 #endif
 
 	adcs_i2c_cmd i2c_cmd;
-	
+	printf("Executing sst: %d \n",sub_type);
 	switch(sub_type)
 	{
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
-			memcpy(i2c_cmd.data,cmd->data,sizeof(cmd->length));
+			memcpy(i2c_cmd.data,cmd->data,sizeof(cmd->length));//todo: check what happen here(sizeof(length))
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			if (i2c_cmd.id < 128){
 				SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
@@ -288,9 +288,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_setAttEstMode(ADCS_ID,att_est);
 			PRINT_ON_TEST(setAttEstMode,err);
 			break;
-		//case ADCS_USE_IN_EKF_ST:
-			// err = cspaceADCS_setAttEstMode(ADCS_ID,estmode_full_state_ekf);
-			// break;
+//		case ADCS_USE_IN_EKF_ST:
+//			 err = cspaceADCS_setAttEstMode(ADCS_ID, estmode_full_state_ekf);
+//			 break;
 		case ADCS_SET_MAG_OUTPUT_ST:
 			err = cspaceADCS_setMagOutput(ADCS_ID, (cspace_adcs_magnetorq_t*)cmd->data);
 			break;
