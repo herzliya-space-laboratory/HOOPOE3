@@ -63,6 +63,37 @@ void reset_FIRST_activation(Boolean8bit dataFRAM)
 	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 }
 
+static Boolean printImage()
+{
+	char fileName[12] = "i2.jpg";
+
+	unsigned int number_of_bytes = f_filelength(fileName);
+	F_FILE* file_handle = f_open(fileName, "r");
+
+	unsigned char somebyte;
+
+	uint8_t pixel = 0;
+
+	for (unsigned int i = 0; i < number_of_bytes; i++) {
+
+		f_read(&pixel, sizeof(char), 1, file_handle);
+		printf("%u ", pixel);
+
+		if (i % 200 == 0)
+			vTaskDelay(3);
+		if(i%1000000==0)
+		{
+			GomEpsPing(0, 0, &somebyte);
+			GomEpsResetWDT(0);
+		}
+	}
+
+	f_close(file_handle);
+	printf("closed. \n");
+	printf("\n\nfinished. \n");
+	return TRUE;
+}
+
 void test_menu()
 {
 	reset_FIRST_activation(FALSE_8BIT);
@@ -74,6 +105,7 @@ void test_menu()
 		printf( "\n\r Select a test to perform: \n\r");
 		printf("\t 0) continue to code\n\r");
 		printf("\t 1) set first activation flag to TRUE\n\r");
+		printf("\t 2) print image\n\r");
 
 		exit = FALSE;
 		while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
@@ -85,6 +117,9 @@ void test_menu()
 			break;
 		case 1:
 			reset_FIRST_activation(TRUE_8BIT);
+			break;
+		case 2:
+			printImage();
 			break;
 		}
 	}

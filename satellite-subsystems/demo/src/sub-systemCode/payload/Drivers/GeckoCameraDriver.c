@@ -25,6 +25,69 @@
 #define	totalPageCount 136
 #define totalFlashCount 4096
 
+void SPIcallback(SystemContext context, xSemaphoreHandle semaphore) {
+	signed portBASE_TYPE flag = pdFALSE;
+
+	if(context == task_context) {
+		xSemaphoreGive(semaphore);
+	}
+	else {
+		xSemaphoreGiveFromISR(semaphore, &flag);
+	}
+}
+
+void SPI()
+{
+	int retValInt = 0;
+		unsigned int i;
+		SPIslaveParameters slaveParams;
+		SPItransfer spiTransfer;
+		unsigned char readData[64] = {0}, writeData[64] = {0};
+		TRACE_DEBUG("\n\r taskSPItest2: Starting. \n\r");
+
+		writeData[0] = 0xEF;
+		for(i=1; i<sizeof(writeData); i++) {
+			writeData[i] = (unsigned char)(i);
+			readData[i] = 0xEF;
+		}
+
+		slaveParams.bus    = bus1_spi;
+		slaveParams.mode   = mode0_spi;
+		slaveParams.slave  = slave1_spi;
+		slaveParams.dlybs  = 1;
+		slaveParams.dlybct = 1;
+		slaveParams.busSpeed_Hz = 600000;
+		slaveParams.postTransferDelay = 0;
+
+		spiTransfer.slaveParams = &slaveParams;
+		spiTransfer.callback  = SPIcallback;
+		spiTransfer.readData  = readData;
+		spiTransfer.writeData = writeData;
+		spiTransfer.transferSize = 10;
+
+		while(1) {
+
+			retValInt = SPI_writeRead(&spiTransfer);
+			if(retValInt != 0) {
+				TRACE_WARNING("\n\r taskSPItest2: SPI_queueTransfer returned: %d! \n\r", retValInt);
+				while(1);
+			}
+
+			//TRACE_DEBUG(" taskSPItest2: received back: \n\r");
+			//TRACE_DEBUG("0x%X ", readData[0]);
+			for(i=1; i<spiTransfer.transferSize; i++) {
+				//TRACE_DEBUG("0x%X ", readData[i]);
+				writeData[i]++;
+				readData[i] = 0xEF;
+			}
+			writeData[i]++;
+
+			//TRACE_DEBUG(" \n\r\n\r");
+			vTaskDelay(5);
+		}
+
+}
+
 void Initialized_GPIO()
 {
 	/*
@@ -119,7 +182,7 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	Result(result, -2);
 
 	// Setting sensor offset:
-	/*
+	//
 	 * All info taken from datasheet v1.4
 	 * Contained in register 0x0D in bits 16 to 31,
 	 * during tests with ISIS's function for taking pictures we checked the registers' values, 0x0D value was 0x3FC30335
