@@ -121,7 +121,7 @@ void AdcsTask()
 	while(TRUE)
 	{
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
-			vTaskDelay(delay_loop);
+			vTaskDelay(DEFAULT_ADCS_LOOP_DELAY);
 			continue;
 		}
 		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
@@ -147,7 +147,7 @@ void AdcsTask()
 			AdcsTroubleShooting(trbl);
 		}
 
-		vTaskDelay(delay_loop);
+		vTaskDelay(DEFAULT_ADCS_LOOP_DELAY);
 	}
 }
 

@@ -2,7 +2,7 @@
  * AdcsTest.c
  *
  *  Created on: Aug 11, 2019
- *      Author: àéúé
+ *      Author: ï¿½ï¿½ï¿½ï¿½
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -20,7 +20,7 @@
 #define TastDelay 60000
 #define AMUNT_OF_STFF_TO_ADD_TO_THE_Q 3
 
-void Lupos_Test(byte Data[][])
+void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE])
 {
 	int i,j;
 	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
@@ -35,14 +35,14 @@ void Lupos_Test(byte Data[][])
 	cspace_adcs_unixtm_t Time;
 	Time.fields.unix_time_sec = 1566304200;
 	Time.fields.unix_time_millsec = 0;
-	memccpy(Data[0],Time.raw,sizeof(cspace_adcs_unixtm_t));
+	memcpy(Data[0],Time.raw,sizeof(cspace_adcs_unixtm_t));
 
 	//data 1
 	cspace_adcs_attctrl_mod_t CT;
 	CT.fields.ctrl_mode = 1;
 	CT.fields.override_flag = 0;
 	CT.fields.timeout = 10;
-	memccpy(Data[1],CT.raw,sizeof(cspace_adcs_unixtm_t));
+	memcpy(Data[1],CT.raw,sizeof(cspace_adcs_unixtm_t));
 
 
 	//data 2
@@ -53,12 +53,12 @@ void Lupos_Test(byte Data[][])
 	MT.fields.magduty_x = 0.8 * 1000;
 	MT.fields.magduty_y = 0.8 * 1000;
 	MT.fields.magduty_z = 0.8 * 1000;
-	memccpy(Data[3],MT.raw,sizeof(cspace_adcs_magnetorq_t));
+	memcpy(Data[3],MT.raw,sizeof(cspace_adcs_magnetorq_t));
 
 	//data 4
 	cspace_adcs_wspeed_t wheelConfig;
 	wheelConfig.fields.speed_y = 3586;
-	memccpy(Data[4],wheelConfig,sizeof(cspace_adcs_magnetorq_t));
+	memcpy(Data[4],wheelConfig.raw,sizeof(cspace_adcs_magnetorq_t));
 
 	//data 5
 	for(int i = 0; i<3; i++)
@@ -80,12 +80,12 @@ void Lupos_Test(byte Data[][])
 
 	//data 23
 	double SGP4_Init[23] = {0,0,0,0,0,0,0,0};
-	memccpy(Data[23],SGP4_Init,sizeof(double)*8);
+	memcpy(Data[23],SGP4_Init,sizeof(double)*8);
 
 	//data 24-32
 	for(i = 24; i < 32; i++)
 	{
-		memccpy(Data[i], &SGP4_Init[i-24], sizeof(double));
+		memcpy(Data[i], &SGP4_Init[i-24], sizeof(double));
 	}
 
 }
@@ -185,6 +185,7 @@ void AdcsTestTask()
 
 	byte SetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
 	Lupos_Test(SetData);
+	printf("start test");
 	while(TRUE)
 	{
 		int err;
@@ -202,11 +203,11 @@ void AdcsTestTask()
 			memcpy(get.data,GetData[i],set.length);
 
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:\t err:",getSubType[i], err);
+			printf("sst:%d\t err:%d\n",getSubType[i], err);
 			err = AdcsCmdQueueAdd(&set);
-			printf("sst:\t err:",setSubType[i], err);
+			printf("sst:%d\t err:%d\n",setSubType[i], err);
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:\t err:",getSubType[i], err);
+			printf("sst:%d\t err:%d\n",getSubType[i], err);
 		}
 	}
 }

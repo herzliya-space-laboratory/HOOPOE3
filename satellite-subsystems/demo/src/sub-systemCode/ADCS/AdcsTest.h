@@ -2,7 +2,7 @@
  * AdcsTest.h
  *
  *  Created on: Aug 11, 2019
- *      Author: àéúé
+ *      Author: ï¿½ï¿½ï¿½ï¿½
  */
 
 #ifndef ADCSTEST_H_
@@ -18,6 +18,7 @@ typedef enum tests
 }tests;
 #endif /* ADCSTEST_H_ */
 
+void AdcsTestTask();
 void printErrFlag();
 void Mag_Test();
 void AddCommendToQ();
