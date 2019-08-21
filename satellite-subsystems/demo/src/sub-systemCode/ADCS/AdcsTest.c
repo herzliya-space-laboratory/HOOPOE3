@@ -17,8 +17,9 @@
 #define MAX_ADCS_QUEUE_LENGTH 42
 #define ADCS_ID 0
 #define CMD_FOR_TEST_AMUNT 34
-#define TastDelay 60000
+#define TastDelay 600000
 #define AMUNT_OF_STFF_TO_ADD_TO_THE_Q 3
+#define TEST_NUM 0
 
 void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE])
 {
@@ -189,26 +190,26 @@ void AdcsTestTask()
 	while(TRUE)
 	{
 		int err;
-		for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
-		{
-			if(i % (MAX_ADCS_QUEUE_LENGTH/AMUNT_OF_STFF_TO_ADD_TO_THE_Q) == 0)
-			{
-				vTaskDelay(TastDelay);
-			}
+//		for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
+//		{
+//			if(i % (MAX_ADCS_QUEUE_LENGTH/AMUNT_OF_STFF_TO_ADD_TO_THE_Q) == 0)
+//			{
+//
+//			}
+			set.subType = setSubType[TEST_NUM];
+			memcpy(set.data,SetData[TEST_NUM],set.length);
 
-			set.subType = setSubType[i];
-			memcpy(set.data,SetData[i],set.length);
-
-			get.subType = getSubType[i];
-			memcpy(get.data,GetData[i],set.length);
+			get.subType = getSubType[TEST_NUM];
+			memcpy(get.data,GetData[TEST_NUM],set.length);
 
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:%d\t err:%d\n",getSubType[i], err);
+			printf("sst:%d\t err:%d\n",getSubType[TEST_NUM], err);
 			err = AdcsCmdQueueAdd(&set);
-			printf("sst:%d\t err:%d\n",setSubType[i], err);
+			printf("sst:%d\t err:%d\n",setSubType[TEST_NUM], err);
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:%d\t err:%d\n",getSubType[i], err);
-		}
+			printf("sst:%d\t err:%d\n",getSubType[TEST_NUM], err);
+			vTaskDelay(TastDelay);
+//		}
 	}
 }
 
@@ -270,13 +271,23 @@ void AddCommendToQ()
 
 void testInit()
 {
+	TC_spl InitCommand;
+	InitCommand.subType = ADCS_RUN_MODE_ST;
+	InitCommand.data[0] = 1;
 	cspaceADCS_setRunMode(ADCS_ID, runmode_enabled);
+	int err = AdcsCmdQueueAdd(&adcsCmd);
+	printf("ADCS test init command error = %d\n", err);
+
 	vTaskDelay(10);
+
+	InitCommand.subType = ADCS_SET_PWR_CTRL_DEVICE_ST;
 	cspace_adcs_powerdev_t device_ctrl = { 0 };
 	device_ctrl.fields.signal_cubecontrol = 1;
 	device_ctrl.fields.motor_cubecontrol = 1;
 	device_ctrl.fields.pwr_motor = 1;
-	cspaceADCS_setPwrCtrlDevice(ADCS_ID, &device_ctrl);
+	memcpy(InitCommand.data,device_ctrl,sizeof(device_ctrl));
+	int err = AdcsCmdQueueAdd(&InitCommand);
+	printf("ADCS test init command error = %d\n", err);
 
 }
 

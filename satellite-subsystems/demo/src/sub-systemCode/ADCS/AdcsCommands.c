@@ -180,13 +180,6 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 
 	encode_TMpacket(rawData, &rawDataLength, tm);
 	TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
-#ifdef TESTING
-	printf("\n[");
-	for(unsigned int i=0;i<tm.length;i++){
-		printf("%X,",tm.data[i]);
-	}
-	printf("]\n");
-#endif
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
@@ -215,7 +208,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 #endif
 
 	adcs_i2c_cmd i2c_cmd;
-	printf("Executing sst: %d \n",sub_type);
 	switch(sub_type)
 	{
 		//generic I2C command
