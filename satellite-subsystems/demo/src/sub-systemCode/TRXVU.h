@@ -31,7 +31,7 @@
 #define NOMINAL_MODE TRUE
 #define TRANSPONDER_MODE FALSE
 
-#define MAX_NUTE_TIME 3
+#define MAX_NUTE_TIME 90// in minutes
 
 #define DEFAULT_TIME_TRANSMITTER (60 * 15)// in seconds
 
