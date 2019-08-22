@@ -6,7 +6,7 @@
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-
+#include "AdcsCommands.h"
 #include "AdcsMain.h"
 #include "AdcsTest.h"
 #include "sub-systemCode/Main/CMD/ADCS_CMD.h"
@@ -25,7 +25,7 @@
 
 void testInit();
 
-void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE], setLength[CMD_FOR_TEST_AMUNT])
+void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE], int setLength[CMD_FOR_TEST_AMUNT])
 {
 	int i,j;
 	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
@@ -167,7 +167,7 @@ void AdcsTestTask()
 	adcs_i2c_cmd i2c_cmd;
 	i2c_cmd.id = 131;
 	i2c_cmd.length = 0;
-	memcpy(GetData[1],i2c_cmd,sizeof(adcs_i2c_cmd));
+	memcpy(GetData[1],&i2c_cmd,sizeof(adcs_i2c_cmd));
 	getLength[1] = sizeof(adcs_i2c_cmd);
 
 	//function to test constructor
@@ -228,16 +228,15 @@ void AdcsTestTask()
 			memcpy(get.data,GetData[TEST_NUM],get.length);
 
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:%d\t err:%d\n",get.subType, err);
+			printf("\nsst:%d\t err:%d\n",get.subType, err);
 			err = AdcsCmdQueueAdd(&set);
-			printf("sst:%d\t err:%d data:",set.subType, err ,set.data);
+			printf("sst:%d\t err:%d\t data:",set.subType, err ,set.data);
 			for(i = 0; i < set.length; i++)
 			{
 				printf("%x, ",set.data[i]);
 			}
-			printf("\n");
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:%d\t err:%d\n",get.subType, err);
+			printf("\nsst:%d\t err:%d\n",get.subType, err);
 			vTaskDelay(TastDelay);
 //		}
 	}
