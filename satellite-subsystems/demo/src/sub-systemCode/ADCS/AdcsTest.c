@@ -25,11 +25,12 @@
 
 void testInit();
 
-void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE])
+void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE], setLength[CMD_FOR_TEST_AMUNT])
 {
 	int i,j;
 	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
 	{
+		setLength[i] = 0;
 		for(j = 0; j < SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE; j++)
 		{
 			Data[i][j] = 0;
@@ -41,6 +42,7 @@ void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SI
 	Time.fields.unix_time_sec = 1566304200;
 	Time.fields.unix_time_millsec = 0;
 	memcpy(Data[0],Time.raw,sizeof(cspace_adcs_unixtm_t));
+	setLength[0] = 6;
 
 	//data 1
 	cspace_adcs_attctrl_mod_t CT;
@@ -48,13 +50,15 @@ void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SI
 	CT.fields.override_flag = 0;
 	CT.fields.timeout = 10;
 	memcpy(Data[1],CT.raw,sizeof(cspace_adcs_unixtm_t));
-
+	setLength[1] = sizeof(cspace_adcs_attctrl_mod_t);
 
 	//data 2
 	Data[2][0] = 1;
+	setLength[2] = 1;
 
 	//data 3
 	Data[3][0] = 1;
+	setLength[3] = 1;
 
 	//data 4
 	cspace_adcs_magnetorq_t MT;
@@ -62,38 +66,45 @@ void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SI
 	MT.fields.magduty_y = 0.8 * 1000;
 	MT.fields.magduty_z = 0.8 * 1000;
 	memcpy(Data[4],MT.raw,sizeof(cspace_adcs_magnetorq_t));
+	setLength[4] = sizeof(cspace_adcs_magnetorq_t);
 
 	//data 5
 	cspace_adcs_wspeed_t wheelConfig;
 	wheelConfig.fields.speed_y = 0;
 	memcpy(Data[5],wheelConfig.raw,sizeof(cspace_adcs_magnetorq_t));
+	setLength[5] = sizeof(cspace_adcs_magnetorq_t);
 
 	//data 6
 	for(int i = 0; i<3; i++)
 	{
 		Data[6][i] = 6;
 	}
+	setLength[6] = 3;
 
 	//data 7
 	for(int i = 0; i < 4; i++)
 	{
 		Data[7][i] = 6;
 	}
+	setLength[7] = 4;
 
 	//data 8
 	for(int i = 0; i<10; i++)
 	{
 		Data[8][i] = 6;
 	}
+	setLength[8] = 10;
 
 	//data 23
 	double SGP4_Init[23] = {0,0,0,0,0,0,0,0};
 	memcpy(Data[23],SGP4_Init,sizeof(double)*8);
+	setLength[23] = sizeof(double)*8;
 
 	//data 24-32
 	for(i = 24; i < 32; i++)
 	{
 		memcpy(Data[i], &SGP4_Init[i-24], sizeof(double));
+		setLength[i] = sizeof(double);
 	}
 
 }
@@ -141,17 +152,23 @@ void AdcsTestTask()
 			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
 			ADCS_GET_FULL_CONFIG_ST,
 	};
+	int setLength[CMD_FOR_TEST_AMUNT];
+	int getLength[CMD_FOR_TEST_AMUNT];
 	byte GetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
 	int i,j;
 	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
 	{
+		getLength[i] = 0;
 		for(j = 0; j < SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE; j++)
 		{
 			GetData[i][j] = 0;
 		}
 	}
-	GetData[1][0] = 131;
-
+	adcs_i2c_cmd i2c_cmd;
+	i2c_cmd.id = 131;
+	i2c_cmd.length = 0;
+	memcpy(GetData[1],i2c_cmd,sizeof(adcs_i2c_cmd));
+	getLength[1] = sizeof(adcs_i2c_cmd);
 
 	//function to test constructor
 	uint8_t setSubType[CMD_FOR_TEST_AMUNT] = {
@@ -190,9 +207,8 @@ void AdcsTestTask()
 			ADCS_SET_MAGNETOMETER_MODE_ST
 	};//function to test sst
 
-
 	byte SetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
-	Lupos_Test(SetData);
+	Lupos_Test(SetData,setLength);
 	printf("start test");
 	while(TRUE)
 	{
@@ -204,11 +220,11 @@ void AdcsTestTask()
 //
 //			}
 			set.subType = setSubType[TEST_NUM];
-			set.length = 6;
+			set.length = setLength[TEST_NUM];
 			memcpy(set.data,SetData[TEST_NUM],set.length);
 
 			get.subType = getSubType[TEST_NUM];
-			get.length = 0;
+			get.length = getLength[TEST_NUM];
 			memcpy(get.data,GetData[TEST_NUM],get.length);
 
 			err = AdcsCmdQueueAdd(&get);
