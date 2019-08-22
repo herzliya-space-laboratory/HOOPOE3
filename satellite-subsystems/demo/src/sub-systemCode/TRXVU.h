@@ -43,7 +43,7 @@
 #define DEFULT_BEACON_DELAY 20// in seconds
 #endif
 
-#define MIN_TIME_DELAY_BEACON	1
+#define MIN_TIME_DELAY_BEACON	5
 #define MAX_TIME_DELAY_BEACON 	40
 
 #define TRANSMMIT_DELAY_9600(length) (length - length)

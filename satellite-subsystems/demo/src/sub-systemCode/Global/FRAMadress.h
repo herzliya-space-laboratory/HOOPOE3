@@ -25,7 +25,7 @@
 //EPS
 #define EPS_VOLTAGES_ADDR 0x2100 // << EPS_VOLTAGES_SIZE_RAW bytes >>
 #define EPS_STATES_ADDR 0x211C // << 1 byte >> Address of consumption state
-#define EPS_ALPHA_ADDR		0x211D	//<< 8 byte >>
+#define EPS_ALPHA_ADDR		0x211D	//<< 1 byte >>
 
 //TRX
 #define BEACON_LOW_BATTERY_STATE_ADDR 0x311D // << 2 bytes >>

@@ -40,6 +40,9 @@
 
 #define CHECK_EPS_ALPHA_VALUE(alpha) (alpha < 1 && alpha > 0)
 
+#define FROM_RAW_ALPHA(param) ((double)param) / 100
+#define TO_RAW_ALPAH(param) (byte)(param * 100)
+
 typedef enum EPS_mode_t{
 	critical_mode = 0,
 	safe_mode = 1,

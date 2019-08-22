@@ -359,10 +359,10 @@ void Transponder_task(void *arg)
 	{
 		if (!get_system_state(mute_param) && get_system_state(Tx_param))
 		{
-			save_ACK(ACK_TRANSPONDER, ERR_ACTIVE, cmdId);
 			change_TRXVU_state(TRANSPONDER_MODE);
 			xQueueReset(xTransponderQueue);
 			transponder_logic(time, cmdId);
+			save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
 		}
 		else
 		{

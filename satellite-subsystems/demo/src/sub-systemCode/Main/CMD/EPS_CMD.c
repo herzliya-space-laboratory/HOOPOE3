@@ -195,11 +195,10 @@ void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 
-	double alpha;
-	memcpy(&alpha, cmd.data, sizeof(double));
+	double alpha = FROM_RAW_ALPHA(cmd.data[0]);
 	if (CHECK_EPS_ALPHA_VALUE(alpha))
 	{
-		int error = FRAM_write(cmd.data, EPS_ALPHA_ADDR, sizeof(double));
+		int error = FRAM_write(cmd.data, EPS_ALPHA_ADDR, 1);
 		if (error)
 		{
 			*err = ERR_FRAM_WRITE_FAIL;
