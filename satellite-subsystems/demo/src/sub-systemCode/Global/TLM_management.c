@@ -128,13 +128,13 @@ int f_managed_releaseFS()
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
 }
 
-int f_managed_open(char* file_name, char* config, F_FILE* fileHandler)
+int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 {
 	int lastError = 0;
 	if (xSemaphoreTake(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
-		fileHandler = f_open(file_name, config);
-		if (fileHandler == NULL)
+		*fileHandler = f_open(file_name, config);
+		if (*fileHandler == NULL)
 		{
 			portBASE_TYPE portRet = xSemaphoreGive(xFileOpenHandler);
 			check_portBASE_TYPE("could not return the xFileOpenHandler\n", portRet);
@@ -145,16 +145,16 @@ int f_managed_open(char* file_name, char* config, F_FILE* fileHandler)
 	}
 	else
 	{
-		fileHandler = f_open(file_name, config);
+		*fileHandler = f_open(file_name, config);
 		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xFileOpenHandler!!!!!!\n");
 		lastError = f_getlasterror();
 		printf("FS last error: %d\n", lastError);
 	}
 	return lastError;
 }
-int f_managed_close(F_FILE* fileHandler)
+int f_managed_close(F_FILE** fileHandler)
 {
-	int error = f_close(fileHandler);
+	int error = f_close(*fileHandler);
 	if (error != 0)
 		return error;
 
@@ -284,7 +284,7 @@ static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int t
 		printf("writewithEpochtime error\n");
 	}
 	f_flush( file ); /* only after flushing can data be considered safe */
-	f_managed_close(file);	/* data is also considered safe when file is closed */
+	f_managed_close(&file);	/* data is also considered safe when file is closed */
 }
 // get C_FILE struct from FRAM by name
 static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address)
@@ -367,7 +367,7 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	}
 	int index_current = getFileIndex(c_file.creation_time,curr_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
-	int error = f_managed_open(curr_file_name, "a+", file);
+	int error = f_managed_open(curr_file_name, "a+", &file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	if (file == NULL || error != F_NO_ERROR)
@@ -395,13 +395,13 @@ static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long fro
 		unsigned long to_time,int full_element_size)
 {
 	F_FILE* file = NULL;
-	int error = f_managed_open(file_name,"r", file);
+	int error = f_managed_open(file_name,"r", &file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	else if (error != 0)
 		return FS_FAIL;
 	F_FILE* temp_file = NULL;
-	error = f_managed_open("temp","a+", temp_file);
+	error = f_managed_open("temp","a+", &temp_file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	else if (error != 0)
@@ -417,8 +417,8 @@ static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long fro
 			f_write(buffer,1,full_element_size,temp_file);
 		}
 	}
-	f_managed_close(file);
-	f_managed_close(temp_file);
+	f_managed_close(&file);
+	f_managed_close(&temp_file);
 	free(buffer);
 	f_delete(file_name);
 	f_rename("temp",file_name);
@@ -525,7 +525,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
-		int error = f_managed_open(curr_file_name, "r+", current_file);
+		int error = f_managed_open(curr_file_name, "r+", &current_file);
 		if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 			return FS_COULD_NOT_TAKE_SEMAPHORE;
 		if (current_file == NULL)
@@ -558,7 +558,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 				buffer_index += size_elementWithTimeStamp;
 			}
 		}
-		error = f_managed_close(current_file);
+		error = f_managed_close(&current_file);
 		if (error == COULD_NOT_GIVE_SEMAPHORE_ERROR)
 			return FS_COULD_NOT_GIVE_SEMAPHORE;
 		if (error != F_NO_ERROR)
@@ -588,7 +588,7 @@ void print_file(char* c_file_name)
 	{
 		printf("file %d:\n",i);//print file index
 		get_file_name_by_index(c_file_name,i,curr_file_name);
-		int error = f_managed_open(curr_file_name, "r", current_file);
+		int error = f_managed_open(curr_file_name, "r", &current_file);
 		if (error != 0)
 			return;
 		for(int j=0;j<f_filelength(curr_file_name)/((int)c_file.size_of_element+(int)sizeof(unsigned int));j++)
@@ -601,7 +601,7 @@ void print_file(char* c_file_name)
 			}
 			printf("\n");
 		}
-		f_managed_close(current_file);
+		f_managed_close(&current_file);
 	}
 }
 
