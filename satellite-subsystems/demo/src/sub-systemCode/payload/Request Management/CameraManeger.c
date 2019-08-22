@@ -25,7 +25,7 @@
 
 #include <string.h>
 
-#include "../DataBase/DataBase.h"
+//#include "../DataBase/DataBase.h"
 #include "../Drivers/GeckoCameraDriver.h"
 #include "DB_RequestHandling.h"
 #include "Dump/imageDump.h"
@@ -54,7 +54,7 @@ command_id cmd_id_for_takePicturesWithTimeInBetween;
 static time_unix turnedOnCamera;
 static time_unix cameraActivation_duration; ///< the duration the camera will stay turned on after being activated
 
-ImageDataBase imageDataBase;
+//ImageDataBase imageDataBase;
 
 
 /*

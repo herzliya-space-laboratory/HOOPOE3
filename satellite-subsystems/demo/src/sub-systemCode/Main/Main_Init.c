@@ -48,6 +48,8 @@
 #include "HouseKeeping.h"
 #include "commands.h"
 
+#include "../payload/Compression/ImageConversion.h"
+
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
 #define I2c_TimeoutTest portMAX_DELAY
@@ -123,6 +125,43 @@ void test_menu()
 	}
 }
 #endif
+
+static Boolean printImage(char fileName[12])
+{
+	f_enterFS();
+
+	unsigned int number_of_bytes = f_filelength(fileName);
+	F_FILE* file_handle = f_open(fileName, "r");
+
+	printf("\n\n%d\n\n", f_getlasterror());
+
+	unsigned char somebyte;
+
+	uint8_t pixel = 0;
+
+	for (unsigned int i = 0; i < number_of_bytes; i++)
+	{
+		f_read(&pixel, sizeof(char), 1, file_handle);
+		printf("%u ", pixel);
+
+		if (i % 200 == 0)
+			vTaskDelay(3);
+		if(i%1000000==0)
+		{
+			GomEpsPing(0, 0, &somebyte);
+			GomEpsResetWDT(0);
+		}
+	}
+
+	f_close(file_handle);
+
+	f_releaseFS();
+
+	printf("closed. \n");
+	printf("\n\nfinished. \n");
+	return TRUE;
+}
+
 
 void numberOfRestarts()
 {
@@ -261,7 +300,11 @@ int InitSubsystems()
 	InitializeFS(activation);
 	if (activation)
 	{
+<<<<<<< HEAD
 		// resetSD();
+=======
+		//resetSD();
+>>>>>>> Roy
 	}
 	create_files(activation);
 
@@ -294,6 +337,7 @@ int InitSubsystems()
 
 	init_onlineParam();
 
+<<<<<<< HEAD
 	unsigned int selection;
 	printf( "\n\r Would you like to print an image? \n\r");
 	printf("\t 0) no\n\r");
@@ -314,6 +358,34 @@ int InitSubsystems()
 
 	int error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
 	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
+=======
+	TurnOffGecko();
+	TurnOnGecko();
+	TurnOffGecko();
+
+	TurnOnGecko();
+
+	int result = takePicture(imageDataBase, FALSE_8BIT);
+	printf("\nTAKE PICTURE (%d)\n", result);
+	result = takePicture(imageDataBase, TRUE_8BIT);
+	printf("\nTAKE PICTURE (%d)\n", result);
+
+	result = transferImageToSD(imageDataBase, 1);
+	printf("\nTRANSFER TO SD (%d)\n", result);
+	result = transferImageToSD(imageDataBase, 2);
+	printf("\nTRANSFER TO SD (%d)\n", result);
+
+	TurnOffGecko();
+
+	result = compressImage(1, 100);
+	printf("\nCOMPRESS IMAGE TO JPEG (%d)\n", result);
+	result = compressImage(2, 100);
+	printf("\nCOMPRESS IMAGE TO JPEG (%d)\n", result);
+
+	printImage("i1.jpg");
+	printImage("i1.raw");
+	printImage("i2.jpg");
+>>>>>>> Roy
 
 	return 0;
 }

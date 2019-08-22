@@ -20,7 +20,7 @@
 #include "../Compression/jpeg/bmp/rawToBMP.h"
 
 #define DELAY 100
-#define CAMERA_DELAY 500
+#define CAMERA_DELAY 1000
 
 #define FILE_NAME_SIZE 11	///< The size of the filename parameter. i00001.raw (+1 for '\0')
 
