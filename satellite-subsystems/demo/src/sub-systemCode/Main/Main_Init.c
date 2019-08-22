@@ -65,10 +65,12 @@ void reset_FIRST_activation(Boolean8bit dataFRAM)
 
 static Boolean printImage()
 {
-	char fileName[12] = "i2.jpg";
+	char fileName[12] = "i1.jpg";
 
 	unsigned int number_of_bytes = f_filelength(fileName);
 	F_FILE* file_handle = f_open(fileName, "r");
+
+	printf("\n\n%d\n\n", f_getlasterror());
 
 	unsigned char somebyte;
 
@@ -105,7 +107,6 @@ void test_menu()
 		printf( "\n\r Select a test to perform: \n\r");
 		printf("\t 0) continue to code\n\r");
 		printf("\t 1) set first activation flag to TRUE\n\r");
-		printf("\t 2) print image\n\r");
 
 		exit = FALSE;
 		while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
@@ -117,9 +118,6 @@ void test_menu()
 			break;
 		case 1:
 			reset_FIRST_activation(TRUE_8BIT);
-			break;
-		case 2:
-			printImage();
 			break;
 		}
 	}
@@ -263,9 +261,7 @@ int InitSubsystems()
 	InitializeFS(activation);
 	if (activation)
 	{
-		resetSD();
-
-		resetSD();
+		// resetSD();
 	}
 	create_files(activation);
 
@@ -297,6 +293,27 @@ int InitSubsystems()
 	init_command();
 
 	init_onlineParam();
+
+	unsigned int selection;
+	printf( "\n\r Would you like to print an image? \n\r");
+	printf("\t 0) no\n\r");
+	printf("\t 1) yes\n\r");
+
+	while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
+
+	switch (selection)
+	{
+		case 0:
+			break;
+		case 1:
+			printImage();
+			break;
+		default:
+			break;
+	}
+
+	int error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
+	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
 
 	return 0;
 }

@@ -45,8 +45,22 @@ JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_fa
 	}
 
 	f_enterFS();
-	printf("Compressed file size: %u\n", (unsigned int)f_filelength(pDst_filename));
+	uint32_t file_size = f_filelength(pDst_filename);
+	printf("Compressed file size: %u\n", file_size);
 	f_releaseFS();
+
+	for (unsigned int i = 0; i < file_size; i++)
+	{
+		printf("%u ", imageBuffer[i]);
+
+		if (i % 200 == 0)
+			vTaskDelay(3);
+		if(i%1000000==0)
+		{
+			GomEpsResetWDT(0);
+		}
+	}
+	printf("\n\n\n");
 
 	return JpegCompression_Success;
 }
@@ -58,15 +72,15 @@ JpegCompressionResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], ch
 	// Load the bmp bmp:
 
 	F_FILE* file = NULL;
-	int error = OpenFile(&file, pSrc_filename, "w");	// open file for writing in safe mode
+	int error = OpenFile(&file, pSrc_filename, "r");	// open file for reading in safe mode
 	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
 	CHECK_FOR_NULL(file, JpegCompression_ImageLoadingFailure);
 
-	f_seek(file, BMP_FILE_HEADER_SIZE, SEEK_SET);	// skipping the file header
-
 	byte* buffer = imageBuffer;
 
-	error = WriteToFile(file, buffer, BMP_FILE_DATA_SIZE, 1);
+	f_seek(file, BMP_FILE_HEADER_SIZE, SEEK_SET);	// skipping the file header
+
+	error = ReadFromFile(file, buffer, BMP_FILE_DATA_SIZE, 1);
 	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
 
 	error = CloseFile(file);

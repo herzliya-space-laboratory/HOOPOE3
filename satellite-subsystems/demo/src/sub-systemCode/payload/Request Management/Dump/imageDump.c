@@ -355,7 +355,6 @@ void imageDump_task(void* param)
 
 		error = bitField_imageDump(image_id, comprasionType, request.cmd_id, firstIndex, packetsToSend);
 	}
-
 	else if (request.id == Image_Dump_chunkField)
 	{
 		imageid image_id;

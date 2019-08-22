@@ -17,6 +17,7 @@
 #include "../Drivers/GeckoCameraDriver.h"
 #include "../../Global/FRAMadress.h"
 #include "../../Global/Global.h"
+#include "../Compression/jpeg/bmp/rawToBMP.h"
 
 #define DELAY 100
 #define CAMERA_DELAY 500
@@ -136,7 +137,7 @@ typedef enum
 	Butcher_Undefined_Error
 } ImageDataBaseResult;
 
-uint8_t imageBuffer[IMAGE_HEIGHT*IMAGE_WIDTH*3];
+uint8_t imageBuffer[BMP_FILE_DATA_SIZE];
 
 uint32_t getDataBaseStart();
 uint32_t getDataBaseEnd();
@@ -174,7 +175,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 /*
  * takePicture_withSpecialParameters
  */
-ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, Boolean8bit testPattern);
+ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, Boolean8bit testPattern);
 /*
  * updateCameraParameters
  */

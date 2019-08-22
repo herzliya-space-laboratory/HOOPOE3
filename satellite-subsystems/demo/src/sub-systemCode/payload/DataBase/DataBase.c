@@ -13,7 +13,6 @@
 #include <stdio.h>		//TODO: remove before flight. including printfs
 #include <stdint.h>
 #include <math.h>
-
 #include <hcc/api_fat.h>
 #include <hal/Boolean.h>
 #include <hal/Timing/Time.h>
@@ -620,7 +619,6 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 
 ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 {
-
 	int err = 0;
 
 	// Erasing previous image before taking one to clear this part of the SDs:
@@ -665,7 +663,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	return DataBaseSuccess;
 }
 
-ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, Boolean8bit testPattern)
+ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, Boolean8bit testPattern)
 {
 	CameraPhotographyValues regularParameters;
 	memcpy(&regularParameters, &database->cameraParameters, sizeof(CameraPhotographyValues));
