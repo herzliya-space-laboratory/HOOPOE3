@@ -2,7 +2,7 @@
  * General_CMD.h
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef GENERAL_CMD_H_
@@ -12,8 +12,6 @@
 #include "../../Global/Global.h"
 
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd);
-
-void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_dummy_func(Ack_type* type, ERR_type* err);
 

@@ -2,7 +2,7 @@
  * SW_CMD.h
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef SW_CMD_H_

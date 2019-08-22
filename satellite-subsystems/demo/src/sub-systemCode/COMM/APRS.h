@@ -2,14 +2,13 @@
  * APRS.h
  *
  *  Created on: Jun 23, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef APRS_H_
 #define APRS_H_
 
 #include "../Global/Global.h"
-#include "../Global/GlobalParam.h"
 
 
 /**
@@ -31,7 +30,7 @@ int send_APRS_Dump();
 int check_APRS(byte* data);
 
 /*
- * @brief reads the APRS from the FRAM to a buffer
+ * todo:
  */
 void get_APRS_list();
 

@@ -2,14 +2,13 @@
  * General_CMD.c
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 
 #include <hal/Drivers/I2C.h>
-#include <hal/Timing/Time.h>
 
 #include "General_CMD.h"
 #include "../../Global/TM_managment.h"
@@ -18,6 +17,7 @@
 #include "../../Ants.h"
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
+
 
 void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
@@ -34,27 +34,28 @@ void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_dump(TC_spl cmd)
 {
-	if (cmd.length != 2 * TIME_SIZE + 5 + 1)
+	if (cmd.length != 2 * TIME_SIZE + 5)
 	{
 		return;
 	}
 	//1. build combine data with command_id
-	unsigned char raw[2 * TIME_SIZE + 5 + 4 + 1] = {0};
+	unsigned char raw[2 * TIME_SIZE + 5 + 4] = {0};
 	// 1.1. copying command id
 	BigEnE_uInt_to_raw(cmd.id, &raw[0]);
 	// 1.2. copying command data
-	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + 5 + 1);
-	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xDumpHandle);
+	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + 5);
+	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, FIRST_PRIORITY, xDumpHandle);
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
+	//todo
 	*type = ACK_MEMORY;
 	if (cmd.length != 13)
 	{
 		*err = ERR_PARAMETERS;
 		return;
 	}
-
+	// 1. extracting time for deleting process
 	time_unix start_time = BigEnE_raw_to_uInt(&cmd.data[0]);
 	time_unix end_time = BigEnE_raw_to_uInt(&cmd.data[4]);
 	HK_types files[5];
@@ -62,13 +63,13 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	{
 		files[i] = (HK_types)cmd.data[8 + i];
 	}
-
+	// 2. check if start time comes before end time
 	if (start_time > end_time)
 	{
 		*err = ERR_PARAMETERS;
 		return;
 	}
-
+	// 3. extracting the file name
 	char file_name[MAX_F_FILE_NAME_SIZE];
 	FileSystemResult result = FS_SUCCSESS;
 	FileSystemResult errorRes = FS_SUCCSESS;
@@ -77,21 +78,27 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		if (files[i] != this_is_not_the_file_you_are_looking_for)
 		{
 			find_fileName(files[i], file_name);
-			//todo: find the function for delete elements
-			//result = c_fileDeleteElements(file_name, start_time, end_time);
+			//todo: add real function
+			//result = c_filedelete(file_name, start_time, end_time);
 			if (result != FS_SUCCSESS)
 			{
 				errorRes = FS_FAIL;
 			}
 		}
 	}
-
+	// 6. check result and updating *err
 	switch(errorRes)
 	{
 	case FS_SUCCSESS:
 		*err = ERR_SUCCESS;
 		break;
+	case FS_TOO_LONG_NAME:
+		*err = ERR_PARAMETERS;
+		 break;
 	case FS_NOT_EXIST:
+		*err = ERR_PARAMETERS;
+		 break;
+	case FS_ALLOCATION_ERROR:
 		*err = ERR_PARAMETERS;
 		 break;
 	case FS_FRAM_FAIL:
@@ -102,33 +109,9 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		break;
 	}
 }
-void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
-{
-	*type = ACK_RESET_FILE;
-	*err = ERR_SUCCESS;
-	if (cmd.length != NUM_FILES_IN_DUMP)
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-
-	char file_name[MAX_F_FILE_NAME_SIZE];
-	FileSystemResult reslt;
-	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
-	{
-		if ((HK_types)cmd.data[i] == this_is_not_the_file_you_are_looking_for)
-			continue;
-
-		if (find_fileName((HK_types)cmd.data[i], file_name) == 0)
-			reslt = c_fileReset(file_name);
-
-		if (reslt != FS_SUCCSESS)
-			*err = ERR_FAIL;
-	}
-}
 void cmd_dummy_func(Ack_type* type, ERR_type* err)
 {
-	printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
+	printf("Im sorry Elai.\nI can't let you do it...\n");
 	*type = ACK_THE_MIGHTY_DUMMY_FUNC;
 	*err = ERR_SUCCESS;
 }
@@ -141,7 +124,7 @@ void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error = soft_reset_subsystem((subSystem_indx)cmd.data[0]);
+	int error = soft_reset_subsystem((subSystem_indx)cmd.data);
 	switch (error)
 	{
 	case 0:
@@ -163,7 +146,7 @@ void cmd_hard_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error = hard_reset_subsystem((subSystem_indx)cmd.data[0]);
+	int error = soft_reset_subsystem((subSystem_indx)cmd.data);
 	switch (error)
 	{
 	case 0:
@@ -220,12 +203,10 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 	// 1. converting to time_unix
-	time_unix new_time = BigEnE_raw_to_uInt(cmd.data);
+	time_unix new_time = BigEnE_raw_to_uInt(&cmd.data[0]);
 	// 2. update time on satellite
 	if (Time_setUnixEpoch(new_time))
 	{
-		printf("fuckeddddddd\n");
-		printf("I gues we need to stay on this time forever\n");
 		*err = ERR_FAIL;
 	}
 	else
@@ -242,17 +223,20 @@ void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error;
-
+	int error;//containing error from drivers
+	//1. extracting data, ARM or DISARM
 	switch (cmd.data[0])
 	{
 	case ARM_ANTS:
+		//arm
 		error = ARM_ants();
 		break;
 	case DISARM_ANTS:
+		//disarm
 		error = DISARM_ants();
 		break;
 	default:
+		//command parameters are incorrect
 		*err = ERR_PARAMETERS;
 		return;
 		break;
@@ -271,8 +255,6 @@ void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 {
-	(void)type;
-	(void)err;
 	/*type = ACK_REDEPLOY;
 #ifndef ANTS_DO_NOT_DEPLOY
 	int error = deploye_ants();

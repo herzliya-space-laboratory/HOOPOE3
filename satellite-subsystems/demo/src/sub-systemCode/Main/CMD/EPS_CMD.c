@@ -2,11 +2,10 @@
  * EPS_CMD.c
  *
  *  Created on: Jun 13, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <hal/errors.h>
-#include <hal/Storage/FRAM.h>
 
 #include "EPS_CMD.h"
 

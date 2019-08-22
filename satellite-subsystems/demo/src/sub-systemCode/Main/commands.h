@@ -2,7 +2,7 @@
  * commands.h
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef COMMANDS_H_
@@ -50,6 +50,8 @@ void AUC_payload(TC_spl decode);
 void AUC_EPS(TC_spl decode);
 
 void AUC_ADCS(TC_spl decode);
+
+void AUC_GS(TC_spl decode);
 
 void AUC_SW(TC_spl decode);
 

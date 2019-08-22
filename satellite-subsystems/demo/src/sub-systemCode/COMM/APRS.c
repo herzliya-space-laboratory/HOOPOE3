@@ -2,12 +2,8 @@
  * APRS.c
  *
  *  Created on: Jun 23, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
-#include <hal/Storage/FRAM.h>
-
-#include <hal/Timing/Time.h>
-
 #include "APRS.h"
 #include "GSC.h"
 #include "../TRXVU.h"

@@ -2,7 +2,7 @@
  * commands.c
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <stdlib.h>
 
@@ -47,6 +47,8 @@
 #include "../ADCS.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
+#include "../payload/CameraManeger.h"
+#include "../payload/DataBase.h"
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
@@ -184,6 +186,11 @@ void act_upon_command(TC_spl decode)
 	case (SPECIAL_OPERATIONS_T):
 		AUC_special_operation(decode);
 		break;
+#ifdef TESTING
+	case (56):
+		AUC_test(decode);
+		break;
+#endif
 	default:
 		printf("wrong type: %d\n", decode.type);
 		break;
@@ -239,28 +246,8 @@ void AUC_general(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	case (GENERIC_I2C_ST):
-		cmd_generic_I2C(&type, &err, decode);
-		break;
-	case (UPLOAD_TIME_ST):
-		cmd_upload_time(&type, &err, decode);
-		break;
-	case (DUMP_ST):
-		cmd_dump(decode);
-		return;
-		break;
-	case (DELETE_PACKETS_ST):
-		cmd_delete_TM(&type, &err, decode);
-		break;
-	case (RESET_FILE_ST):
-		cmd_reset_file(&type, &err, decode);
-		break;
-	case (RESTSRT_FS_ST):
-		break;
-	case (REDEPLOY):
-		break;
-	case (ARM_DISARM):
-		cmd_ARM_DIARM(&type, &err, decode);
+	case (SOFT_RESET_ST):
+		cmd_soft_reset_cmponent(&type, &err, decode);
 		break;
 	case (HARD_RESET_ST):
 		cmd_hard_reset_cmponent(&type, &err, decode);
@@ -268,19 +255,15 @@ void AUC_general(TC_spl decode)
 	case (RESET_SAT_ST):
 		cmd_reset_satellite(&type, &err);
 		break;
-	case (SOFT_RESET_ST):
-		cmd_soft_reset_cmponent(&type, &err, decode);
-		break;
 	case (GRACEFUL_RESET_ST):
 		cmd_gracefull_reset_satellite(&type, &err);
 		break;
-	case (DUMMY_FUNC_ST):
-		cmd_dummy_func(&type, &err);
+	case (UPLOAD_TIME_ST):
+		cmd_upload_time(&type, &err, decode);
 		break;
 	default:
 		cmd_error(&type, &err);
 		break;
-
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
@@ -386,6 +369,46 @@ void AUC_ADCS(TC_spl decode)
 #endif
 }
 
+void AUC_GS(TC_spl decode)
+{
+	Ack_type type;
+	ERR_type err;
+
+	switch (decode.subType)
+	{
+	case (GENERIC_I2C_ST):
+		cmd_generic_I2C(&type, &err, decode);
+		break;
+	case (DUMP_ST):
+		cmd_dump(decode);
+		return;
+		break;
+	case (DELETE_PACKETS_ST):
+		cmd_delete_TM(&type, &err, decode);
+		break;
+	case (DELETE_FILE_ST):
+		break;
+	case (RESTSRT_FS_ST):
+		break;
+	case (DUMMY_FUNC_ST):
+		cmd_dummy_func(&type, &err);
+		break;
+	case (REDEPLOY):
+
+		break;
+	case (ARM_DISARM):
+		cmd_ARM_DIARM(&type, &err, decode);
+		break;
+	default:
+		cmd_error(&type, &err);
+		break;
+	}
+	//Builds ACK
+#ifndef NOT_USE_ACK_HK
+	save_ACK(type, err, decode.id);
+#endif
+}
+
 void AUC_SW(TC_spl decode)
 {
 	Ack_type type;
@@ -450,7 +473,8 @@ void AUC_test(TC_spl decode)
 	switch (decode.subType)
 	{
 	case IMAGE_DUMP_ST:
-
+		cmd_imageDump_test(&type, &err, decode);
+		return;
 		break;
 	default:
 		cmd_error(&type, &err);

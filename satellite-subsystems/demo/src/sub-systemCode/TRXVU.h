@@ -17,12 +17,12 @@
 
 #include "Global/Global.h"
 #include "COMM/GSC.h"
-#define APRS_ON
+#include "payload/DataBase.h"
+#include "payload/Butchering.h"
 
 #define TRXVU_TO_CALSIGN "GS1"
-#define TRXVU_FROM_CALSIGN "4x4HSL1"
+#define TRXVU_FROM_CALSIGN "4x4hsc1"
 
-#define VALUE_TX_BUFFER_FULL 0xff
 #define NUM_FILES_IN_DUMP	5
 
 #define NOMINAL_MODE TRUE
@@ -35,19 +35,16 @@
 #define GET_BEACON_DELAY_LOW_VOLTAGE(ms) (ms * 3)
 
 #ifndef TESTING
-#define DEFULT_BEACON_DELAY 20
+#define DEFULT_BEACON_DELAY 20// in seconds todo
 #else
 #define DEFULT_BEACON_DELAY 20// in seconds
 #endif
 
-#define MIN_TIME_DELAY_BEACON	1
+#define MIN_TIME_DELAY_BEACON	10
 #define MAX_TIME_DELAY_BEACON 	40
 
-#define TRANSMMIT_DELAY_9600(length) (length - length)
-//(portTickType)((length + 30) * (5 / 6) + 30)
-#define TRANSMMIT_DELAY_1200(length) (portTickType)(20 * 100)
-
-#define GROUND_PASSING_TIME	(60*10)//todo: find real values
+#define TRANSMMIT_DELAY_9600(length) (portTickType)((length + 30) * (5 / 6) + 30)
+#define TRANSMMIT_DELAY_1200(length) (portTickType)(TRANSMMIT_DELAY_9600(length) * 100)
 
 //todo: find real values
 #define DEFULT_COMM_VOL		7250
@@ -92,11 +89,6 @@ extern time_unix allow_transponder;
  */
 void Rx_logic();
 
-/**
- * @brief	if a command were sent from ground to the satellite this function will be
- * 			in charge of starting the count of time until the pass is over.
- */
-void pass_above_Ground();
 /**
  * 	@brief		one run of the TRXVU logic
  */
@@ -154,13 +146,6 @@ int sendRequestToStop_transponder();
  */
 void lookForRequestToDelete_dump(command_id cmdID);
 
-/**
- * @brief		look for request to delete the transponder task, if there's a request
- * 				the function is deleting the Task and saving ACK
- * @param[in]	the ID of the command that started the dump, for saving ACK if there's
- * 				a request to delete the Dump
- */
-void lookForRequestToDelete_transponder(command_id cmdID);
 
 /**
  * @brief		sends data as an AX.25 frame

@@ -2,7 +2,7 @@
  * SW_CMD.c
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -13,8 +13,6 @@
 #include "../../TRXVU.h"
 #include "../../EPS.h"
 #include "../../Main/Main_Init.h"
-#include "../../COMM/APRS.h"
-#include "../../COMM/DelayedCommand_list.h"
 
 void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err)
 {

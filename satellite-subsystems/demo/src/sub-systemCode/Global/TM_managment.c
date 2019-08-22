@@ -1,7 +1,7 @@
 /*
  * filesystem.c
  *
- *  Created on: 20 √°√Æ√∏√µ 2019
+ *  Created on: 20 ·Ó¯ı 2019
  *      Author: Idan
  */
 
@@ -44,25 +44,6 @@ typedef struct
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
 
 
-void delete_allTMFilesFromSD()
-{
-	F_FIND find;
-	if (!f_findfirst("A:/*.*",&find))
-	{
-		do
-		{
-			int count = 0;
-			while (find.filename[count] != '.' && find.filename[count] != '\0' && count < 30)
-				count++;
-			count++;
-			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
-			{
-				f_delete(find.filename);
-			}
-
-		} while (!f_findnext(&find));
-	}
-}
 // return -1 for FRAM fail
 static int getNumOfFilesInFS()
 {
@@ -119,28 +100,12 @@ FileSystemResult InitializeFS(Boolean first_time)
 	}
 	if(first_time)
 	{
-		delete_allTMFilesFromSD();
 		FS fs = {0};
 		if(FRAM_write((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
 			return FS_FAT_API_FAIL;
 		}
 	}
-
-	F_SPACE space;
-	/* get free space on current drive */
-	ret = f_getfreespace(f_getdrive(),&space);
-	if(!ret)
-	{
-	printf("There are %lu bytes total, %lu bytes free, \
-	%lu bytes used, %lu bytes bad.",
-	space.total, space.free, space.used, space.bad);
-	}
-	else
-	{
-	printf("\nError %d reading drive\n", ret);
-	}
-
 	return FS_SUCCSESS;
 }
 
@@ -154,9 +119,9 @@ FileSystemResult c_fileCreate(char* c_file_name,
 	}
 
 	C_FILE c_file; //chain file descriptor
+	c_file.size_of_element = size_of_element;
 	strcpy(c_file.name,c_file_name);
 	Time_getUnixEpoch(&c_file.creation_time);//get current time
-	c_file.size_of_element =size_of_element;
 	c_file.last_time_modified = FIRST_TIME;//no written yet
 	int num_of_files_in_FS = getNumOfFilesInFS();
 	if(num_of_files_in_FS == -1)
@@ -177,14 +142,14 @@ FileSystemResult c_fileCreate(char* c_file_name,
 	return FS_SUCCSESS;
 }
 //write element with timestamp to file
-static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int time)
+static void writewithEpochtime(F_FILE* file, char* data, int size,unsigned int time)
 {
 	PLZNORESTART();
 
 	int number_of_writes;
 	number_of_writes = f_write( &time,sizeof(unsigned int),1, file );
 	number_of_writes += f_write( data, size,1, file );
-	//printf("writing element, time is: %u\n",time);
+	printf("writing element, time is: %u\n",time);
 	if(number_of_writes!=2)
 	{
 		printf("writewithEpochtime error\n");
@@ -233,13 +198,13 @@ static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 void get_file_name_by_index(char* c_file_name,int index,char* curr_file_name)
 {
 	PLZNORESTART();
-	sprintf(curr_file_name,"%s%d.%s", c_file_name, index, FS_FILE_ENDING);
+	sprintf(curr_file_name,"%s%d",c_file_name,index);
 }
 FileSystemResult c_fileReset(char* c_file_name)
 {
 	C_FILE c_file;
 	unsigned int addr;//FRAM ADDRESS
-	//F_FILE *file;
+	F_FILE *file;
 	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
 	PLZNORESTART();
 	unsigned int curr_time;
@@ -257,7 +222,6 @@ FileSystemResult c_fileReset(char* c_file_name)
 	c_file.creation_time =curr_time;
 	return FS_SUCCSESS;
 }
-
 FileSystemResult c_fileWrite(char* c_file_name, void* element)
 {
 	C_FILE c_file;
@@ -273,9 +237,7 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	}
 	int index_current = getFileIndex(c_file.creation_time,curr_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
-	int error = f_enterFS();
-	check_int("c_fileWrite, f_enterFS", error);
-	file = f_open(curr_file_name,"a+");
+	file= f_open(curr_file_name,"a+");
 	writewithEpochtime(file,element,c_file.size_of_element,curr_time);
 	c_file.last_time_modified= curr_time;
 	if(FRAM_write((unsigned char *)&c_file,addr,sizeof(C_FILE))!=0)//update last written
@@ -283,7 +245,6 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 		return FS_FRAM_FAIL;
 	}
 	f_close(file);
-	f_releaseFS();
 	return FS_SUCCSESS;
 }
 FileSystemResult fileWrite(char* file_name, void* element,int size)
@@ -297,8 +258,8 @@ FileSystemResult fileWrite(char* file_name, void* element,int size)
 	f_close(file);
 	return FS_SUCCSESS;
 }
-FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
-		time_unix from_time, time_unix to_time, int* read, int element_size)
+FileSystemResult fileRead(char* c_file_name,char* buffer, int size_of_buffer,
+		unsigned long from_time, unsigned long to_time, int* read, int element_size)
 {
 	*read=0;
 	F_FILE* current_file= f_open(c_file_name,"r+");
@@ -313,7 +274,7 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	for(unsigned int j=0;j < length;j++)
 	{
 		err_fread = f_read(element,(size_t)size_elementWithTimeStamp,(size_t)1,current_file);
-		(void)err_fread;
+
 		unsigned int element_time = *((unsigned int*)element);
 		printf("read element, time is %u\n",element_time);
 		if(element_time > to_time)
@@ -323,7 +284,7 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 
 		if(element_time >= from_time)
 		{
-			if((unsigned int)buffer_index>(unsigned int)size_of_buffer)
+			if(buffer_index>(unsigned int)size_of_buffer)
 			{
 				return FS_BUFFER_OVERFLOW;
 			}
@@ -339,12 +300,12 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 
 	return FS_SUCCSESS;
 }
-FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
-		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time)
+FileSystemResult c_fileRead(char* c_file_name,char* buffer, int size_of_buffer,
+		unsigned long from_time, unsigned long to_time, int* read,unsigned long* last_read_time)
 {
 	C_FILE c_file;
 	unsigned int addr;//FRAM ADDRESS
-	//F_FILE *file;
+	F_FILE *file;
 	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
 	PLZNORESTART();
 
@@ -354,10 +315,6 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	{
 		return FS_NOT_EXIST;
 	}
-	if(from_time<c_file.creation_time)
-	{
-		from_time=c_file.creation_time;
-	}
 	F_FILE* current_file;
 	int index_current = getFileIndex(c_file.creation_time,from_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
@@ -366,21 +323,17 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
-		int error = f_enterFS();
-		check_int("c_fileWrite, f_enterFS", error);
 		current_file= f_open(curr_file_name,"r");
-		if (current_file == NULL)
-			return FS_NOT_EXIST;
-		unsigned int length =f_filelength(curr_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
+		unsigned int length =f_filelength(c_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
 		int err_fread=0;
-		(void)err_fread;
+
 		f_seek( current_file, 0L , SEEK_SET );
 		for(unsigned int j=0;j < length;j++)
 		{
 			err_fread = f_read(element,(size_t)size_elementWithTimeStamp,(size_t)1,current_file);
 
 			unsigned int element_time = *((unsigned int*)element);
-			//printf("read element, time is %u\n",element_time);
+			printf("read element, time is %u\n",element_time);
 			if(element_time > to_time)
 			{
 				break;
@@ -389,7 +342,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			if(element_time >= from_time)
 			{
 				*last_read_time = element_time;
-				if((unsigned int)buffer_index>(unsigned int)size_of_buffer)
+				if(buffer_index>(unsigned int)size_of_buffer)
 				{
 					free(element);
 					return FS_BUFFER_OVERFLOW;
@@ -400,7 +353,6 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			}
 		}
 		f_close(current_file);
-		f_releaseFS();
 	}while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current);
 
 
@@ -415,8 +367,8 @@ void print_file(char* c_file_name)
 	int i = 0;
 	void* element;
 	char curr_file_name[FILE_NAME_WITH_INDEX_SIZE];//store current file's name
-	//int temp[2];//use to append name with index
-	//temp[1] = '\0';
+	int temp[2];//use to append name with index
+	temp[1] = '\0';
 	if(get_C_FILE_struct(c_file_name,&c_file,NULL)!=TRUE)
 	{
 		printf("print_file_error\n");
@@ -434,7 +386,7 @@ void print_file(char* c_file_name)
 			printf("time: %d\n data:",*((int*)element));//print element timestamp
 			for(j =0;j<c_file.size_of_element;j++)
 			{
-				printf("%d ",*((byte*)(element+sizeof(int)+j)));//print data
+				printf("%d ",*((char*)(element+sizeof(int)+j)));//print data
 			}
 			printf("\n");
 		}
@@ -477,33 +429,5 @@ void DeInitializeFS( void )
 	printf("deinitializig file system end \n");
 
 }
-typedef struct{
-	int a;
-	int b;
-}TestStruct ;
-/*void test_i()
-{
 
-	time_unix curr_time;
-	time_unix read=0;
-	time_unix last_read_time=0;
-	f_delete("idan0");
-	TestStruct test_struct_arr[8]={0};
-	Time_getUnixEpoch(&curr_time);
-	time_unix start_time_unix=curr_time;
-	InitializeFS(TRUE);
-	TestStruct test_struct = {3,4};
-	c_fileCreate("idan",sizeof(TestStruct));
-	curr_time+=200;
-	Time_setUnixEpoch(curr_time);
-	c_fileWrite("idan",&test_struct);
-	Time_setUnixEpoch(++curr_time);
-	c_fileWrite("idan",&test_struct);
-	Time_setUnixEpoch(++curr_time);
-	c_fileWrite("idan",&test_struct);
-	c_fileRead("idan",test_struct_arr,8,start_time_unix,++curr_time,&read,&last_read_time);
-	c_fileReset("idan");
 
-}
-
-*/

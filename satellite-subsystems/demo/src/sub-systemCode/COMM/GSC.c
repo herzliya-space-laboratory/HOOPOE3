@@ -2,7 +2,7 @@
  * GSC.c
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
@@ -30,9 +30,6 @@
 
 int decode_TCpacket(byte *data, int length, TC_spl *packet)
 {
-	if (data == NULL)
-		return -1;
-
 	if (length != -1)
 	{
 		if (length < SPL_TC_HEADER_SIZE || length > SIZE_RXFRAME)
@@ -64,12 +61,10 @@ int decode_TCpacket(byte *data, int length, TC_spl *packet)
 
 int encode_TCpacket(byte* data, int *size, TC_spl packet)
 {
-	if (data == NULL || size == NULL)
-		return -1;
-
 	if (packet.length > SIZE_RXFRAME)
+	{
 		return 1;
-
+	}
 	*size = packet.length + SPL_TC_HEADER_SIZE;
 	BigEnE_uInt_to_raw(packet.id, &data[0]);
 	data[4] = (byte)packet.type;
@@ -84,9 +79,6 @@ int encode_TCpacket(byte* data, int *size, TC_spl packet)
 
 int decode_TMpacket(byte* data, TM_spl *packet)
 {
-	if (data == NULL)
-		return -1;
-
 	packet->type = (byte)data[0];
 	packet->subType = (byte)data[1];
 	packet->length = (unsigned short)(data[2] << 8);
@@ -104,13 +96,10 @@ int decode_TMpacket(byte* data, TM_spl *packet)
 int encode_TMpacket(byte* data, int* size, TM_spl packet)
 {
 	*size = packet.length + SPL_TM_HEADER_SIZE;
-
-	if (data == NULL || size == NULL)
-		return -1;
-
 	if (*size > SIZE_TXFRAME)
+	{
 		return 1;
-
+	}
 	data[0] = (byte)packet.type;
 	data[1] = (byte)packet.subType;
 	data[2] = (byte)packet.length >> 8;
@@ -140,8 +129,6 @@ int build_raw_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* ra
 
 int build_data_field_ACK(Ack_type type, ERR_type err, command_id ACKcommandId, byte* data_feild)
 {
-	if (data_feild == NULL)
-		return -1;
 	//command id
 	BigEnE_uInt_to_raw(ACKcommandId, data_feild);
 	//ack type, ack err

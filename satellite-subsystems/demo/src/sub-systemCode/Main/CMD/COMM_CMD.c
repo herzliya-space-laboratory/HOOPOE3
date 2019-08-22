@@ -2,17 +2,14 @@
  * COMM_CMD.c
  *
  *  Created on: Jun 22, 2019
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
 
-#include <hal/Storage/FRAM.h>
-
 #include "COMM_CMD.h"
 #include "../../TRXVU.h"
-#include "../../COMM/APRS.h"
 
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
@@ -51,7 +48,7 @@ void cmd_unmute(Ack_type* type, ERR_type* err)
 	//1. unmute satellite
 	*err = ERR_FRAM_WRITE_FAIL;
 	set_mute_time(0);
-	unmute_Tx();
+	mute_Tx(FALSE);
 	*err = ERR_SUCCESS;
 }
 void cmd_active_trans(Ack_type* type, ERR_type* err, TC_spl cmd)
@@ -69,7 +66,7 @@ void cmd_active_trans(Ack_type* type, ERR_type* err, TC_spl cmd)
 	// 2.2. copying data to raw
 	raw[4] = cmd.data[0];
 	// 3. activate transponder
-	create_task(Transponder_task, (const signed char * const)"Transponder_Task", 1024, &raw, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xTransponderHandle);
+	create_task(Transponder_task, (const signed char * const)"Transponder_Task", 1024, &raw, FIRST_PRIORITY, xTransponderHandle);
 	//no ACK
 }
 void cmd_shut_trans(Ack_type* type, ERR_type* err)
@@ -90,7 +87,7 @@ void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	unsigned short param = cmd.data[1];
 	param += cmd.data[0] << 8;
-	if (param > MAX_TRANS_RSSI)
+	if (MIN_TRANS_RSSI > param || param > MAX_TRANS_RSSI)
 	{
 		*err = ERR_PARAMETERS;
 		return;

@@ -2,7 +2,7 @@
  * splTypes.h
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: elain
  */
 
 #ifndef SPLTYPES_H_
@@ -94,7 +94,7 @@
 #define GENERIC_I2C_ST			0
 #define DUMP_ST					33
 #define DELETE_PACKETS_ST		35
-#define RESET_FILE_ST			45
+#define DELETE_FILE_ST			45
 #define RESTSRT_FS_ST			46
 #define DUMMY_FUNC_ST			122
 #define REDEPLOY				56

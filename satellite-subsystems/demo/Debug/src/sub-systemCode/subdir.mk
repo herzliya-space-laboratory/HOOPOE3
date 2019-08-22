@@ -21,7 +21,7 @@ C_SRCS += \
 ../src/sub-systemCode/TRXVU.c \
 ../src/sub-systemCode/Test.c \
 ../src/sub-systemCode/commands.c \
-../src/sub-systemCode/Hoopoe3.c \
+../src/sub-systemCode/elai.c \
 ../src/sub-systemCode/fileSystem.c 
 
 OBJS += \
@@ -42,7 +42,7 @@ OBJS += \
 ./src/sub-systemCode/TRXVU.o \
 ./src/sub-systemCode/Test.o \
 ./src/sub-systemCode/commands.o \
-./src/sub-systemCode/Hoopoe3.o \
+./src/sub-systemCode/elai.o \
 ./src/sub-systemCode/fileSystem.o 
 
 C_DEPS += \
@@ -63,7 +63,7 @@ C_DEPS += \
 ./src/sub-systemCode/TRXVU.d \
 ./src/sub-systemCode/Test.d \
 ./src/sub-systemCode/commands.d \
-./src/sub-systemCode/Hoopoe3.d \
+./src/sub-systemCode/elai.d \
 ./src/sub-systemCode/fileSystem.d 
 
 

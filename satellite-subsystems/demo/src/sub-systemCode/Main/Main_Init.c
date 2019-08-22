@@ -44,8 +44,13 @@
 #include "../ADCS.h"
 #include "../ADCS/Stage_Table.h"
 #include "../TRXVU.h"
+#include "../payload/CameraManeger.h"
 #include "HouseKeeping.h"
 #include "commands.h"
+
+#ifdef TESTING
+#include "../Tests/Test.h"
+#endif
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -57,8 +62,6 @@
 stageTable ST;
 
 #ifdef TESTING
-
-
 void test_menu()
 {
 	byte dataFRAM = FALSE_8BIT;
@@ -66,12 +69,12 @@ void test_menu()
 
 	Boolean exit = FALSE;
 	unsigned int selection;
-	byte data;
 	while (!exit)
 	{
 		printf( "\n\r Select a test to perform: \n\r");
 		printf("\t 0) continue to code\n\r");
 		printf("\t 1) set first activation flag to TRUE\n\r");
+		printf("\t 2) write data to FRAM \n");
 
 		exit = FALSE;
 		while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
@@ -82,7 +85,7 @@ void test_menu()
 			exit = TRUE;
 			break;
 		case 1:
-			FRAM_write(&data, FIRST_ACTIVATION_ADDR, 1);
+			reset_FIRST_activation();
 			break;
 		}
 	}
@@ -132,7 +135,7 @@ void StartTIME()
 {
 	// starts time
 	int error = 0;
-	Time initial_time_jan2000={0,0,0,1,30,6,19,0};
+	Time initial_time_jan2000={0,0,0,1,1,1,0,0};
 	error = Time_start(&initial_time_jan2000,0);
 	if(0 != error )
 	{
@@ -184,23 +187,10 @@ Boolean first_activation()
 
 void resetSD()
 {
-	F_FIND find;
-	unsigned int selection = 0;
-	if (!f_findfirst("A:/*.*",&find))
-	{
-		do
-		{
-			printf ("filename:%s\n ",find.filename);
-			printf("\t 0) next file \n\r");
-			printf("\t 1) delete and next file \n\r");
-			while(UTIL_DbguGetIntegerMinMax(&selection, 0, 13) == 0);
-			if(selection == 1)
-			{
-				f_delete(find.filename);
-			}
-			selection =0;
-		} while (!f_findnext(&find));
-	}
+	f_delete("EPSHKF0");
+	f_delete("COMMHKF0");
+	f_delete("ADCSHKF0");
+	f_delete("ACKHKF0");
 }
 
 int InitSubsystems()
@@ -225,6 +215,8 @@ int InitSubsystems()
 
 	InitializeFS(activation);
 
+	resetSD();
+
 	create_files(activation);
 
 	EPS_Init();
@@ -232,22 +224,20 @@ int InitSubsystems()
 #ifdef ANTS_ON
 	init_Ants();
 
-#ifdef TESTING
-	printf("before deploy\n");
+	printf("before deploy ");
 	readAntsState();
-#endif
 
 	Auto_Deploy();
 
-#ifdef TESTING
-	printf("after deploy\n");
 	readAntsState();
-#endif
+	printf("after deploy ");
 #endif
 
-	init_adcs(activation);
+	//ADCS_startLoop(activation);
 
 	init_trxvu();
+
+	initCamera(activation);
 
 	init_command();
 
@@ -257,14 +247,22 @@ int InitSubsystems()
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
-	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(TRXVU_task, (const signed char*)("TRXVU_TASK_Debug"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
-	xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(HouseKeeping_Task, (const signed char*)("HouseKeeping_Task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(HouseKeeping_secondTask, (const signed char*)("HouseKeeping2_Task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
+	//xTaskGenericCreate(ADCS_Task, (const signed char*)"ADCS_TASK_Debug", 8192, (void *) ST, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL, NULL, NULL);
 	vTaskDelay(100);
+
+	//KickStartCamera();
+
+/*#ifdef TESTING
+	xTaskCreate(test_task, (const signed char*)("test_Task"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	vTaskDelay(100);
+#endif*/
 	return 0;
 }
 

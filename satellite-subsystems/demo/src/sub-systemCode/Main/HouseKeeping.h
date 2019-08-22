@@ -14,27 +14,24 @@
 
 #include <satellite-subsystems/cspaceADCS_types.h>
 
-#define TASK_HK_HIGH_RATE_DELAY 	1000
-#define TASK_HK_LOW_RATE_DELAY 	10000
-
-#define NUMBER_OF_SOLAR_PANNELS	6
+#define NUMBER_OF_FILE_HK 7
 
 #define ACK_HK_SIZE ACK_DATA_LENGTH
 #define EPS_HK_SIZE 49
-#define SP_HK_SIZE	FLOAT_SIZE * NUMBER_OF_SOLAR_PANNELS
+#define SP_HK_SIZE	24
 #define CAM_HK_SIZE 62
 #define COMM_HK_SIZE 12
 #define ADCS_HK_SIZE 34
 
 #define ADCS_SC_SIZE 6
 
-#define ACK_FILE_NAME "ACKf"
-#define EPS_HK_FILE_NAME "EPSf"
-#define	SP_HK_FILE_NAME	"SPF"
-#define CAM_HK_FILE_NAME "CAMf"
-#define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
-#define ADCS_HK_FILE_NAME "ADCf"// ADCS
-#define BOS_HK_FILE_NAME	"BOSf"
+#define ACK_FILE_NAME "ACKHKf"
+#define EPS_HK_FILE_NAME "EPSHKf"
+#define	SP_HK_FILE_NAME	"SPHKF"
+#define CAM_HK_FILE_NAME "CAMHKf"
+#define COMM_HK_FILE_NAME "COMMHKf"// TRX and ANTS HK
+#define ADCS_HK_FILE_NAME "ADCSHKf"// ADCS panel HK
+#define BOS_HK_FILE_NAME	"BOSHKf"
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
@@ -61,7 +58,6 @@ typedef enum HK_dump_types{
 	ADCS_ESTIMATED_ANGLES_T = 34,
 	ADCS_Estimated_AR_T = 35,
 	ADCS_ECI_POS_T = 36,
-	ADCS_ECI_VEL_T = 255,
 	ADCS_SAV_Vel_T = 37,
 	ADCS_ECEF_POS_T = 38,
 	ADCS_LLH_POS_T = 39,
@@ -144,56 +140,24 @@ typedef union __attribute__ ((__packed__))
 	byte raw[SP_HK_SIZE];
 	struct __attribute__((packed))
 	{
-		int32_t SP_temp[NUMBER_OF_SOLAR_PANNELS];
+		temp_t SP_temp[6];
 	}fields;
 }SP_HK;
 
 typedef cspace_adcs_pwtempms_t ADCS_HK;
 
-/*
- * @brief 	saving every second telemetry from the ADCS, COMM, EPS and camera
- */
-void HouseKeeping_highRate_Task();
-/*
- * @brief 	saving every 10 seconds telemetry from the Solar panels
- */
-void HouseKeeping_lowRate_Task();
 
-/*
- * @brief 	creating the files in the TM_manegment for all the HK types
- * @return	-1 when its not the first activation, 0 on success
- */
+void HouseKeeping_Task();
+void HouseKeeping_secondTask();
+
 int create_files(Boolean firstActivation);
 
-/*
- * @brief		build correctly an SPL packet from raw data according to the HK type
- * @param[in]	the data type
- * @param[in]	the raw data from the TM_manegmant
- * @param[out]	the packet assembled
- * @return		-1 if the type is not the enum values, -2 if one of the pointers are NULL
- */
+int save_HK();
+
 int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet);
 
-/*
- * @brief		save a new execution ACK in ACK file with the online time
- * @param[in]	ACK type (according to GSC.h)
- * @param[in]	err type (according to GSC.h)
- * @param[in]	id of the command the execution ACK is for
- * return 		0
- */
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId);
 
-/*
- * @brief		find the name of a file from a HK type
- * @param[in]	HK type of the file
- * @param[out]	place to copy the file name
- * @return		-1 if the type is not the enum values, -2 if one of the pointers are NULL
- */
 int find_fileName(HK_types type, char *fileName);
-
-/*
- * @brief		return the size of an HK element
- * @return		the size of the element requested, 0 if the value is not in the enum
- */
 int size_of_element(HK_types type);
 #endif /* HOUSEKEEPING_H_ */
