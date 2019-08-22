@@ -30,6 +30,7 @@
 #include <satellite-subsystems/GomEPS.h>
 
 #include "Global.h"
+#include "TLM_management.h"
 
 int not_first_activation;
 
@@ -287,4 +288,12 @@ Boolean getBitValueByIndex(byte* data, int length, int index)
 		return FALSE;
 	else
 		return TRUE;
+}
+
+
+//FreeRTOS extension
+void terminateTask()
+{
+	f_managed_releaseFS();
+	vTaskDelete(NULL);
 }

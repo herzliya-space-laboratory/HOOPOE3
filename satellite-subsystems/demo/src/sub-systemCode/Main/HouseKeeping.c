@@ -183,11 +183,7 @@ int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 	FileSystemResult error;
 	byte raw_ACK[ACK_DATA_LENGTH];
 	build_data_field_ACK(type, err, ACKcommandId, raw_ACK);
-	if (f_managed_enterFS() == 0)
-	{
-		error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
-		f_managed_releaseFS();
-	}
+	error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
 	if (error != FS_SUCCSESS)
 	{
 		printf("could not save ACK, error %d", error);
@@ -863,23 +859,17 @@ void HouseKeeping_highRate_Task()
 			vTaskDelay(100);
 			continue;
 		}
-		int i_error = f_managed_enterFS();
-		if (i_error == 0)
-		{
-			save_EPS_HK();
+		save_EPS_HK();
 
-			save_CAM_HK();
+		save_CAM_HK();
 
-			save_COMM_HK();
+		save_COMM_HK();
 
-			//save_ADCS_HK();
+		//save_ADCS_HK();
 
 #ifndef USE_DIFFERENT_TASK_ONLINE_TM
 		save_onlineTM_logic();
 #endif
-		f_managed_releaseFS();
-		}
-
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
@@ -896,12 +886,7 @@ void HouseKeeping_lowRate_Task()
 			vTaskDelay(100);
 			continue;
 		}
-		int i_error = f_managed_enterFS();
-		if (i_error == 0)
-		{
-			save_SP_HK();
-			f_managed_releaseFS();
-		}
+		save_SP_HK();
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}

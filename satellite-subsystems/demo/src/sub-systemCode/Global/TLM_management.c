@@ -30,7 +30,7 @@
 #define FIRST_TIME -1
 #define FILE_NAME_WITH_INDEX_SIZE MAX_F_FILE_NAME_SIZE+sizeof(int)*2
 
-#define FS_TAKE_SEMPH_DELAY	1000
+#define FS_TAKE_SEMPH_DELAY	1000 * 30
 
 xSemaphoreHandle xFileOpenHandler;
 xSemaphoreHandle xEnterTaskFS;
@@ -112,7 +112,11 @@ int f_managed_enterFS()
 
 		return 0;
 	}
-	return COULD_NOT_TAKE_SEMAPHORE_ERROR;
+	else
+	{
+		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xEnterTaskFS!!!!!!\n");
+		return f_enterFS();
+	}
 }
 int f_managed_releaseFS()
 {
@@ -120,27 +124,33 @@ int f_managed_releaseFS()
 	if (xSemaphoreGive(xEnterTaskFS) == pdTRUE)
 		return 0;
 
+	printf("could not return the xEnterTaskFS\n");
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
 }
 
 int f_managed_open(char* file_name, char* config, F_FILE* fileHandler)
 {
+	int lastError = 0;
 	if (xSemaphoreTake(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
 		fileHandler = f_open(file_name, config);
 		if (fileHandler == NULL)
 		{
-			portBASE_TYPE portRet = xSemaphoreGive(xEnterTaskFS);
-			check_portBASE_TYPE("could not return the xEnterTaskFS", portRet);
+			portBASE_TYPE portRet = xSemaphoreGive(xFileOpenHandler);
+			check_portBASE_TYPE("could not return the xFileOpenHandler\n", portRet);
 			//TODO: write data to log error
+			lastError = f_getlasterror();
+			printf("FS last error: %d\n", lastError);
 		}
 	}
 	else
 	{
-		return COULD_NOT_TAKE_SEMAPHORE_ERROR;
+		fileHandler = f_open(file_name, config);
+		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xFileOpenHandler!!!!!!\n");
+		lastError = f_getlasterror();
+		printf("FS last error: %d\n", lastError);
 	}
-
-	return f_getlasterror();
+	return lastError;
 }
 int f_managed_close(F_FILE* fileHandler)
 {

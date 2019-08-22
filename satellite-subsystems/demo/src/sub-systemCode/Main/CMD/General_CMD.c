@@ -81,11 +81,10 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			i_error = find_fileName(files[i], file_name);
 			if (i_error != 0)
 				continue;
-			if (f_managed_enterFS() == 0)
-			{
-				result = c_fileDeleteElements(file_name, start_time, end_time);
-				f_managed_releaseFS();
-			}
+			int i_error = f_managed_enterFS();
+			check_int("f_managed_enterFS in cmd_delete_TM", i_error);
+			result = c_fileDeleteElements(file_name, start_time, end_time);
+			f_managed_releaseFS();
 			if (result != FS_SUCCSESS)
 			{
 				errorRes = FS_FAIL;
