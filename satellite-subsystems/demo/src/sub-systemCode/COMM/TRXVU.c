@@ -67,17 +67,23 @@ void update_FRAM_bitRate()
 		}
 	}
 	vTaskDelay(2000);
+	printf("new bit rate value: %d\n", newParam);
 	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
+	vTaskDelay(1000);
 	check_int("IsisTrxvu_tcSetAx25Bitrate, update_FRAM_bitRate", error);
 }
 void toggle_idle_state()
 {
-	int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
-	vTaskDelay(500);
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
-	vTaskDelay(500);
+	for (int i = 0; i < 2; i++)
+	{
+		vTaskDelay(500);
+		int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
+		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
+		vTaskDelay(1000);
+		retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
+		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
+		vTaskDelay(1500);
+	}
 }
 
 void TRXVU_init_hardWare()
@@ -842,9 +848,8 @@ void unmute_Tx()
 	set_system_state(mute_param, SWITCH_OFF);
 	int i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
 	check_int("unmute_Tx, FRAM_read(MUTE_TIME_ADDR)", i_error);
-	toggle_idle_state();
 
-	change_TRXVU_state(NOMINAL_MODE);
+	update_FRAM_bitRate();
 }
 
 void check_time_off_mute()
@@ -916,6 +921,7 @@ void change_TRXVU_state(Boolean state)
 		printf("\tTransponder is disabled\n\n");
 		data[1] = 0x01;
 		set_system_state(transponder_active_param, SWITCH_OFF);
+		vTaskDelay(10000);
 		update_FRAM_bitRate();
 	}
 	else
