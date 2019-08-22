@@ -17,6 +17,9 @@
 
 #include <hal/boolean.h>
 
+#include "../DataBase/DataBase.h"
+ImageDataBase imageDataBase;
+
 #define MAX_NUMBER_OF_CAMERA_REQ	25
 
 #define AUTO_CAMERA_SLEEP_TIMEOUT	CONVERT_MS_TO_SECONDS(30 * 60)

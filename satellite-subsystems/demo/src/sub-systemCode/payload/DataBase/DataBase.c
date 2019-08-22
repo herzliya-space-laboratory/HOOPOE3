@@ -620,7 +620,6 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 
 ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 {
-
 	int err = 0;
 
 	// Erasing previous image before taking one to clear this part of the SDs:
