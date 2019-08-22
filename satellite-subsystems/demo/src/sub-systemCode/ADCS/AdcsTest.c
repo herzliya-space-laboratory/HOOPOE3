@@ -9,17 +9,21 @@
 
 #include "AdcsMain.h"
 #include "AdcsTest.h"
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 #include "../Main/CMD/General_CMD.h"
 #include <satellite-subsystems/cspaceADCS.h>
 #include <satellite-subsystems/cspaceADCS_types.h>
 #include "../EPS.h"
+#include <hal/Utility/util.h>
 
 #define MAX_ADCS_QUEUE_LENGTH 42
 #define ADCS_ID 0
 #define CMD_FOR_TEST_AMUNT 34
 #define TastDelay 600000
 #define AMUNT_OF_STFF_TO_ADD_TO_THE_Q 3
-#define TEST_NUM 0
+#define TEST_NUM 5
+
+void testInit();
 
 void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE])
 {
@@ -50,33 +54,36 @@ void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SI
 	Data[2][0] = 1;
 
 	//data 3
+	Data[3][0] = 1;
+
+	//data 4
 	cspace_adcs_magnetorq_t MT;
 	MT.fields.magduty_x = 0.8 * 1000;
 	MT.fields.magduty_y = 0.8 * 1000;
 	MT.fields.magduty_z = 0.8 * 1000;
-	memcpy(Data[3],MT.raw,sizeof(cspace_adcs_magnetorq_t));
-
-	//data 4
-	cspace_adcs_wspeed_t wheelConfig;
-	wheelConfig.fields.speed_y = 3586;
-	memcpy(Data[4],wheelConfig.raw,sizeof(cspace_adcs_magnetorq_t));
+	memcpy(Data[4],MT.raw,sizeof(cspace_adcs_magnetorq_t));
 
 	//data 5
-	for(int i = 0; i<3; i++)
-	{
-		Data[5][i] = 6;
-	}
+	cspace_adcs_wspeed_t wheelConfig;
+	wheelConfig.fields.speed_y = 0;
+	memcpy(Data[5],wheelConfig.raw,sizeof(cspace_adcs_magnetorq_t));
 
 	//data 6
-	for(int i = 0; i < 4; i++)
+	for(int i = 0; i<3; i++)
 	{
 		Data[6][i] = 6;
 	}
 
 	//data 7
-	for(int i = 0; i<10; i++)
+	for(int i = 0; i < 4; i++)
 	{
 		Data[7][i] = 6;
+	}
+
+	//data 8
+	for(int i = 0; i<10; i++)
+	{
+		Data[8][i] = 6;
 	}
 
 	//data 23
@@ -120,7 +127,7 @@ void AdcsTestTask()
 			ADCS_GET_FULL_CONFIG_ST,
 			ADCS_GET_FULL_CONFIG_ST,
 			ADCS_GET_FULL_CONFIG_ST,
-			666,
+			255,
 			ADCS_GET_FULL_CONFIG_ST,
 			ADCS_GET_FULL_CONFIG_ST,
 			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
@@ -197,17 +204,24 @@ void AdcsTestTask()
 //
 //			}
 			set.subType = setSubType[TEST_NUM];
+			set.length = 6;
 			memcpy(set.data,SetData[TEST_NUM],set.length);
 
 			get.subType = getSubType[TEST_NUM];
-			memcpy(get.data,GetData[TEST_NUM],set.length);
+			get.length = 0;
+			memcpy(get.data,GetData[TEST_NUM],get.length);
 
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:%d\t err:%d\n",getSubType[TEST_NUM], err);
+			printf("sst:%d\t err:%d\n",get.subType, err);
 			err = AdcsCmdQueueAdd(&set);
-			printf("sst:%d\t err:%d\n",setSubType[TEST_NUM], err);
+			printf("sst:%d\t err:%d data:",set.subType, err ,set.data);
+			for(i = 0; i < set.length; i++)
+			{
+				printf("%x, ",set.data[i]);
+			}
+			printf("\n");
 			err = AdcsCmdQueueAdd(&get);
-			printf("sst:%d\t err:%d\n",getSubType[TEST_NUM], err);
+			printf("sst:%d\t err:%d\n",get.subType, err);
 			vTaskDelay(TastDelay);
 //		}
 	}
@@ -275,18 +289,18 @@ void testInit()
 	InitCommand.subType = ADCS_RUN_MODE_ST;
 	InitCommand.data[0] = 1;
 	cspaceADCS_setRunMode(ADCS_ID, runmode_enabled);
-	int err = AdcsCmdQueueAdd(&adcsCmd);
+	int err = AdcsCmdQueueAdd(&InitCommand);
 	printf("ADCS test init command error = %d\n", err);
 
 	vTaskDelay(10);
 
 	InitCommand.subType = ADCS_SET_PWR_CTRL_DEVICE_ST;
-	cspace_adcs_powerdev_t device_ctrl = { 0 };
+	cspace_adcs_powerdev_t device_ctrl;
 	device_ctrl.fields.signal_cubecontrol = 1;
 	device_ctrl.fields.motor_cubecontrol = 1;
 	device_ctrl.fields.pwr_motor = 1;
-	memcpy(InitCommand.data,device_ctrl,sizeof(device_ctrl));
-	int err = AdcsCmdQueueAdd(&InitCommand);
+	memcpy(InitCommand.data,device_ctrl.raw,sizeof(device_ctrl));
+	err = AdcsCmdQueueAdd(&InitCommand);
 	printf("ADCS test init command error = %d\n", err);
 
 }

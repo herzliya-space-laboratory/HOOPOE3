@@ -69,7 +69,7 @@ typedef enum __attribute__ ((__packed__)){
 
 typedef struct _adcs_i2c_cmd
 {
-	unsigned short id;
+	unsigned char id;
 	unsigned short length;
 	byte data[ADCS_CMD_MAX_DATA_LENGTH];
 	AdcsTcErrorReason ack;

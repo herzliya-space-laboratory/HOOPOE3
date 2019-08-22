@@ -193,17 +193,7 @@ void taskMain()
 	//portTickType xLastWakeTime = xTaskGetTickCount();
 	//const portTickType xFrequency = 1000;
 	
-	TC_spl adcsCmd;
-	adcsCmd.id = TC_ADCS_T;
-	//tests testId;
-	int err;
 
-
-	cspace_adcs_estmode_sel est_mode = 0;
-	cspace_adcs_attctrl_mod_t ctrl_mode = {.raw = {0}};
-	cspace_adcs_runmode_t runmode = 0;
-	cspace_adcs_powerdev_t pwr_device = {.raw = {0}};
-	unsigned int input;
 	gom_eps_hk_t eps_tlm;
 	while(1)
 	{

@@ -241,7 +241,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(int), ADCS_RESET_BOOT_REGISTER_ST);
 			break;
 		case ADCS_DEPLOY_MAG_BOOM_ST:
-			//err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);
+			//err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);//TODO:remove comment
 		#ifdef TESTING
 			printf("magnetometer not deployed \nBOOM\n");
 		#endif
@@ -249,23 +249,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_RUN_MODE_ST:
 			memcpy(&runmode,cmd->data,sizeof(runmode));
 			err = cspaceADCS_setRunMode(ADCS_ID, runmode);
-			PRINT_ON_TEST(runmode, err);
-
 			break;
 		case ADCS_SET_PWR_CTRL_DEVICE_ST:
 			err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, (cspace_adcs_powerdev_t*)cmd->data);
-			PRINT_ON_TEST(setPwrCtrlDevice,err);
-#ifdef TESTING
-			if(0 == err)
-			{
-			err = cspaceADCS_getPwrCtrlDevice(ADCS_ID, &pwr_device);
-			PRINT_ON_TEST(getPwrCtrlDevice,err);
-			PRINT_ON_TEST(signal_cubecontrol,pwr_device.fields.signal_cubecontrol);
-			PRINT_ON_TEST(motor_cubecontrol,pwr_device.fields.motor_cubecontrol);
-			PRINT_ON_TEST(pwr_cubesense,pwr_device.fields.pwr_cubesense);
-			PRINT_ON_TEST(pwr_cubestar,pwr_device.fields.pwr_cubestar);
-			}
-#endif
 			break;
 		case ADCS_CLEAR_ERRORS_ST:
 			memcpy(&clear,cmd->data,sizeof(clear));
@@ -273,12 +259,10 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_SET_ATT_CTRL_MODE_ST:
 			err = cspaceADCS_setAttCtrlMode(ADCS_ID, (cspace_adcs_attctrl_mod_t*)cmd->data);
-			PRINT_ON_TEST(setAttCtrlMode,err);
 			break;
 		case ADCS_SET_EST_MODE_ST:
 			memcpy(&att_est,cmd->data,sizeof(att_est));
 			err = cspaceADCS_setAttEstMode(ADCS_ID,att_est);
-			PRINT_ON_TEST(setAttEstMode,err);
 			break;
 //		case ADCS_USE_IN_EKF_ST:
 //			 err = cspaceADCS_setAttEstMode(ADCS_ID, estmode_full_state_ekf);
