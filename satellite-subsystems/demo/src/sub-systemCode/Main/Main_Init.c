@@ -49,6 +49,7 @@
 #include "commands.h"
 
 #include "../payload/Compression/ImageConversion.h"
+#include "../payload/Compression/jpeg/ImgCompressor.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -63,39 +64,6 @@ stageTable ST;
 void reset_FIRST_activation(Boolean8bit dataFRAM)
 {
 	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
-}
-
-static Boolean printImage()
-{
-	char fileName[12] = "i1.jpg";
-
-	unsigned int number_of_bytes = f_filelength(fileName);
-	F_FILE* file_handle = f_open(fileName, "r");
-
-	printf("\n\n%d\n\n", f_getlasterror());
-
-	unsigned char somebyte;
-
-	uint8_t pixel = 0;
-
-	for (unsigned int i = 0; i < number_of_bytes; i++) {
-
-		f_read(&pixel, sizeof(char), 1, file_handle);
-		printf("%u ", pixel);
-
-		if (i % 200 == 0)
-			vTaskDelay(3);
-		if(i%1000000==0)
-		{
-			GomEpsPing(0, 0, &somebyte);
-			GomEpsResetWDT(0);
-		}
-	}
-
-	f_close(file_handle);
-	printf("closed. \n");
-	printf("\n\nfinished. \n");
-	return TRUE;
 }
 
 void test_menu()
@@ -255,7 +223,6 @@ Boolean first_activation()
 
 #define BUFFLEN 30+F_MAXNAME
 
-
 void resetSD()
 {
 	F_FIND find;
@@ -275,6 +242,50 @@ void resetSD()
 			selection =0;
 		} while (!f_findnext(&find));
 	}
+}
+
+void pre_written_test(void)
+{
+	TurnOffGecko();
+	TurnOnGecko();
+	TurnOffGecko();
+
+	TurnOnGecko();
+
+	byte* buffer = imageBuffer;
+/*
+	int err = GECKO_EraseBlock(1);
+	printf("\n\n\tGECKO_EraseBlock (%d)\n\n", err);
+
+	vTaskDelay(1000);
+
+	err = GECKO_TakeImage( 53, 3, 2048, 1, 1, 1, FALSE_8BIT);
+	printf("\n\n\tGECKO_TakeImage (%d)\n\n", err);
+
+	vTaskDelay(1000);
+
+	err = GECKO_ReadImage((uint32_t)1, (uint32_t*)buffer);
+	printf("\n\n\tGECKO_ReadImage (%d)\n\n", err);
+
+	vTaskDelay(1000);
+*/
+	f_enterFS();
+	F_FILE* f = f_open("BOAZ2.OUT", "w");
+	f_write(buffer, 2048*1088, 1, f);
+	f_close(f);
+	f_releaseFS();
+
+	TurnOffGecko();
+
+	int err = Create_BMP_File("jpegTest.raw", "jpegTest.bmp", 1, buffer);
+	printf("\n\n\tCreate_BMP_File (%d)\n\n", err);
+
+	err = JPEG_compressor(1, 50, "jpegTest.jpg", buffer);
+	printf("\n\n\tJPEG_compressor (%d)\n\n", err);
+
+	printImage("jpegTest.jpg");
+	printImage("jpegTest.bmp");
+	printImage("jpegTest.raw");
 }
 
 int InitSubsystems()
@@ -300,11 +311,7 @@ int InitSubsystems()
 	InitializeFS(activation);
 	if (activation)
 	{
-<<<<<<< HEAD
-		// resetSD();
-=======
-		//resetSD();
->>>>>>> Roy
+		// resetSD();s
 	}
 	create_files(activation);
 
@@ -337,9 +344,11 @@ int InitSubsystems()
 
 	init_onlineParam();
 
-<<<<<<< HEAD
+	int error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
+	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
+
 	unsigned int selection;
-	printf( "\n\r Would you like to print an image? \n\r");
+	printf( "\n\r Would you like to run the pre-written test?? \n\r");
 	printf("\t 0) no\n\r");
 	printf("\t 1) yes\n\r");
 
@@ -350,42 +359,11 @@ int InitSubsystems()
 		case 0:
 			break;
 		case 1:
-			printImage();
+			pre_written_test();
 			break;
 		default:
 			break;
 	}
-
-	int error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
-=======
-	TurnOffGecko();
-	TurnOnGecko();
-	TurnOffGecko();
-
-	TurnOnGecko();
-
-	int result = takePicture(imageDataBase, FALSE_8BIT);
-	printf("\nTAKE PICTURE (%d)\n", result);
-	result = takePicture(imageDataBase, TRUE_8BIT);
-	printf("\nTAKE PICTURE (%d)\n", result);
-
-	result = transferImageToSD(imageDataBase, 1);
-	printf("\nTRANSFER TO SD (%d)\n", result);
-	result = transferImageToSD(imageDataBase, 2);
-	printf("\nTRANSFER TO SD (%d)\n", result);
-
-	TurnOffGecko();
-
-	result = compressImage(1, 100);
-	printf("\nCOMPRESS IMAGE TO JPEG (%d)\n", result);
-	result = compressImage(2, 100);
-	printf("\nCOMPRESS IMAGE TO JPEG (%d)\n", result);
-
-	printImage("i1.jpg");
-	printImage("i1.raw");
-	printImage("i2.jpg");
->>>>>>> Roy
 
 	return 0;
 }

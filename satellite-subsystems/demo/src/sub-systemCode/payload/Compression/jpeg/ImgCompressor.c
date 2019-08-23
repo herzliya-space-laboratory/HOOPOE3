@@ -23,7 +23,7 @@
 
 typedef unsigned int uint;
 
-JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_factor, char pDst_filename[FILE_NAME_SIZE])
+JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_factor, char pDst_filename[FILE_NAME_SIZE], byte* buffer)
 {
 	unsigned int image_width = IMAGE_WIDTH / compfact;
 	unsigned int image_height = IMAGE_HEIGHT / compfact;
@@ -35,8 +35,6 @@ JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_fa
 	printf("Writing JPEG image to file: %s\n", pDst_filename);
 
 	// Now create the JPEG file.
-
-	byte* buffer = imageBuffer;
 
 	if (!compress_image_to_jpeg_file(pDst_filename, image_width, image_height, H2V2, buffer, &params))
 	{
@@ -65,7 +63,7 @@ JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_fa
 	return JpegCompression_Success;
 }
 
-JpegCompressionResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], char pSrc_filename[FILE_NAME_SIZE], unsigned int compfact)
+JpegCompressionResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], char pSrc_filename[FILE_NAME_SIZE], unsigned int compfact, byte* buffer)
 {
 	TransformRawToBMP(pSrc_filename_raw, pSrc_filename, compfact);
 
@@ -75,8 +73,6 @@ JpegCompressionResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], ch
 	int error = OpenFile(&file, pSrc_filename, "r");	// open file for reading in safe mode
 	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
 	CHECK_FOR_NULL(file, JpegCompression_ImageLoadingFailure);
-
-	byte* buffer = imageBuffer;
 
 	f_seek(file, BMP_FILE_HEADER_SIZE, SEEK_SET);	// skipping the file header
 
@@ -100,6 +96,7 @@ JpegCompressionResult CompressImage(imageid id, fileType reductionLevel, unsigne
 	}
 
 	unsigned int compfact = (unsigned int)pow(2, (double)reductionLevel);
+	byte* buffer = imageBuffer;
 
 	char pSrc_filename_raw[FILE_NAME_SIZE];
 	int result = GetImageFileName(id, reductionLevel, pSrc_filename_raw);
@@ -109,14 +106,14 @@ JpegCompressionResult CompressImage(imageid id, fileType reductionLevel, unsigne
 	result = GetImageFileName(id, bmp, pSrc_filename_bmp);
 	CMP_AND_RETURN(result, DataBaseSuccess, JpegCompression_ImageDataBaseFailure);
 
-	result = Create_BMP_File(pSrc_filename_raw, pSrc_filename_bmp, compfact);
+	result = Create_BMP_File(pSrc_filename_raw, pSrc_filename_bmp, compfact, buffer);
 	CMP_AND_RETURN(result, JpegCompression_Success, JpegCompression_ImageDataBaseFailure);
 
 	char pDst_filename[FILE_NAME_SIZE];
 	result = GetImageFileName(id, jpg, pDst_filename);
 	CMP_AND_RETURN(result, DataBaseSuccess, JpegCompression_ImageDataBaseFailure);
 
-	result = JPEG_compressor(compfact, quality_factor, pDst_filename);
+	result = JPEG_compressor(compfact, quality_factor, pDst_filename, buffer);
 	CMP_AND_RETURN(result, JpegCompression_Success, result);
 
 	f_delete(pSrc_filename_bmp);	// deleting the BMP file
