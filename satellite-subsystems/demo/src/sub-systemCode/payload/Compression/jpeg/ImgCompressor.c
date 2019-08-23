@@ -47,19 +47,6 @@ JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_fa
 	printf("Compressed file size: %u\n", file_size);
 	f_releaseFS();
 
-	for (unsigned int i = 0; i < file_size; i++)
-	{
-		printf("%u ", imageBuffer[i]);
-
-		if (i % 200 == 0)
-			vTaskDelay(3);
-		if(i%1000000==0)
-		{
-			GomEpsResetWDT(0);
-		}
-	}
-	printf("\n\n\n");
-
 	return JpegCompression_Success;
 }
 

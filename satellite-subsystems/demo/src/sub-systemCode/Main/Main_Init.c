@@ -253,38 +253,48 @@ void pre_written_test(void)
 	TurnOnGecko();
 
 	byte* buffer = imageBuffer;
-/*
+
 	int err = GECKO_EraseBlock(1);
 	printf("\n\n\tGECKO_EraseBlock (%d)\n\n", err);
 
 	vTaskDelay(1000);
 
-	err = GECKO_TakeImage( 53, 3, 2048, 1, 1, 1, FALSE_8BIT);
+	err = GECKO_TakeImage( 53, 1, 38, 1, 1, 1, FALSE_8BIT);
 	printf("\n\n\tGECKO_TakeImage (%d)\n\n", err);
 
 	vTaskDelay(1000);
+	GomEpsResetWDT(0);
 
 	err = GECKO_ReadImage((uint32_t)1, (uint32_t*)buffer);
 	printf("\n\n\tGECKO_ReadImage (%d)\n\n", err);
 
 	vTaskDelay(1000);
-*/
-	f_enterFS();
-	F_FILE* f = f_open("BOAZ2.OUT", "w");
-	f_write(buffer, 2048*1088, 1, f);
-	f_close(f);
-	f_releaseFS();
 
 	TurnOffGecko();
 
-	int err = Create_BMP_File("jpegTest.raw", "jpegTest.bmp", 1, buffer);
-	printf("\n\n\tCreate_BMP_File (%d)\n\n", err);
+	f_enterFS();
+
+	f_delete("bmp");
+	f_delete("jpegTest.jpg");
+
+	F_FILE* f = f_open("jpegTest.raw", "w");
+	printf("\n\n\tf_open (%d)\n\n", f_getlasterror());
+	f_write(buffer, 2048*1088, 1, f);
+	f_flush(f);
+	printf("\n\n\tf_write (%d)\n\n", f_getlasterror());
+	f_close(f);
+	printf("\n\n\tf_close (%d)\n\n", f_getlasterror());
+
+	f_releaseFS();
+	GomEpsResetWDT(0);
+
+	Create_BMP_File("jpegTest.raw", "jpegTest.bmp", 1, buffer);
+	printf("\n\n\tCreate_BMP_File (no return...)\n\n");
 
 	err = JPEG_compressor(1, 50, "jpegTest.jpg", buffer);
 	printf("\n\n\tJPEG_compressor (%d)\n\n", err);
 
 	printImage("jpegTest.jpg");
-	printImage("jpegTest.bmp");
 	printImage("jpegTest.raw");
 }
 
