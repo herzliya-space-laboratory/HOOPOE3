@@ -676,7 +676,7 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		packet->subType = SP_DUMP_ST;
 		packet->length = SP_HK_SIZE;
 		packet->time = data_time;
-		ADCS_HK_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
+		SP_HK_raw_BiEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_CSS_DATA_T:
 		packet->type = TM_ADCS_ST;
@@ -859,6 +859,9 @@ void HouseKeeping_highRate_Task()
 			vTaskDelay(100);
 			continue;
 		}
+
+		int i_error = f_managed_enterFS();
+		check_int("f_managed_enterFS in HK low rate, ", i_error);
 		save_EPS_HK();
 
 		save_CAM_HK();
@@ -870,6 +873,7 @@ void HouseKeeping_highRate_Task()
 #ifndef USE_DIFFERENT_TASK_ONLINE_TM
 		save_onlineTM_logic();
 #endif
+		f_managed_releaseFS();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
@@ -886,7 +890,11 @@ void HouseKeeping_lowRate_Task()
 			vTaskDelay(100);
 			continue;
 		}
+
+		int i_error = f_managed_enterFS();
+		check_int("f_managed_enterFS in HK low rate, ", i_error);
 		save_SP_HK();
+		f_managed_releaseFS();
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
