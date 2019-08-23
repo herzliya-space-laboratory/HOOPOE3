@@ -245,7 +245,7 @@ void resetSD()
 }
 
 void pre_written_test(void)
-{
+{/*
 	TurnOffGecko();
 	TurnOnGecko();
 
@@ -255,9 +255,9 @@ void pre_written_test(void)
 	err = transferImageToSD(imageDataBase, 1);
 	printf("\n\n\ttransferImageToSD (%d)\n\n", err);
 
-	TurnOffGecko();
-
-	err = CompressImage(1, raw, 50);
+	TurnOffGecko();*/
+/*
+	int err = CompressImage(1, raw, 50);
 	printf("\n\n\tCompressImage (%d)\n\n", err);
 
 	GomEpsResetWDT(0);
@@ -281,7 +281,7 @@ void pre_written_test(void)
 
 	err = GetImageFileName(1, t16, fileName);
 	printImage(fileName);
-
+*/
 }
 
 int InitSubsystems()
