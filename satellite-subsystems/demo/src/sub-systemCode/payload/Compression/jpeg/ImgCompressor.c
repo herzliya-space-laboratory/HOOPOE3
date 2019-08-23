@@ -15,6 +15,8 @@
 #include <math.h>
 #include "jpeg.h"
 
+#include <satellite-subsystems/GomEPS.h>
+
 #include "../../Misc/Macros.h"
 #include "../../Misc/FileSystem.h"
 #include "bmp/rawToBMP.h"
@@ -23,7 +25,7 @@
 
 typedef unsigned int uint;
 
-JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_factor, char pDst_filename[FILE_NAME_SIZE], byte* buffer)
+ImageDataBaseResult JPEG_compressor(uint32_t compfact, unsigned int quality_factor, char pDst_filename[FILE_NAME_SIZE], byte* buffer)
 {
 	unsigned int image_width = IMAGE_WIDTH / compfact;
 	unsigned int image_height = IMAGE_HEIGHT / compfact;
@@ -39,40 +41,40 @@ JpegCompressionResult JPEG_compressor(uint32_t compfact, unsigned int quality_fa
 	if (!compress_image_to_jpeg_file(pDst_filename, image_width, image_height, H2V2, buffer, &params))
 	{
 		printf("Failed writing to output file!\n");
-		return JpegCompression_FailedWritingToOutputFile;
+		return DataBaseFileSystemError;
 	}
 
 	f_enterFS();
 	uint32_t file_size = f_filelength(pDst_filename);
-	printf("Compressed file size: %u\n", file_size);
+	printf("Compressed file size: %u\n", (unsigned int)file_size);
 	f_releaseFS();
 
 	return JpegCompression_Success;
 }
 
-JpegCompressionResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], char pSrc_filename[FILE_NAME_SIZE], unsigned int compfact, byte* buffer)
+ImageDataBaseResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], char pSrc_filename[FILE_NAME_SIZE], unsigned int compfact, byte* buffer)
 {
 	TransformRawToBMP(pSrc_filename_raw, pSrc_filename, compfact);
 
-	// Load the bmp bmp:
+	// Load the bmp:
 
 	F_FILE* file = NULL;
 	int error = OpenFile(&file, pSrc_filename, "r");	// open file for reading in safe mode
-	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
-	CHECK_FOR_NULL(file, JpegCompression_ImageLoadingFailure);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+	CHECK_FOR_NULL(file, DataBaseNullPointer);
 
 	f_seek(file, BMP_FILE_HEADER_SIZE, SEEK_SET);	// skipping the file header
 
 	error = ReadFromFile(file, buffer, BMP_FILE_DATA_SIZE, 1);
-	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	error = CloseFile(file);
-	CMP_AND_RETURN(error, 0, JpegCompression_ImageLoadingFailure);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	return JpegCompression_Success;
 }
 
-JpegCompressionResult CompressImage(imageid id, fileType reductionLevel, unsigned int quality_factor)
+ImageDataBaseResult CompressImage(imageid id, fileType reductionLevel, unsigned int quality_factor)
 {
 	printf("jpeg_encoder class example program\n");
 
@@ -86,24 +88,45 @@ JpegCompressionResult CompressImage(imageid id, fileType reductionLevel, unsigne
 	byte* buffer = imageBuffer;
 
 	char pSrc_filename_raw[FILE_NAME_SIZE];
-	int result = GetImageFileName(id, reductionLevel, pSrc_filename_raw);
-	CMP_AND_RETURN(result, DataBaseSuccess, JpegCompression_ImageDataBaseFailure);
+	ImageDataBaseResult result = GetImageFileName(id, reductionLevel, pSrc_filename_raw);
+	CMP_AND_RETURN(result, DataBaseSuccess, result);
 
 	char pSrc_filename_bmp[FILE_NAME_SIZE];
 	result = GetImageFileName(id, bmp, pSrc_filename_bmp);
-	CMP_AND_RETURN(result, DataBaseSuccess, JpegCompression_ImageDataBaseFailure);
+	CMP_AND_RETURN(result, DataBaseSuccess, result);
+
+	GomEpsResetWDT(0);
 
 	result = Create_BMP_File(pSrc_filename_raw, pSrc_filename_bmp, compfact, buffer);
-	CMP_AND_RETURN(result, JpegCompression_Success, JpegCompression_ImageDataBaseFailure);
+	CMP_AND_RETURN(result, JpegCompression_Success, result);
 
 	char pDst_filename[FILE_NAME_SIZE];
 	result = GetImageFileName(id, jpg, pDst_filename);
-	CMP_AND_RETURN(result, DataBaseSuccess, JpegCompression_ImageDataBaseFailure);
+	CMP_AND_RETURN(result, DataBaseSuccess, result);
 
 	result = JPEG_compressor(compfact, quality_factor, pDst_filename, buffer);
 	CMP_AND_RETURN(result, JpegCompression_Success, result);
 
 	f_delete(pSrc_filename_bmp);	// deleting the BMP file
+
+	/*
+	F_FILE* f = f_open("jpegTest.raw", "w");
+	printf("\n\n\tf_open (%d)\n\n", f_getlasterror());
+	f_write(buffer, 2048*1088, 1, f);
+	f_flush(f);
+	printf("\n\n\tf_write (%d)\n\n", f_getlasterror());
+	f_close(f);
+	printf("\n\n\tf_close (%d)\n\n", f_getlasterror());
+
+	f_releaseFS();
+	GomEpsResetWDT(0);
+
+	Create_BMP_File("jpegTest.raw", "jpegTest.bmp", 1, buffer);
+	printf("\n\n\tCreate_BMP_File (no return...)\n\n");
+
+	err = JPEG_compressor(1, 50, "jpegTest.jpg", buffer);
+	printf("\n\n\tJPEG_compressor (%d)\n\n", err);
+	 */
 
 	return JpegCompression_Success;
 }

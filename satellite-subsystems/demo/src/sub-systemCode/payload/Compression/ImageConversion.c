@@ -14,7 +14,7 @@
 
 #include "ImageConversion.h"
 
-static uint8_t GetBinnedPixel(uint8_t binPixelSize, int x, int y)
+static uint8_t GetBayerPixel(uint8_t binPixelSize, int x, int y)
 {
 	uint16_t value = 0;
 
@@ -39,10 +39,10 @@ void BinImage(fileType reductionLevel)	// where 2^(bin level) is the size reduct
 	{
 		for(unsigned int x = 0; x < IMAGE_WIDTH / binPixelSize; x += 2)
 		{
-			(*binBuffer)[y][x] = GetBinnedPixel(binPixelSize,x*binPixelSize,y*binPixelSize);         // Red pixel
-			(*binBuffer)[y][x+1] = GetBinnedPixel(binPixelSize,x*binPixelSize+1,y*binPixelSize);     // Green pixel
-			(*binBuffer)[y+1][x] = GetBinnedPixel(binPixelSize,x*binPixelSize,y*binPixelSize+1);     // Green pixel
-			(*binBuffer)[y+1][x+1] = GetBinnedPixel(binPixelSize,x*binPixelSize+1,y*binPixelSize+1); // Blue pixel
+			(*binBuffer)[y][x] = GetBayerPixel(binPixelSize,x*binPixelSize,y*binPixelSize);         // Red pixel
+			(*binBuffer)[y][x+1] = GetBayerPixel(binPixelSize,x*binPixelSize+1,y*binPixelSize);     // Green pixel
+			(*binBuffer)[y+1][x] = GetBayerPixel(binPixelSize,x*binPixelSize,y*binPixelSize+1);     // Green pixel
+			(*binBuffer)[y+1][x+1] = GetBayerPixel(binPixelSize,x*binPixelSize+1,y*binPixelSize+1); // Blue pixel
 		}
 	}
 }
@@ -127,7 +127,7 @@ ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor)
 
 	updateFileTypes(&image_metadata, image_address, jpg, TRUE);
 
-	JpegCompressionResult JPEG_result = CompressImage(id, raw, quality_factor);
+	ImageDataBaseResult JPEG_result = CompressImage(id, raw, quality_factor);
 	if (JPEG_result != JpegCompression_Success)
 	{
 		updateFileTypes(&image_metadata, image_address, jpg, FALSE);
