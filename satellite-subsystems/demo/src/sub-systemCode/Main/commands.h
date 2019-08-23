@@ -51,10 +51,9 @@ void AUC_EPS(TC_spl decode);
 
 void AUC_ADCS(TC_spl decode);
 
-void AUC_GS(TC_spl decode);
-
 void AUC_SW(TC_spl decode);
 
 void AUC_special_operation(TC_spl decode);
 
+void AUC_onlineTM(TC_spl decode);
 #endif /* COMMANDS_H_ */

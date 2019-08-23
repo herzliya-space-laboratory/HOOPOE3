@@ -17,6 +17,7 @@
 
 #include "Global/Global.h"
 #include "COMM/GSC.h"
+
 #define APRS_ON
 
 #define TRXVU_TO_CALSIGN "GS1"
@@ -25,10 +26,12 @@
 #define VALUE_TX_BUFFER_FULL 0xff
 #define NUM_FILES_IN_DUMP	5
 
+#define DEFAULT_BIT_RATE	trxvu_bitrate_9600
+
 #define NOMINAL_MODE TRUE
 #define TRANSPONDER_MODE FALSE
 
-#define MAX_NUTE_TIME 3
+#define MAX_NUTE_TIME 90// in minutes
 
 #define DEFAULT_TIME_TRANSMITTER (60 * 15)// in seconds
 
@@ -40,7 +43,7 @@
 #define DEFULT_BEACON_DELAY 20// in seconds
 #endif
 
-#define MIN_TIME_DELAY_BEACON	1
+#define MIN_TIME_DELAY_BEACON	5
 #define MAX_TIME_DELAY_BEACON 	40
 
 #define TRANSMMIT_DELAY_9600(length) (length - length)
@@ -54,6 +57,7 @@
 
 #define MIN_TRANS_RSSI 	0
 #define MAX_TRANS_RSSI 	4095
+#define DEFAULT_TRANS_RSSI	1500
 
 typedef enum
 {
@@ -126,7 +130,7 @@ void Transponder_task(void *arg);
  * 	@brief		build and send beacon packet
  * 	@param[in]	the bitRate to send the beacon in
  */
-void buildAndSend_beacon(ISIStrxvuBitrate bitRate);
+void buildAndSend_beacon();
 
 /**
  * 	@brief	the task in charge of sending a beacon once in defined time
@@ -167,7 +171,7 @@ void lookForRequestToDelete_transponder(command_id cmdID);
  * @param[in]	data to send, can't be over
  * @param[in]	length of data to send as an AX.25 frame
  */
-int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate);
+int TRX_sendFrame(byte* data, uint8_t length);
 
 /**
  * @brief		gets data from Rx buffer

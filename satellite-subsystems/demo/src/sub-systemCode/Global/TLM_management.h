@@ -45,8 +45,8 @@ typedef enum
 
 int f_managed_enterFS();
 int f_managed_releaseFS();
-int f_managed_open(char* file_name, char* config, F_FILE* fileHandler);
-int f_managed_close(F_FILE* fileHandler);
+int f_managed_open(char* file_name, char* config, F_FILE** fileHandler);
+int f_managed_close(F_FILE** fileHandler);
 /*
  *
  */

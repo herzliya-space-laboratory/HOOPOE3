@@ -16,15 +16,14 @@
 #define IMAGE_DUMP_T 11
 #define ACK_ST 90
 #define TM_ADCS_ST 	42
-#define ADCS_SC_ST	55
+#define TM_ONLINE_TM_T	88
 
 //Types (TC)
 
-#define NONE_APRS_T 33
 #define COMM_T 		13
 #define GENERAL_T 	20
+#define TC_ONLINE_TM_T		TM_ONLINE_TM_T
 #define TC_ADCS_T 		154
-#define GENERALLY_SPEAKING_T		195
 #define PAYLOAD_T	251
 #define EPS_T		6
 #define SOFTWARE_T 42
@@ -33,6 +32,7 @@
 //SubType (TM)
 #define BEACON_ST 25
 #define APRS_PACKET_FRAM 33
+
 //dumps subTypes:
 #define EPS_DUMP_ST 13
 #define CAM_DUMP_ST 23
@@ -46,6 +46,7 @@
 #define IMAGE_DUMP_THUMBNAIL1_ST	103
 #define IMAGE_DUMP_RAW_ST			104
 #define IMAGE_DUMP_JPG_ST			105
+
 //ADCS science sub-types
 #define ADCS_CSS_DATA_ST 				122
 #define ADCS_MAGNETIC_FILED_ST			123
@@ -82,6 +83,7 @@
 #define APRS_DUMP_ST				90
 #define STOP_DUMP_ST				91
 #define TIME_FREQUENCY_ST			5
+#define UPDATE_BIT_RATE_ST			55
 
 //general
 #define SOFT_RESET_ST			68
@@ -89,8 +91,6 @@
 #define RESET_SAT_ST 			67
 #define GRACEFUL_RESET_ST		69
 #define UPLOAD_TIME_ST 			17
-
-//generally speaking
 #define GENERIC_I2C_ST			0
 #define DUMP_ST					33
 #define DELETE_PACKETS_ST		35
@@ -122,6 +122,7 @@
 #define UPD_LOGIC_VOLT_ST		255
 #define UPD_COMM_VOLTAGE		20
 #define CHANGE_HEATER_TMP_ST	0
+#define UPDATE_EPS_ALPHA_ST		11
 
 //adcs
 #define ADCS_SET_BOOT_INDEX_ST			98
@@ -164,6 +165,12 @@
 #define RESET_DELAYED_CM_LIST_ST 	32
 #define RESET_APRS_LIST_ST			15
 #define RESET_FRAM_ST				42
+
+//online TM
+#define GET_ONLINE_TM_INDEX_ST		0
+#define RESET_OFF_LINE_LIST_ST		1
+#define ADD_ITEM_OFF_LINE_LIST_ST		2
+#define	DELETE_ITEM_OFF_LINE_LIST_ST		3
 
 //special operations
 #define DELETE_UNF_CUF_ST		156

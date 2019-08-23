@@ -35,10 +35,6 @@
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
 
-#ifdef TESTING
-#include "CMD/test_CMD.h"
-#endif
-
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
@@ -61,6 +57,13 @@ xSemaphoreHandle xCTE = NULL;
 TC_spl command_to_execute[COMMAND_LIST_SIZE];
 int place_in_list = 0;
 
+void save_ACK_s(Ack_type type, ERR_type err, command_id ACKcommandId)
+{
+	int i_error = f_managed_enterFS();
+	check_int("f_managed_enterFS in AUC", i_error);
+	save_ACK(type, err, ACKcommandId);
+	f_managed_releaseFS();
+}
 
 void copy_command(TC_spl source, TC_spl* to)
 {
@@ -175,19 +178,26 @@ void act_upon_command(TC_spl decode)
 	case (TC_ADCS_T):
 		AUC_ADCS(decode);
 		break;
-	case (GENERALLY_SPEAKING_T):
-		AUC_GS(decode);
-		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
 		break;
 	case (SPECIAL_OPERATIONS_T):
 		AUC_special_operation(decode);
 		break;
+	case (TC_ONLINE_TM_T):
+		AUC_onlineTM(decode);
+		break;
 	default:
 		printf("wrong type: %d\n", decode.type);
 		break;
 	}
+}
+
+
+void cmd_error(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_NOTHING;
+	*err = ERR_FAIL;
 }
 
 
@@ -222,13 +232,16 @@ void AUC_COMM(TC_spl decode)
 	case (TIME_FREQUENCY_ST):
 		cmd_time_frequency(&type, &err, decode);
 		break;
+	case (UPDATE_BIT_RATE_ST):
+		cmd_change_def_bit_rate(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -239,8 +252,28 @@ void AUC_general(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	case (SOFT_RESET_ST):
-		cmd_soft_reset_cmponent(&type, &err, decode);
+	case (GENERIC_I2C_ST):
+		cmd_generic_I2C(&type, &err, decode);
+		break;
+	case (UPLOAD_TIME_ST):
+		cmd_upload_time(&type, &err, decode);
+		break;
+	case (DUMP_ST):
+		cmd_dump(decode);
+		return;
+		break;
+	case (DELETE_PACKETS_ST):
+		cmd_delete_TM(&type, &err, decode);
+		break;
+	case (RESET_FILE_ST):
+		cmd_reset_file(&type, &err, decode);
+		break;
+	case (RESTSRT_FS_ST):
+		break;
+	case (REDEPLOY):
+		break;
+	case (ARM_DISARM):
+		cmd_ARM_DIARM(&type, &err, decode);
 		break;
 	case (HARD_RESET_ST):
 		cmd_hard_reset_cmponent(&type, &err, decode);
@@ -248,19 +281,23 @@ void AUC_general(TC_spl decode)
 	case (RESET_SAT_ST):
 		cmd_reset_satellite(&type, &err);
 		break;
+	case (SOFT_RESET_ST):
+		cmd_soft_reset_cmponent(&type, &err, decode);
+		break;
 	case (GRACEFUL_RESET_ST):
 		cmd_gracefull_reset_satellite(&type, &err);
 		break;
-	case (UPLOAD_TIME_ST):
-		cmd_upload_time(&type, &err, decode);
+	case (DUMMY_FUNC_ST):
+		cmd_dummy_func(&type, &err);
 		break;
 	default:
 		cmd_error(&type, &err);
 		break;
+
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -303,7 +340,7 @@ void AUC_payload(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -335,13 +372,16 @@ void AUC_EPS(TC_spl decode)
 	case (SHUT_CAM_ST):
 		cmd_SHUT_CAM(&type, &err, decode);
 		break;
+	case (UPDATE_EPS_ALPHA_ST):
+		cmd_update_alpha(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -358,48 +398,7 @@ void AUC_ADCS(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
-#endif
-}
-
-void AUC_GS(TC_spl decode)
-{
-	Ack_type type;
-	ERR_type err;
-
-	switch (decode.subType)
-	{
-	case (GENERIC_I2C_ST):
-		cmd_generic_I2C(&type, &err, decode);
-		break;
-	case (DUMP_ST):
-		cmd_dump(decode);
-		return;
-		break;
-	case (DELETE_PACKETS_ST):
-		cmd_delete_TM(&type, &err, decode);
-		break;
-	case (RESET_FILE_ST):
-		cmd_reset_file(&type, &err, decode);
-		break;
-	case (RESTSRT_FS_ST):
-		break;
-	case (DUMMY_FUNC_ST):
-		cmd_dummy_func(&type, &err);
-		break;
-	case (REDEPLOY):
-
-		break;
-	case (ARM_DISARM):
-		cmd_ARM_DIARM(&type, &err, decode);
-		break;
-	default:
-		cmd_error(&type, &err);
-		break;
-	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -425,7 +424,36 @@ void AUC_SW(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
+#endif
+}
+
+void AUC_onlineTM(TC_spl decode)
+{
+	Ack_type type;
+	ERR_type err;
+
+	switch (decode.subType)
+	{
+	case (GET_ONLINE_TM_INDEX_ST):
+		cmd_get_onlineTM(&type, &err, decode);
+		break;
+	case (RESET_OFF_LINE_LIST_ST):
+		cmd_reset_off_line(&type, &err, decode);
+		break;
+	case (ADD_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
+		break;
+	case (DELETE_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
+		break;
+	default:
+		cmd_error(&type, &err);
+		break;
+	}
+	//Builds ACK
+#ifndef NOT_USE_ACK_HK
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -454,7 +482,7 @@ void AUC_special_operation(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 

@@ -30,6 +30,7 @@
 #include <satellite-subsystems/GomEPS.h>
 
 #include "Global.h"
+#include "TLM_management.h"
 
 int not_first_activation;
 
@@ -137,6 +138,9 @@ int hard_reset_subsystem(subSystem_indx reset_idx)
 		channel.raw = 0;
 		error = GomEpsSetOutput(0, channel);
 		check_int("Hard reset ADCS, turn off EPS channels", error);
+		break;
+	case CAMMERA:
+		//todo:
 		break;
 	default:
 		return -444;
@@ -284,4 +288,12 @@ Boolean getBitValueByIndex(byte* data, int length, int index)
 		return FALSE;
 	else
 		return TRUE;
+}
+
+
+//FreeRTOS extension
+void terminateTask()
+{
+	f_managed_releaseFS();
+	vTaskDelete(NULL);
 }

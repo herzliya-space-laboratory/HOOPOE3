@@ -42,12 +42,15 @@
 #include "../Global/sizes.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
+#include "../Global/OnlineTM.h"
 #include "../ADCS.h"
-
 
 
 int find_fileName(HK_types type, char *fileName)
 {
+	if (fileName == NULL)
+		return -2;
+
 	switch(type)
 	{
 	case EPS_HK_T:
@@ -132,6 +135,15 @@ int find_fileName(HK_types type, char *fileName)
 		strcpy(fileName, ESTIMATED_QUATERNION_FILE);
 		break;
 	default:
+		if (type >= OnlineTM_first_type_T)
+		{
+			onlineTM_param param = get_item_by_index((int)(type - (int)OnlineTM_first_type_T));
+			if (param.TM_param_length != 0)
+			{
+				strcpy(fileName, param.name);
+				break;
+			}
+		}
 		return -1;
 		break;
 	}
@@ -155,15 +167,23 @@ int size_of_element(HK_types type)
 		return ADCS_SC_SIZE;
 	if (ADCS_ECI_VEL_T == type)
 		return ADCS_SC_SIZE;
-
+	if (type >= OnlineTM_first_type_T)
+	{
+		onlineTM_param param = get_item_by_index((int)(type - (int)OnlineTM_first_type_T));
+		if (param.TM_param_length != 0)
+		{
+			return param.TM_param_length;
+		}
+	}
 	return 0;
 }
 
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 {
+	FileSystemResult error;
 	byte raw_ACK[ACK_DATA_LENGTH];
 	build_data_field_ACK(type, err, ACKcommandId, raw_ACK);
-	FileSystemResult error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
+	error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
 	if (error != FS_SUCCSESS)
 	{
 		printf("could not save ACK, error %d", error);
@@ -176,6 +196,7 @@ int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 	return 0;
 }
 
+//update the global_params
 void set_GP_EPS(EPS_HK hk_in)
 {
 	set_Vbatt(hk_in.fields.VBatt);
@@ -204,7 +225,7 @@ void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 	set_TxRefl(tx_tm.fields.tx_reflpwr);
 }
 
-
+// collect from the drivers telemetry for each of the HK types
 int SP_HK_collect(SP_HK* hk_out)
 {
 	int errors[NUMBER_OF_SOLAR_PANNELS];
@@ -319,7 +340,7 @@ int ADCS_HK_collect(ADCS_HK* hk_out)
 	return error;
 }
 
-
+//create file for every type of HK
 int COMM_create_file()
 {
 	int er = c_fileReset(COMM_HK_FILE_NAME);
@@ -404,20 +425,21 @@ int create_files(Boolean firstActivation)
 	return 0;
 }
 
+//save data from each of the systems, every type of HK have his own function
 void save_SP_HK()
 {
 	int error;
-	SP_HK eps_hk;
+	SP_HK sp_hk;
 	// 1.1. collect hk
-	error = SP_HK_collect(&eps_hk);
+	error = SP_HK_collect(&sp_hk);
 	if (error == 0)
 	{
 		// 1.2. save hk in filesystem
-		error = c_fileWrite(SP_HK_FILE_NAME, (void*)(&eps_hk));
+		error = c_fileWrite(SP_HK_FILE_NAME, (void*)(&sp_hk));
 		if (error == FS_NOT_EXIST)
 		{
 			// 1.3. create file if not exist
-			EPS_create_file();
+			SP_create_file();
 		}
 	}
 	else
@@ -430,21 +452,17 @@ void save_EPS_HK()
 {
 	int error;
 	EPS_HK eps_hk;
-	// 1.1. collect hk
 	error = EPS_HK_collect(&eps_hk);
 	if (error == 0)
 	{
-		// 1.2. save hk in filesystem
 		error = c_fileWrite(EPS_HK_FILE_NAME, (void*)(&eps_hk));
 		if (error == FS_NOT_EXIST)
 		{
-			// 1.3. create file if not exist
 			EPS_create_file();
 		}
 	}
 	else
 	{
-		//can't get eps hk
 		printf("ERROR IN COLLECTING EPS TM: %d\n", error);
 	}
 }
@@ -454,22 +472,18 @@ void save_CAM_HK()
 	if (get_system_state(cam_operational_param))
 	{
 		CAM_HK cam_hk;
-		// 2.1. collect hk
 		error = CAM_HK_collect(&cam_hk);
 		if (error == 0)
 		{
-			// 2.2. save hk in filesystem
 			error = c_fileWrite(CAM_HK_FILE_NAME, (void*)(&cam_hk));
 			if (error == FS_NOT_EXIST)
 			{
-				// 2.3. create file if not exist
 				CAM_create_file();
 			}
 		}
 		else
 		{
-			//can't get eps hk
-			//printf("ERROR IN COLLECTING CAM TM: %d\n", error);
+			printf("ERROR IN COLLECTING CAM TM: %d\n", error);
 		}
 	}
 }
@@ -477,21 +491,17 @@ void save_COMM_HK()
 {
 	int error;
 	COMM_HK comm_hk;
-	// 3.1. collect hk
 	error = COMM_HK_collect(&comm_hk);
 	if (error == 0)
 	{
-		// 3.2. save hk in filesystem
 		error = c_fileWrite(COMM_HK_FILE_NAME, (void*)(&comm_hk));
 		if (error == FS_NOT_EXIST)
 		{
-			// 3.3. create file if not exist
 			COMM_create_file();
 		}
 	}
 	else
 	{
-		//can't get eps hk
 		printf("ERROR IN COLLECTING COMM TM: %d\n", error);
 	}
 }
@@ -499,28 +509,25 @@ void save_ADCS_HK()
 {
 	int error;
 	ADCS_HK adcs_hk;
-	// 3.1. collect hk
 	if (get_system_state(ADCS_param))
 	{
 		error = ADCS_HK_collect(&adcs_hk);
 		if (error == 0)
 		{
-			// 3.2. save hk in filesystem
 			error = c_fileWrite(ADCS_HK_FILE_NAME, (void*)(&adcs_hk));
 			if (error == FS_NOT_EXIST)
 			{
-				// 3.3. create file if not exist
 				ADCS_create_file();
 			}
 		}
 		else
 		{
-			//can't get eps hk
 			printf("ERROR IN COLLECTING ADCS TM: %d\n", error);
 		}
 	}
 }
 
+//convert data from little-endian to big-endian, every HK type have his own function
 int EPS_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
 	int params[] = {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 1, 1};
@@ -589,7 +596,7 @@ int SP_HK_raw_BiEnE(byte* raw_in, byte* raw_out)
 {
 	int params[] = {4, 4, 4, 4, 4, 4};
 	int lastPlace = 0, l;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < NUMBER_OF_SOLAR_PANNELS; i++)
 	{
 		for (l = 0; l < params[i] / 2; l++)
 		{
@@ -621,6 +628,9 @@ int ADCS_SC_raw_BigEnE(byte* raw_in, byte* raw_out)
 
 int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 {
+	if (raw_data == NULL || packet == NULL)
+		return -2;
+
 	time_unix data_time;
 	memcpy(&data_time, raw_data, sizeof(time_unix));
 	switch(type)
@@ -666,156 +676,169 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet)
 		packet->subType = SP_DUMP_ST;
 		packet->length = SP_HK_SIZE;
 		packet->time = data_time;
-		ADCS_HK_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
+		SP_HK_raw_BiEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_CSS_DATA_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_CSS_DATA_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Magnetic_filed_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_MAGNETIC_FILED_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_CSS_sun_vector_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_CSS_SUN_VECTOR_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_wheel_speed_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_WHEEL_SPEED_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_sensore_rate_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_SENSORE_RATE_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_MAG_CMD_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_MAG_CMD_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_wheel_CMD_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_WHEEL_CMD_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Mag_raw_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_MAG_RAW_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_IGRF_MODEL_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_IGRF_MODEL_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Gyro_BIAS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_GYRO_BIAS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Inno_Vextor_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_INNO_VEXTOR_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Error_Vec_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ERROR_VEC_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_QUATERNION_COVARIANCE_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_QUATERNION_COVARIANCE_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ANGULAR_RATE_COVARIANCE_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ANGULAR_RATE_COVARIANCE_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ESTIMATED_ANGLES_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ESTIMATED_ANGLES_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_Estimated_AR_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ESTIMATED_AR_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ECI_POS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ECI_POS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_SAV_Vel_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_SAV_VEL_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_ECEF_POS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_ECEF_POS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_LLH_POS_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_LLH_POS_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	case ADCS_EST_QUATERNION_T:
-		packet->type = ADCS_SC_ST;
+		packet->type = TM_ADCS_ST;
 		packet->subType = ADCS_EST_QUATERNION_ST;
 		packet->length = ADCS_SC_SIZE;
 		packet->time = data_time;
 		ADCS_SC_raw_BigEnE((raw_data + TIME_SIZE), packet->data);
 		break;
 	default:
+		if (type >= OnlineTM_first_type_T)
+		{
+			onlineTM_param param = get_item_by_index((int)(type - (int)OnlineTM_first_type_T));
+			if (param.TM_param_length != 0)
+			{
+				packet->type = TM_ONLINE_TM_T;
+				packet->subType = type - OnlineTM_first_type_T;
+				packet->length = param.TM_param_length;
+				packet->time = data_time;
+				memcpy(packet->data, raw_data + TIME_SIZE, param.TM_param_length);
+				return 0;
+			}
+		}
 		return -1;
 		break;
 	}
@@ -831,17 +854,26 @@ void HouseKeeping_highRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF != TRUE_8BIT)
+		if (DF == TRUE_8BIT)
 		{
-			save_EPS_HK();
-
-			save_CAM_HK();
-
-			save_COMM_HK();
-
-			//save_ADCS_HK();
+			vTaskDelay(100);
+			continue;
 		}
 
+		int i_error = f_managed_enterFS();
+		check_int("f_managed_enterFS in HK low rate, ", i_error);
+		save_EPS_HK();
+
+		save_CAM_HK();
+
+		save_COMM_HK();
+
+		//save_ADCS_HK();
+
+#ifndef USE_DIFFERENT_TASK_ONLINE_TM
+		save_onlineTM_logic();
+#endif
+		f_managed_releaseFS();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
@@ -853,10 +885,16 @@ void HouseKeeping_lowRate_Task()
 	{
 		byte DF;
 		FRAM_write(&DF, STOP_TELEMETRY_ADDR, 1);
-		if (DF != TRUE_8BIT)
+		if (DF == TRUE_8BIT)
 		{
-			save_SP_HK();
+			vTaskDelay(100);
+			continue;
 		}
+
+		int i_error = f_managed_enterFS();
+		check_int("f_managed_enterFS in HK low rate, ", i_error);
+		save_SP_HK();
+		f_managed_releaseFS();
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}

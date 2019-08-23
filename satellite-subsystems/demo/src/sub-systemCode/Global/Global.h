@@ -138,4 +138,8 @@ Boolean comapre_string(unsigned char* str0, unsigned char* str1, int numberOfByt
 Boolean getBitValueByIndex(byte* data, int length, int index);
 
 void reset_FRAM_MAIN();
+
+
+//FreeRTOS extension
+void terminateTask();
 #endif /* GLOBAL_H_ */

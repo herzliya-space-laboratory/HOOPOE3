@@ -25,18 +25,19 @@
 //EPS
 #define EPS_VOLTAGES_ADDR 0x2100 // << EPS_VOLTAGES_SIZE_RAW bytes >>
 #define EPS_STATES_ADDR 0x211C // << 1 byte >> Address of consumption state
+#define EPS_ALPHA_ADDR		0x211D	//<< 1 byte >>
 
 //TRX
-#define FRAME_COUNT_ADDR 0x311C // << 1 byte >>
 #define BEACON_LOW_BATTERY_STATE_ADDR 0x311D // << 2 bytes >>
 #define TRANS_LOW_BATTERY_STATE_ADDR 0x311F
 #define NUMBER_COMMAND_FRAM_ADDR  0x3121 // << 1 byte >> The number of delayed command stored in the FRAM
 #define DELAY_COMMAD_FRAM_ADDR	0x3122 //<<100 * SIZE_OF_COMMAND = 30080 bytes >> All delayed command will be stored in this address ass one big array of bytes
 #define NUMBER_PACKET_APRS_ADDR 0x8CEE // << 1 byte >> number of APRS packets in the FRAM
 #define APRS_PACKETS_ADDR 0x8CEF// << 20 * 18 = 360 >>
-#define BEACON_BIT_RATE_ADDR 0x8E57// << 1 byte >>
 #define BEACON_TIME_ADDR 0x8E58// << 1 byte >>
-#define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
+#define MUTE_TIME_ADDR		0x8E59//<<4 bytes>>
+#define BIT_RATE_ADDR		0x8E5D //<<1 bytes>>
+#define TRANSPONDER_RSSI_ADDR	0x8E5E// << 2 bytes>
 
 //ADCS
 #define STAGE_TABLE_ADDR 0x9044

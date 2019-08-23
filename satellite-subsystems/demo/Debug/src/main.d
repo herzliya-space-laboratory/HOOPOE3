@@ -60,7 +60,12 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Global/Global.h ../src/sub-systemCode/EPS.h \
  ../src/sub-systemCode/Global/FRAMadress.h \
  ../src/sub-systemCode/Global/Global.h \
- ../src/sub-systemCode/Global/sizes.h
+ ../src/sub-systemCode/Global/sizes.h \
+ ../src/sub-systemCode/Global/OnlineTM.h \
+ ../src/sub-systemCode/Global/Global.h \
+ ../src/sub-systemCode/Global/TLM_management.h \
+ ../src/sub-systemCode/Global/../COMM/GSC.h \
+ ../src/sub-systemCode/Global/../COMM/splTypes.h
 
 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h:
 
@@ -187,3 +192,13 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:
 ../src/sub-systemCode/Global/Global.h:
 
 ../src/sub-systemCode/Global/sizes.h:
+
+../src/sub-systemCode/Global/OnlineTM.h:
+
+../src/sub-systemCode/Global/Global.h:
+
+../src/sub-systemCode/Global/TLM_management.h:
+
+../src/sub-systemCode/Global/../COMM/GSC.h:
+
+../src/sub-systemCode/Global/../COMM/splTypes.h:

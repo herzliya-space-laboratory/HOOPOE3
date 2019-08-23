@@ -13,6 +13,7 @@
 
 #include "General_CMD.h"
 #include "../../Global/TLM_management.h"
+#include "../../Global/OnlineTM.h"
 #include "../../Main/HouseKeeping.h"
 #include "../../TRXVU.h"
 #include "../../Ants.h"
@@ -48,6 +49,7 @@ void cmd_dump(TC_spl cmd)
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
+	int i_error = 0;
 	*type = ACK_MEMORY;
 	if (cmd.length != 13)
 	{
@@ -76,9 +78,13 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	{
 		if (files[i] != this_is_not_the_file_you_are_looking_for)
 		{
-			find_fileName(files[i], file_name);
-			//todo: find the function for delete elements
-			//result = c_fileDeleteElements(file_name, start_time, end_time);
+			i_error = find_fileName(files[i], file_name);
+			if (i_error != 0)
+				continue;
+			int i_error = f_managed_enterFS();
+			check_int("f_managed_enterFS in cmd_delete_TM", i_error);
+			result = c_fileDeleteElements(file_name, start_time, end_time);
+			f_managed_releaseFS();
 			if (result != FS_SUCCSESS)
 			{
 				errorRes = FS_FAIL;
@@ -113,7 +119,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 
 	char file_name[MAX_F_FILE_NAME_SIZE];
-	FileSystemResult reslt;
+	FileSystemResult reslt = FS_SUCCSESS;
 	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 	{
 		if ((HK_types)cmd.data[i] == this_is_not_the_file_you_are_looking_for)
@@ -132,6 +138,12 @@ void cmd_dummy_func(Ack_type* type, ERR_type* err)
 	*type = ACK_THE_MIGHTY_DUMMY_FUNC;
 	*err = ERR_SUCCESS;
 }
+void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_RESET_SD_TLM;
+	*err = ERR_SUCCESS;
+	delete_allTMFilesFromSD();
+}
 
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
@@ -141,7 +153,7 @@ void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error = soft_reset_subsystem((subSystem_indx)cmd.data);
+	int error = soft_reset_subsystem((subSystem_indx)cmd.data[0]);
 	switch (error)
 	{
 	case 0:
@@ -163,7 +175,7 @@ void cmd_hard_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int error = soft_reset_subsystem((subSystem_indx)cmd.data);
+	int error = hard_reset_subsystem((subSystem_indx)cmd.data[0]);
 	switch (error)
 	{
 	case 0:
@@ -220,7 +232,7 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 	// 1. converting to time_unix
-	time_unix new_time = BigEnE_raw_to_uInt(&cmd.data[0]);
+	time_unix new_time = BigEnE_raw_to_uInt(cmd.data);
 	// 2. update time on satellite
 	if (Time_setUnixEpoch(new_time))
 	{
@@ -297,4 +309,83 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 	printf("sho! sho!, get out before i kill you\n");
 	*err = ERR_TETST;
 #endif*/
+}
+
+void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_ONLINE_TM_GET;
+	if (cmd.length != 1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	TM_spl packet;
+	int error = get_online_packet((int)cmd.data[0], &packet);
+
+	if (error == -1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+	else if (error == 0)
+	{
+		*err = ERR_SUCCESS;
+		return;
+	}
+	*err = ERR_FAIL;
+}
+void cmd_reset_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_RESET;
+	if (cmd.length != 0)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	reset_offline_TM_list();
+
+	*err = ERR_SUCCESS;
+}
+void cmd_add_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_OFFLINE_TM_LIST;
+	if (cmd.length != 9)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+	int index = cmd.data[0];
+	uint period;
+	memcpy(&period, cmd.data + 1, 4);
+	time_unix stopTime;
+	memcpy(&stopTime, cmd.data + 5, 4);
+
+	int error = add_onlineTM_param_to_save_list(index, period, stopTime);
+
+	if (error == 0)
+		*err = ERR_SUCCESS;
+	else if (error == -1)
+		*err = ERR_PARAMETERS;
+	else
+		*err = ERR_FAIL;
+}
+void cmd_delete_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_OFFLINE_TM_LIST;
+	if (cmd.length != 1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	int index = cmd.data[0];
+
+	int error = delete_onlineTM_param_to_save_list(index);
+
+	if (error == 0)
+		*err = ERR_SUCCESS;
+	else
+		*err = ERR_FAIL;
 }

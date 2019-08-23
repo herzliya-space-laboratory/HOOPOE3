@@ -39,6 +39,7 @@
 #include "../Global/Global.h"
 #include "../Global/GlobalParam.h"
 #include "../Global/TLM_management.h"
+#include "../Global/OnlineTM.h"
 #include "../EPS.h"
 #include "../Ants.h"
 #include "../ADCS.h"
@@ -57,7 +58,6 @@
 stageTable ST;
 
 #ifdef TESTING
-
 
 void test_menu()
 {
@@ -251,6 +251,8 @@ int InitSubsystems()
 
 	init_command();
 
+	init_onlineParam();
+
 	return 0;
 }
 
@@ -264,7 +266,9 @@ int SubSystemTaskStart()
 	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
-	vTaskDelay(100);
+#ifdef USE_DIFFERENT_TASK_ONLINE_TM
+	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+#endif
 	return 0;
 }
 
