@@ -426,20 +426,16 @@ void convert_raw_voltage(byte raw[EPS_VOLTAGES_SIZE_RAW], voltage_t voltages[EPS
 
 Boolean check_EPSTableCorrection(voltage_t table[2][NUM_BATTERY_MODE - 1])
 {
-	for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
+	if (table[0][0] < EPS_VOL_LOGIC_MIN || table[0][0] >= table[1][NUM_BATTERY_MODE - 2])
+		return FALSE;
+	if (table[1][0] > EPS_VOL_LOGIC_MAX)
+		return FALSE;
+	for(int i = 1; i < NUM_BATTERY_MODE - 1; i++)
 	{
-		if (table[0][i] >= table[1][NUM_BATTERY_MODE - 1 -i])
+		if (table[0][i] <= table[1][NUM_BATTERY_MODE - 1 - i] ||
+				table[0][i] >= table[1][NUM_BATTERY_MODE - 2 - i])
 			return FALSE;
 	}
-	for (int i = 1; i < NUM_BATTERY_MODE - 1; i++)
-	{
-		if (table[0][i - 1] >= table[0][i])
-			return FALSE;
-	}
-	for (int i = 1; i < NUM_BATTERY_MODE - 1; i++)
-	{
-		if (table[1][i - 1] <= table[1][i])
-			return FALSE;
-	}
+
 	return TRUE;
 }
