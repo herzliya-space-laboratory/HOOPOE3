@@ -27,7 +27,7 @@
 	}
 #endif
 
-	ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t chunk_height, uint16_t index, pixel_t* image, fileType img_type, uint32_t image_size)
+ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t chunk_height, uint16_t index, pixel_t* image, fileType img_type, uint32_t image_size)
 {
 	CHECK_FOR_NULL(chunk, BUTCHER_NULL_POINTER);
 	CHECK_FOR_NULL(image, BUTCHER_NULL_POINTER);
@@ -54,7 +54,6 @@
 	if ( effective_im_width % chunk_width != 0 )
 		return Butcher_Parameter_Value;
 
-
 	uint32_t height_offset = (index / num_of_chunks_X) * chunk_height;
 	uint32_t width_offset = (index % num_of_chunks_X) * chunk_width;
 
@@ -74,13 +73,7 @@
 	{
 		for (uint32_t y = 0; y < chunk_height; y++)
 		{
-			/*
-			for (uint32_t x = 0; x < chunk_width; x++)
-			{
-				*(chunk + (y*chunk_width) + (x) ) = *(image + (height_offset + y*chunk_width) + (width_offset + x) );
-			}
-			*/
-			memcpy(chunk + (y*chunk_width), image + (height_offset + y*chunk_width) + (width_offset), chunk_width);
+			memcpy(chunk + (y*chunk_width), image + ((height_offset + y) * effective_im_width) + (width_offset), chunk_width);
 		}
 	}
 
