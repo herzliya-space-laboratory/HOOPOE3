@@ -82,46 +82,6 @@ void Command_logic()
 	while (error == 0);
 }
 
-/*
-void TestGenericI2cTelemetry()
-{
-	int err = 0;
-	int from_driver = 0;
-	unsigned int tlm_id = 0;
-	unsigned int tlm_length = 0;
-	printf("choose from driver telemetry? Y=1/N=0\n");
-	while(UTIL_DbguGetIntegerMinMax(&from_driver,0,1)==0);
-
-	printf("please choose TLM id(0 to exit):\n");
-	while(UTIL_DbguGetIntegerMinMax(&tlm_id,0,200)==0);
-	if(tlm_id == 0) return;
-
-	printf("please choose TLM length(0 to exit):\n");
-	while(UTIL_DbguGetIntegerMinMax(&tlm_length,0,300)==0);
-	if(tlm_length == 0) return;
-
-	byte buffer[300] ={0};
-
-	if(from_driver == 1){
-		cspace_adcs_magfieldvec_t info_data;
-		switch(tlm_id){
-		case 151:
-			err = cspaceADCS_getMagneticFieldVec(ADCS_ID, &info_data);
-			err = err*1;
-			memcpy(&info_data,buffer,sizeof(info_data));
-			err = 0;
-		break;
-		}
-	}
-	else{
-		for(unsigned int i=0;i<tlm_length;i++)
-		{
-			printf("%X\t",buffer[i]);
-		}
-	}
-
-}*/
-
 #define PRINT_IF_NO_ERROR(err,function) 	\
 if(0 != err){\
 printf("error in " #function "= %d\n",err);return;\

@@ -220,10 +220,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			if (i2c_cmd.id < 128){
 				SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
 			} else {
-				SendAdcsTlm((byte*)&i2c_cmd.ack,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
+				SendAdcsTlm((byte*)i2c_cmd.data,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
 			}
-			//TODO: log 'rv'. maybe send it in ACK form
-
+			//TODO: log 'i2c_cmd.ack'. maybe send it in ACK form
 			break;
 		
 		//ADCS telecommand
@@ -607,7 +606,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_GET_FULL_CONFIG_ST:
 			err = cspaceADCS_getADCSConfiguration(ADCS_ID,(unsigned char*)data);
-			SendAdcsTlm(data, ADCS_FULL_CONFIG_DATA_LENGTH,ADCS_GET_FULL_CONFIG_ST);
+			SendAdcsTlm(data, ADCS_FULL_CONFIG_DATA_LENGTH,ADCS_GET_FULL_CONFIG_ST);//TODO: send in two parts. data is too long
 			break;
 		case ADCS_GET_SGP4_ORBIT_PARAMETERS_ST:
 			err = cspaceADCS_getSGP4OrbitParameters(ADCS_ID,(double*)data);
@@ -629,9 +628,50 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
 			break;
+		case ADCS_SET_DATA_LOG_ST:
+			break;
+		case ADCS_USE_IN_EKF_ST:
+			break;
+		case ADCS_CSS_THRESHOLD_ST:
+			break;
+		case ADCS_MAGNETMTR_MOUNT_TRNSFRM_ST:
+			break;
+		case ADCS_MAGETMTR_CHNL_1_3_OFFST_ST:
+			break;
+		case ADCS_MAGNETMTR_SENS_MATRIX_ST:
+			break;
+		case ADCS_RATE_SENSOR_MULT_ST:
+			break;
+		case ADCS_MTQ_CONFIG_ST:
+			break;
+		case ADCS_I2C_WRITE_ST:
+			break;
+		case ADCS_I2C_READ_ST:
+			break;
+		case ADCS_GET_C_AM_SENSOR_ST:
+			break;
+		case ADCS_GET_C_AM_SENSOR_ST:
+			break;
+		case ADCS_SET__SENSOR_CONFIG_ST:
+			break;
+		case ADCS_SET__SENSOR_CONFIG_ST:
+			break;
+		case ADCS_DETUMBLING_GAIN_CONFIG_ST:
+			break;
+		case ADCS_Y_MOMENT_GAIN_CONFIG_ST:
+			break;
+		case ADCS_REF_WHEEL_MOMENTUM_ST:
+			break;
+		case ADCS_RWHEEL_GAIN_ST:
+			break;
+		case ADCS_MOMENT_INERTIA_ST:
+			break;
+		case ADCS_NOISE_CONFIG_ST:
+			break;
 		default:
 			//TODO: return unknown subtype
 			break;
 	}
+
 	return err;
 }

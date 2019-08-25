@@ -7,9 +7,8 @@
 
 #define MAX_ADCS_QUEUE_LENGTH 42
 
-//static ADCS_CMD_t ADCS_cmd[ADCS_CMD_LEN];
 static xQueueHandle AdcsCmdQueue = NULL;
-time_unix queue_wait = 0;
+time_unix queue_wait = 100;
 
 TroubleErrCode AdcsCmdQueueInit(){
 	AdcsCmdQueue = xQueueCreate(MAX_ADCS_QUEUE_LENGTH,sizeof(TC_spl));
@@ -27,7 +26,7 @@ TroubleErrCode AdcsCmdQueueGet(TC_spl *cmd){
 	if(AdcsCmdQueueIsEmpty() == TRUE){
 		return TRBL_QUEUE_EMPTY;
 	}
-	if (xQueueReceive(AdcsCmdQueue, cmd, MAX_DELAY) == pdTRUE){
+	if (xQueueReceive(AdcsCmdQueue, cmd, queue_wait) == pdTRUE){
 		return TRBL_SUCCESS;
 	}else{
 		return TRBL_FAIL;
@@ -50,7 +49,7 @@ TroubleErrCode AdcsCmdQueueGetCount(){
 }
 
 unsigned int AdcsCmdQueueIsEmpty(){
-	if(uxQueueMessagesWaiting(AdcsCmdQueue) == 0){//cheak if queue is empty
+	if(uxQueueMessagesWaiting(AdcsCmdQueue) == 0){//check if queue is empty
 		return TRUE;
 	}else{
 		return FALSE;

@@ -6,11 +6,8 @@
 
 //TODO: update this number to the correct number of telemetries
 #define NUM_OF_ADCS_TLM 42 							//<! states the maximum number of telemetries the ADCS can save
-#define TLM_SAVE_VECTOR_START_ADDR 	(0x4242)		//<! FRAM start address
-#define TLM_SAVE_VECTOR_END_ADDR 	(TLM_SAVE_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) //<! FRAM end address
 
-#define TLM_PERIOD_VECTOR_START_ADDR 	(TLM_SAVE_VECTOR_END_ADDR+1)		//<! FRAM start address
-#define TLM_PERIOD_VECTOR_END_ADDR 		((TLM_PERIOD_VECTOR_START_ADDR + NUM_OF_ADCS_TLM)) //<! FRAM end address
+
 #define ADCS_MAX_TLM_SIZE 272
 
 #define ADCS_STATE_TLM_FILENAME 		("StTlm")

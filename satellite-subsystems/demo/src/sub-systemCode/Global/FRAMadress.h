@@ -39,7 +39,7 @@
 #define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
 
 //ADCS
-#define ADCS_LOOP_DELAY_FRAM_ADDR 0X6543			// main loop delay
+#define ADCS_LOOP_DELAY_FRAM_ADDR 0X6542			// main loop delay
 #define ADCS_LOOP_DELAY_FRAM_SIZE 4
 
 #define ADCS_RESPONSE_DELAY_FRAM_ADDR 0x6548
@@ -47,6 +47,12 @@
 
 #define ADCS_QUEUE_WAIT_TIME_FRAM_ADDR 0X6552		// max wait time for the adcs cmd queue
 #define ADCS_QUEUE_WAIT_TIME_FRAM_SIZE 4
+
+#define TLM_SAVE_VECTOR_START_ADDR 	(0x6242)		//<! FRAM start address
+#define TLM_SAVE_VECTOR_END_ADDR 	(TLM_SAVE_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) //<! FRAM end address
+
+#define TLM_PERIOD_VECTOR_START_ADDR 	(TLM_SAVE_VECTOR_END_ADDR+1)		//<! FRAM start address
+#define TLM_PERIOD_VECTOR_END_ADDR 		((TLM_PERIOD_VECTOR_START_ADDR + NUM_OF_ADCS_TLM)) //<! FRAM end address
 
 //CAMERA
 #define AUTO_PILOT_STATE_ADDR			0x9FFB

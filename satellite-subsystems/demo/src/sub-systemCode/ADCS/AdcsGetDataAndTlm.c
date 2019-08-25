@@ -7,6 +7,7 @@
 #include <satellite-subsystems/cspaceADCS_types.h>
 
 #include "sub-systemCode/Global/TM_managment.h"
+#include "sub-systemCode/Global/FRAMadress.h"
 #include "AdcsGetDataAndTlm.h"
 
 
@@ -39,6 +40,119 @@ AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_exctm_t),			cspaceADCS_getADCSExcTimes,			ADCS_ESC_TIME_FILENAME,			1,0,	FALSE_8BIT},\
 		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_misccurr_t),		cspaceADCS_getMiscCurrentMeas,		ADCS_MISC_CURR_FILENAME,		1,0,	FALSE_8BIT},\
 		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_msctemp_t),			cspaceADCS_getADCSTemperatureTlm,	ADCS_TEMPERATURE_FILENAME,		1,0,	FALSE_8BIT}};
+/*
+cspaceADCS_getGeneralInfo
+cspace_adcs_geninfo_t
+
+cspaceADCS_getBootProgramInfo
+cspace_adcs_bootinfo_t
+
+cspaceADCS_getSRAMLatchupCounters
+cspace_adcs_sramlatchupcnt_t
+
+cspaceADCS_getEDACCounters
+cspace_adcs_edaccnt_t
+
+cspaceADCS_getCurrentTime
+cspace_adcs_unixtm_t
+
+cspaceADCS_getCommStatus
+cspace_adcs_commstat_t
+
+cspaceADCS_getCurrentState
+cspace_adcs_currstate_t
+
+cspaceADCS_getMagneticFieldVec
+cspace_adcs_magfieldvec_t
+
+cspaceADCS_getCoarseSunVec
+cspace_adcs_sunvec_t
+
+cspaceADCS_getFineSunVec
+cspace_adcs_sunvec_t
+
+cspaceADCS_getNadirVector
+cspace_adcs_nadirvec_t
+
+cspaceADCS_getSensorRates
+cspace_adcs_angrate_t
+
+cspaceADCS_getWheelSpeed
+cspace_adcs_wspeed_t
+
+cspaceADCS_getMagnetorquerCmd
+cspace_adcs_magtorqcmd_t
+
+cspaceADCS_getWheelSpeedCmd
+cspace_adcs_wspeed_t
+
+cspaceADCS_getRawCam2Sensor
+cspace_adcs_rawcam_t
+
+cspaceADCS_getRawCam1Sensor
+cspace_adcs_rawcam_t
+
+cspaceADCS_getRawCss1_6Measurements
+cspace_adcs_rawcss1_6_t
+
+cspaceADCS_getRawCss7_10Measurements
+cspace_adcs_rawcss7_10_t
+
+cspaceADCS_getRawMagnetometerMeas
+cspace_adcs_rawmagmeter_t
+
+cspaceADCS_getCSenseCurrentMeasurements
+cspace_adcs_csencurrms_t
+
+cspaceADCS_getCControlCurrentMeasurements
+cspace_adcs_cctrlcurrms_t
+
+cspaceADCS_getWheelCurrentsTlm
+cspace_adcs_wheelcurr_t
+
+cspaceADCS_getADCSTemperatureTlm
+cspace_adcs_msctemp_t
+
+cspaceADCS_getRateSensorTempTlm
+cspace_adcs_ratesen_temp_t
+
+cspaceADCS_getStateTlm
+cspace_adcs_statetlm_t
+
+cspaceADCS_getADCSMeasurements
+cspace_adcs_measure_t
+
+cspaceADCS_getActuatorsCmds
+cspace_adcs_actcmds_t
+
+cspaceADCS_getEstimationMetadata
+cspace_adcs_estmetadata_t
+
+cspaceADCS_getRawSensorMeasurements
+cspace_adcs_rawsenms_t
+
+cspaceADCS_getPowTempMeasTLM
+cspace_adcs_pwtempms_t
+
+cspaceADCS_getADCSExcTimes
+cspace_adcs_exctm_t
+
+cspaceADCS_getPwrCtrlDevice
+cspace_adcs_powerdev_t
+
+cspaceADCS_getMiscCurrentMeas
+cspace_adcs_misccurr_t
+
+cspaceADCS_getCommandedAttitudeAngles
+cspace_adcs_cmdangles_t
+
+cspaceADCS_getADCSConfiguration
+config
+
+cspaceADCS_getSGP4OrbitParameters
+parameters
+ */
+
 
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
 
@@ -107,18 +221,20 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 		//TODO: change 0 to a define
 		time_unix curr_time = 0;
 		Time_getUnixEpoch(&curr_time);
-		if((curr_time - TlmElements[index].LastSaveTime) % TlmElements[index].SavePeriod == 0){
-			err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
-			if (0 != err) {
-				// TODO: log error
-				return err;
-			}
+		if(curr_time > TlmElements[index].LastSaveTime){
+			if((curr_time - TlmElements[index].LastSaveTime) % TlmElements[index].SavePeriod == 0){
+				err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
+				if (0 != err) {
+					// TODO: log error
+					return err;
+				}
 
-			res = c_fileWrite(TlmElements[index].TlmFileName, adcs_tlm);
-			if (FS_SUCCSESS != res) {
-				return TRBL_FS_WRITE_ERR;
+				res = c_fileWrite(TlmElements[index].TlmFileName, adcs_tlm);
+				if (FS_SUCCSESS != res) {
+					return TRBL_FS_WRITE_ERR;
+				}
+				TlmElements[index].LastSaveTime = curr_time;
 			}
-			TlmElements[index].LastSaveTime = curr_time;
 		}
 	}
 	return TRBL_SUCCESS;
