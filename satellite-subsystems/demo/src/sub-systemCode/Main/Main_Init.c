@@ -27,7 +27,7 @@
 #include <hal/Drivers/LED.h>
 #include <hal/Drivers/I2C.h>
 #include <hal/Drivers/SPI.h>
-
+#include <hal/errors.h>
 #include <hal/boolean.h>
 
 #include <hal/version/version.h>
