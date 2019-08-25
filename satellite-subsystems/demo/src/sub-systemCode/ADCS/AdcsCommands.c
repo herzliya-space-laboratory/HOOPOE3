@@ -139,15 +139,17 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	if(NULL == i2c_cmd){
 		return E_INPUT_POINTER_NULL;
 	}
-	char is_cmd = (i2c_cmd->id & 0x80);
-	if(is_cmd){	// if MSB is 1 then it is TLM. if 0 then TC
+	char is_tlm = (i2c_cmd->id & 0x80); // if MSB is 1 then it is TLM. if 0 then TC
+
+	if(!is_tlm){ // is command
 		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length);
 		if(0 != err){
 			//TODO: log I2c write Err
 			return err;
 		}
 		err = AdcsReadI2cAck(&i2c_cmd->ack);
-	}else{
+
+	}else{ // is tlm
 		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)&i2c_cmd->id, sizeof(i2c_cmd->id));
 		if(0 != err){
 			//TODO: log I2c write Err
@@ -212,8 +214,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	{
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
-			memcpy(i2c_cmd.data,cmd->data,sizeof(cmd->length));//todo: check what happen here(sizeof(length))
+			memcpy(&i2c_cmd,cmd->data,sizeof(cmd->length));
 			err = AdcsGenericI2cCmd(&i2c_cmd);
+
 			if (i2c_cmd.id < 128){
 				SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
 			} else {

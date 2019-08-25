@@ -61,7 +61,7 @@
 #define ADCS_CMD_MAX_DATA_LENGTH			300
 
 typedef enum __attribute__ ((__packed__)){
-	ADCS_TC__NO_ERR 			= 0,
+	ADCS_TC_NO_ERR 			= 0,
 	ADCS_TC_INVALID_TC 			= 1,
 	ADCS_TC_INCORRECT_LENGTH 	= 2,
 	ADCS_TC_INCORRECT_PARAM 	= 3
@@ -86,7 +86,7 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv);
 int AdcsI2cCmdReadTLM(unsigned char tlm_type, unsigned char* data, unsigned int length , int *ack);
 
 /*!
- * @brief allows the user to send a command directly to the I2C bus to the ADCS.
+ * @brief allows the user to send a command directly to the I2C bus to the ADCS, and receive data.
  * @param[in][out] i2c_cmd executes data according to 'i2c_cmd' data. Saves ADCS ack into the struct.
  * @return Errors according to "<hal/Drivers/I2C.h>"
  */
