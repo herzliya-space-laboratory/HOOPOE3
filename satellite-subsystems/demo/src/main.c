@@ -88,7 +88,7 @@ printf("error in " #function "= %d\n",err);return;\
 }
 
 void TestSetAdcsModes(){
-	unsigned int err = 0;
+	int err = 0;
 	cspace_adcs_runmode_t runmode = runmode_enabled;
 	err = cspaceADCS_setRunMode(ADCS_ID,  runmode);
 	vTaskDelay(2000);
@@ -99,15 +99,25 @@ void TestSetAdcsModes(){
 		printf("runmode = %d\n",runmode);
 	}
 
+	cspace_adcs_powerdev_t pwr = {.raw = {0}};
+	pwr.fields.signal_cubecontrol = 1;
+	pwr.fields.pwr_motor = 1;
+	pwr.fields.motor_cubecontrol = 1;
+
+	vTaskDelay(1000);
+
+	err = cspaceADCS_setPwrCtrlDevice(ADCS_ID,&pwr);
+	PRINT_IF_NO_ERROR(err,cspaceADCS_setPwrCtrlDevice);
+
 	cspace_adcs_attctrl_mod_t ctrl_mode;
-	printf("choose control mode mode:\n");
+	printf("\nchoose control mode mode:\n");
 	while(UTIL_DbguGetIntegerMinMax((unsigned int*)&ctrl_mode.fields.ctrl_mode,0,13) == 0);
 	err = cspaceADCS_setAttCtrlMode(ADCS_ID,&ctrl_mode);
 	PRINT_IF_NO_ERROR(err,cspaceADCS_setAttCtrlMode);
 	vTaskDelay(2000);
 
 	cspace_adcs_estmode_sel estimation_mode;
-	printf("choose estimation mode:\n");
+	printf("\nchoose estimation mode:\n");
 	while(UTIL_DbguGetIntegerMinMax((unsigned int*)&estimation_mode,0,6) == 0);
 
 	err = cspaceADCS_setAttEstMode(ADCS_ID,estimation_mode);
@@ -136,6 +146,8 @@ void TestAdcsPrintTlm()
 	printf("magfield_y: %d\n",vec.fields.magfield_y);
 	printf("magfield_z: %d\n",vec.fields.magfield_z);
 
+	printf("\n\n");
+
 	err = cspaceADCS_getRawMagnetometerMeas(ADCS_ID, &raw_mag);
 	PRINT_IF_NO_ERROR(err,cspaceADCS_getRawMagnetometerMeas)
 	printf("magnetic_x: %d\n",raw_mag.fields.magnetic_x);
@@ -149,6 +161,7 @@ void TestAdcsPrintTlm()
 	printf("\n--- USING GNERING I2C\n");
 
 	i2c_cmd.id = 151; //cspaceADCS_getMagneticFieldVec
+	i2c_cmd.length = 6;
 	err = AdcsGenericI2cCmd(&i2c_cmd);
 	PRINT_IF_NO_ERROR(err,AdcsGenericI2cCmd)
 
@@ -159,6 +172,7 @@ void TestAdcsPrintTlm()
 
 
 	i2c_cmd.id = 170; //cspaceADCS_getRawMagnetometerMeas
+	i2c_cmd.length = 6;
 	err = AdcsGenericI2cCmd(&i2c_cmd);
 	PRINT_IF_NO_ERROR(err,AdcsGenericI2cCmd)
 
