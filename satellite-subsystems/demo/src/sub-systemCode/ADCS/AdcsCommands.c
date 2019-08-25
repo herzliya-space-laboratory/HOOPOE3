@@ -214,7 +214,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	{
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
-			memcpy(&i2c_cmd,cmd->data,sizeof(cmd->length));
+			memcpy(&i2c_cmd,cmd->data,cmd->length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 
 			if (i2c_cmd.id < 128){
@@ -629,44 +629,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
 			break;
 		case ADCS_SET_DATA_LOG_ST:
-			break;
-		case ADCS_USE_IN_EKF_ST:
-			break;
-		case ADCS_CSS_THRESHOLD_ST:
-			break;
-		case ADCS_MAGNETMTR_MOUNT_TRNSFRM_ST:
-			break;
-		case ADCS_MAGETMTR_CHNL_1_3_OFFST_ST:
-			break;
-		case ADCS_MAGNETMTR_SENS_MATRIX_ST:
-			break;
-		case ADCS_RATE_SENSOR_MULT_ST:
-			break;
-		case ADCS_MTQ_CONFIG_ST:
-			break;
-		case ADCS_I2C_WRITE_ST:
-			break;
-		case ADCS_I2C_READ_ST:
-			break;
-		case ADCS_GET_C_AM_SENSOR_ST:
-			break;
-		case ADCS_GET_C_AM_SENSOR_ST:
-			break;
-		case ADCS_SET__SENSOR_CONFIG_ST:
-			break;
-		case ADCS_SET__SENSOR_CONFIG_ST:
-			break;
-		case ADCS_DETUMBLING_GAIN_CONFIG_ST:
-			break;
-		case ADCS_Y_MOMENT_GAIN_CONFIG_ST:
-			break;
-		case ADCS_REF_WHEEL_MOMENTUM_ST:
-			break;
-		case ADCS_RWHEEL_GAIN_ST:
-			break;
-		case ADCS_MOMENT_INERTIA_ST:
-			break;
-		case ADCS_NOISE_CONFIG_ST:
 			break;
 		default:
 			//TODO: return unknown subtype

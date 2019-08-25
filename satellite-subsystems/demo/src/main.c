@@ -208,10 +208,6 @@ void taskMain()
 	{
 		GomEpsGetHkData_general(0,&eps_tlm);
 
-		TestSetAdcsModes();
-
-		TestAdcsPrintTlm();
-
 		vTaskDelay(1000);
 	}
 }

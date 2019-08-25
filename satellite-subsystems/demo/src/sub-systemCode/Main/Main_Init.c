@@ -298,7 +298,7 @@ int SubSystemTaskStart()
 
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 
-	//xTaskCreate(AdcsTestTask, (const signed char*)("ADCS_Test"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(AdcsTestTask, (const signed char*)("ADCS_Test"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 	return 0;
 }
