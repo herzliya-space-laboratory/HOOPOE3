@@ -133,7 +133,7 @@ void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 	}
 	//2. update time in FRAM
-	else if (!FRAM_writeAndVerify(&cmd.data[0], BEACON_TIME_ADDR, 1))
+	else if (FRAM_writeAndVerify(&cmd.data[0], BEACON_TIME_ADDR, 1))
 	{
 		*err = ERR_FRAM_WRITE_FAIL;
 	}

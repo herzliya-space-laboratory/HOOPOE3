@@ -271,7 +271,7 @@ void EPS_Conditioning()
 	}
 
 	update_powerLines(switches_states);
-	printf("last state: %d\n", batteryLastMode);
+	//printf("last state: %d\n", batteryLastMode);
 	//printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 	VBatt_previous = VBatt_filtered;
 }

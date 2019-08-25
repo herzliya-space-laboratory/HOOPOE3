@@ -372,7 +372,7 @@ void Transponder_task(void *arg)
 			i_error = f_managed_enterFS();
 			check_int("f_managed_enterFS in Transponder task", i_error);
 			save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
-			terminateTask();
+			f_managed_releaseFS();
 		}
 	}
 
