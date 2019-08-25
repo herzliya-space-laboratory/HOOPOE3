@@ -132,8 +132,11 @@ int initCamera(Boolean first_activation)
 	if (imageDataBase == NULL)
 		error = -1;
 
-	error = setChunkDimensions_inFRAM(DEFALT_CHUNK_WIDTH, DEFALT_CHUNK_HEIGHT);
-	CMP_AND_RETURN(error, DataBaseSuccess, error);
+	if (first_activation)
+	{
+		error = setChunkDimensions_inFRAM(DEFALT_CHUNK_WIDTH, DEFALT_CHUNK_HEIGHT);
+		CMP_AND_RETURN(error, DataBaseSuccess, error);
+	}
 
 	return error;
 }

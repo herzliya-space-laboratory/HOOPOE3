@@ -78,11 +78,10 @@ ImageDataBaseResult CreateThumbnail(unsigned char* data)
 {
 	imageid cameraID = 0;
 	byte reductionLevel = 0;
-	Boolean8bit Skipping = 0;
+	Boolean8bit Skipping = TRUE_8BIT;
 
 	memcpy(&cameraID, data, sizeof(imageid));
 	memcpy(&reductionLevel, data + 2, sizeof(byte));
-	memcpy(&Skipping, data + 3, sizeof(byte));
 
 	ImageDataBaseResult DB_result = CreateImageThumbnail(cameraID, reductionLevel, Skipping);
 

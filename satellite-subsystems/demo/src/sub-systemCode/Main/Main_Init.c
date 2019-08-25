@@ -245,17 +245,19 @@ void resetSD()
 }
 
 void pre_written_test(void)
-{/*
+{
 	TurnOffGecko();
 	TurnOnGecko();
+
+	setCameraPhotographyValues(imageDataBase, 1, 53, 1, 2048, 1);
 
 	int err = takePicture(imageDataBase, FALSE_8BIT);
 	printf("\n\n\ttakePicture (%d)\n\n", err);
 
-	err = transferImageToSD(imageDataBase, 1);
+	err = transferImageToSD(imageDataBase, 4);
 	printf("\n\n\ttransferImageToSD (%d)\n\n", err);
 
-	TurnOffGecko();*/
+	TurnOffGecko();
 /*
 	int err = CompressImage(1, raw, 50);
 	printf("\n\n\tCompressImage (%d)\n\n", err);
@@ -282,6 +284,7 @@ void pre_written_test(void)
 	err = GetImageFileName(1, t16, fileName);
 	printImage(fileName);
 */
+	printImage("i4.raw");
 }
 
 int InitSubsystems()
