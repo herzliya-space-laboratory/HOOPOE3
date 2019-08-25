@@ -18,7 +18,7 @@
 #include "Global/Global.h"
 #include "COMM/GSC.h"
 
-#define APRS_ON
+//#define APRS_ON
 
 #define TRXVU_TO_CALSIGN "GS1"
 #define TRXVU_FROM_CALSIGN "4x4HSL1"
