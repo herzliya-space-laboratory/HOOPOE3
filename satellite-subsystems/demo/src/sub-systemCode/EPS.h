@@ -36,12 +36,9 @@
 
 #define EPS_ROUNDING_FACTOR	5
 
-#define EPS_ALPHA_DEFFAULT_VALUE 0.6
+#define EPS_ALPHA_DEFFAULT_VALUE 0.95
 
 #define CHECK_EPS_ALPHA_VALUE(alpha) (alpha < 1 && alpha > 0)
-
-#define FROM_RAW_ALPHA(param) ((double)param) / 100
-#define TO_RAW_ALPAH(param) (byte)(param * 100)
 
 typedef enum EPS_mode_t{
 	critical_mode = 0,

@@ -42,7 +42,7 @@
 #define CHECK_CHANNEL_CHANGE(preState, currState) CHECK_CHANNEL_0(preState, currState) || CHECK_CHANNEL_3(preState, currState)
 
 voltage_t VBatt_previous;
-double alpha = EPS_ALPHA_DEFFAULT_VALUE;
+float alpha = EPS_ALPHA_DEFFAULT_VALUE;
 gom_eps_channelstates_t switches_states;
 EPS_mode_t batteryLastMode;
 EPS_enter_mode_t enterMode[NUM_BATTERY_MODE];
@@ -188,9 +188,8 @@ void reset_FRAM_EPS()
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	i_error = FRAM_write(&data, SHUT_CAM_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
-	data = TO_RAW_ALPAH(EPS_ALPHA_DEFFAULT_VALUE);
 	alpha = EPS_ALPHA_DEFFAULT_VALUE;
-	i_error = FRAM_write(&data, EPS_ALPHA_ADDR, 1);
+	i_error = FRAM_write((byte*)&alpha, EPS_ALPHA_ADDR, 4);
 	check_int("can't FRAM_write(EPS_ALPHA_ADDR), reset_FRAM_EPS", i_error);
 }
 
@@ -249,9 +248,7 @@ void EPS_Conditioning()
 		return;
 	set_Vbatt(eps_tlm.fields.vbatt);
 
-	byte dat;
-	i_error = FRAM_read(&dat, EPS_ALPHA_ADDR, 1);
-	alpha = FROM_RAW_ALPHA(dat);
+	i_error = FRAM_read((byte*)&alpha, EPS_ALPHA_ADDR, 4);
 	check_int("can't FRAM_read(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
 	if (!CHECK_EPS_ALPHA_VALUE(alpha))
 	{
@@ -259,7 +256,7 @@ void EPS_Conditioning()
 	}
 
 	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
-	voltage_t VBatt_filtered = (voltage_t)(current_VBatt * alpha + (1 - alpha) * VBatt_previous);
+	voltage_t VBatt_filtered = (voltage_t)((float)current_VBatt * alpha + (1 - alpha) * (float)VBatt_previous);
 
 	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
 	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
