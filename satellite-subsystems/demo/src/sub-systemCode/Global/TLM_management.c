@@ -29,8 +29,11 @@
 #define _SD_CARD 0
 #define FIRST_TIME -1
 #define FILE_NAME_WITH_INDEX_SIZE MAX_F_FILE_NAME_SIZE+sizeof(int)*2
-
+#define MAX_ELEMENT_SIZE MAX_SIZE_TM_PACKET+sizeof(int)
 #define FS_TAKE_SEMPH_DELAY	1000 * 30
+char allocked_write_element[MAX_ELEMENT_SIZE];
+char allocked_read_element[MAX_ELEMENT_SIZE];
+char allocked_delete_element[MAX_ELEMENT_SIZE];
 
 xSemaphoreHandle xFileOpenHandler;
 xSemaphoreHandle xEnterTaskFS;
@@ -400,13 +403,14 @@ static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long fro
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	else if (error != 0)
 		return FS_FAIL;
+
 	F_FILE* temp_file = NULL;
 	error = f_managed_open("temp","a+", &temp_file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	else if (error != 0)
 		return FS_FAIL;
-	char* buffer = malloc(full_element_size);
+	char* buffer = allocked_delete_element;
 	for(int i = 0; i<f_filelength(file_name); i++)
 	{
 
@@ -419,7 +423,7 @@ static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long fro
 	}
 	f_managed_close(&file);
 	f_managed_close(&temp_file);
-	free(buffer);
+	//free(buffer);
 	f_delete(file_name);
 	f_rename("temp",file_name);
 	return FS_SUCCSESS;
@@ -495,7 +499,7 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	f_close(current_file);
 
 
-	free(element);
+	//free(element);
 
 	return FS_SUCCSESS;
 }
@@ -521,7 +525,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	int index_current = getFileIndex(c_file.creation_time,from_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
 	unsigned int size_elementWithTimeStamp = c_file.size_of_element+sizeof(unsigned int);
-	element = malloc(size_elementWithTimeStamp);//store element and his timestamp
+	element = allocked_read_element;//store element and his timestamp
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
@@ -550,7 +554,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 				*last_read_time = element_time;
 				if((unsigned int)buffer_index>(unsigned int)size_of_buffer)
 				{
-					free(element);
+					//free(element);
 					return FS_BUFFER_OVERFLOW;
 				}
 				(*read)++;
@@ -565,7 +569,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			return FS_FAIL;
 	} while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current);
 
-	free(element);
+	//free(element);
 
 	return FS_SUCCSESS;
 }
