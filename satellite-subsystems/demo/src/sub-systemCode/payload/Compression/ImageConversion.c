@@ -9,6 +9,8 @@
 
 #include <satellite-subsystems/GomEPS.h>
 
+#include "../../Global/logger.h"
+
 #include "../Misc/Boolean_bit.h"
 #include "jpeg/ImgCompressor.h"
 
@@ -133,6 +135,12 @@ ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor)
 		updateFileTypes(&image_metadata, image_address, jpg, FALSE);
 		return DataBaseJpegFail;
 	}
+
+	int log_data = 0;
+	memcpy(&image_metadata.cameraId, &log_data, 2);
+	memcpy(&quality_factor, &log_data + 2, 2);
+
+	WritePayloadLog(PAYLOAD_COMPRESSED_IMAGE, log_data);
 
 	return DataBaseSuccess;
 }

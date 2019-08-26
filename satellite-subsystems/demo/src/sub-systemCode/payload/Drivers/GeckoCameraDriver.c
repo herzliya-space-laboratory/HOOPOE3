@@ -16,6 +16,8 @@
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
 
+#include "../../Global/logger.h"
+
 #include "GeckoCameraDriver.h"
 
 #define Result(value, errorType)	if(value != 0) { return errorType; }
@@ -67,6 +69,8 @@ Boolean TurnOnGecko()
 
 	//Initialized_GPIO();
 
+	WritePayloadLog(PAYLOAD_TURNED_GECKO_ON, 0);
+
 	return TRUE;
 }
 Boolean TurnOffGecko()
@@ -76,7 +80,6 @@ Boolean TurnOffGecko()
 	Pin gpio5=PIN_GPIO07;
 	Pin gpio6=PIN_GPIO05;
 	Pin gpio7=PIN_GPIO07;
-
 
 	PIO_Clear(&gpio4);
 	vTaskDelay(10);
@@ -88,6 +91,8 @@ Boolean TurnOffGecko()
 	vTaskDelay(10);
 
 	//De_Initialized_GPIO();
+
+	WritePayloadLog(PAYLOAD_TURNED_GECKO_OFF, 0);
 
 	return TRUE;
 }

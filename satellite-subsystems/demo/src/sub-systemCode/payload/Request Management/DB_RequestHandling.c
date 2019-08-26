@@ -62,6 +62,8 @@ ImageDataBaseResult DeletePicture(ImageDataBase database, unsigned char* data)
 	memcpy(&cameraID, data, sizeof(imageid));
 	memcpy(&GroundFileType, data + 2, sizeof(byte));
 
+	TurnOnGecko();
+
 	return DeleteImageFromPayload(database, cameraID);
 }
 ImageDataBaseResult TransferPicture(ImageDataBase database, unsigned char* data)

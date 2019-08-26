@@ -22,6 +22,7 @@
 #include <satellite-subsystems/GomEPS.h>
 
 #include "../../Global/GlobalParam.h"
+#include "../../Global/logger.h"
 
 #include "../Misc/Boolean_bit.h"
 #include "../Misc/Macros.h"
@@ -402,6 +403,8 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 	error = checkForFileType(image_metadata, raw);
 	CMP_AND_RETURN(error, DataBaseSuccess, DataBaseFail);
 
+	WritePayloadLog(PAYLOAD_TRANSFERRED_IMAGE, image_metadata.cameraId);
+
 	return DataBaseSuccess;
 }
 
@@ -495,6 +498,8 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 	database->numberOfPictures--;
 
 	updateGeneralDataBaseParameters(database);
+
+	WritePayloadLog(PAYLOAD_ERASED_IMAGE, image_metadata.cameraId);
 
 	return DataBaseSuccess;
 }
@@ -659,6 +664,8 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	}
 
 	updateGeneralDataBaseParameters(database);
+
+	WritePayloadLog(PAYLOAD_TOOK_IMAGE, getLatestID(database));
 
 	return DataBaseSuccess;
 }
