@@ -92,7 +92,14 @@ TroubleErrCode AdcsInit()
 	if (trbl != TRBL_SUCCESS){
 		return trbl;
 	}
-
+	trbl = InitTlmElements();
+	if (trbl != TRBL_SUCCESS){
+		return trbl;
+	}
+	Boolean b = CreateTlmElementFiles();
+	if (b != TRUE){
+		return TRBL_FS_INIT_ERR;
+	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 #ifdef FIRST_ADCS_ACTIVATION
 	delay_loop = DEFAULT_ADCS_LOOP_DELAY;
@@ -109,6 +116,7 @@ TroubleErrCode AdcsInit()
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
 	}
+
 	return TRBL_SUCCESS;
 }
 
