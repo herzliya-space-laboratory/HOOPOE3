@@ -25,191 +25,232 @@
 
 void testInit();
 
-void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE], int setLength[CMD_FOR_TEST_AMUNT])
+void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMUNT], int getLength[CMD_FOR_TEST_AMUNT], byte getData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE], uint8_t setSubType[CMD_FOR_TEST_AMUNT], int setLength[CMD_FOR_TEST_AMUNT], byte setData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE])
 {
 	int i,j;
+	adcs_i2c_cmd i2c_cmd;
+
 	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
 	{
 		setLength[i] = 0;
+		getLength[i] = 0;
 		for(j = 0; j < SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE; j++)
 		{
-			Data[i][j] = 0;
+			setData[i][j] = 0;
+			getData[i][j] = 0;
 		}
 	}
+	int testNum;
 
-	//data 0
-	cspace_adcs_unixtm_t Time;
-	Time.fields.unix_time_sec = 1566304200;
-	Time.fields.unix_time_millsec = 0;
-	memcpy(Data[0],Time.raw,sizeof(cspace_adcs_unixtm_t));
-	setLength[0] = 6;
+	//test #0 data
+	testNum = 0;
+	getSubType[testNum] = ADCS_GET_CURR_UNIX_TIME_ST;
+	setSubType[testNum] = ADCS_SET_CURR_UNIX_TIME_ST;
+	setLength[testNum] = 6;
+	cspace_adcs_unixtm_t time;
+	time.fields.unix_time_sec = 1566304200;
+	time.fields.unix_time_millsec = 0;
+	memcpy(setData[testNum],time.raw,sizeof(cspace_adcs_unixtm_t));
 
-	//data 1
+	//test #1 data
+	testNum = 1;
+	getSubType[testNum] = ADCS_I2C_GENRIC_ST; //generic I2C command #131
+	getLength[testNum] = sizeof(adcs_i2c_cmd);
+	i2c_cmd.id = 131;
+	i2c_cmd.length = 1;
+	i2c_cmd.ack = 3;
+	memcpy(getData[testNum],&i2c_cmd,getLength[testNum]);
+	setSubType[testNum] = ADCS_CACHE_ENABLE_ST;
+	setLength[testNum] = sizeof(cspace_adcs_attctrl_mod_t);
 	cspace_adcs_attctrl_mod_t CT;
 	CT.fields.ctrl_mode = 1;
 	CT.fields.override_flag = 0;
 	CT.fields.timeout = 10;
-	memcpy(Data[1],CT.raw,sizeof(cspace_adcs_unixtm_t));
-	setLength[1] = sizeof(cspace_adcs_attctrl_mod_t);
+	memcpy(setData[testNum],CT.raw,setLength[testNum]);
 
-	//data 2
-	Data[2][0] = 1;
-	setLength[2] = 1;
+	//test #2 data
+	testNum = 2;
+	getSubType[testNum] = ADCS_GET_CURRENT_STATE_ST;
+	setSubType[testNum] = ADCS_SET_ATT_CTRL_MODE_ST;
+	setData[testNum][0] = 1;
+	setLength[testNum] = 1;
 
-	//data 3
-	Data[3][0] = 1;
-	setLength[3] = 1;
+	//test #3 data
+	testNum = 3;
+	getSubType[testNum] = ADCS_GET_CURRENT_STATE_ST;
+	setSubType[testNum] = ADCS_SET_EST_MODE_ST;
+	setData[testNum][0] = 1;
+	setLength[testNum] = 1;
 
-	//data 4
+	//test #4 data
+	testNum = 4;
+	getSubType[testNum] = ADCS_GET_MAGNETORQUER_CMD_ST;
+	setSubType[testNum] = ADCS_SET_MAG_OUTPUT_ST;
+	setLength[testNum] = sizeof(cspace_adcs_magnetorq_t);
 	cspace_adcs_magnetorq_t MT;
 	MT.fields.magduty_x = 0.8 * 1000;
 	MT.fields.magduty_y = 0.8 * 1000;
 	MT.fields.magduty_z = 0.8 * 1000;
-	memcpy(Data[4],MT.raw,sizeof(cspace_adcs_magnetorq_t));
-	setLength[4] = sizeof(cspace_adcs_magnetorq_t);
+	memcpy(setData[testNum],MT.raw,setLength[testNum]);
 
-	//data 5
+	//test #5 data
+	testNum = 5;
+	getSubType[testNum] = ADCS_GET_WHEEL_SPEED_CMD_ST;
+	setSubType[testNum] = ADCS_SET_WHEEL_SPEED_ST;
+	setLength[testNum] = sizeof(cspace_adcs_magnetorq_t);
 	cspace_adcs_wspeed_t wheelConfig;
 	wheelConfig.fields.speed_y = 0;
-	memcpy(Data[5],wheelConfig.raw,sizeof(cspace_adcs_magnetorq_t));
-	setLength[5] = sizeof(cspace_adcs_magnetorq_t);
+	memcpy(setData[testNum],wheelConfig.raw,setLength[testNum]);
 
-	//data 6
-	for(int i = 0; i<3; i++)
+	//test #6 data
+	testNum = 6;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_MTQ_CONFIG_ST;
+	setLength[testNum] = 3;
+	for(int i = 0; i<setLength[testNum]; i++)
 	{
-		Data[6][i] = 6;
+		setData[testNum][i] = 6;
 	}
-	setLength[6] = 3;
 
-	//data 7
-	for(int i = 0; i < 4; i++)
+	//test #7 data
+	testNum = 7;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_RW_CONFIG_ST;
+	setLength[testNum] = 4;
+	for(int i = 0; i<setLength[testNum]; i++)
 	{
-		Data[7][i] = 6;
+		setData[testNum][i] = 6;
 	}
-	setLength[7] = 4;
 
-	//data 8
-	for(int i = 0; i<10; i++)
+	//test #8 data
+	testNum = 8;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_GYRO_CONFIG_ST;
+	setLength[testNum] = 10;
+	for(int i = 0; i<setLength[testNum]; i++)
 	{
-		Data[8][i] = 6;
+		setData[testNum][i] = 6;
 	}
-	setLength[8] = 10;
 
-	//data 23
-	double SGP4_Init[23] = {0,0,0,0,0,0,0,0};
-	memcpy(Data[23],SGP4_Init,sizeof(double)*8);
-	setLength[23] = sizeof(double)*8;
+	//test #9 data
+	testNum = 9;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_CSS_CONFIG_ST;
+
+	//test #10 data
+	testNum = 10;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_CSS_RELATIVE_SCALE_ST;
+
+	//test #11 data
+	testNum = 11;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_MAGNETMTR_MOUNT_ST;
+
+	//test #12 data
+	testNum = 12;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_MAGNETMTR_OFFSET_ST;
+
+	//test #13 data
+	testNum = 13;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_MAGNETMTR_SENSTVTY_ST;
+
+	//test #14 data
+	testNum = 14;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_RATE_SENSOR_OFFSET_ST;
+
+	//test #15 data
+	testNum = 15;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_STAR_TRACKER_CONFIG_ST;
+
+	//test #16 data
+	testNum = 16;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_DETUMB_CTRL_PARAM_ST;
+
+	//test #17 data
+	testNum = 17;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_YWHEEL_CTRL_PARAM_ST;
+
+	//test #18 data
+	testNum = 18;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_RWHEEL_CTRL_PARAM_ST;
+
+	//test #19 data
+	testNum = 19;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_MOMENT_INTERTIA_ST;
+
+	//test #20 data
+	testNum = 20;
+	getSubType[testNum] = 255;
+	setSubType[testNum] = ADCS_PROD_INERTIA_ST;
+
+	//test #21 data
+	testNum = 21;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_ESTIMATION_PARAM1_ST;
+
+	//test #22 data
+	testNum = 22;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_ESTIMATION_PARAM2_ST;
+
+	//tests #23-32 data all SGP4 commands
+	testNum = 23;
+	double SGP4_Init[8] = {0,0,0,0,0,0,0,0};
+	getSubType[testNum] = ADCS_GET_SGP4_ORBIT_PARAMETERS_ST;
+	setSubType[testNum] = ADCS_SET_SGP4_ORBIT_PARAMS_ST;
+	setLength[testNum] = sizeof(double)*8;
+	memcpy(setData[testNum],SGP4_Init,setLength[testNum]);
 
 	//data 24-32
-	for(i = 24; i < 32; i++)
+	setSubType[testNum+1] = ADCS_SET_SGP4_ORBIT_INC_ST;
+	setSubType[testNum+2] = ADCS_SET_SGP4_ORBIT_ECC_ST;
+	setSubType[testNum+3] = ADCS_SET_SGP4_ORBIT_RAAN_ST;
+	setSubType[testNum+4] = ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST;
+	setSubType[testNum+5] = ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST;
+	setSubType[testNum+6] = ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST;
+	setSubType[testNum+7] = ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST;
+	setSubType[testNum+9] = ADCS_SET_SGP4_ORBIT_EPOCH_ST;
+
+	for(testNum = 24; testNum < 32; i++)
 	{
-		memcpy(Data[i], &SGP4_Init[i-24], sizeof(double));
-		setLength[i] = sizeof(double);
+		SGP4_Init[testNum-24] = 1; //change from 0 there from last test
+		getSubType[testNum] = ADCS_GET_SGP4_ORBIT_PARAMETERS_ST;
+		setLength[testNum] = sizeof(double);
+		memcpy(setData[testNum], &SGP4_Init[testNum-24], setLength[testNum]);
 	}
 
+	//test #32 data
+	testNum = 32;
+	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	setSubType[testNum] = ADCS_SET_MAGNETOMETER_MODE_ST;
 }
 
 
 void AdcsTestTask()
 {
 	testInit();
-	TC_spl set;
 	TC_spl get;
+	TC_spl set;
 
-	uint8_t getSubType[CMD_FOR_TEST_AMUNT] =
-	{
-			ADCS_GET_CURR_UNIX_TIME_ST,
-			ADCS_I2C_GENRIC_ST, //131
-			ADCS_GET_CURRENT_STATE_ST,
-			ADCS_GET_CURRENT_STATE_ST,
-			ADCS_GET_MAGNETORQUER_CMD_ST,
-			ADCS_GET_WHEEL_SPEED_CMD_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			255,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_SGP4_ORBIT_PARAMETERS_ST,
-			ADCS_GET_FULL_CONFIG_ST,
-	};
-	int setLength[CMD_FOR_TEST_AMUNT];
+	uint8_t getSubType[CMD_FOR_TEST_AMUNT];
 	int getLength[CMD_FOR_TEST_AMUNT];
-	byte GetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
-	int i,j;
-	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
-	{
-		getLength[i] = 0;
-		for(j = 0; j < SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE; j++)
-		{
-			GetData[i][j] = 0;
-		}
-	}
-	adcs_i2c_cmd i2c_cmd;
-	i2c_cmd.id = 131;
-	i2c_cmd.length = 1;
-	i2c_cmd.ack = 3;
-	getLength[1] = sizeof(adcs_i2c_cmd);
-	memcpy(GetData[1],&i2c_cmd,getLength[1]);
+	byte getData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
 
 	//function to test constructor
-	uint8_t setSubType[CMD_FOR_TEST_AMUNT] = {
-			ADCS_SET_CURR_UNIX_TIME_ST,
-			ADCS_CACHE_ENABLE_ST,
-			ADCS_SET_ATT_CTRL_MODE_ST,
-			ADCS_SET_EST_MODE_ST,
-			ADCS_SET_MAG_OUTPUT_ST,
-			ADCS_SET_WHEEL_SPEED_ST,
-			ADCS_SET_MTQ_CONFIG_ST,
-			ADCS_RW_CONFIG_ST,
-			ADCS_GYRO_CONFIG_ST,
-			ADCS_CSS_CONFIG_ST,
-			ADCS_CSS_RELATIVE_SCALE_ST,
-			ADCS_SET_MAGNETMTR_MOUNT_ST,
-			ADCS_SET_MAGNETMTR_OFFSET_ST,
-			ADCS_SET_MAGNETMTR_SENSTVTY_ST,
-			ADCS_RATE_SENSOR_OFFSET_ST,
-			ADCS_SET_STAR_TRACKER_CONFIG_ST,
-			ADCS_SET_DETUMB_CTRL_PARAM_ST,
-			ADCS_SET_YWHEEL_CTRL_PARAM_ST,
-			ADCS_SET_RWHEEL_CTRL_PARAM_ST,
-			ADCS_SET_MOMENT_INTERTIA_ST,
-			ADCS_PROD_INERTIA_ST,
-			ADCS_ESTIMATION_PARAM1_ST,
-			ADCS_ESTIMATION_PARAM2_ST,
-			ADCS_SET_SGP4_ORBIT_PARAMS_ST,
-			ADCS_SET_SGP4_ORBIT_INC_ST,
-			ADCS_SET_SGP4_ORBIT_ECC_ST,
-			ADCS_SET_SGP4_ORBIT_RAAN_ST,
-			ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST,
-			ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST,
-			ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST,
-			ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST,
-			ADCS_SET_SGP4_ORBIT_EPOCH_ST,
-			ADCS_SET_MAGNETOMETER_MODE_ST
-	};//function to test sst
-
-	byte SetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
-	Lupos_Test(SetData,setLength);
+	uint8_t setSubType[CMD_FOR_TEST_AMUNT];//function to test sst	
+	int setLength[CMD_FOR_TEST_AMUNT];
+	byte setData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
+	
+	BuildTests(getSubType, getLength, getData, setSubType, setLength, setData);
 	printf("start test");
 	while(TRUE)
 	{
@@ -222,18 +263,17 @@ void AdcsTestTask()
 //			}
 			set.subType = setSubType[TEST_NUM];
 			set.length = setLength[TEST_NUM];
-			memcpy(set.data,SetData[TEST_NUM],set.length);
+			memcpy(set.data,setData[TEST_NUM],set.length);
 
 			get.subType = getSubType[TEST_NUM];
 			get.length = getLength[TEST_NUM];
-			memcpy(get.data,GetData[TEST_NUM],get.length);
-			memcpy(&i2c_cmd,get.data,get.length);
+			memcpy(get.data,getData[TEST_NUM],get.length);
 
 			err = AdcsCmdQueueAdd(&get);
 			printf("\nsst:%d\t err:%d\n",get.subType, err);
 			err = AdcsCmdQueueAdd(&set);
 			printf("sst:%d\t err:%d\t data:",set.subType, err ,set.data);
-			for(i = 0; i < set.length; i++)
+			for(int i = 0; i < set.length; i++)
 			{
 				printf("%x, ",set.data[i]);
 			}
