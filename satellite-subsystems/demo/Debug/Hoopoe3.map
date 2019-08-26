@@ -2555,6 +2555,7 @@ END GROUP
                 0x20009920      0x148 ./src/sub-systemCode/ADCS/AdcsCommands.o
                 0x20009920                SendAdcsTlm
  .text.AdcsExecuteCommand
+<<<<<<< Updated upstream
                 0x20009a68     0x1748 ./src/sub-systemCode/ADCS/AdcsCommands.o
                 0x20009a68                AdcsExecuteCommand
  .text.GatherTlmAndData
@@ -3879,6 +3880,29 @@ END GROUP
                 0x20031950       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-mprec.o)
                 0x20031950                __mprec_bigtens
  .rodata.str1.1
+                0x20031824       0x10 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfprintf_float.o)
+ .rodata.str1.1
+                0x20031834       0x22 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfprintf_i.o)
+ .rodata.str1.1
+                0x20031856        0x5 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfscanf_float.o)
+ .rodata.str1.1
+                0x2003185b        0xf c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-dtoa.o)
+ .rodata.str1.1
+                0x2003186a        0xa c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-locale.o)
+                                  0xb (size before relaxing)
+ *fill*         0x20031874        0x4 00
+ .rodata.__mprec_tens
+                0x20031878       0xc8 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-mprec.o)
+                0x20031878                __mprec_tens
+ .rodata.p05.5252
+                0x20031940        0xc c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-mprec.o)
+ *fill*         0x2003194c        0x4 00
+ .rodata.__mprec_bigtens
+                0x20031950       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-mprec.o)
+                0x20031950                __mprec_bigtens
+>>>>>>> parent of a003a1b... Some changes
+>>>>>>> Stashed changes
+ .rodata.str1.1
                 0x00000000        0xa c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-strtod.o)
                                   0xc (size before relaxing)
  .rodata.tinytens
@@ -4417,6 +4441,7 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_frame   0x00000f84      0x144 ./src/sub-systemCode/Main/Main_Init.o
  .debug_frame   0x000010c8      0x194 ./src/sub-systemCode/Global/Global.o
  .debug_frame   0x0000125c      0x4e0 ./src/sub-systemCode/Global/GlobalParam.o
+<<<<<<< Updated upstream
  .debug_frame   0x0000173c      0x1d0 ./src/sub-systemCode/Global/TM_managment.o
  .debug_frame   0x0000190c       0x84 ./src/sub-systemCode/COMM/APRS.o
  .debug_frame   0x00001990      0x10c ./src/sub-systemCode/COMM/DelayedCommand_list.o
@@ -4564,6 +4589,7 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_abbrev  0x000005a9      0x1b0 ./src/sub-systemCode/Main/Main_Init.o
  .debug_abbrev  0x00000759      0x1e3 ./src/sub-systemCode/Global/Global.o
  .debug_abbrev  0x0000093c      0x20c ./src/sub-systemCode/Global/GlobalParam.o
+<<<<<<< Updated upstream
  .debug_abbrev  0x00000b48      0x267 ./src/sub-systemCode/Global/TM_managment.o
  .debug_abbrev  0x00000daf      0x149 ./src/sub-systemCode/COMM/APRS.o
  .debug_abbrev  0x00000ef8      0x146 ./src/sub-systemCode/COMM/DelayedCommand_list.o
@@ -4628,6 +4654,7 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_loc     0x00000960      0x1e4 ./src/sub-systemCode/Main/Main_Init.o
  .debug_loc     0x00000b44      0x294 ./src/sub-systemCode/Global/Global.o
  .debug_loc     0x00000dd8      0x790 ./src/sub-systemCode/Global/GlobalParam.o
+<<<<<<< Updated upstream
  .debug_loc     0x00001568      0x2c0 ./src/sub-systemCode/Global/TM_managment.o
  .debug_loc     0x00001828       0xb0 ./src/sub-systemCode/COMM/APRS.o
  .debug_loc     0x000018d8      0x198 ./src/sub-systemCode/COMM/DelayedCommand_list.o
@@ -4816,6 +4843,7 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_ranges  0x000001c8       0x60 ./src/sub-systemCode/Main/Main_Init.o
  .debug_ranges  0x00000228       0x80 ./src/sub-systemCode/Global/Global.o
  .debug_ranges  0x000002a8      0x168 ./src/sub-systemCode/Global/GlobalParam.o
+<<<<<<< Updated upstream
  .debug_ranges  0x00000410       0xb8 ./src/sub-systemCode/Global/TM_managment.o
  .debug_ranges  0x000004c8       0x28 ./src/sub-systemCode/COMM/APRS.o
  .debug_ranges  0x000004f0       0x50 ./src/sub-systemCode/COMM/DelayedCommand_list.o
