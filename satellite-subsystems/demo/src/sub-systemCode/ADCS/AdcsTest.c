@@ -1,21 +1,23 @@
-/*
- * AdcsTest.c
- *
- *  Created on: Aug 11, 2019
- *      Author: ����
- */
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+
+#include <satellite-subsystems/cspaceADCS.h>
+#include <satellite-subsystems/cspaceADCS_types.h>
+#include <hal/Utility/util.h>
+#include <at91/utility/exithandler.h>
+
+#include <stdlib.h>
+
+#include "AdcsGetDataAndTlm.h"
 #include "AdcsCommands.h"
 #include "AdcsMain.h"
 #include "AdcsTest.h"
-#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
-#include "../Main/CMD/General_CMD.h"
-#include <satellite-subsystems/cspaceADCS.h>
-#include <satellite-subsystems/cspaceADCS_types.h>
-#include "../EPS.h"
-#include <hal/Utility/util.h>
 
+#include "../Main/CMD/General_CMD.h"
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
+
+#include "../EPS.h"
 #define MAX_ADCS_QUEUE_LENGTH 42
 #define ADCS_ID 0
 #define CMD_FOR_TEST_AMUNT 34
@@ -23,19 +25,87 @@
 #define AMUNT_OF_STFF_TO_ADD_TO_THE_Q 3
 #define TEST_NUM 1
 
-void Test();
+
+void TestUpdateTlmToSaveVector(){
+	int err = 0;
+	Boolean8bit ToSaveVec[NUM_OF_ADCS_TLM] = {0};
+	Boolean8bit temp[NUM_OF_ADCS_TLM] = {0};
+	AdcsTlmElement_t elem = {0};
+	memset(ToSaveVec,0xFF,sizeof(NUM_OF_ADCS_TLM * sizeof(Boolean8bit)));
+
+	UpdateTlmToSaveVector(ToSaveVec);
+	err = FRAM_read(temp,TLM_SAVE_VECTOR_START_ADDR,TLM_SAVE_VECTOR_END_ADDR);	// check update in FRAM
+	if(0 != err){
+		printf("Error in FRAM_read\n");
+		return;
+	}
+	for(int i = 0; i < NUM_OF_ADCS_TLM; i++){
+		GetTlmElementAtIndex(&elem,i);	// check Update in array
+		if(ToSaveVec[i] != temp[i] || ToSaveVec[i] != elem.ToSave){
+			printf("\n\t-----Error in 'UpdateTlmToSaveVector'\n\n");
+			return;
+		}
+	}
+}
+
+void TestSaveTlm(){
+
+}
+
+void TestGatherTlmAndData(){
+	TroubleErrCode trbl = 0;
+	for(int i = 0; i < 60; i++){
+		trbl = GatherTlmAndData();
+		vTaskDelay(1000);
+	}
+}
+
+void TestUpdateTlmElemdntAtIndex(){
+	int err = 0;
+	for(int i = 0; i<NUM_OF_ADCS_TLM;i++){
+		UpdateTlmElementAtIndex(i,NULL,0,TRUE,NULL,6);
+	}
+
+}
+
+void TestRestoreDefaultTlmElement()
+{
+	TroubleErrCode trbl = RestoreDefaultTlmElement();
+	if(trbl != TRBL_SUCCESS)
+		printf("\t----- Error in 'RestoreDefaultTlmElement'\n");
+}
+
+void TestAdcsTLM()
+{
+	printf("Test 'UpdateTlmToSaveVector'\n");
+	TestUpdateTlmToSaveVector();
+
+	printf("Test 'GatherTlmAndData' for 60 sec\n");
+	TestGatherTlmAndData();
+
+	printf("Test 'UpdateTlmElemdntAtIndex' (change tlm save freq to 1/6 Hz)\n");
+	TestUpdateTlmElemdntAtIndex();
+
+	printf("Test 'GatherTlmAndData' for 60 sec with updated array\n");
+	TestGatherTlmAndData();
+
+	printf("Test 'RestoreDefaultTlmElement'");
+	RestoreDefaultTlmElement();
+
+	printf("Test 'GatherTlmAndData' for 60 sec\n");
+	TestGatherTlmAndData();
+}
+
+void Test()
+{
+}
 
 void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE], int setLength[CMD_FOR_TEST_AMUNT])
 {
 	int i,j;
-	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
-	{
-		setLength[i] = 0;
-		for(j = 0; j < SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE; j++)
-		{
-			Data[i][j] = 0;
-		}
-	}
+
+	memset(setLength,0,CMD_FOR_TEST_AMUNT);
+	memset(Data,0,CMD_FOR_TEST_AMUNT*(SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE));
 
 	//data 0
 	cspace_adcs_unixtm_t Time;
@@ -109,12 +179,13 @@ void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SI
 
 }
 
-
 void AdcsTestTask()
 {
 	Test();
 	TC_spl set;
 	TC_spl get;
+
+	TaskMamagTest(); // currently restarts the sat' right after
 
 	uint8_t getSubType[CMD_FOR_TEST_AMUNT] =
 	{
@@ -153,17 +224,9 @@ void AdcsTestTask()
 			ADCS_GET_FULL_CONFIG_ST,
 	};
 	int setLength[CMD_FOR_TEST_AMUNT];
-	int getLength[CMD_FOR_TEST_AMUNT];
-	byte GetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
-	int i,j;
-	for(i = 0; i < CMD_FOR_TEST_AMUNT; i++)
-	{
-		getLength[i] = 0;
-		for(j = 0; j < SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE; j++)
-		{
-			GetData[i][j] = 0;
-		}
-	}
+	int getLength[CMD_FOR_TEST_AMUNT] = {0};
+	byte GetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE] = {0};
+
 	adcs_i2c_cmd i2c_cmd;
 	i2c_cmd.id = 131;
 	i2c_cmd.length = 1;
@@ -230,12 +293,12 @@ void AdcsTestTask()
 			memcpy(&i2c_cmd,get.data,get.length);
 
 			err = AdcsCmdQueueAdd(&get);
-			printf("\nsst:%d\t err:%d\n",get.subType, err);
+			printf("\nsst:%d\n err:%d\n",get.subType, err);
 			err = AdcsCmdQueueAdd(&set);
-			printf("sst:%d\t err:%d\t data:",set.subType, err ,set.data);
-			for(i = 0; i < set.length; i++)
+			printf("\nsst:%d\n err:%d\n data:%s\n",set.subType, err ,set.data);
+			for(int i = 0; i < set.length; i++)
 			{
-				printf("%x, ",set.data[i]);
+				printf("%X, ",set.data[i]);
 			}
 			err = AdcsCmdQueueAdd(&get);
 			printf("\nsst:%d\t err:%d\n",get.subType, err);
@@ -244,14 +307,13 @@ void AdcsTestTask()
 	}
 }
 
-
-
 void ErrFlagTest()
 {
 	Test();
 
-	double* SGP4 = { 0,0,0,0,0,0,0,0 };
-	cspaceADCS_setSGP4Parameters(ADCS_ID, SGP4);
+	double sgp4_orbit_params[] = { 0,0,0,0,0,0,0,0 };
+	cspaceADCS_setSGP4OrbitParameters(ADCS_ID, sgp4_orbit_params);
+	vTaskDelay(5000);
 	restart();
 }
 
@@ -285,16 +347,16 @@ void AddCommendToQ()
 	int err;
 	TC_spl adcsCmd;
 	adcsCmd.id = TC_ADCS_T;
-	if (UTIL_DbguGetIntegerMinMax(&(adcsCmd.subType), 0, 666) != 0) {
+	if (UTIL_DbguGetIntegerMinMax((unsigned int *)&(adcsCmd.subType), 0, 666) != 0) {
 		printf("Enter ADCS command data\n");
-		UTIL_DbguGetString(&(adcsCmd.data), SIZE_OF_COMMAND + 1);
+		UTIL_DbguGetString((char*)&(adcsCmd.data), SIZE_OF_COMMAND + 1);
 		err = AdcsCmdQueueAdd(&adcsCmd);
 		printf("ADCS command error = %d\n\n\n", err);
 		printf("Send new command\n");
 		printf("Enter ADCS sub type\n");
 	}
 
-	if (UTIL_DbguGetIntegerMinMax(&input, 900, 1000) != 0) {
+	if (UTIL_DbguGetIntegerMinMax((unsigned int *)&input, 900, 1000) != 0) {
 		printf("Print the data\n");
 	}
 
@@ -304,7 +366,9 @@ void TestStartAdcs()
 {
 	TC_spl cmd;
 	int err = 0;
+	cmd.type = TM_ADCS_T;
 	cmd.subType = ADCS_RUN_MODE_ST;
+
 	cmd.data[0] = 1;
 
 	err = AdcsCmdQueueAdd(&cmd);
@@ -321,18 +385,39 @@ void TestStartAdcs()
 	memcpy(cmd.data,pwr_dev.raw,sizeof(pwr_dev));
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
-		printf("ADCS test init command error = %d\n", err);
+		printf("ADCS set pwr mode error = %d\n", err);
+	}
+
+	cmd.subType = ADCS_SET_EST_MODE_ST;
+	cmd.data[0] = 1;
+	err = AdcsCmdQueueAdd(cmd);
+	if(0 != err){
+		printf("ADCS set est mode error = %d\n", err);
+	}
+
+	cmd.subType = ADCS_SET_ATT_CTRL_MODE_ST;
+	cspace_adcs_attctrl_mod_t ctrl = {0};
+	ctrl.fields.ctrl_mode = 1;
+	memcpy(cmd.data,&ctrl,sizeof(ctrl));
+	err = AdcsCmdQueueAdd(cmd);
+	if(0 != err){
+		printf("ADCS set ctrl mode error = %d\n", err);
 	}
 
 }
 
 void TaskMamagTest()
 {
+	unsigned int i = 0;
 	TestStartAdcs();
+
+	TestAdcsTLM();
 
 	while(TRUE){
 
-
+		restart();
+		vTaskDelay(1000);
+		printf("\t-----Still Alive%d\n",i++);
 	}
 
 }
