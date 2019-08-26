@@ -29,6 +29,7 @@
 #define ADCS_ACK_PROCESSED_FLAG_INDEX 1
 #define ADCS_ACK_TC_ERR_INDEX 2
 
+byte I2cData[ADCS_CMD_MAX_DATA_LENGTH]; //global for splited I2C TC (272 bytes long)
 
 /*!
  * @brief allows the user to send a read request directly to the I2C.
@@ -174,12 +175,11 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	tm.time = time_now;
 	tm.type = TM_ADCS_T;
 	tm.subType = subType;
-	memcpy(tm.data,info,length);
-	tm.length = length;
 
+	tm.length = length;
+	memcpy(tm.data,info,tm.length);
 	byte rawData[SPL_TM_HEADER_SIZE + tm.length];
 	int rawDataLength = 0;
-
 	encode_TMpacket(rawData, &rawDataLength, tm);
 	TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
 }
@@ -208,19 +208,33 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 #ifdef TESTING
 	cspace_adcs_powerdev_t pwr_device;
 #endif
-
 	adcs_i2c_cmd i2c_cmd;
+
 	switch(sub_type)
 	{
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
 			memcpy(&i2c_cmd,cmd->data,cmd->length);
+			if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
+				if (i2c_cmd.data[0] == 0){
+					memcpy(I2cData, &i2c_cmd.data[1], ADCS_CMD_MAX_DATA_LENGTH/2);
+					break; //recived only half of the data and wait for second half
+				}else{
+					memcpy(&I2cData[ADCS_CMD_MAX_DATA_LENGTH/2], &i2c_cmd.data[1], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2);
+					memcpy(i2c_cmd.data, I2cData, i2c_cmd.length);
+				}
+			}
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 
 			if (i2c_cmd.id < 128){
 				SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
 			} else {
-				SendAdcsTlm((byte*)i2c_cmd.data,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
+				if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
+					SendAdcsTlm((byte*)i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
+					SendAdcsTlm((byte*)&i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
+				}else{
+					SendAdcsTlm((byte*)i2c_cmd.data,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
+				}
 			}
 			//TODO: log 'i2c_cmd.ack'. maybe send it in ACK form
 			break;
@@ -453,7 +467,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_GENERAL_INFO_ST:
 			rv = cspaceADCS_getGeneralInfo(ADCS_ID,(cspace_adcs_geninfo_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_geninfo_t),ADCS_GET_GENERAL_INFO_ST);
-			//TODO: change this into a real command and send to GS
 			break;
 		case ADCS_GET_BOOT_PROGRAM_INFO_ST:
 			err = cspaceADCS_getBootProgramInfo(ADCS_ID,(cspace_adcs_bootinfo_t*)data);
@@ -461,7 +474,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_GET_CURR_UNIX_TIME_ST:
 			err = cspaceADCS_getCurrentTime(ADCS_ID,(cspace_adcs_unixtm_t*)data);
-			//TODO: send 'time' as ack or something
 			SendAdcsTlm(data, sizeof(cspace_adcs_unixtm_t),ADCS_GET_CURR_UNIX_TIME_ST);
 			break;
 		case ADCS_GET_SRAM_LATCHUP_COUNTERS_ST:
@@ -628,7 +640,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
 			break;
-
+		case ADCS_SET_DATA_LOG_ST:
+			//TODO: implement
+			break;
 		default:
 			//TODO: return unknown subtype
 			break;
