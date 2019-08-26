@@ -25,7 +25,7 @@
 #include "../COMM/GSC.h"
 #include "../Global/sizes.h"
 #include "../Global/Global.h"
-#include "../Global/TM_managment.h"
+#include "../Global/TLM_management.h"
 
 //ADCS
 #define ADCS_INDEX 1

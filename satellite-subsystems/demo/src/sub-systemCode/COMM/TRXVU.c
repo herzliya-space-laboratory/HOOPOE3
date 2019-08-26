@@ -32,7 +32,7 @@
 #include "../Main/HouseKeeping.h"
 #include "../Main/commands.h"
 #include "../Global/FRAMadress.h"
-#include "../Global/TM_managment.h"
+#include "sub-systemCode/Global/TLM_management.h"
 #include "splTypes.h"
 #include "APRS.h"
 #include "../Global/GlobalParam.h"

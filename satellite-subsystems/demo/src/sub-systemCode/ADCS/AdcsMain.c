@@ -66,12 +66,6 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 
 TroubleErrCode AdcsInit()
 {
-	if(SWITCH_OFF == get_system_state(ADCS_param))
-	{
-		while(SWITCH_OFF == get_system_state(ADCS_param)){
-			vTaskDelay(CHANNEL_OFF_DELAY);
-		}
-	}
 
 	TroubleErrCode trbl = TRBL_SUCCESS;
 
@@ -84,15 +78,19 @@ TroubleErrCode AdcsInit()
 		return TRBL_ADCS_INIT_ERR;
 	}
 
-	if(F_NO_ERROR !=  f_enterFS()){
-		return TRBL_FS_INIT_ERR;
-	}
 	
 	trbl = AdcsCmdQueueInit();
 	if (trbl != TRBL_SUCCESS){
 		return trbl;
 	}
-
+	trbl = InitTlmElements();
+	if (trbl != TRBL_SUCCESS){
+		return trbl;
+	}
+	Boolean b = CreateTlmElementFiles();
+	if (b != TRUE){
+		return TRBL_FS_INIT_ERR;
+	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 #ifdef FIRST_ADCS_ACTIVATION
 	delay_loop = DEFAULT_ADCS_LOOP_DELAY;
@@ -109,6 +107,7 @@ TroubleErrCode AdcsInit()
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
 	}
+
 	return TRBL_SUCCESS;
 }
 

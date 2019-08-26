@@ -6,7 +6,7 @@
 #include <satellite-subsystems/cspaceADCS.h>
 #include <satellite-subsystems/cspaceADCS_types.h>
 
-#include "sub-systemCode/Global/TM_managment.h"
+#include "sub-systemCode/Global/TLM_management.h"
 #include "sub-systemCode/Global/FRAMadress.h"
 #include "AdcsGetDataAndTlm.h"
 
@@ -172,6 +172,7 @@ TroubleErrCode GatherTlmAndData()
 {
 	TroubleErrCode err = TRBL_SUCCESS;
 	TroubleErrCode err_occured = TRBL_SUCCESS;
+
 	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
 		err = SaveElementTlmAtIndex(i);
 		if (TRBL_SUCCESS != err) {
@@ -286,7 +287,7 @@ int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 
 	if(0 != Period){
 		TlmElements[index].SavePeriod = Period;
-		err = FRAM_write(&Period,ADCS_TLM_PERIOD_VECTOR_START_ADDR + index,sizeof(ToSave));
+		err = FRAM_write((unsigned char*)&Period,ADCS_TLM_PERIOD_VECTOR_START_ADDR + index,sizeof(ToSave));
 		if(TRBL_SUCCESS != err){
 			return TRBL_FRAM_WRITE_ERR;
 		}
