@@ -61,9 +61,9 @@ ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t ch
 	{
 		uint32_t reminder_section_index = index - (num_of_chunks_Y * num_of_chunks_X);
 
-		uint32_t reminder_height_offset = num_of_chunks_Y * chunk_height;
+		uint32_t reminder_height = num_of_chunks_Y * chunk_height;
 
-		uint32_t reminder_section_offset = reminder_height_offset * effective_im_width;
+		uint32_t reminder_section_offset = reminder_height * effective_im_width;
 		pixel_t* reminder_section_strarting_point = (pixel_t*)image + reminder_section_offset;
 
 		pixel_t* buffer = SimpleButcher(reminder_section_strarting_point, effective_im_size, chunk_size, reminder_section_index);
