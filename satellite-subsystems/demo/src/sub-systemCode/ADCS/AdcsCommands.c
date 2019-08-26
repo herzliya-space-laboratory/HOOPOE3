@@ -142,7 +142,7 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	char is_tlm = (i2c_cmd->id & 0x80); // if MSB is 1 then it is TLM. if 0 then TC
 
 	if(!is_tlm){ // is command
-		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length);
+		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length + 1); // +1 in case of 0 length cmd
 		if(0 != err){
 			//TODO: log I2c write Err
 			return err;
@@ -627,46 +627,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_ACP_EXECUTION_STATE_ST:
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
-			break;
-		case ADCS_SET_DATA_LOG_ST:
-			break;
-		case ADCS_USE_IN_EKF_ST:
-			break;
-		case ADCS_CSS_THRESHOLD_ST:
-			break;
-		case ADCS_MAGNETMTR_MOUNT_TRNSFRM_ST:
-			break;
-		case ADCS_MAGETMTR_CHNL_1_3_OFFST_ST:
-			break;
-		case ADCS_MAGNETMTR_SENS_MATRIX_ST:
-			break;
-		case ADCS_RATE_SENSOR_MULT_ST:
-			break;
-		case ADCS_MTQ_CONFIG_ST:
-			break;
-		case ADCS_I2C_WRITE_ST:
-			break;
-		case ADCS_I2C_READ_ST:
-			break;
-		case ADCS_GET_C_AM_SENSOR_ST:
-			break;
-		case ADCS_GET_C_AM_SENSOR_ST:
-			break;
-		case ADCS_SET__SENSOR_CONFIG_ST:
-			break;
-		case ADCS_SET__SENSOR_CONFIG_ST:
-			break;
-		case ADCS_DETUMBLING_GAIN_CONFIG_ST:
-			break;
-		case ADCS_Y_MOMENT_GAIN_CONFIG_ST:
-			break;
-		case ADCS_REF_WHEEL_MOMENTUM_ST:
-			break;
-		case ADCS_RWHEEL_GAIN_ST:
-			break;
-		case ADCS_MOMENT_INERTIA_ST:
-			break;
-		case ADCS_NOISE_CONFIG_ST:
 			break;
 		default:
 			//TODO: return unknown subtype

@@ -7,7 +7,7 @@
 #define ADCS_I2C_TELEMETRY_ACK_REQUEST 240 // this i2c command request an ack with data from the ADCS
 
 #define RESET_BOOT_REGISTER_CMD_ID			6
-#define RESET_BOOT_REGISTER_LENGTH 			3
+#define RESET_BOOT_REGISTER_LENGTH 			0
 
 #define MTQ_CONFIG_CMD_ID 					21
 #define MTQ_CONFIG_CMD_DATA_LENGTH 			3

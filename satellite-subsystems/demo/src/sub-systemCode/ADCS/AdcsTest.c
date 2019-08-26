@@ -23,7 +23,7 @@
 #define AMUNT_OF_STFF_TO_ADD_TO_THE_Q 3
 #define TEST_NUM 5
 
-void testInit();
+void Test();
 
 void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE], int setLength[CMD_FOR_TEST_AMUNT])
 {
@@ -112,7 +112,7 @@ void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SI
 
 void AdcsTestTask()
 {
-	testInit();
+	Test();
 	TC_spl set;
 	TC_spl get;
 
@@ -246,7 +246,7 @@ void AdcsTestTask()
 
 void ErrFlagTest()
 {
-	testInit();
+	Test();
 
 	double* SGP4 = { 0,0,0,0,0,0,0,0 };
 	cspaceADCS_setSGP4Parameters(ADCS_ID, SGP4);
@@ -255,7 +255,7 @@ void ErrFlagTest()
 
 void printErrFlag()
 {
-	testInit();
+	Test();
 	cspace_adcs_statetlm_t data;
 	cspaceADCS_getStateTlm(ADCS_ID, &data);
 	printf("\nSGP ERR FLAG = %d \n", data.fields.curr_state.fields.orbitparam_invalid);
@@ -263,7 +263,7 @@ void printErrFlag()
 
 void Mag_Test()
 {
-	testInit();
+	Test();
 
 	//generic i2c tm id 170 size 6 and print them
 	cspace_adcs_rawmagmeter_t Mag;
@@ -277,7 +277,7 @@ void Mag_Test()
 
 void AddCommendToQ()
 {
-	testInit();
+	Test();
 
 	int input;
 	int err;
@@ -298,25 +298,39 @@ void AddCommendToQ()
 
 }
 
-void testInit()
+void TestStartAdcs()
 {
-	TC_spl InitCommand;
-	InitCommand.subType = ADCS_RUN_MODE_ST;
-	InitCommand.data[0] = 1;
-	cspaceADCS_setRunMode(ADCS_ID, runmode_enabled);
-	int err = AdcsCmdQueueAdd(&InitCommand);
-	printf("ADCS test init command error = %d\n", err);
+	TC_spl cmd;
+	int err = 0;
+	cmd.subType = ADCS_RUN_MODE_ST;
+	cmd.data[0] = 1;
 
+	err = AdcsCmdQueueAdd(&cmd);
+	if(0 != err){
+		printf("ADCS test init command error = %d\n", err);
+	}
 	vTaskDelay(10);
 
-	InitCommand.subType = ADCS_SET_PWR_CTRL_DEVICE_ST;
-	cspace_adcs_powerdev_t device_ctrl;
-	device_ctrl.fields.signal_cubecontrol = 1;
-	device_ctrl.fields.motor_cubecontrol = 1;
-	device_ctrl.fields.pwr_motor = 1;
-	memcpy(InitCommand.data,device_ctrl.raw,sizeof(device_ctrl));
-	err = AdcsCmdQueueAdd(&InitCommand);
-	printf("ADCS test init command error = %d\n", err);
+	cmd.subType = ADCS_SET_PWR_CTRL_DEVICE_ST;
+	cspace_adcs_powerdev_t pwr_dev;
+	pwr_dev.fields.signal_cubecontrol = 1;
+	pwr_dev.fields.motor_cubecontrol = 1;
+	pwr_dev.fields.pwr_motor = 1;
+	memcpy(cmd.data,pwr_dev.raw,sizeof(pwr_dev));
+	err = AdcsCmdQueueAdd(&cmd);
+	if(0 != err){
+		printf("ADCS test init command error = %d\n", err);
+	}
 
 }
 
+void TaskMamagTest()
+{
+	TestStartAdcs();
+
+	while(TRUE){
+
+
+	}
+
+}
