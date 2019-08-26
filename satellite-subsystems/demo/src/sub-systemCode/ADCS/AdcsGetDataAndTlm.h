@@ -20,14 +20,14 @@
 
 #define ADCS_STATE_TLM_FILENAME 		("StTlm")
 #define ADCS_EST_META_DATA				("EstMtDt")
-#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVc")
-#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVc")
+#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVec")
+#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVec")
 #define ADCS_SENSOR_FILENAME			("Snsr")
 #define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")
 #define ADCS_RAW_MAG_FILENAME 			("RawMag")
 #define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldVc")
 #define ADCS_RAW_CSS_FILENAME_1_6 		("RwCss16")
-#define ADCS_RAW_CSS_FILENAME_7_10		("RwCss7A")
+#define ADCS_RAW_CSS_FILENAME_7_10		("RwCss710")
 #define ADCS_POWER_TEMP_FILENAME		("PowTemp")
 #define	ADCS_MISC_CURR_FILENAME 		("MscCurr")
 
