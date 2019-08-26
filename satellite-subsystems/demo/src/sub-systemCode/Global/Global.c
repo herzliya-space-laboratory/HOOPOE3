@@ -271,6 +271,8 @@ void reset_FRAM_MAIN()
 		err = FRAM_write(&bool, DEPLOY_ANTS_ATTEMPTS_ADDR + i, 1);
 		check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
 	}
+
+	reset_offline_TM_list();
 }
 
 Boolean getBitValueByIndex(byte* data, int length, int index)

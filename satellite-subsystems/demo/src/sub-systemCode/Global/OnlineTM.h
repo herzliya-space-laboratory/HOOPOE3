@@ -12,12 +12,11 @@
 #include "TLM_management.h"
 #include "../COMM/GSC.h"
 #include "../COMM/splTypes.h"
-
-#define USE_DIFFERENT_TASK_ONLINE_TM
+#include "../Main/HouseKeeping.h"
 
 #define DEFULT_INDEX	0
-#define NUMBER_OF_ONLIME_TM_PACKETS	18
-#define MAX_ITEMS_OFFLINE_LIST	10
+#define NUMBER_OF_ONLIME_TM_PACKETS	21
+#define MAX_ITEMS_OFFLINE_LIST	20
 
 typedef struct __attribute__ ((__packed__)) {
 	void* TM_param;
@@ -45,9 +44,5 @@ int delete_onlineTM_param_to_save_list(int TM_index);
 
 int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTime);
 
-#ifndef USE_DIFFERENT_TASK_ONLINE_TM
-void save_onlineTM_logic();
-#else
 void save_onlineTM_task();
-#endif
 #endif /* ONLINETM_H_ */

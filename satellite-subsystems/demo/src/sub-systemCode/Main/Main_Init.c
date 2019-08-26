@@ -225,8 +225,6 @@ int InitSubsystems()
 
 	InitializeFS(activation);
 
-	create_files(activation);
-
 	EPS_Init();
 
 #ifdef ANTS_ON
@@ -262,13 +260,7 @@ int SubSystemTaskStart()
 	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
-	xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-	vTaskDelay(100);
-
-#ifdef USE_DIFFERENT_TASK_ONLINE_TM
 	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-#endif
 	return 0;
 }
 

@@ -34,7 +34,6 @@
 #define CAM_HK_FILE_NAME "CAMf"
 #define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
 #define ADCS_HK_FILE_NAME "ADCf"// ADCS
-#define BOS_HK_FILE_NAME	"BOSf"
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
@@ -154,29 +153,6 @@ typedef union __attribute__ ((__packed__))
 
 typedef cspace_adcs_pwtempms_t ADCS_HK;
 
-/*
- * @brief 	saving every second telemetry from the ADCS, COMM, EPS and camera
- */
-void HouseKeeping_highRate_Task();
-/*
- * @brief 	saving every 10 seconds telemetry from the Solar panels
- */
-void HouseKeeping_lowRate_Task();
-
-/*
- * @brief 	creating the files in the TM_manegment for all the HK types
- * @return	-1 when its not the first activation, 0 on success
- */
-int create_files(Boolean firstActivation);
-
-/*
- * @brief		build correctly an SPL packet from raw data according to the HK type
- * @param[in]	the data type
- * @param[in]	the raw data from the TM_manegmant
- * @param[out]	the packet assembled
- * @return		-1 if the type is not the enum values, -2 if one of the pointers are NULL
- */
-int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet);
 
 /*
  * @brief		save a new execution ACK in ACK file with the online time
@@ -187,17 +163,10 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet);
  */
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId);
 
-/*
- * @brief		find the name of a file from a HK type
- * @param[in]	HK type of the file
- * @param[out]	place to copy the file name
- * @return		-1 if the type is not the enum values, -2 if one of the pointers are NULL
- */
-int find_fileName(HK_types type, char *fileName);
+int SP_HK_collect(SP_HK* hk_out);
+int EPS_HK_collect(EPS_HK* hk_out);
+int CAM_HK_collect(CAM_HK* hk_out);
+int COMM_HK_collect(COMM_HK* hk_out);
 
-/*
- * @brief		return the size of an HK element
- * @return		the size of the element requested, 0 if the value is not in the enum
- */
-int size_of_element(HK_types type);
+int build_HK_spl_packet();
 #endif /* HOUSEKEEPING_H_ */

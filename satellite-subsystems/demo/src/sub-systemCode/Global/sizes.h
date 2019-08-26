@@ -27,6 +27,8 @@
 #define CHAR_SIZE	1
 #define SHORT_SIZE	2
 
+#define OFFLINE_FRAM_STRUCT_SIZE	10
+
 #define IMAGE_SIZE (IMAGE_WIDTH * IMAGE_HEIGHT)	///< image size in bytes
 #define MAX_SIZE_OF_PARAM_IMAGE_DUMP	9
 
