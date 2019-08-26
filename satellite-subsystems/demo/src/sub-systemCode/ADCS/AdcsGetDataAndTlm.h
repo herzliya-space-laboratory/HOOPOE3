@@ -13,7 +13,7 @@
 #endif
 
 #ifndef TLM_SAVE_VECTOR_END_ADDR
-	#define TLM_SAVE_VECTOR_END_ADDR ((TLM_SAVE_VECTOR_START_ADDR) + (NUM_OF_ADCS_TLM) * sizeof(Boolean8bit))
+	#define ADCS_TLM_SAVE_VECTOR_END_ADDR ((ADCS_TLM_SAVE_VECTOR_START_ADDR) + (NUM_OF_ADCS_TLM) * sizeof(Boolean8bit))
 #endif
 
 #define ADCS_MAX_TLM_SIZE 272
@@ -56,14 +56,12 @@ int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
 /*!
  * @brief updates the Tlm element at index with the input parameters
  * @param[in] 	index index at which to update in the elements array
- * @param[in] 	TlmElementSize	size of the telemetry
  * @param[in]	ToSave		save telemetry flag(TRUE = save; FALSE = don't save)
- * @param[in]	file_name	the file name to be updated
  * @param[in] 	Period 		TLM save period- time in seconds between TLM saves
- * @note if you don't want to update an element put NULL in it
+ * @note if you don't want to update 'Period' put 0 in it
+ * @return	Errors According to TroubleErrCode enum
  */
-void UpdateTlmElementAtIndex(int index,AdcsTlmCollectFunc func,unsigned char TlmElementSize,
-		Boolean8bit ToSave, char file_name[FN_MAXNAME], char Period);
+int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period);
 
 /*!
  * @brief restores the TLM element array to its default value.

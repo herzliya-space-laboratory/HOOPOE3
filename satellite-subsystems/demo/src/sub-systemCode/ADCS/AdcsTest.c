@@ -34,7 +34,7 @@ void TestUpdateTlmToSaveVector(){
 	memset(ToSaveVec,0xFF,sizeof(NUM_OF_ADCS_TLM * sizeof(Boolean8bit)));
 
 	UpdateTlmToSaveVector(ToSaveVec);
-	err = FRAM_read(temp,TLM_SAVE_VECTOR_START_ADDR,TLM_SAVE_VECTOR_END_ADDR);	// check update in FRAM
+	err = FRAM_read(temp,ADCS_TLM_SAVE_VECTOR_START_ADDR,ADCS_TLM_SAVE_VECTOR_END_ADDR);	// check update in FRAM
 	if(0 != err){
 		printf("Error in FRAM_read\n");
 		return;
@@ -63,7 +63,7 @@ void TestGatherTlmAndData(){
 void TestUpdateTlmElemdntAtIndex(){
 	int err = 0;
 	for(int i = 0; i<NUM_OF_ADCS_TLM;i++){
-		UpdateTlmElementAtIndex(i,NULL,0,TRUE,NULL,6);
+		UpdateTlmElementAtIndex(i,TRUE_8BIT,6);
 	}
 
 }
@@ -181,7 +181,8 @@ void Lupos_Test(byte Data[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SI
 
 void AdcsTestTask()
 {
-	Test();
+//	testInit();
+	TC_spl get;
 	TC_spl set;
 	TC_spl get;
 
@@ -235,44 +236,11 @@ void AdcsTestTask()
 	memcpy(GetData[1],&i2c_cmd,getLength[1]);
 
 	//function to test constructor
-	uint8_t setSubType[CMD_FOR_TEST_AMUNT] = {
-			ADCS_SET_CURR_UNIX_TIME_ST,
-			ADCS_CACHE_ENABLE_ST,
-			ADCS_SET_ATT_CTRL_MODE_ST,
-			ADCS_SET_EST_MODE_ST,
-			ADCS_SET_MAG_OUTPUT_ST,
-			ADCS_SET_WHEEL_SPEED_ST,
-			ADCS_SET_MTQ_CONFIG_ST,
-			ADCS_RW_CONFIG_ST,
-			ADCS_GYRO_CONFIG_ST,
-			ADCS_CSS_CONFIG_ST,
-			ADCS_CSS_RELATIVE_SCALE_ST,
-			ADCS_SET_MAGNETMTR_MOUNT_ST,
-			ADCS_SET_MAGNETMTR_OFFSET_ST,
-			ADCS_SET_MAGNETMTR_SENSTVTY_ST,
-			ADCS_RATE_SENSOR_OFFSET_ST,
-			ADCS_SET_STAR_TRACKER_CONFIG_ST,
-			ADCS_SET_DETUMB_CTRL_PARAM_ST,
-			ADCS_SET_YWHEEL_CTRL_PARAM_ST,
-			ADCS_SET_RWHEEL_CTRL_PARAM_ST,
-			ADCS_SET_MOMENT_INTERTIA_ST,
-			ADCS_PROD_INERTIA_ST,
-			ADCS_ESTIMATION_PARAM1_ST,
-			ADCS_ESTIMATION_PARAM2_ST,
-			ADCS_SET_SGP4_ORBIT_PARAMS_ST,
-			ADCS_SET_SGP4_ORBIT_INC_ST,
-			ADCS_SET_SGP4_ORBIT_ECC_ST,
-			ADCS_SET_SGP4_ORBIT_RAAN_ST,
-			ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST,
-			ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST,
-			ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST,
-			ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST,
-			ADCS_SET_SGP4_ORBIT_EPOCH_ST,
-			ADCS_SET_MAGNETOMETER_MODE_ST
-	};//function to test sst
-
-	byte SetData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE];
-	Lupos_Test(SetData,setLength);
+	uint8_t setSubType[CMD_FOR_TEST_AMUNT] = {0};//function to test sst	
+	int setLength[CMD_FOR_TEST_AMUNT] = {0};
+	byte setData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE] = {{0}};
+	
+	BuildTests(getSubType, getLength, GetData, setSubType, setLength, setData);
 	printf("start test");
 	while(TRUE)
 	{
@@ -290,7 +258,6 @@ void AdcsTestTask()
 			get.subType = getSubType[TEST_NUM];
 			get.length = getLength[TEST_NUM];
 			memcpy(get.data,GetData[TEST_NUM],get.length);
-			memcpy(&i2c_cmd,get.data,get.length);
 
 			err = AdcsCmdQueueAdd(&get);
 			printf("\nsst:%d\n err:%d\n",get.subType, err);
@@ -408,16 +375,13 @@ void TestStartAdcs()
 
 void TaskMamagTest()
 {
-	unsigned int i = 0;
 	TestStartAdcs();
 
 	TestAdcsTLM();
 
 	while(TRUE){
-
-		restart();
 		vTaskDelay(1000);
-		printf("\t-----Still Alive%d\n",i++);
+
 	}
 
 }
