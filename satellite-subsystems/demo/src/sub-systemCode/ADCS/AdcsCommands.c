@@ -214,7 +214,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	{
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
-			memcpy(&i2c_cmd,cmd->data,sizeof(cmd->length));
+			memcpy(&i2c_cmd,cmd->data,cmd->length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 
 			if (i2c_cmd.id < 128){
@@ -628,6 +628,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
 			break;
+
 		default:
 			//TODO: return unknown subtype
 			break;

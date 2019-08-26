@@ -21,7 +21,7 @@
 #define CMD_FOR_TEST_AMUNT 34
 #define TastDelay 600000
 #define AMUNT_OF_STFF_TO_ADD_TO_THE_Q 3
-#define TEST_NUM 5
+#define TEST_NUM 1
 
 void Test();
 
@@ -166,9 +166,10 @@ void AdcsTestTask()
 	}
 	adcs_i2c_cmd i2c_cmd;
 	i2c_cmd.id = 131;
-	i2c_cmd.length = 0;
-	memcpy(GetData[1],&i2c_cmd,sizeof(adcs_i2c_cmd));
+	i2c_cmd.length = 1;
+	i2c_cmd.ack = 3;
 	getLength[1] = sizeof(adcs_i2c_cmd);
+	memcpy(GetData[1],&i2c_cmd,getLength[1]);
 
 	//function to test constructor
 	uint8_t setSubType[CMD_FOR_TEST_AMUNT] = {
@@ -226,6 +227,7 @@ void AdcsTestTask()
 			get.subType = getSubType[TEST_NUM];
 			get.length = getLength[TEST_NUM];
 			memcpy(get.data,GetData[TEST_NUM],get.length);
+			memcpy(&i2c_cmd,get.data,get.length);
 
 			err = AdcsCmdQueueAdd(&get);
 			printf("\nsst:%d\t err:%d\n",get.subType, err);
