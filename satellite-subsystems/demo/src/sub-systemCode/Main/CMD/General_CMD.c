@@ -57,12 +57,12 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 
-	time_unix start_time = BigEnE_raw_to_uInt(&cmd.data[0]);
-	time_unix end_time = BigEnE_raw_to_uInt(&cmd.data[4]);
+	time_unix start_time = BigEnE_raw_to_uInt(&cmd.data[5]);
+	time_unix end_time = BigEnE_raw_to_uInt(&cmd.data[9]);
 	HK_types files[5];
 	for (int i = 0; i < 5; i++)
 	{
-		files[i] = (HK_types)cmd.data[8 + i];
+		files[i] = (HK_types)cmd.data[i];
 	}
 
 	if (start_time > end_time)

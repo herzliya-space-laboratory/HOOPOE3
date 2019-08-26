@@ -422,7 +422,7 @@ void lookForRequestToDelete_dump(command_id cmdID)
 int sendRequestToStop_dump()
 {
 	//1. check if the task is running
-	if (get_system_state(dump_param))
+	if (!get_system_state(dump_param))
 	{
 		return 1;
 	}
@@ -441,7 +441,7 @@ int sendRequestToStop_dump()
 int sendRequestToStop_transponder()
 {
 	//1. check if the task is running
-	if (eTaskGetState(xTransponderHandle) == eDeleted)
+	if (!get_system_state(transponder_active_param))
 	{
 		return 1;
 	}

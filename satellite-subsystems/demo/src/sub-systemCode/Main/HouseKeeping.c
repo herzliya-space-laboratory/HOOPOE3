@@ -312,15 +312,20 @@ int CAM_HK_collect(CAM_HK* hk_out)
 }
 int COMM_HK_collect(COMM_HK* hk_out)
 {
-	ISIStrxvuRxTelemetry_revC telemetry;
-	int error_trxvu = -1, error_antA = -1, error_antB = -1;
-	error_trxvu = IsisTrxvu_rcGetTelemetryAll_revC(0, &telemetry);
-	check_int("COMM_HK_collect, IsisTrxvu_rcGetTelemetryAll_revC", error_trxvu);
-	hk_out->fields.bus_vol = telemetry.fields.bus_volt;
-	hk_out->fields.total_curr = telemetry.fields.total_current;
-	hk_out->fields.pa_temp = telemetry.fields.pa_temp;
-	hk_out->fields.locosc_temp = telemetry.fields.locosc_temp;
+	ISIStrxvuRxTelemetry_revC telemetry_Rx;
+	int error_Rx = -1, error_antA = -1, error_antB = -1, error_Tx = -1;
+	error_Rx = IsisTrxvu_rcGetTelemetryAll_revC(0, &telemetry_Rx);
+	check_int("COMM_HK_collect, IsisTrxvu_rcGetTelemetryAll_revC", error_Rx);
+	hk_out->fields.bus_vol = telemetry_Rx.fields.bus_volt;
+	hk_out->fields.total_curr = telemetry_Rx.fields.total_current;
+	hk_out->fields.pa_temp = telemetry_Rx.fields.pa_temp;
+	hk_out->fields.locosc_temp = telemetry_Rx.fields.locosc_temp;
+	hk_out->fields.rx_rssi = telemetry_Rx.fields.rx_rssi;
 
+	ISIStrxvuTxTelemetry_revC telemetry_Tx;
+	error_Tx = IsisTrxvu_tcGetTelemetryAll_revC(0, &telemetry_Tx);
+	hk_out->fields.tx_fwrdpwr = telemetry_Tx.fields.tx_fwrdpwr;
+	hk_out->fields.tx_reflpwr = telemetry_Tx.fields.tx_reflpwr;
 #ifdef ANTS_ON
 	error_antA = IsisAntS_getTemperature(0, isisants_sideA, &(hk_out->fields.ant_A_temp));
 	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antA);
@@ -329,9 +334,9 @@ int COMM_HK_collect(COMM_HK* hk_out)
 	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antB);
 #endif
 
-	set_GP_COMM(telemetry);
+	set_GP_COMM(telemetry_Rx);
 
-	return (error_trxvu && error_antA && error_antB);
+	return (error_Rx && error_antA && error_antB && error_Tx);
 }
 int ADCS_HK_collect(ADCS_HK* hk_out)
 {
@@ -562,9 +567,9 @@ int CAM_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 }
 int COMM_HK_raw_BigEnE(byte* raw_in, byte* raw_out)
 {
-	int params[] = {2, 2, 2, 2, 2, 2};
+	int params[] = {2, 2, 2, 2, 2, 2, 2, 2, 2};
 	int lastPlace = 0, l;
-	for (int i = 0; i < 6; i++)
+	for (int i = 0; i < 9; i++)
 	{
 		for (l = 0; l < params[i] / 2; l++)
 		{

@@ -23,7 +23,7 @@
 #define EPS_HK_SIZE 49
 #define SP_HK_SIZE	FLOAT_SIZE * NUMBER_OF_SOLAR_PANNELS
 #define CAM_HK_SIZE 62
-#define COMM_HK_SIZE 12
+#define COMM_HK_SIZE 18
 #define ADCS_HK_SIZE 34
 
 #define ADCS_SC_SIZE 6
@@ -133,6 +133,9 @@ typedef union __attribute__ ((__packed__))
 	{
 		voltage_t bus_vol;
 		current_t total_curr;
+        unsigned short tx_reflpwr;
+        unsigned short tx_fwrdpwr;
+        unsigned short rx_rssi;
 		unsigned short pa_temp;
 		unsigned short locosc_temp;
 		unsigned short ant_A_temp;
