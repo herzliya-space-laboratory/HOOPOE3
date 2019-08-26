@@ -31,7 +31,6 @@
 #define TRXVU_TEMP_CALIBRATION(ADC) ((temp_t)ADC * -0.07669 + 195.6037)
 #define ATTITUDE_CALIBRATION 	10
 
-#define current_system_state current_global_param.state
 global_param current_global_param;
 xSemaphoreHandle xCGP_semaphore = NULL;
 
@@ -49,15 +48,15 @@ int init_GP()
 		return 1;
 	}
 	//3. read the system state before the restart
-	current_system_state.fields.ADCS = SWITCH_OFF;
-	current_system_state.fields.Tx = SWITCH_OFF;
-	current_system_state.fields.cam_operational = SWITCH_OFF;
-	current_system_state.fields.dump = SWITCH_OFF;
-	current_system_state.fields.cammera = SWITCH_OFF;
-	current_system_state.fields.transponder_active = SWITCH_OFF;
-	current_system_state.fields.mute = SWITCH_OFF;
-	current_system_state.fields.anttena_deploy = SWITCH_OFF;
-	FRAM_read(&current_system_state.raw, STATES_ADDR, 1);
+	current_global_param.state.fields.ADCS = SWITCH_OFF;
+	current_global_param.state.fields.Tx = SWITCH_OFF;
+	current_global_param.state.fields.cam_operational = SWITCH_OFF;
+	current_global_param.state.fields.dump = SWITCH_OFF;
+	current_global_param.state.fields.cammera = SWITCH_OFF;
+	current_global_param.state.fields.transponder_active = SWITCH_OFF;
+	current_global_param.state.fields.mute = SWITCH_OFF;
+	current_global_param.state.fields.anttena_deploy = SWITCH_OFF;
+	FRAM_read(&current_global_param.state.raw, STATES_ADDR, 1);
 	//4. Initialize current_global_param
 	current_global_param.Vbatt = 0;
 	current_global_param.curBat = 0;
@@ -103,55 +102,54 @@ Boolean get_system_state(systems_state_parameters param)
 	Boolean return_value = SWITCH_ON;
 	if (xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-
-		i_error = FRAM_read(&(current_system_state.raw), STATES_ADDR, 1);
+		i_error = FRAM_read((byte*)&(current_global_param.state), STATES_ADDR, 1);
 		check_int("can't get system state from FRAM", i_error);
 		switch (param)
 		{
 		case mute_param:
-			if (current_system_state.fields.mute == 1)
+			if (current_global_param.state.fields.mute == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
 			break;
 		case cam_param:
-			if (current_system_state.fields.cammera == 1)
+			if (current_global_param.state.fields.cammera == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
 			break;
 		case anttena_deploy_param:
-			if (current_system_state.fields.anttena_deploy == 1)
+			if (current_global_param.state.fields.anttena_deploy == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
 			break;
 		case transponder_active_param:
-			if (current_system_state.fields.transponder_active == 1)
+			if (current_global_param.state.fields.transponder_active == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
 			break;
 		case dump_param:
-			if (current_system_state.fields.dump == 1)
+			if (current_global_param.state.fields.dump == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
 			break;
 		case cam_operational_param:
-			if (current_system_state.fields.cam_operational == 1)
+			if (current_global_param.state.fields.cam_operational == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
 			break;
 		case Tx_param:
-			if (current_system_state.fields.Tx == 1)
+			if (current_global_param.state.fields.Tx == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
 			break;
 		case ADCS_param:
-			if (current_system_state.fields.ADCS == 1)
+			if (current_global_param.state.fields.ADCS == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
@@ -169,61 +167,61 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 	portBASE_TYPE lu_error;
 	if (xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		i_error = FRAM_read(&current_system_state.raw, STATES_ADDR, 1);
+		i_error = FRAM_read((byte*)&current_global_param.state, STATES_ADDR, 1);
 		check_int("can't read from FRAM in set_system_state", i_error);
 		switch (param)
 		{
 		case mute_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.mute = 1;
+				current_global_param.state.fields.mute = 1;
 			else
-				current_system_state.fields.mute = 0;
+				current_global_param.state.fields.mute = 0;
 			break;
 		case cam_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.cammera= 1;
+				current_global_param.state.fields.cammera= 1;
 			else
-				current_system_state.fields.cammera = 0;
+				current_global_param.state.fields.cammera = 0;
 			break;
 		case anttena_deploy_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.anttena_deploy = 1;
+				current_global_param.state.fields.anttena_deploy = 1;
 			else
-				current_system_state.fields.anttena_deploy = 0;
+				current_global_param.state.fields.anttena_deploy = 0;
 			break;
 		case transponder_active_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.transponder_active = 1;
+				current_global_param.state.fields.transponder_active = 1;
 			else
-				current_system_state.fields.transponder_active = 0;
+				current_global_param.state.fields.transponder_active = 0;
 			break;
 		case dump_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.dump = 1;
+				current_global_param.state.fields.dump = 1;
 			else
-				current_system_state.fields.dump = 0;
+				current_global_param.state.fields.dump = 0;
 			break;
 		case cam_operational_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.cam_operational = 1;
+				current_global_param.state.fields.cam_operational = 1;
 			else
-				current_system_state.fields.cam_operational = 0;
+				current_global_param.state.fields.cam_operational = 0;
 			break;
 		case Tx_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.Tx = 1;
+				current_global_param.state.fields.Tx = 1;
 			else
-				current_system_state.fields.Tx = 0;
+				current_global_param.state.fields.Tx = 0;
 			break;
 		case ADCS_param:
 			if (set_state == SWITCH_ON)
-				current_system_state.fields.ADCS = 1;
+				current_global_param.state.fields.ADCS = 1;
 			else
-				current_system_state.fields.ADCS = 0;
+				current_global_param.state.fields.ADCS = 0;
 			break;
 		}
 
-		FRAM_write(&current_system_state.raw, STATES_ADDR, 1);
+		FRAM_write(&current_global_param.state.raw, STATES_ADDR, 1);
 		check_int("can't read from FRAM in set_system_state", i_error);
 		lu_error = xSemaphoreGive(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCST_semaphore in set_system_state", lu_error);
