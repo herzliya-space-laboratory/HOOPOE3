@@ -206,6 +206,20 @@ int COMM_HK_collect(COMM_HK* hk_out)
 
 	return (error_Rx && error_antA && error_antB && error_Tx);
 }
+int FS_HK_collect(FS_HK* hk_out)
+{
+	f_managed_enterFS();
+	F_SPACE parameter;
+	int error = f_getfreespace(f_getdrive(), &parameter);
+	f_managed_releaseFS();
+	if (error != 0)
+		return error;
+	hk_out->fields.bad = parameter.bad;
+	hk_out->fields.free = parameter.free;
+	hk_out->fields.total = parameter.total;
+	hk_out->fields.used = parameter.used;
+	return 0;
+}
 
 int HK_find_fileName(HK_types type, char* fileName)
 {

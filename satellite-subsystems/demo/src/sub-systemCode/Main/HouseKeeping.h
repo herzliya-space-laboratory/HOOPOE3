@@ -25,6 +25,7 @@
 #define CAM_HK_SIZE 62
 #define COMM_HK_SIZE 18
 #define ADCS_HK_SIZE 34
+#define FS_HK_SIZE 4*4
 
 #define ADCS_SC_SIZE 6
 
@@ -34,6 +35,7 @@
 #define CAM_HK_FILE_NAME "CAMf"
 #define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
 #define ADCS_HK_FILE_NAME "ADCf"// ADCS
+#define FS_HK_FILE_NAME "FSf"
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
@@ -125,6 +127,18 @@ typedef union __attribute__ ((__packed__))
 	}fields;
 }SP_HK;
 
+typedef union __attribute__ ((__packed__))
+{
+	byte raw[FS_HK_SIZE];
+	struct __attribute__((packed))
+	{
+		  unsigned long  total;
+		  unsigned long  free;
+		  unsigned long  used;
+		  unsigned long  bad;
+	}fields;
+}FS_HK;
+
 typedef cspace_adcs_pwtempms_t ADCS_HK;
 
 
@@ -141,6 +155,7 @@ int SP_HK_collect(SP_HK* hk_out);
 int EPS_HK_collect(EPS_HK* hk_out);
 int CAM_HK_collect(CAM_HK* hk_out);
 int COMM_HK_collect(COMM_HK* hk_out);
+int FS_HK_collect(FS_HK* hk_out);
 
 int HK_find_fileName(HK_types type, char* fileName);
 int HK_findElementSize(HK_types type);
