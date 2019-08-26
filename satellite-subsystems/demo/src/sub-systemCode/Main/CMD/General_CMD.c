@@ -78,7 +78,7 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	{
 		if (files[i] != this_is_not_the_file_you_are_looking_for)
 		{
-			i_error = find_fileName(files[i], file_name);
+			i_error = HK_find_fileName(files[i], file_name);
 			if (i_error != 0)
 				continue;
 			int i_error = f_managed_enterFS();
@@ -125,7 +125,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 		if ((HK_types)cmd.data[i] == this_is_not_the_file_you_are_looking_for)
 			continue;
 
-		if (find_fileName((HK_types)cmd.data[i], file_name) == 0)
+		if (HK_find_fileName((HK_types)cmd.data[i], file_name) == 0)
 			reslt = c_fileReset(file_name);
 
 		if (reslt != FS_SUCCSESS)
@@ -382,10 +382,38 @@ void cmd_delete_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	int index = cmd.data[0];
 
-	int error = delete_onlineTM_param_to_save_list(index);
+	int error = delete_onlineTM_param_from_offline(index);
 
 	if (error == 0)
 		*err = ERR_SUCCESS;
 	else
 		*err = ERR_FAIL;
+}
+void cmd_get_off_line_setting(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_OFFLINE_TM_LIST;
+	if (cmd.length != 0)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	TM_spl packet;
+	int error = get_offlineSettingPacket(&packet);
+
+	if (error == 0)
+	{
+		byte rawPacket[SIZE_TXFRAME];
+		int size = 0;
+		encode_TMpacket(rawPacket, &size, packet);
+		error = TRX_sendFrame(rawPacket, (uint8_t)size);
+		if (error == 0)
+			*err = ERR_SUCCESS;
+		else
+			*err = ERR_FAIL;
+	}
+	else
+	{
+		*err = ERR_FRAM_READ_FAIL;
+	}
 }

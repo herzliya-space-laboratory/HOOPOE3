@@ -44,4 +44,6 @@ void cmd_reset_off_line(Ack_type* type, ERR_type* err, TC_spl cmd);
 void cmd_add_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_delete_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd);
+
+void cmd_get_off_line_setting(Ack_type* type, ERR_type* err, TC_spl cmd);
 #endif /* GENERAL_CMD_H_ */

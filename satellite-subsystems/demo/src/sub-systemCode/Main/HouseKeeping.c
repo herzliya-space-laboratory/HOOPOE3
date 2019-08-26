@@ -42,6 +42,7 @@
 #include "../Global/sizes.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
+#include "../Global/OnlineTM.h"
 #include "../ADCS.h"
 
 
@@ -206,3 +207,61 @@ int COMM_HK_collect(COMM_HK* hk_out)
 	return (error_Rx && error_antA && error_antB && error_Tx);
 }
 
+int HK_find_fileName(HK_types type, char* fileName)
+{
+	if (fileName == NULL)
+		return -12;
+	if (type == ACK_T)
+	{
+		strcpy(fileName, ACK_FILE_NAME);
+		return 0;
+	}
+
+	if (offlineTM_T <= type && type < ADCS_sience_T)
+	{
+		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
+		strcpy(fileName, OnlineTM_type.name);
+		return 0;
+	}
+	return -13;
+}
+int HK_findElementSize(HK_types type)
+{
+	if (type == ACK_T)
+	{
+		return ACK_DATA_LENGTH;
+	}
+
+	if (offlineTM_T <= type && type < ADCS_sience_T)
+	{
+		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
+		return OnlineTM_type.TM_param_length;
+	}
+	return -13;
+}
+int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
+{
+	if (raw_data == NULL || packet == NULL)
+		return -12;
+	memcpy(&packet->time, raw_data, TIME_SIZE);
+	if (type == ACK_T)
+	{
+		packet->type = ACK_TYPE;
+		packet->subType = ACK_ST;
+		packet->length = ACK_DATA_LENGTH;
+		memcpy(packet->data, raw_data + TIME_SIZE, ACK_DATA_LENGTH);
+		return 0;
+	}
+
+	if (offlineTM_T <= type && type < ADCS_sience_T)
+	{
+		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
+		packet->type = TM_ONLINE_TM_T;
+		packet->subType = (byte)type;
+		packet->length = (unsigned short)OnlineTM_type.TM_param_length;
+		memcpy(packet->data, raw_data + TIME_SIZE, OnlineTM_type.TM_param_length);
+		return 0;
+	}
+
+	return -13;
+}

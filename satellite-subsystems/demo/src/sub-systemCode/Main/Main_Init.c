@@ -172,6 +172,8 @@ Boolean first_activation()
 	reset_FRAM_TRXVU();
 	// 3. reset TRXVU FRAM adress
 	reset_FRAM_EPS();
+
+	reset_offline_TM_list();
 	// 3. cahnge the first activation to false
 	dataFRAM = FALSE_8BIT;
 

@@ -191,8 +191,8 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 			if (HK[i] == this_is_not_the_file_you_are_looking_for)
 				continue;
 
-			find_fileName(HK[i], fileName);
-			parameterSize = (size_of_element(HK[i]) + TIME_SIZE);
+			HK_find_fileName(HK[i], fileName);
+			parameterSize = (HK_findElementSize(HK[i]) + TIME_SIZE);
 			last_read = start_time;
 			last_send = 0;
 			do

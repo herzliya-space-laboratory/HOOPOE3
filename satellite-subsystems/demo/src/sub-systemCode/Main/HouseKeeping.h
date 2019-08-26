@@ -37,35 +37,9 @@
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
-	EPS_HK_T = 1,
-	CAMERA_HK_T = 2,
-	COMM_HK_T = 3,
-	ADCS_HK_T = 4,
-	SP_HK_T = 5,
 	this_is_not_the_file_you_are_looking_for = 18,
-	ADCS_CSS_DATA_T = 20,
-	ADCS_Magnetic_filed_T = 21,
-	ADCS_CSS_sun_vector_T = 22,
-	ADCS_wheel_speed_T = 23,
-	ADCS_sensore_rate_T = 24,
-	ADCS_MAG_CMD_T = 25,
-	ADCS_wheel_CMD_T = 26,
-	ADCS_Mag_raw_T = 27,
-	ADCS_IGRF_MODEL_T = 28,
-	ADCS_Gyro_BIAS_T = 29,
-	ADCS_Inno_Vextor_T = 30,
-	ADCS_Error_Vec_T = 31,
-	ADCS_QUATERNION_COVARIANCE_T = 32,
-	ADCS_ANGULAR_RATE_COVARIANCE_T = 33,
-	ADCS_ESTIMATED_ANGLES_T = 34,
-	ADCS_Estimated_AR_T = 35,
-	ADCS_ECI_POS_T = 36,
-	ADCS_ECI_VEL_T = 255,
-	ADCS_SAV_Vel_T = 37,
-	ADCS_ECEF_POS_T = 38,
-	ADCS_LLH_POS_T = 39,
-	ADCS_EST_QUATERNION_T = 40,
-	OnlineTM_first_type_T = 120
+	offlineTM_T = 50,
+	ADCS_sience_T = 128
 }HK_types;
 
 typedef union __attribute__ ((__packed__))
@@ -168,5 +142,7 @@ int EPS_HK_collect(EPS_HK* hk_out);
 int CAM_HK_collect(CAM_HK* hk_out);
 int COMM_HK_collect(COMM_HK* hk_out);
 
-int build_HK_spl_packet();
+int HK_find_fileName(HK_types type, char* fileName);
+int HK_findElementSize(HK_types type);
+int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet);
 #endif /* HOUSEKEEPING_H_ */

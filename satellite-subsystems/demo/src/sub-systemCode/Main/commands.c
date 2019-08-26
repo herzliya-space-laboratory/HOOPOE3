@@ -447,6 +447,9 @@ void AUC_onlineTM(TC_spl decode)
 	case (DELETE_ITEM_OFF_LINE_LIST_ST):
 		cmd_add_item_off_line(&type, &err, decode);
 		break;
+	case GET_OFFLINE_LIST_SETTING_ST:
+		cmd_get_off_line_setting(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;

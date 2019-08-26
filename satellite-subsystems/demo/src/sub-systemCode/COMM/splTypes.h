@@ -12,7 +12,6 @@
 #define BEACON_T 3
 #define APRS 20
 #define ACK_TYPE 13
-#define DUMP_T 173
 #define IMAGE_DUMP_T 11
 #define ACK_ST 90
 #define TM_ADCS_ST 	42
@@ -32,13 +31,7 @@
 //SubType (TM)
 #define BEACON_ST 25
 #define APRS_PACKET_FRAM 33
-
-//dumps subTypes:
-#define EPS_DUMP_ST 13
-#define CAM_DUMP_ST 23
-#define COMM_DUMP_ST 45
-#define ADCS_DUMP_ST 78
-#define SP_DUMP_ST	91
+#define OFFLINE_SETTING_ST	255
 
 #define IMAGE_DUMP_THUMBNAIL4_ST	100
 #define IMAGE_DUMP_THUMBNAIL3_ST	101
@@ -171,6 +164,7 @@
 #define RESET_OFF_LINE_LIST_ST		1
 #define ADD_ITEM_OFF_LINE_LIST_ST		2
 #define	DELETE_ITEM_OFF_LINE_LIST_ST		3
+#define GET_OFFLINE_LIST_SETTING_ST			4
 
 //special operations
 #define DELETE_UNF_CUF_ST		156

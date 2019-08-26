@@ -124,12 +124,22 @@ int set_offlineSetting_FRAM()
 	return 0;
 }
 
-TM_spl get_offlineSettings()
+int get_offlineSettingPacket(TM_spl* setPacket)
 {
-	TM_spl packet;
-	return packet;
+	if (setPacket == NULL)
+		return -12;
+	setPacket->type = TM_ONLINE_TM_T;
+	setPacket->subType = OFFLINE_SETTING_ST;
+	setPacket->length = SETTING_LIST_SIZE;
+	int i_error = Time_getUnixEpoch(&setPacket->time);
+	check_int("Time_getUnixEpoch, get_offlineSettingPacket", i_error);
+	saveTM_FRAM FRAM_list[MAX_ITEMS_OFFLINE_LIST];
+	i_error = get_offlineSetting_FRAM(FRAM_list);
+	if (i_error != 0)
+		return i_error;
+	memcpy(setPacket->data, FRAM_list, SETTING_LIST_SIZE);
+	return 0;
 }
-
 
 onlineTM_param get_item_by_index(int TMIndex)
 {
@@ -140,119 +150,143 @@ onlineTM_param get_item_by_index(int TMIndex)
 	return item;
 }
 
+
 void init_onlineParam()
 {
 	int index = 0;
+	//0
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_EPS;
 	onlineTM_list[index].TM_param_length = EPS_HK_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, EPS_HK_FILE_NAME);
 	index++;
+	//1
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_COMM;
 	onlineTM_list[index].TM_param_length = COMM_HK_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, COMM_HK_FILE_NAME);
 	index++;
+	//2
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_CAM;
-	onlineTM_list[index].TM_param_length = CAMERA_HK_T;
+	onlineTM_list[index].TM_param_length = CAM_HK_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, CAM_HK_FILE_NAME);
 	index++;
+	//3
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_SP;
 	onlineTM_list[index].TM_param_length = SP_HK_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, SP_HK_FILE_NAME);
 	index++;
+	//4
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))cspaceADCS_getPowTempMeasTLM;
 	onlineTM_list[index].TM_param_length = CSPACE_ADCS_POWTEMPMEAS_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, ADCS_HK_FILE_NAME);
 	index++;
+	//5
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsGetHkData_param;
 	onlineTM_list[index].TM_param_length = 45;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GEA");
 	index++;
+	//6
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsGetHkData_general;
 	onlineTM_list[index].TM_param_length = 133;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GEB");
 	index++;
+	//7
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsGetHkData_vi;
 	onlineTM_list[index].TM_param_length = 22;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GEC");
 	index++;
+	//8
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsGetHkData_out;
 	onlineTM_list[index].TM_param_length = 66;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GED");
 	index++;
+	//9
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsGetHkData_wdt;
 	onlineTM_list[index].TM_param_length = 28;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GEE");
 	index++;
+	//10
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsGetHkData_basic;
 	onlineTM_list[index].TM_param_length = 23;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GEF");
 	index++;
+	//11
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsConfigGet;
 	onlineTM_list[index].TM_param_length = 60;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GEG");
 	index++;
+	//12
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsConfig2Get;
 	onlineTM_list[index].TM_param_length = 22;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "GEJ");
 	index++;
+	//13
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisTrxvu_rcGetTelemetryAll;
 	onlineTM_list[index].TM_param_length = TRXVU_ALL_RXTELEMETRY_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "TRA");
 	index++;
+	//14
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisTrxvu_rcGetTelemetryAll_revC;
 	onlineTM_list[index].TM_param_length = TRXVU_ALL_RXTELEMETRY_REVC_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "TRB");
 	index++;
+	//15
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisTrxvu_tcGetTelemetryAll;
 	onlineTM_list[index].TM_param_length = TRXVU_ALL_TXTELEMETRY_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "TRC");
 	index++;
+	//16
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisTrxvu_tcGetTelemetryAll_revC;
 	onlineTM_list[index].TM_param_length = TRXVU_ALL_TXTELEMETRY_REVC_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "TRD");
 	index++;
+	//17
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisAntS_getStatusData_sideA;
 	onlineTM_list[index].TM_param_length = 2;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "ANA");
 	index++;
+	//18
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisAntS_getAlltelemetry_sideA;
 	onlineTM_list[index].TM_param_length = 8;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "ANB");
 	index++;
+	//19
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisAntS_getTemperature_sideA;
 	onlineTM_list[index].TM_param_length = sizeof(unsigned short);
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "ANC");
 	index++;
+	//20
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisAntS_getStatusData_sideB;
 	onlineTM_list[index].TM_param_length = 2;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "AND");
 	index++;
+	//21
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisAntS_getAlltelemetry_sideB;
 	onlineTM_list[index].TM_param_length = 8;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, "ANE");
 	index++;
+	//22
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))IsisAntS_getTemperature_sideB;
 	onlineTM_list[index].TM_param_length = sizeof(unsigned short);
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
@@ -271,8 +305,8 @@ void init_onlineParam()
 void reset_offline_TM_list()
 {
 	for (int i = 0; i < 4; i++)
-		add_onlineTM_param_to_save_list(i, 1, 4294967296);
-	add_onlineTM_param_to_save_list(4, 20, 4294967296);
+		add_onlineTM_param_to_save_list(i, 1, 4294967295u);
+	add_onlineTM_param_to_save_list(4, 20, 4294967295u);
 	for (int i = 5; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
 		offline_TM_list[i].type = NULL;
@@ -295,7 +329,7 @@ int get_online_packet(int TM_index, TM_spl* packet)
 		return error;
 
 	packet->type = TM_ONLINE_TM_T;
-	packet->subType = TM_index;
+	packet->subType = TM_index + offlineTM_T;
 	packet->length = onlineTM_list[TM_index].TM_param_length;
 	Time_getUnixEpoch(&(packet->time));
 
