@@ -12,6 +12,7 @@
 #include <satellite-subsystems/cspaceADCS.h>
 
 #include "sub-systemCode/COMM/splTypes.h"	// for ADCS command subtypes
+#include "sub-systemCode/ADCS/AdcsGetDataAndTlm.h"
 
 #include "../COMM/GSC.h"
 #include "../TRXVU.h"
@@ -216,19 +217,22 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_I2C_GENRIC_ST:
 			memcpy(&i2c_cmd,cmd->data,cmd->length);
 			if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
-				if (i2c_cmd.data[0] == 0){
+				if (i2c_cmd.data[0] & 0x0F == 0){	// 4 LSB indicate which half of the CMD did we send.
 					memcpy(I2cData, &i2c_cmd.data[1], ADCS_CMD_MAX_DATA_LENGTH/2);
-					break; //recived only half of the data and wait for second half
 				}else{
 					memcpy(&I2cData[ADCS_CMD_MAX_DATA_LENGTH/2], &i2c_cmd.data[1], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2);
 					memcpy(i2c_cmd.data, I2cData, i2c_cmd.length);
 				}
 			}
+			if(i2c_cmd.data[0] & 0xF0 != 0xF0){	// 4MSB indicate if CMD is assembled
+				break;
+			}
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 
-			if (i2c_cmd.id < 128){
+			if (i2c_cmd.id < 128){	// is TLC
 				SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
-			} else {
+			}
+			else { // is TLM
 				if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
 					SendAdcsTlm((byte*)i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
 					SendAdcsTlm((byte*)&i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
@@ -639,6 +643,16 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_ACP_EXECUTION_STATE_ST:
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
+			break;
+		case ADCS_RESET_TLM_ELEMENTS_ST:
+			err = RestoreDefaultTlmElement();
+			break;
+		case ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST:
+			err = UpdateTlmElementAtIndex(cmd->data[0],cmd->data[1],cmd->data[2]);
+			break;
+		case ADCS_GET_TLM_ELEM_AT_INDEX_ST:
+			GetTlmElementAtIndex((AdcsTlmElement_t *)data,cmd->data[0]);
+			SendAdcsTlm(data, sizeof(AdcsTlmElement_t),ADCS_GET_TLM_ELEM_AT_INDEX_ST);
 			break;
 		case ADCS_SET_DATA_LOG_ST:
 			//TODO: implement

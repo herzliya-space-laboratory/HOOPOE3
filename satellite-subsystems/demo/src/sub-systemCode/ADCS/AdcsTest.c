@@ -35,7 +35,7 @@ void TestUpdateTlmToSaveVector(){
 	memset(ToSaveVec,0xFF,NUM_OF_ADCS_TLM * sizeof(Boolean8bit));
 
 	UpdateTlmToSaveVector(ToSaveVec);
-	err = FRAM_read(temp,TLM_SAVE_VECTOR_START_ADDR,TLM_SAVE_VECTOR_END_ADDR);	// check update in FRAM
+	err = FRAM_read(temp,ADCS_TLM_SAVE_VECTOR_START_ADDR,ADCS_TLM_SAVE_VECTOR_END_ADDR);	// check update in FRAM
 	if(0 != err){
 		printf("Error in FRAM_read\n");
 		return;
@@ -62,7 +62,7 @@ void TestGatherTlmAndData(){
 
 void TestUpdateTlmElemdntAtIndex(){
 	for(int i = 0; i<NUM_OF_ADCS_TLM;i++){
-		UpdateTlmElementAtIndex(i,NULL,0,TRUE_8BIT,NULL,6);
+		UpdateTlmElementAtIndex(i,TRUE_8BIT,6);
 	}
 
 }
@@ -305,7 +305,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMUNT], int getLength[CMD_FOR_TE
 
 void AdcsTestTask()
 {
-	testInit();
+//	testInit();
 	TC_spl get;
 	TC_spl set;
 
@@ -320,7 +320,7 @@ void AdcsTestTask()
 	int setLength[CMD_FOR_TEST_AMUNT] = {0};
 	byte setData[CMD_FOR_TEST_AMUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE] = {{0}};
 	
-	BuildTests(getSubType, getLength, getData, setSubType, setLength, setData);
+	BuildTests(getSubType, getLength, GetData, setSubType, setLength, setData);
 	printf("start test");
 	while(TRUE)
 	{
@@ -337,7 +337,7 @@ void AdcsTestTask()
 
 			get.subType = getSubType[TEST_NUM];
 			get.length = getLength[TEST_NUM];
-			memcpy(get.data,getData[TEST_NUM],get.length);
+			memcpy(get.data,GetData[TEST_NUM],get.length);
 
 			err = AdcsCmdQueueAdd(&get);
 			printf("\nsst:%d\n err:%d\n",get.subType, err);
@@ -456,13 +456,13 @@ void TestStartAdcs()
 
 void TaskMamagTest()
 {
-	unsigned int i = 0;
 	TestStartAdcs();
 
+	TestAdcsTLM();
 
 	while(TRUE){
-		TestAdcsTLM();
 		vTaskDelay(1000);
+
 	}
 
 }
