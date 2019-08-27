@@ -17,7 +17,6 @@
 #define CHECK_TM_INDEX_RANGE(index) ((index >= 0) && (index < NUMBER_OF_ONLIME_TM_PACKETS))
 
 #define get_TMPointer_byIndex(index) (&(onlineTM_list[index]))
-#define	get_TMIndex_byPointer(pointer)	((int)pointer - (int)onlineTM_list)
 
 int IsisAntS_getStatusData_sideA(unsigned char index, ISISantsStatus* status)
 {
@@ -78,6 +77,15 @@ int HK_collect_FS_B(unsigned char index, void* param)
 onlineTM_param onlineTM_list[NUMBER_OF_ONLIME_TM_PACKETS];
 saveTM offline_TM_list[MAX_ITEMS_OFFLINE_LIST];
 
+int	get_TMIndex_byPointer(onlineTM_param *pointer)
+{
+	for (int i = 0; i < NUMBER_OF_ONLIME_TM_PACKETS; i++)
+	{
+		if (pointer == get_TMPointer_byIndex(i))
+			return i;
+	}
+	return 0;
+}
 
 typedef struct __attribute__ ((__packed__)) {
 	Boolean8bit isEmpty;
@@ -340,7 +348,6 @@ void reset_offline_TM_list()
 
 	save_offlineSetting_FRAM();
 }
-
 
 
 int get_online_packet(int TM_index, TM_spl* packet)
