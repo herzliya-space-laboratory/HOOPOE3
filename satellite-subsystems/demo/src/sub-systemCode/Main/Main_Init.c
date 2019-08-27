@@ -217,6 +217,8 @@ int InitSubsystems()
 	test_menu();
 #endif
 
+	init_onlineParam();
+
 	Boolean activation = first_activation();
 
 	StartTIME();
@@ -250,8 +252,6 @@ int InitSubsystems()
 	init_trxvu();
 
 	init_command();
-
-	init_onlineParam();
 
 	return 0;
 }

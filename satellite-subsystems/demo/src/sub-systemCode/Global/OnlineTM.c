@@ -16,7 +16,7 @@
 
 #define CHECK_TM_INDEX_RANGE(index) ((index >= 0) && (index < NUMBER_OF_ONLIME_TM_PACKETS))
 
-#define get_TMPointer_byIndex(index) (onlineTM_param*)((uint)index + (uint)onlineTM_list)
+#define get_TMPointer_byIndex(index) (&(onlineTM_list[index]))
 #define	get_TMIndex_byPointer(pointer)	((int)pointer - (int)onlineTM_list)
 
 int IsisAntS_getStatusData_sideA(unsigned char index, ISISantsStatus* status)
@@ -325,6 +325,7 @@ void init_onlineParam()
 		offline_TM_list[i].lastSave = 0;
 }
 
+
 void reset_offline_TM_list()
 {
 	for (int i = 0; i < 4; i++)
@@ -401,7 +402,7 @@ int add_onlineTM_param_to_save_list(int TM_index, uint period, time_unix stopTim
 	{
 		if (offline_TM_list[i].type == NULL && !addedToLit)
 		{
-			offline_TM_list[i].type = onlineTM_list + TM_index;
+			offline_TM_list[i].type = get_TMPointer_byIndex(TM_index);
 			offline_TM_list[i].period = period;
 			offline_TM_list[i].stopTime = stopTime;
 			offline_TM_list[i].lastSave = 0;
