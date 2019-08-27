@@ -51,27 +51,29 @@ void testInit()
 	int err = 0;
 	cmd.type = TM_ADCS_T;
 	cmd.subType = ADCS_RUN_MODE_ST;
-
+	cmd.length =1;
 	cmd.data[0] = 1;
 
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
 		printf("\t---ADCS test init command error = %d\n", err);
 	}
-	vTaskDelay(10);
+	vTaskDelay(10000);
 
 	cmd.subType = ADCS_SET_PWR_CTRL_DEVICE_ST;
-	cspace_adcs_powerdev_t pwr_dev;
+	cmd.length = sizeof(cspace_adcs_powerdev_t);
+	cspace_adcs_powerdev_t pwr_dev = {.raw = {0}};
 	pwr_dev.fields.signal_cubecontrol = 1;
 	pwr_dev.fields.motor_cubecontrol = 1;
 	pwr_dev.fields.pwr_motor = 1;
-	memcpy(cmd.data,pwr_dev.raw,sizeof(pwr_dev));
+	memcpy(cmd.data,pwr_dev.raw,cmd.length);
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
 		printf("\t---ADCS set pwr mode error = %d\n", err);
 	}
 
 	cmd.subType = ADCS_SET_EST_MODE_ST;
+	cmd.length = 1;
 	cmd.data[0] = 1;
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
@@ -79,9 +81,10 @@ void testInit()
 	}
 
 	cmd.subType = ADCS_SET_ATT_CTRL_MODE_ST;
+	cmd.length = sizeof(cspace_adcs_attctrl_mod_t);
 	cspace_adcs_attctrl_mod_t ctrl = {.raw = {0}};
 	ctrl.fields.ctrl_mode = 1;
-	memcpy(cmd.data,&ctrl,sizeof(ctrl));
+	memcpy(cmd.data,&ctrl,cmd.length);
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
 		printf("\t---ADCS set ctrl mode error = %d\n", err);
@@ -198,6 +201,11 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	memcpy(getData[testNum],&i2c_cmd,getLength[testNum]);
 	setSubType[testNum] = ADCS_CACHE_ENABLE_ST;
 	setLength[testNum] = sizeof(cspace_adcs_attctrl_mod_t);
+	cspace_adcs_attctrl_mod_t CT;
+	CT.fields.ctrl_mode = 1;
+	CT.fields.override_flag = 0;
+	CT.fields.timeout = 10;
+	memcpy(setData[testNum],CT.raw,setLength[testNum]);
 	testNum++;
 
 	//test #2 data
@@ -230,7 +238,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	setSubType[testNum] = ADCS_SET_WHEEL_SPEED_ST;
 	setLength[testNum] = sizeof(cspace_adcs_magnetorq_t);
 	cspace_adcs_wspeed_t wheelConfig;
-	wheelConfig.fields.speed_y = 0;
+	wheelConfig.fields.speed_y = 4000;
 	memcpy(setData[testNum],wheelConfig.raw,setLength[testNum]);
 	testNum++;
 
@@ -241,8 +249,10 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getLength[testNum] = 3;
 	getData[testNum][0] = 0;
-	getData[testNum][2] = 1;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 3;
 	testNum++;
 
 	//test #7 data
@@ -252,117 +262,205 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getLength[testNum] = 3;
 	getData[testNum][0] = 3;
-	getData[testNum][2] = 1;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 4;
 	testNum++;
 
 	//test #8 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_GYRO_CONFIG_ST;
-	setLength[testNum] = 10;
+	setLength[testNum] = 3;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
-	getData[testNum][0] = 8;
-	getData[testNum][2] = 1;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 7;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 3;
 	testNum++;
 
 	//test #9 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 10;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 10;
 	setSubType[testNum] = ADCS_CSS_CONFIG_ST;
-
-	getData[testNum][0] = 11;
-	getData[testNum][2] = 1;
+	setLength[testNum] = 10;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #10 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 20;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 11;
 	setSubType[testNum] = ADCS_CSS_RELATIVE_SCALE_ST;
-	getData[testNum][0] = 21;
-	getData[testNum][2] = 1;
+	setLength[testNum] = 11;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #11 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 101;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 6;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_MOUNT_ST;
-	getData[testNum][0] = 102;
-	getData[testNum][2] = 2;
+	setLength[testNum] = 6;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #12 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 107;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 6;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_OFFSET_ST;
-	getData[testNum][0] = 108;
-	getData[testNum][2] = 2;
+	setLength[testNum] = 6;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #13 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 113;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 18;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_SENSTVTY_ST;
-	getData[testNum][0] = 114;
-	getData[testNum][2] = 2;
+	setLength[testNum] = 18;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #14 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 131;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 7;
 	setSubType[testNum] = ADCS_RATE_SENSOR_OFFSET_ST;
-	getData[testNum][0] = 132;
-	getData[testNum][2] = 2;
+	setLength[testNum] = 7;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #15 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 138;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 26;
 	setSubType[testNum] = ADCS_SET_STAR_TRACKER_CONFIG_ST;
-	getData[testNum][0] = 136;
-	getData[testNum][2] = 2;
+	setLength[testNum] = 26;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #16 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 164;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 14;
 	setSubType[testNum] = ADCS_SET_DETUMB_CTRL_PARAM_ST;
-	getData[testNum][0] = 165;
-	getData[testNum][2] = 4;
+	setLength[testNum] = 14;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #17 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 0;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 20;
 	setSubType[testNum] = ADCS_SET_YWHEEL_CTRL_PARAM_ST;
-	getData[testNum][0] = 179;
-	getData[testNum][2] = 4;
+	setLength[testNum] = 20;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #18 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 198;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 8;
 	setSubType[testNum] = ADCS_SET_RWHEEL_CTRL_PARAM_ST;
-	getData[testNum][0] = 195;
-	getData[testNum][2] = 4;
+	setLength[testNum] = 8;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #19 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 3;
+	getData[testNum][0] = 218;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 24;
 	setSubType[testNum] = ADCS_SET_MOMENT_INTERTIA_ST;
-	getData[testNum][0] = 219;
-	getData[testNum][2] = 4;
+	setLength[testNum] = 12;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #20 data
 	getSubType[testNum] = 255;
+	getLength[testNum] = 0;
+	getData[testNum][0] = 0;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 0;
 	setSubType[testNum] = ADCS_PROD_INERTIA_ST;
+	setLength[testNum] = 12;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #21 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 0;
+	getData[testNum][0] = 0;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 0;
 	setSubType[testNum] = ADCS_ESTIMATION_PARAM1_ST;
-	getData[testNum][0] = 247;
-	getData[testNum][2] = 4;
+	setLength[testNum] = 16;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//test #22 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 0;
+	getData[testNum][0] = 0;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 0;
 	setSubType[testNum] = ADCS_ESTIMATION_PARAM2_ST;
-	getData[testNum][0] = 0x01;
-	getData[testNum][2] = 0x03;
-	getData[testNum][3] = 4;
+	setLength[testNum] = 14;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 
 	//tests #23-32 data all SGP4 commands
@@ -393,10 +491,15 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 
 	//test #32 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	getLength[testNum] = 0;
+	getData[testNum][0] = 0;
+	getData[testNum][1] = 0;
+	getData[testNum][2] = 0;
 	setSubType[testNum] = ADCS_SET_MAGNETOMETER_MODE_ST;
-	getData[testNum][0] = 0x01;
-	getData[testNum][1] = 0x0F;
-	getData[testNum][3] = 1;
+	setLength[testNum] = 2;
+	for(int i = 0; i<setLength[testNum]; i++){
+		setData[testNum][i] = 0;
+	}
 	testNum++;
 }
 
