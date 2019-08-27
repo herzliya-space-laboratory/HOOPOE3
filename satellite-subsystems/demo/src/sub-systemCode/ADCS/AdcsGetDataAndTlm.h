@@ -20,14 +20,14 @@
 
 #define ADCS_STATE_TLM_FILENAME 		("StTlm")
 #define ADCS_EST_META_DATA				("EstMtDt")
-#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVec")
-#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVec")
+#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVc")
+#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVc")
 #define ADCS_SENSOR_FILENAME			("Snsr")
 #define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")
 #define ADCS_RAW_MAG_FILENAME 			("RawMag")
 #define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldVc")
-#define ADCS_RAW_CSS_FILENAME_1_6 		("RwCss16")
-#define ADCS_RAW_CSS_FILENAME_7_10		("RwCss710")
+#define ADCS_RAW_CSS_FILENAME_1_6 		("RCss16")
+#define ADCS_RAW_CSS_FILENAME_7_10		("RCss7A")// A =10
 #define ADCS_POWER_TEMP_FILENAME		("PowTemp")
 #define	ADCS_MISC_CURR_FILENAME 		("MscCurr")
 
@@ -43,6 +43,17 @@ typedef struct __attribute__ ((__packed__)) AdcsTlmElement_t{
 	Boolean8bit OperatingFlag;			//<! A flag stating if the TLM is working correctly and no errors occuredd in the file creation or TLM collection
 }AdcsTlmElement_t;
 
+/*!
+ * 	@brief Initializes the telemetry array.
+ *	@return return errors according to TroubleErrCode enum
+ */
+TroubleErrCode InitTlmElements();
+
+/*!
+ * 	@brief Initializes the telemetry array.
+ *	@return FALSE if error occured in file creation
+ */
+Boolean CreateTlmElementFiles();
 
 /*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD
@@ -64,7 +75,7 @@ int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period);
 
 /*!
- * @brief restores the TLM element array to its default value.
+ * @brief restores the TLM element array to its default values and updated the FRAM.
  * @return 	TRBL_FAIL in case of error.
  * 			TRBL_SUCCSESS in case of successful restoration
  */
@@ -83,16 +94,5 @@ void GetTlmElementAtIndex(AdcsTlmElement_t * elem,unsigned int index);
  */
 TroubleErrCode GatherTlmAndData();
 
-/*!
- * 	@brief Initializes the telemetry array.
- *	@return return errors according to TroubleErrCode enum
- */
-TroubleErrCode InitTlmElements();
-
-/*!
- * 	@brief Initializes the telemetry array.
- *	@return FALSE if error occured in file creation
- */
-Boolean CreateTlmElementFiles();
 
 #endif /* ADCSGETDATAANDTLM_H_ */

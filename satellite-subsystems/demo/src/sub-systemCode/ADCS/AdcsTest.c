@@ -35,7 +35,7 @@ void TestUpdateTlmToSaveVector(){
 	memset(ToSaveVec,0xFF,NUM_OF_ADCS_TLM * sizeof(Boolean8bit));
 
 	UpdateTlmToSaveVector(ToSaveVec);
-	err = FRAM_read(temp,ADCS_TLM_SAVE_VECTOR_START_ADDR,ADCS_TLM_SAVE_VECTOR_END_ADDR);	// check update in FRAM
+	err = FRAM_read(temp,ADCS_TLM_SAVE_VECTOR_START_ADDR,NUM_OF_ADCS_TLM * sizeof(*temp));	// check update in FRAM
 	if(0 != err){
 		printf("Error in FRAM_read\n");
 		return;
@@ -76,23 +76,33 @@ void TestRestoreDefaultTlmElement()
 
 void TestAdcsTLM()
 {
+	printf("Test 'RestoreDefaultTlmElement'");
+	RestoreDefaultTlmElement();
+	vTaskDelay(100);
+
 	printf("Test 'UpdateTlmToSaveVector'\n");
 	TestUpdateTlmToSaveVector();
+	vTaskDelay(100);
 
 	printf("Test 'GatherTlmAndData' for 60 sec\n");
 	TestGatherTlmAndData();
+	vTaskDelay(100);
 
 	printf("Test 'UpdateTlmElemdntAtIndex' (change tlm save freq to 1/6 Hz)\n");
 	TestUpdateTlmElemdntAtIndex();
+	vTaskDelay(100);
 
 	printf("Test 'GatherTlmAndData' for 60 sec with updated array\n");
 	TestGatherTlmAndData();
+	vTaskDelay(100);
 
 	printf("Test 'RestoreDefaultTlmElement'");
 	RestoreDefaultTlmElement();
+	vTaskDelay(100);
 
 	printf("Test 'GatherTlmAndData' for 60 sec\n");
 	TestGatherTlmAndData();
+	vTaskDelay(100);
 }
 
 void Test()
@@ -309,7 +319,7 @@ void AdcsTestTask()
 	TC_spl get;
 	TC_spl set;
 
-	TaskMamagTest(); // currently restarts the sat' right after
+	TaskMamagTest(); // currently in infinite loop
 
 	uint8_t getSubType[CMD_FOR_TEST_AMUNT] = {0};
 	int getLength[CMD_FOR_TEST_AMUNT] = {0};
@@ -421,7 +431,7 @@ void TestStartAdcs()
 
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
-		printf("ADCS test init command error = %d\n", err);
+		printf("\t---ADCS test init command error = %d\n", err);
 	}
 	vTaskDelay(10);
 
@@ -433,14 +443,14 @@ void TestStartAdcs()
 	memcpy(cmd.data,pwr_dev.raw,sizeof(pwr_dev));
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
-		printf("ADCS set pwr mode error = %d\n", err);
+		printf("\t---ADCS set pwr mode error = %d\n", err);
 	}
 
 	cmd.subType = ADCS_SET_EST_MODE_ST;
 	cmd.data[0] = 1;
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
-		printf("ADCS set est mode error = %d\n", err);
+		printf("\t---ADCS set est mode error = %d\n", err);
 	}
 
 	cmd.subType = ADCS_SET_ATT_CTRL_MODE_ST;
@@ -449,9 +459,13 @@ void TestStartAdcs()
 	memcpy(cmd.data,&ctrl,sizeof(ctrl));
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
-		printf("ADCS set ctrl mode error = %d\n", err);
+		printf("\t---ADCS set ctrl mode error = %d\n", err);
 	}
 
+}
+void TestMagnetometer()
+{
+	//TODO: collect TLM, print + transmit
 }
 
 void TaskMamagTest()
@@ -461,8 +475,10 @@ void TaskMamagTest()
 	TestAdcsTLM();
 
 	while(TRUE){
-		vTaskDelay(1000);
 
+		TestMagnetometer();
+
+		vTaskDelay(1000);
 	}
 
 }

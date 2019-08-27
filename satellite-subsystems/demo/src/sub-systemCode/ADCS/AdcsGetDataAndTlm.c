@@ -10,24 +10,48 @@
 #include "sub-systemCode/Global/FRAMadress.h"
 #include "AdcsGetDataAndTlm.h"
 
-
 #define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1) //TODO: check if needed
 
 AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 
+#define ADCS_TLM_DEFAULT_COLLECT_PERIOD 10	// (1/10) Hz - once every 10 seconds
+
 #define ADCS_DEFAULT_TLM_VECTOR	\
-		{(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_statetlm_t),		cspaceADCS_getStateTlm,				ADCS_STATE_TLM_FILENAME,		1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_estmetadata_t),		cspaceADCS_getEstimationMetadata,	ADCS_EST_META_DATA,				1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_sunvec_t),			cspaceADCS_getCoarseSunVec,			ADCS_COARSE_SUN_VEC_FILENAME,	1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_sunvec_t),			cspaceADCS_getFineSunVec,			ADCS_FINE_SUN_VEC_FILENAME,		1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_angrate_t),			cspaceADCS_getSensorRates,			ADCS_SENSOR_FILENAME,			1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_wspeed_t),			cspaceADCS_getWheelSpeed,			ADCS_WHEEL_SPEED_FILENAME,		1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_rawmagmeter_t),		cspaceADCS_getRawMagnetometerMeas,	ADCS_RAW_MAG_FILENAME,			1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_magfieldvec_t),		cspaceADCS_getMagneticFieldVec,		ADCS_MAG_FIELD_VEC_FILENAME,	1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_rawcss1_6_t),		cspaceADCS_getRawCss1_6Measurements,ADCS_RAW_CSS_FILENAME_1_6,		1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_rawcss7_10_t),		cspaceADCS_getRawCss7_10Measurements,ADCS_RAW_CSS_FILENAME_7_10,	1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_pwtempms_t),		cspaceADCS_getPowTempMeasTLM,		ADCS_POWER_TEMP_FILENAME,		1,(time_unix)0,	FALSE_8BIT},\
-		(AdcsTlmElement_t){TRUE_8BIT,sizeof(cspace_adcs_misccurr_t),		cspaceADCS_getMiscCurrentMeas,		ADCS_MISC_CURR_FILENAME,		1,(time_unix)0,	FALSE_8BIT},\
+		{{TRUE_8BIT,sizeof(cspace_adcs_statetlm_t),		(AdcsTlmCollectFunc)cspaceADCS_getStateTlm,					\
+		ADCS_STATE_TLM_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_estmetadata_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimationMetadata,		\
+		ADCS_EST_META_DATA,			ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getCoarseSunVec,				\
+		ADCS_COARSE_SUN_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getFineSunVec,				\
+		ADCS_FINE_SUN_VEC_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_angrate_t),		(AdcsTlmCollectFunc)cspaceADCS_getSensorRates,				\
+		ADCS_SENSOR_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_wspeed_t),		(AdcsTlmCollectFunc)cspaceADCS_getWheelSpeed,				\
+		ADCS_WHEEL_SPEED_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_rawmagmeter_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawMagnetometerMeas,		\
+		ADCS_RAW_MAG_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_magfieldvec_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagneticFieldVec,			\
+		ADCS_MAG_FIELD_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss1_6_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss1_6Measurements,	\
+		ADCS_RAW_CSS_FILENAME_1_6,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss7_10_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss7_10Measurements,	\
+		ADCS_RAW_CSS_FILENAME_7_10,ADCS_TLM_DEFAULT_COLLECT_PERIOD,		(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_pwtempms_t),	(AdcsTlmCollectFunc)cspaceADCS_getPowTempMeasTLM,				\
+		ADCS_POWER_TEMP_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_misccurr_t),	(AdcsTlmCollectFunc)cspaceADCS_getMiscCurrentMeas,				\
+		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		};
 
 /*
@@ -143,50 +167,65 @@ cspaceADCS_getSGP4OrbitParameters
 parameters
  */
 
-
-TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
-
-
-int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
-{
-	if (NULL == save_tlm_flag) {
-		//TODO: log error
-		return (int) TRBL_NULL_DATA;
-	}
-
-	int err = 0;
-
-	err = FRAM_write(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
-			ADCS_TLM_SAVE_VECTOR_END_ADDR);
-	if (0 != err) {
-		return err;
-	}
-
-	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
-		TlmElements[i].ToSave = save_tlm_flag[i];
-	}
-	return 0;
-}
-
-TroubleErrCode GatherTlmAndData()
+TroubleErrCode InitTlmElements()
 {
 	TroubleErrCode err = TRBL_SUCCESS;
-	TroubleErrCode err_occured = TRBL_SUCCESS;
+	AdcsTlmElement_t default_elements[] = ADCS_DEFAULT_TLM_VECTOR;
 
-	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
-		err = SaveElementTlmAtIndex(i);
-		if (TRBL_SUCCESS != err) {
-#ifdef TESTING
-			printf("\t----- Error in 'SaveElementTlmAtIndex': %d", err);
-#endif
-			err_occured = TRBL_TLM_ERR;
-			TlmElements[i].ToSave = FALSE_8BIT;			// stop saving tlm if error
-			TlmElements[i].OperatingFlag = FALSE_8BIT;	// raise the 'not operating correctly' flag
-			//TODO: log err
+	if (NULL ==  memcpy(TlmElements, default_elements, sizeof(default_elements))){
+		//TODO: log err
+		return TRBL_FAIL;
+	}
+
+	Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM] ={0};
+
+	unsigned char Periods[NUM_OF_ADCS_TLM] = {0};
+
+	err = FRAM_read(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
+			(NUM_OF_ADCS_TLM) * sizeof(*save_tlm_flag));
+	if (0 != err) {
+		//TODO: log err
+		return TRBL_FRAM_READ_ERR;
+	}
+	err = FRAM_read((unsigned char*)Periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
+			NUM_OF_ADCS_TLM* sizeof(*Periods));
+	if(0 != err){
+		//TODO: log err
+		return TRBL_FRAM_READ_ERR;
+	}
+	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; i++) {
+		TlmElements[i].ToSave = save_tlm_flag[i];
+		TlmElements[i].SavePeriod = Periods[i];
+	}
+
+	//TODO: log successful init
+	return TRBL_SUCCESS;
+}
+
+Boolean CreateTlmElementFiles()
+{
+	FileSystemResult res = 0;
+	Boolean err = TRUE;
+
+	for (int i = 0; i < NUM_OF_ADCS_TLM; i++) {
+		if (NULL != TlmElements[i].TlmFileName &&
+			0 != TlmElements[i].TlmElementeSize)
+		{
+			res = c_fileCreate(TlmElements[i].TlmFileName,TlmElements[i].TlmElementeSize);
+			TlmElements[i].OperatingFlag = TRUE_8BIT;
+			if (FS_SUCCSESS != res) {
+				TlmElements[i].ToSave = FALSE_8BIT;
+				TlmElements[i].OperatingFlag = FALSE_8BIT;
+				err = FALSE;
+				//TODO: log error
+			}
 		}
 	}
-	return err_occured;
+	return err;
 }
+
+
+TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
 
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 {
@@ -204,24 +243,28 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 	{
 		return TRBL_SUCCESS;
 	}
-	//TODO: change 0 to a define
+	if(TlmElements[index].SavePeriod == 0){ // in case of Period error
+		TlmElements[index].SavePeriod = ADCS_TLM_DEFAULT_COLLECT_PERIOD;
+	}
 	time_unix curr_time = 0;
 	Time_getUnixEpoch(&curr_time);
-	if(curr_time > TlmElements[index].LastSaveTime){
-		if((curr_time - TlmElements[index].LastSaveTime) % TlmElements[index].SavePeriod == 0){
-			err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
-			if (0 != err) {
-				// TODO: log error
-				return err;
-			}
+	if(curr_time < TlmElements[index].LastSaveTime){ // in case of past time(B.C of time update).
+		TlmElements[index].LastSaveTime = 0;
+	}
+	if((curr_time - TlmElements[index].LastSaveTime) >= TlmElements[index].SavePeriod ){
+		err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
+		if (0 != err) {
+			// TODO: log error
+			return err;
+		}
 
-			res = c_fileWrite(TlmElements[index].TlmFileName, adcs_tlm);
-			if (FS_SUCCSESS != res) {
-				return TRBL_FS_WRITE_ERR;
-			}
-			TlmElements[index].LastSaveTime = curr_time;
+		res = c_fileWrite(TlmElements[index].TlmFileName, adcs_tlm);
+		if (FS_SUCCSESS != res) {
+			return TRBL_FS_WRITE_ERR;
+		}
+		TlmElements[index].LastSaveTime = curr_time;
 #ifdef TESTING
-			printf("Collected Tlm %s\n",TlmElements[index].TlmFileName);
+			printf("Collected Tlm \t\"%s\"\n",TlmElements[index].TlmFileName);
 #ifdef PRINTTLM
 			if(index == 7){	// magnetic field vector
 				printf("\n[");
@@ -232,10 +275,56 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 			}
 #endif
 #endif
+		}
 
+	return TRBL_SUCCESS;
+}
+
+
+int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
+{
+	TroubleErrCode err = TRBL_SUCCESS;
+	if(index >= NUM_OF_ADCS_TLM){
+		return TRBL_INPUT_PARAM_ERR;
+	}
+	TlmElements[index].ToSave = ToSave;
+
+	ToSave = ToSave ? TRUE_8BIT : FALSE_8BIT;
+	err = FRAM_write(&ToSave,ADCS_TLM_SAVE_VECTOR_START_ADDR + index,sizeof(ToSave));
+	if(TRBL_SUCCESS != err){
+		return TRBL_FRAM_WRITE_ERR;
+	}
+
+	if(0 != Period){
+		TlmElements[index].SavePeriod = Period;
+		err = FRAM_write((unsigned char*)&Period,ADCS_TLM_PERIOD_VECTOR_START_ADDR + index,sizeof(ToSave));
+		if(TRBL_SUCCESS != err){
+			return TRBL_FRAM_WRITE_ERR;
 		}
 	}
 	return TRBL_SUCCESS;
+	//TODO: log update
+}
+
+int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
+{
+	if (NULL == save_tlm_flag) {
+		//TODO: log error
+		return (int) TRBL_NULL_DATA;
+	}
+
+	int err = 0;
+
+	err = FRAM_write(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
+			NUM_OF_ADCS_TLM * sizeof(*save_tlm_flag));
+	if (0 != err) {
+		return err;
+	}
+
+	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
+		TlmElements[i].ToSave = save_tlm_flag[i];
+	}
+	return 0;
 }
 
 TroubleErrCode RestoreDefaultTlmElement(){
@@ -264,6 +353,7 @@ TroubleErrCode RestoreDefaultTlmElement(){
 	return TRBL_SUCCESS;
 }
 
+
 void GetTlmElementAtIndex(AdcsTlmElement_t *elem,unsigned int index){
 	if(NULL == elem || index >= NUM_OF_ADCS_TLM){
 		return;
@@ -271,98 +361,26 @@ void GetTlmElementAtIndex(AdcsTlmElement_t *elem,unsigned int index){
 	memcpy(elem,&TlmElements[index],sizeof(*elem));
 }
 
-int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
+
+TroubleErrCode GatherTlmAndData()
 {
 	TroubleErrCode err = TRBL_SUCCESS;
-	if(index >= NUM_OF_ADCS_TLM){
-		return TRBL_INPUT_PARAM_ERR;
+	TroubleErrCode err_occured = TRBL_SUCCESS;
+	if(F_NO_ERROR != f_managed_enterFS()){
+		return TRBL_FAIL;
 	}
-	TlmElements[index].ToSave = ToSave;
-
-	ToSave = ToSave ? TRUE_8BIT : FALSE_8BIT;
-	err = FRAM_write(&ToSave,ADCS_TLM_SAVE_VECTOR_START_ADDR + index,sizeof(ToSave));
-	if(TRBL_SUCCESS != err){
-		return TRBL_FRAM_WRITE_ERR;
-	}
-
-	if(0 != Period){
-		TlmElements[index].SavePeriod = Period;
-		err = FRAM_write((unsigned char*)&Period,ADCS_TLM_PERIOD_VECTOR_START_ADDR + index,sizeof(ToSave));
-		if(TRBL_SUCCESS != err){
-			return TRBL_FRAM_WRITE_ERR;
+	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
+		err = SaveElementTlmAtIndex(i);
+		if (TRBL_SUCCESS != err) {
+			err_occured = TRBL_TLM_ERR;
+			TlmElements[i].ToSave = FALSE_8BIT;			// stop saving tlm if error
+			TlmElements[i].OperatingFlag = FALSE_8BIT;	// raise the 'not operating correctly' flag
+			//TODO: log err
+#ifdef TESTING
+			printf("\t----- Error in 'SaveElementTlmAtIndex': %d", err);
+#endif
 		}
 	}
-	return TRBL_SUCCESS;
-	//TODO: log update
-}
-
-TroubleErrCode InitTlmElements()
-{
-	//TODO: chage return error codes to appropriate values
-	TroubleErrCode err = 0;
-	AdcsTlmElement_t default_elements[] = ADCS_DEFAULT_TLM_VECTOR;
-
-	unsigned int tlm_elements_length = sizeof(default_elements)
-			/ sizeof(default_elements[0]);
-
-	if (NULL ==  memcpy(TlmElements, default_elements, tlm_elements_length)) {
-		//TODO: change -1 to appropriate error
-		//TODO: log err
-		return -1;
-	}
-	Boolean8bit *save_tlm_flag = malloc(
-			tlm_elements_length * sizeof(*save_tlm_flag));
-	char *Periods = malloc(tlm_elements_length*sizeof(*Periods));
-
-	if (NULL == save_tlm_flag || NULL == Periods)
-	{
-		//TODO: change -1 to appropriate error
-		//TODO: log err
-		return -1;
-	}
-
-	err = FRAM_read(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
-			ADCS_TLM_SAVE_VECTOR_END_ADDR);
-	if (0 != err) {
-		//TODO: log err
-		free(save_tlm_flag);
-		return err;
-	}
-	err = FRAM_read((unsigned char*)Periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
-			ADCS_TLM_PERIOD_VECTOR_END_ADDR);
-	if(0 != err){
-		//TODO: log err
-		free(save_tlm_flag);
-		return err;
-	}
-	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; i++) {
-		TlmElements[i].ToSave = save_tlm_flag[i];
-		TlmElements[i].SavePeriod = Periods[i];
-	}
-	free(save_tlm_flag);
-	free(Periods);
-	//TODO: log successful init
-	return TRBL_SUCCESS;
-}
-
-Boolean CreateTlmElementFiles()
-{
-	FileSystemResult res = 0;
-	Boolean err = TRUE;
-
-	for (int i = 0; i < NUM_OF_ADCS_TLM; i++) {
-		if (NULL != TlmElements[i].TlmFileName &&
-			0 != TlmElements[i].TlmElementeSize)
-		{
-			res = c_fileCreate(TlmElements[i].TlmFileName,TlmElements[i].TlmElementeSize);
-			TlmElements[i].OperatingFlag = TRUE_8BIT;
-			if (FS_SUCCSESS != res) {
-				TlmElements[i].ToSave = FALSE_8BIT;
-				TlmElements[i].OperatingFlag = FALSE_8BIT;
-				err = FALSE;
-				//TODO: log error
-			}
-		}
-	}
-	return err;
+	f_managed_releaseFS();
+	return err_occured;
 }

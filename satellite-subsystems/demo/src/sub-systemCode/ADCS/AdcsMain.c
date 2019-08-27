@@ -62,7 +62,7 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 
 }
 
-//#define FIRST_ADCS_ACTIVATION
+#define FIRST_ADCS_ACTIVATION
 
 TroubleErrCode AdcsInit()
 {
@@ -89,7 +89,8 @@ TroubleErrCode AdcsInit()
 	}
 	Boolean b = CreateTlmElementFiles();
 	if (b != TRUE){
-		return TRBL_FS_INIT_ERR;
+		//TODO: log err
+		//TODO: do somthing- continue with operations but re-init the system
 	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 #ifdef FIRST_ADCS_ACTIVATION
