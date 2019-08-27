@@ -321,7 +321,7 @@ void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 
 	TM_spl packet;
-	int error = get_online_packet((int)cmd.data[0], &packet);
+	int error = get_online_packet((TM_struct_types)cmd.data[0], &packet);
 
 	if (error == -1)
 	{
@@ -356,7 +356,7 @@ void cmd_add_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	int index = cmd.data[0];
+	TM_struct_types index = (TM_struct_types)cmd.data[0];
 	uint period;
 	memcpy(&period, cmd.data + 1, 4);
 	time_unix stopTime;
@@ -380,7 +380,7 @@ void cmd_delete_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 
-	int index = cmd.data[0];
+	TM_struct_types index = (TM_struct_types)cmd.data[0];
 
 	int error = delete_onlineTM_param_from_offline(index);
 
