@@ -206,11 +206,11 @@ int COMM_HK_collect(COMM_HK* hk_out)
 
 	return (error_Rx && error_antA && error_antB && error_Tx);
 }
-int FS_HK_collect(FS_HK* hk_out)
+int FS_HK_collect(FS_HK* hk_out, int SD_num)
 {
 	f_managed_enterFS();
 	F_SPACE parameter;
-	int error = f_getfreespace(f_getdrive(), &parameter);
+	int error = f_getfreespace(SD_num, &parameter);
 	f_managed_releaseFS();
 	if (error != 0)
 		return error;

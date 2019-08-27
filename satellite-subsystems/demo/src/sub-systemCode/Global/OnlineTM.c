@@ -64,10 +64,15 @@ int HK_collect_SP(unsigned char index, void* param)
 	(void)index;
 	return SP_HK_collect(param);
 }
-int HK_collect_FS(unsigned char index, void* param)
+int HK_collect_FS_A(unsigned char index, void* param)
 {
 	(void)index;
-	return FS_HK_collect(param);
+	return FS_HK_collect(param, 0);
+}
+int HK_collect_FS_B(unsigned char index, void* param)
+{
+	(void)index;
+	return FS_HK_collect(param, 1);
 }
 
 onlineTM_param onlineTM_list[NUMBER_OF_ONLIME_TM_PACKETS];
@@ -298,7 +303,13 @@ void init_onlineParam()
 	strcpy(onlineTM_list[index].name, "ANF");
 	index++;
 	//23
-	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_FS;
+	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_FS_A;
+	onlineTM_list[index].TM_param_length = FS_HK_SIZE;
+	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
+	strcpy(onlineTM_list[index].name, FS_HK_FILE_NAME);
+	index++;
+	//24
+	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_FS_B;
 	onlineTM_list[index].TM_param_length = FS_HK_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
 	strcpy(onlineTM_list[index].name, FS_HK_FILE_NAME);
@@ -320,7 +331,8 @@ void reset_offline_TM_list()
 		add_onlineTM_param_to_save_list(i, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(4, 20, 4294967295u);
 	add_onlineTM_param_to_save_list(23, 60, 4294967295u);
-	for (int i = 6; i < MAX_ITEMS_OFFLINE_LIST; i++)
+	add_onlineTM_param_to_save_list(24, 60, 4294967295u);
+	for (int i = 7; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
 		offline_TM_list[i].type = NULL;
 	}

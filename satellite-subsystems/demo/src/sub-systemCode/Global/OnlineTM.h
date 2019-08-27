@@ -15,8 +15,8 @@
 #include "../Main/HouseKeeping.h"
 
 #define DEFULT_INDEX	0
-#define NUMBER_OF_ONLIME_TM_PACKETS	24
-#define MAX_ITEMS_OFFLINE_LIST	20
+#define NUMBER_OF_ONLIME_TM_PACKETS	25
+#define MAX_ITEMS_OFFLINE_LIST	10
 #define SETTING_LIST_SIZE	MAX_ITEMS_OFFLINE_LIST * OFFLINE_FRAM_STRUCT_SIZE
 
 typedef struct __attribute__ ((__packed__)) {

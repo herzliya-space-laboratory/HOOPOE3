@@ -111,7 +111,8 @@ void TRXVU_init_hardWare()
 	if (!get_system_state(mute_param))
 	{
 		toggle_idle_state();
-		change_TRXVU_state(NOMINAL_MODE);
+		if (get_system_state(transponder_active_param))
+			change_TRXVU_state(NOMINAL_MODE);
 	}
 }
 void TRXVU_init_softWare()
@@ -210,7 +211,7 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 					build_HK_spl_packet(HK[i], Dump_buffer + l * parameterSize, &packet);
 					encode_TMpacket(raw_packet, &length_raw_packet, packet);
 
-					if (last_send + (time_unix)resulotion <= packet.time || HK[i] == ACK_T)
+					if (last_send + (time_unix)resulotion <= packet.time || HK[i] == ACK_T || HK[i] == log_files_T)
 					{
 						last_send = packet.time;
 						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);

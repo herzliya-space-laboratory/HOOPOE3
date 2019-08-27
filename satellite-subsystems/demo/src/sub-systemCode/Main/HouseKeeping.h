@@ -39,6 +39,7 @@
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
+	log_files_T = 1,
 	this_is_not_the_file_you_are_looking_for = 18,
 	offlineTM_T = 50,
 	ADCS_sience_T = 128
@@ -155,7 +156,7 @@ int SP_HK_collect(SP_HK* hk_out);
 int EPS_HK_collect(EPS_HK* hk_out);
 int CAM_HK_collect(CAM_HK* hk_out);
 int COMM_HK_collect(COMM_HK* hk_out);
-int FS_HK_collect(FS_HK* hk_out);
+int FS_HK_collect(FS_HK* hk_out, int SD_num);
 
 int HK_find_fileName(HK_types type, char* fileName);
 int HK_findElementSize(HK_types type);
