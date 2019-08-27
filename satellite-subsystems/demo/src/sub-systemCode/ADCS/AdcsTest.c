@@ -20,20 +20,28 @@
 #include "../EPS.h"
 #define ADCS_ID 0
 #define CMD_FOR_TEST_AMOUNT 34
-#define TestDelay (2*1000)
+#define TestDelay (10*1000)
 #define TEST_NUM 1
 
 void TaskMamagTest();
 void AdcsConfigPramTest()
 {
-	printf("config test");
-	TC_spl test;
-	test.id = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	printf("config test\n");
+	TC_spl test = {0};
+	test.type = TM_ADCS_T;
+	test.subType = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	test.length = 4;
 	test.data[0] = 0;
+	test.data[1] = 0;
 	test.data[2] = 10;
+	test.data[3] = 0;
 	AdcsCmdQueueAdd(&test);
-	test = {0};
-	test.id = ADCS_GET_FULL_CONFIG_ST;
+	test.subType = ADCS_GET_FULL_CONFIG_ST;
+	test.length = 4;
+	test.data[0] = 0;
+	test.data[1] = 0;
+	test.data[2] = 0;
+	test.data[3] = 0;
 	AdcsCmdQueueAdd(&test);
 	vTaskDelay(TestDelay);
 }
@@ -397,6 +405,8 @@ void AdcsTestTask()
 	testInit();
 	TC_spl get;
 	TC_spl set;
+	get.type = TM_ADCS_T;
+	set.type = TM_ADCS_T;
 
 	//TaskMamagTest(); // currently in infinite loop
 
@@ -410,7 +420,7 @@ void AdcsTestTask()
 	byte setData[CMD_FOR_TEST_AMOUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE] = {{0}};
 	
 	BuildTests(getSubType, getLength, GetData, setSubType, setLength, setData);
-	printf("start test");
+	printf("start test\n");
 	int err;
 	int continue_flag = 0;
 	unsigned int test_num = 0;
@@ -428,14 +438,15 @@ void AdcsTestTask()
 		memcpy(get.data,GetData[test_num],get.length);
 
 		err = AdcsCmdQueueAdd(&get);
-		printf("\nsst:%d\n err:%d\n",get.subType, err);
+		printf("\nsst:%d\terr:%d\n",get.subType, err);
 
 		err = AdcsCmdQueueAdd(&set);
-		printf("\nsst:%d\n err:%d\n data:%s\n",set.subType, err ,set.data);
+		printf("sst: %d\terr: %d\tdata: ",set.subType, err);
 
 		for(int i = 0; i < set.length; i++){
 			printf("%X, ",set.data[i]);
 		}
+		printf("\n");
 		err = AdcsCmdQueueAdd(&get);
 		printf("\nsst:%d\t err:%d\n",get.subType, err);
 		vTaskDelay(TestDelay);
