@@ -654,6 +654,12 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_SET_DATA_LOG_ST:
 			//TODO: implement
 			break;
+		case ADCS_GET_ADCS_CONFIG_PARAM_ST:
+			i2c_cmd.id = GET_ADCS_FULL_CONFIG_CMD_ID;
+			i2c_cmd.length = ADCS_FULL_CONFIG_DATA_LENGTH;
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			TRX_sendFrame(&(i2c_cmd.data[data[0]]),data[1],trxvu_bitrate_9600);
+			break;
 		default:
 			//TODO: return unknown subtype
 			break;

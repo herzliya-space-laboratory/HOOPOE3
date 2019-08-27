@@ -315,11 +315,11 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMUNT], int getLength[CMD_FOR_TE
 
 void AdcsTestTask()
 {
-//	testInit();
+	testInit();
 	TC_spl get;
 	TC_spl set;
 
-	TaskMamagTest(); // currently in infinite loop
+	//TaskMamagTest(); // currently in infinite loop
 
 	uint8_t getSubType[CMD_FOR_TEST_AMUNT] = {0};
 	int getLength[CMD_FOR_TEST_AMUNT] = {0};
@@ -420,7 +420,7 @@ void AddCommendToQ()
 
 }
 
-void TestStartAdcs()
+void testInit()
 {
 	TC_spl cmd;
 	int err = 0;
@@ -470,7 +470,7 @@ void TestMagnetometer()
 
 void TaskMamagTest()
 {
-	TestStartAdcs();
+	testInit();
 
 	TestAdcsTLM();
 
