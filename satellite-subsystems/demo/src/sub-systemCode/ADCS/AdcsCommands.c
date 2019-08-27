@@ -658,7 +658,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			i2c_cmd.id = GET_ADCS_FULL_CONFIG_CMD_ID;
 			i2c_cmd.length = ADCS_FULL_CONFIG_DATA_LENGTH;
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm(&(i2c_cmd.data[data[0]]),data[1],ADCS_GET_ADCS_CONFIG_PARAM_ST);
+			SendAdcsTlm(&(i2c_cmd.data[(data[0]<<8) + data[1]]),data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
 			break;
 		default:
 			//TODO: return unknown subtype

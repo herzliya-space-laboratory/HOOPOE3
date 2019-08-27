@@ -24,7 +24,19 @@
 #define TEST_NUM 1
 
 void TaskMamagTest();
-
+void AdcsConfigPramTest()
+{
+	printf("config test");
+	TC_spl test;
+	test.id = ADCS_GET_ADCS_CONFIG_PARAM_ST;
+	test.data[0] = 0;
+	test.data[2] = 10;
+	AdcsCmdQueueAdd(&test);
+	test = {0};
+	test.id = ADCS_GET_FULL_CONFIG_ST;
+	AdcsCmdQueueAdd(&test);
+	vTaskDelay(TestDelay);
+}
 void testInit()
 {
 	TC_spl cmd;
@@ -215,85 +227,114 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	testNum++;
 
 	//test #6 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MTQ_CONFIG_ST;
 	setLength[testNum] = 3;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getData[testNum][1] = 0;
+	getData[testNum][3] = 1;
 	testNum++;
 
 	//test #7 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_RW_CONFIG_ST;
 	setLength[testNum] = 4;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getData[testNum][1] = 3;
+	getData[testNum][3] = 1;
 	testNum++;
 
 	//test #8 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_GYRO_CONFIG_ST;
 	setLength[testNum] = 10;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getData[testNum][1] = 8;
+	getData[testNum][3] = 1;
 	testNum++;
 
 	//test #9 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_CSS_CONFIG_ST;
+
+	getData[testNum][1] = 11;
+	getData[testNum][3] = 1;
 	testNum++;
 
 	//test #10 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_CSS_RELATIVE_SCALE_ST;
+	getData[testNum][1] = 21;
+	getData[testNum][3] = 1;
 	testNum++;
 
 	//test #11 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_MOUNT_ST;
+	getData[testNum][1] = 102;
+	getData[testNum][3] = 2;
 	testNum++;
 
 	//test #12 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_OFFSET_ST;
+	getData[testNum][1] = 108;
+	getData[testNum][3] = 2;
 	testNum++;
 
 	//test #13 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_SENSTVTY_ST;
+	getData[testNum][1] = 114;
+	getData[testNum][3] = 2;
 	testNum++;
 
 	//test #14 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_RATE_SENSOR_OFFSET_ST;
+	getData[testNum][1] = 132;
+	getData[testNum][3] = 2;
 	testNum++;
 
 	//test #15 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_STAR_TRACKER_CONFIG_ST;
+	getData[testNum][1] = 136;
+	getData[testNum][3] = 2;
 	testNum++;
 
 	//test #16 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_DETUMB_CTRL_PARAM_ST;
+	getData[testNum][1] = 165;
+	getData[testNum][3] = 4;
 	testNum++;
 
 	//test #17 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_YWHEEL_CTRL_PARAM_ST;
+	getData[testNum][1] = 179;
+	getData[testNum][3] = 4;
 	testNum++;
 
 	//test #18 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_RWHEEL_CTRL_PARAM_ST;
+	getData[testNum][1] = 195;
+	getData[testNum][3] = 4;
 	testNum++;
 
 	//test #19 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MOMENT_INTERTIA_ST;
+	getData[testNum][1] = 219;
+	getData[testNum][3] = 4;
 	testNum++;
 
 	//test #20 data
@@ -302,13 +343,18 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	testNum++;
 
 	//test #21 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_ESTIMATION_PARAM1_ST;
+	getData[testNum][1] = 247;
+	getData[testNum][3] = 4;
 	testNum++;
 
 	//test #22 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_ESTIMATION_PARAM2_ST;
+	getData[testNum][0] = 0x01;
+	getData[testNum][1] = 0x03;
+	getData[testNum][3] = 4;
 	testNum++;
 
 	//tests #23-32 data all SGP4 commands
@@ -338,8 +384,11 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	testNum++;
 
 	//test #32 data
-	getSubType[testNum] = ADCS_GET_FULL_CONFIG_ST;
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MAGNETOMETER_MODE_ST;
+	getData[testNum][0] = 0x01;
+	getData[testNum][1] = 0x0F;
+	getData[testNum][3] = 1;
 	testNum++;
 }
 
@@ -365,6 +414,7 @@ void AdcsTestTask()
 	int err;
 	int continue_flag = 0;
 	unsigned int test_num = 0;
+	AdcsConfigPramTest();
 	do{
 		printf("which test would you like to perform?(0 to %d)\n",CMD_FOR_TEST_AMOUNT);
 		while(UTIL_DbguGetIntegerMinMax(&test_num,0,CMD_FOR_TEST_AMOUNT) == 0);
