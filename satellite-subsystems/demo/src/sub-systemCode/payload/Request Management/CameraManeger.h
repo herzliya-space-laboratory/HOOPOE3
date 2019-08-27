@@ -44,7 +44,6 @@ typedef enum{
 	reset_DataBase,
 	Image_Dump_chunkField,
 	Image_Dump_bitField,
-	Thumbnail_Dump,
 	DataBase_Dump,
 	update_defult_duration,
 	Turn_Off_Camera,

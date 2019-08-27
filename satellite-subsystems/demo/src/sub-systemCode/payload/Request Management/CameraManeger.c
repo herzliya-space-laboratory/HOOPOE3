@@ -290,7 +290,6 @@ void act_upon_request(Camera_Request request)
 
 	case Image_Dump_chunkField:
 	case Image_Dump_bitField:
-	case Thumbnail_Dump:
 	case DataBase_Dump:
 		startDumpTask(request);
 		break;

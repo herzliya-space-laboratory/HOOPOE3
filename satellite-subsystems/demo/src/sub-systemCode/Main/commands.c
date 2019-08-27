@@ -326,9 +326,6 @@ void AUC_payload(TC_spl decode)
 		case (SEND_IMAGE_DATA_BASE_ST):
 			request.id = DataBase_Dump;
 			break;
-		case (SEND_ALL_DEFALT_THUMBNAILS_ST):
-			request.id = Thumbnail_Dump;
-			break;
 		case (UPDATE_DEF_DUR_ST):
 			request.id = update_defult_duration;
 			break;

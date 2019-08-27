@@ -125,11 +125,10 @@
 #define CREATE_JPEG_FROM_IMAGE_ST			11
 #define RESET_DATA_BASE_ST					12
 #define SEND_IMAGE_DATA_BASE_ST				13
-#define SEND_ALL_DEFALT_THUMBNAILS_ST		14
-#define UPDATE_DEF_DUR_ST					15
-#define	OFF_CAM_ST							16
-#define ON_CAM_ST							17
-#define SET_CHUNK_SIZE						18
+#define UPDATE_DEF_DUR_ST					14
+#define	OFF_CAM_ST							15
+#define ON_CAM_ST							16
+#define SET_CHUNK_SIZE						17
 
 //eps
 #define ALLOW_ADCS_ST			99

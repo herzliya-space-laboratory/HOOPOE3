@@ -201,52 +201,6 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 	return 0;
 }
 
-ImageDataBaseResult thumbnail_Dump(imageid* ID_list, command_id cmdId)
-{
-	unsigned int lastIndex = ceil(IMAGE_SIZE / pow( pow(2, DEFALT_REDUCTION_LEVEL), 2) / CHUNK_SIZE(chunk_height, chunk_width));
-
-	imageid image_id = 0;
-
-	unsigned int numberOfIDs = 0;
-	memcpy(&numberOfIDs, ID_list, sizeof(int));
-
-	for (unsigned int j = 0; j < numberOfIDs; j++)
-	{
-		memcpy(&image_id, ID_list + ((j+1)*sizeof(imageid)), sizeof(imageid));
-
-		char file_name[FILE_NAME_SIZE];
-		int error = GetImageFileName(image_id, DEFALT_REDUCTION_LEVEL, file_name);
-		CMP_AND_RETURN(error, DataBaseSuccess, error);
-
-		F_FILE* current_file = f_open(file_name, "r");
-
-		uint32_t image_size = f_filelength(file_name);
-
-		f_read(imageBuffer,(size_t)image_size,(size_t)1,current_file);
-
-		error = CloseFile(current_file);
-		CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-		pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
-		for (unsigned int i = 0; i < lastIndex; i++)
-		{
-
-			error = GetChunkFromImage(chunk, chunk_width, chunk_height, i, imageBuffer, DEFALT_REDUCTION_LEVEL, image_size);
-			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
-
-			error = buildAndSend_chunck(chunk, (unsigned short)(i), DEFALT_REDUCTION_LEVEL, image_id, image_size, TRUE_8BIT);
-			CMP_AND_RETURN(error, 0, -1);
-
-			lookForRequestToDelete_dump(cmdId);
-			vTaskDelay(SYSTEM_DEALY);
-		}
-	}
-
-	free(ID_list);
-
-	return 0;
-}
-
 ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte* DataBase_buffer)
 {
 	unsigned int bufferSize = 0;
@@ -367,19 +321,6 @@ void imageDump_task(void* param)
 		memcpy(&lastIndex, request.data + sizeof(imageid)+sizeof(byte)+sizeof(short), sizeof(short));
 
 		error = chunkField_imageDump(request, image_id, comprasionType, firstIndex, lastIndex);
-	}
-	else if (request.id == Thumbnail_Dump)
-	{
-		time_unix startingTime = *((time_unix*)request.data);
-		memcpy(&startingTime, request.data, sizeof(time_unix));
-		time_unix endTime = *((time_unix*)request.data + 4);
-		memcpy(&endTime, request.data + 4, sizeof(time_unix));
-
-		imageid* ID_list = get_ID_list_withDefaltThumbnail(startingTime, endTime);
-		if (ID_list == NULL)
-			error = DataBaseNullPointer;
-
-		error = thumbnail_Dump(ID_list, request.cmd_id);
 	}
 	else if (request.id == DataBase_Dump)
 	{
