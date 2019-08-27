@@ -233,8 +233,8 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
-	getData[testNum][1] = 0;
-	getData[testNum][3] = 1;
+	getData[testNum][0] = 0;
+	getData[testNum][2] = 1;
 	testNum++;
 
 	//test #7 data
@@ -244,8 +244,8 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
-	getData[testNum][1] = 3;
-	getData[testNum][3] = 1;
+	getData[testNum][0] = 3;
+	getData[testNum][2] = 1;
 	testNum++;
 
 	//test #8 data
@@ -255,86 +255,86 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
-	getData[testNum][1] = 8;
-	getData[testNum][3] = 1;
+	getData[testNum][0] = 8;
+	getData[testNum][2] = 1;
 	testNum++;
 
 	//test #9 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_CSS_CONFIG_ST;
 
-	getData[testNum][1] = 11;
-	getData[testNum][3] = 1;
+	getData[testNum][0] = 11;
+	getData[testNum][2] = 1;
 	testNum++;
 
 	//test #10 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_CSS_RELATIVE_SCALE_ST;
-	getData[testNum][1] = 21;
-	getData[testNum][3] = 1;
+	getData[testNum][0] = 21;
+	getData[testNum][2] = 1;
 	testNum++;
 
 	//test #11 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_MOUNT_ST;
-	getData[testNum][1] = 102;
-	getData[testNum][3] = 2;
+	getData[testNum][0] = 102;
+	getData[testNum][2] = 2;
 	testNum++;
 
 	//test #12 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_OFFSET_ST;
-	getData[testNum][1] = 108;
-	getData[testNum][3] = 2;
+	getData[testNum][0] = 108;
+	getData[testNum][2] = 2;
 	testNum++;
 
 	//test #13 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_SENSTVTY_ST;
-	getData[testNum][1] = 114;
-	getData[testNum][3] = 2;
+	getData[testNum][0] = 114;
+	getData[testNum][2] = 2;
 	testNum++;
 
 	//test #14 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_RATE_SENSOR_OFFSET_ST;
-	getData[testNum][1] = 132;
-	getData[testNum][3] = 2;
+	getData[testNum][0] = 132;
+	getData[testNum][2] = 2;
 	testNum++;
 
 	//test #15 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_STAR_TRACKER_CONFIG_ST;
-	getData[testNum][1] = 136;
-	getData[testNum][3] = 2;
+	getData[testNum][0] = 136;
+	getData[testNum][2] = 2;
 	testNum++;
 
 	//test #16 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_DETUMB_CTRL_PARAM_ST;
-	getData[testNum][1] = 165;
-	getData[testNum][3] = 4;
+	getData[testNum][0] = 165;
+	getData[testNum][2] = 4;
 	testNum++;
 
 	//test #17 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_YWHEEL_CTRL_PARAM_ST;
-	getData[testNum][1] = 179;
-	getData[testNum][3] = 4;
+	getData[testNum][0] = 179;
+	getData[testNum][2] = 4;
 	testNum++;
 
 	//test #18 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_RWHEEL_CTRL_PARAM_ST;
-	getData[testNum][1] = 195;
-	getData[testNum][3] = 4;
+	getData[testNum][0] = 195;
+	getData[testNum][2] = 4;
 	testNum++;
 
 	//test #19 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MOMENT_INTERTIA_ST;
-	getData[testNum][1] = 219;
-	getData[testNum][3] = 4;
+	getData[testNum][0] = 219;
+	getData[testNum][2] = 4;
 	testNum++;
 
 	//test #20 data
@@ -345,15 +345,15 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	//test #21 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_ESTIMATION_PARAM1_ST;
-	getData[testNum][1] = 247;
-	getData[testNum][3] = 4;
+	getData[testNum][0] = 247;
+	getData[testNum][2] = 4;
 	testNum++;
 
 	//test #22 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_ESTIMATION_PARAM2_ST;
 	getData[testNum][0] = 0x01;
-	getData[testNum][1] = 0x03;
+	getData[testNum][2] = 0x03;
 	getData[testNum][3] = 4;
 	testNum++;
 

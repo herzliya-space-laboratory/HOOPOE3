@@ -651,14 +651,14 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			GetTlmElementAtIndex((AdcsTlmElement_t *)data,cmd->data[0]);
 			SendAdcsTlm(data, sizeof(AdcsTlmElement_t),ADCS_GET_TLM_ELEM_AT_INDEX_ST);
 			break;
-		case ADCS_SET_DATA_LOG_ST:
-			//TODO: implement
-			break;
 		case ADCS_GET_ADCS_CONFIG_PARAM_ST:
 			i2c_cmd.id = GET_ADCS_FULL_CONFIG_CMD_ID;
 			i2c_cmd.length = ADCS_FULL_CONFIG_DATA_LENGTH;
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(&(i2c_cmd.data[(data[0]<<8) + data[1]]),data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
+			break;
+		case ADCS_SET_DATA_LOG_ST:
+			//TODO: implement
 			break;
 		default:
 			//TODO: return unknown subtype
