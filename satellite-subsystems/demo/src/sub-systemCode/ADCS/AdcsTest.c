@@ -352,7 +352,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][2] = 18;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_SENSTVTY_ST;
 	setLength[testNum] = 19;
-	setData[testNum][0] = ADCS_SET_MAGNETMTR_SENSTVTY_ST
+	setData[testNum][0] = ADCS_SET_MAGNETMTR_SENSTVTY_ST;
 	for(int i = 1; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
@@ -553,7 +553,9 @@ void AdcsTestTask()
 	int err;
 	int continue_flag = 0;
 	unsigned int test_num = 0;
+	vTaskDelay(10);
 	AdcsConfigPramTest();
+	vTaskDelay(10);
 	do{
 		printf("which test would you like to perform?(0 to %d)\n",CMD_FOR_TEST_AMOUNT);
 		while(UTIL_DbguGetIntegerMinMax(&test_num,0,CMD_FOR_TEST_AMOUNT) == 0);
@@ -562,14 +564,19 @@ void AdcsTestTask()
 		set.length = setLength[test_num];
 		memcpy(set.data,setData[test_num],set.length);
 
+		get.id = 0;
 		get.subType = getSubType[test_num];
 		get.length = getLength[test_num];
 		memcpy(get.data,GetData[test_num],get.length);
+		if(test_num == 1){
 
+		}
 		err = AdcsCmdQueueAdd(&get);
+		vTaskDelay(10);
 		printf("\nsst:%d\terr:%d\n",get.subType, err);
 
 		err = AdcsCmdQueueAdd(&set);
+		vTaskDelay(10);
 		printf("sst: %d\terr: %d\tdata: ",set.subType, err);
 
 		for(int i = 0; i < set.length; i++){
@@ -577,6 +584,7 @@ void AdcsTestTask()
 		}
 		printf("\n");
 		err = AdcsCmdQueueAdd(&get);
+		vTaskDelay(10);
 		printf("\nsst:%d\t err:%d\n",get.subType, err);
 		vTaskDelay(TestDelay);
 
