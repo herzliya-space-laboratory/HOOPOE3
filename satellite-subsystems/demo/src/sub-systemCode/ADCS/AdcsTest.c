@@ -240,6 +240,9 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	setLength[testNum] = sizeof(cspace_adcs_magnetorq_t);
 	cspace_adcs_wspeed_t wheelConfig;
 	wheelConfig.fields.speed_y = 4000;
+	wheelConfig.fields.speed_z = 0;
+	wheelConfig.fields.speed_x = 0;
+
 	memcpy(setData[testNum],wheelConfig.raw,setLength[testNum]);
 	testNum++;
 
@@ -556,21 +559,30 @@ void AdcsTestTask()
 	vTaskDelay(10);
 	AdcsConfigPramTest();
 	vTaskDelay(10);
+	cspace_adcs_currstate_t State;
+	cspace_adcs_powerdev_t PowerADCS;
 	do{
 		printf("which test would you like to perform?(0 to %d)\n",CMD_FOR_TEST_AMOUNT);
 		while(UTIL_DbguGetIntegerMinMax(&test_num,0,CMD_FOR_TEST_AMOUNT) == 0);
-
+		cspaceADCS_getPwrCtrlDevice(0,&PowerADCS);
+		cspaceADCS_getCurrentState(0,&State);
+		printf("run:%d\t",State.fields.run_mode);
+		printf("signel:%d\t",PowerADCS.fields.signal_cubecontrol);
+		printf("control:%d\t",PowerADCS.fields.motor_cubecontrol);
+		printf("moter:%d\n",PowerADCS.fields.pwr_motor);
 		set.subType = setSubType[test_num];
 		set.length = setLength[test_num];
-		memcpy(set.data,setData[test_num],set.length);
-
+		memcpy(set.data,&setData[test_num][0],set.length);
+		vTaskDelay(10);
 		get.id = 0;
 		get.subType = getSubType[test_num];
 		get.length = getLength[test_num];
-		memcpy(get.data,GetData[test_num],get.length);
-		if(test_num == 1){
+		if(test_num = 1)
+		{
 
 		}
+		memcpy(get.data,&GetData[test_num][0],get.length);
+		vTaskDelay(10);
 		err = AdcsCmdQueueAdd(&get);
 		vTaskDelay(10);
 		printf("\nsst:%d\terr:%d\n",get.subType, err);

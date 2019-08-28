@@ -149,5 +149,7 @@ void AdcsTask()
 
 		vTaskDelay(delay_loop);
 	}
+
+	printf("that a shity thing");
 }
 
