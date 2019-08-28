@@ -324,15 +324,18 @@ void init_onlineParam()
 }
 void reset_offline_TM_list()
 {
+	for(int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
+	{
+		offline_TM_list[i].type = TM_emptySpace;
+		offline_TM_list[i].lastSave = 0;
+		offline_TM_list[i].period = 0;
+		offline_TM_list[i].stopTime = 0;
+	}
 	for (int i = 0; i < 4; i++)
 		add_onlineTM_param_to_save_list(i, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_SP_HK, 20, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_FS_Space_A, 60, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_FS_Space_B, 60, 4294967295u);
-	for (int i = 7; i < MAX_ITEMS_OFFLINE_LIST; i++)
-	{
-		offline_TM_list[i].type = TM_emptySpace;
-	}
 
 	save_offlineSetting_FRAM();
 }
@@ -393,11 +396,15 @@ int add_onlineTM_param_to_save_list(TM_struct_types TM_index, uint period, time_
 	Boolean addedToLit = FALSE;
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
-		if (TM_index == offline_TM_list[i].type)
+		if (TM_index == offline_TM_list[i].type && !addedToLit)
 		{
 			addedToLit = TRUE;
 			offline_TM_list[i].period = period;
 			offline_TM_list[i].stopTime = stopTime;
+		}
+		else if (TM_index == offline_TM_list[i].type && addedToLit)
+		{
+			offline_TM_list[i].type = TM_emptySpace;
 		}
 	}
 	if (addedToLit)
@@ -415,6 +422,7 @@ int add_onlineTM_param_to_save_list(TM_struct_types TM_index, uint period, time_
 			offline_TM_list[i].lastSave = 0;
 			offline_TM_list[i].period = period;
 			offline_TM_list[i].stopTime = stopTime;
+			break;
 		}
 	}
 	if (addedToLit)

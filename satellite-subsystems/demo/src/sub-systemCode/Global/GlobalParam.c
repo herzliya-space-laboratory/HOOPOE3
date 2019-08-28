@@ -228,6 +228,18 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 	}
 }
 
+systems_state get_systems_state_param()
+{
+	systems_state return_value;
+	if (xSemaphoreTake(xCGP_semaphore, MAX_DELAY) == pdTRUE)
+	{
+		return_value = current_global_param.state;
+		portBASE_TYPE lu_check = xSemaphoreGive(xCGP_semaphore);
+		check_portBASE_TYPE("can't return xCST_semaphore in get_system_state", lu_check);
+	}
+	return return_value;
+}
+
 //global params set/get
 void get_current_global_param(global_param* param_out)
 {

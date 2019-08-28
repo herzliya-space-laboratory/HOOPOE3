@@ -114,6 +114,10 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 	}
 }
 
+EPS_mode_t get_EPS_mode_t()
+{
+	return batteryLastMode;
+}
 
 void init_enterMode()
 {

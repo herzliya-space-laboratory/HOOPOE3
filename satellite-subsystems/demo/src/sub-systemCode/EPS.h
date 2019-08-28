@@ -62,6 +62,7 @@ void EPS_Init();
  */
 void reset_FRAM_EPS();
 void reset_EPS_voltages();
+EPS_mode_t get_EPS_mode_t();
 
 /**
  * @brief Does power conditioning and decides about satellite's consumption state

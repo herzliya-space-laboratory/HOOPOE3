@@ -68,6 +68,10 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Global/../COMM/splTypes.h \
  ../src/sub-systemCode/Global/../Main/HouseKeeping.h \
  ../src/sub-systemCode/Global/../Main/../Global/Global.h \
+ ../src/sub-systemCode/Global/../Main/../Global/GlobalParam.h \
+ ../src/sub-systemCode/Global/../Main/../Global/sizes.h \
+ ../src/sub-systemCode/Global/../Main/../Global/Global.h \
+ ../src/sub-systemCode/Global/../Main/../Global/../ADCS/Stage_Table.h \
  ../src/sub-systemCode/Global/../Main/../COMM/GSC.h \
  ../src/sub-systemCode/Global/../Main/../Global/TLM_management.h
 
@@ -210,6 +214,14 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:
 ../src/sub-systemCode/Global/../Main/HouseKeeping.h:
 
 ../src/sub-systemCode/Global/../Main/../Global/Global.h:
+
+../src/sub-systemCode/Global/../Main/../Global/GlobalParam.h:
+
+../src/sub-systemCode/Global/../Main/../Global/sizes.h:
+
+../src/sub-systemCode/Global/../Main/../Global/Global.h:
+
+../src/sub-systemCode/Global/../Main/../Global/../ADCS/Stage_Table.h:
 
 ../src/sub-systemCode/Global/../Main/../COMM/GSC.h:
 

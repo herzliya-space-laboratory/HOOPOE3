@@ -330,6 +330,20 @@ void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 	else if (error == 0)
 	{
+		byte rawPacket[SIZE_TXFRAME];
+		int size;
+		error = encode_TMpacket(rawPacket, &size, packet);
+		if (error)
+		{
+			*err = ERR_FAIL;
+			return;
+		}
+		error = TRX_sendFrame(rawPacket, (uint8_t)size);
+		if (error)
+		{
+			*err = ERR_FAIL;
+			return;
+		}
 		*err = ERR_SUCCESS;
 		return;
 	}

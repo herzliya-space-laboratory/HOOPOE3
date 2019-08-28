@@ -77,6 +77,7 @@ int init_GP();
 
 Boolean get_system_state(systems_state_parameters param);
 void set_system_state(systems_state_parameters param, Boolean set_state);
+systems_state get_systems_state_param();
 
 // get the whole global structure.
 void get_current_global_param(global_param* param_out);

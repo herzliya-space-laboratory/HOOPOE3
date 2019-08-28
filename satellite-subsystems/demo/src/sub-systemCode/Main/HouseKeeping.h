@@ -9,6 +9,7 @@
 #define HOUSEKEEPING_H_
 
 #include "../Global/Global.h"
+#include "../Global/GlobalParam.h"
 #include "../COMM/GSC.h"
 #include "../Global/TLM_management.h"
 
@@ -20,7 +21,7 @@
 #define NUMBER_OF_SOLAR_PANNELS	6
 
 #define ACK_HK_SIZE ACK_DATA_LENGTH
-#define EPS_HK_SIZE 49
+#define EPS_HK_SIZE 51
 #define SP_HK_SIZE	FLOAT_SIZE * NUMBER_OF_SOLAR_PANNELS
 #define CAM_HK_SIZE 62
 #define COMM_HK_SIZE 18
@@ -65,6 +66,8 @@ typedef union __attribute__ ((__packed__))
 		unsigned char Cause_of_last_reset;
 		unsigned char pptMode;
 		byte channelStatus;
+		systems_state systemState;
+		byte EPSSateNumber;
 	}fields;
 }EPS_HK;
 

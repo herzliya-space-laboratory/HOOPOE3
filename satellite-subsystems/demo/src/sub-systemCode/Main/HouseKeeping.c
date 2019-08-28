@@ -37,6 +37,7 @@
 
 #include "HouseKeeping.h"
 
+#include "../EPS.h"
 #include "../COMM/splTypes.h"
 #include "../Global/Global.h"
 #include "../Global/sizes.h"
@@ -140,6 +141,8 @@ int EPS_HK_collect(EPS_HK* hk_out)
 	{
 		hk_out->fields.channelStatus += (byte)(1 >> gom_hk.fields.output[i]);
 	}
+	hk_out->fields.EPSSateNumber = (byte)get_EPS_mode_t();
+	hk_out->fields.systemState = get_systems_state_param();
 
 	set_GP_EPS(*hk_out);
 	return error;
@@ -208,10 +211,8 @@ int COMM_HK_collect(COMM_HK* hk_out)
 }
 int FS_HK_collect(FS_HK* hk_out, int SD_num)
 {
-	f_managed_enterFS();
 	F_SPACE parameter;
 	int error = f_getfreespace(SD_num, &parameter);
-	f_managed_releaseFS();
 	if (error != 0)
 		return error;
 	hk_out->fields.bad = parameter.bad;
