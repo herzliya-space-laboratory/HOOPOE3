@@ -131,8 +131,7 @@ int f_managed_releaseFS()
 	printf("could not return the xEnterTaskFS\n");
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
 }
-static int counter1=0;
-static int counter2=0;
+
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 {
 	int lastError = 0;
@@ -142,14 +141,12 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 		do
 		{
 			*fileHandler = f_open(file_name, config);
-			printf("counter1 is %d\n",++counter1);
 			if (*fileHandler == NULL)
 			{
-				counter1--;
 				//TODO: write data to log error
 				lastError = f_getlasterror();
 				printf("FS last error: %d\n", lastError);
-				vTaskDelay(1000);
+				vTaskDelay(SYSTEM_DEALY);
 			}
 		}while(lastError==F_ERR_LOCKED);
 	}
@@ -165,7 +162,6 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 int f_managed_close(F_FILE** fileHandler)
 {
 	int error = f_close(*fileHandler);
-	printf("counter2 is %d\n",++counter2);
 	if (error != 0)
 	{
 		printf("f_close in f_managed_close, error: %d", error);
@@ -548,8 +544,6 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
 		int error = f_managed_open(curr_file_name, "r+", &current_file);
-		if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
-			return FS_COULD_NOT_TAKE_SEMAPHORE;
 		if (current_file == NULL)
 			return FS_NOT_EXIST;
 		unsigned int length =f_filelength(curr_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
@@ -574,7 +568,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 				{
 					error = f_managed_close(&current_file);
 					if (error == COULD_NOT_GIVE_SEMAPHORE_ERROR)
-								return FS_COULD_NOT_GIVE_SEMAPHORE;
+						return FS_COULD_NOT_GIVE_SEMAPHORE;
 					return FS_BUFFER_OVERFLOW;
 				}
 				(*read)++;
@@ -588,8 +582,6 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 		if (error != F_NO_ERROR)
 			return FS_FAIL;
 	} while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current);
-
-	//free(element);
 
 	return FS_SUCCSESS;
 }
