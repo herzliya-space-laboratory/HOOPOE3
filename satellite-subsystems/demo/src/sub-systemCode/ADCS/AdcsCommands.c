@@ -168,7 +168,6 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 }
 
 
-
 void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	TM_spl tm;
 	time_unix time_now;
@@ -258,7 +257,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(int), ADCS_RESET_BOOT_REGISTER_ST);
 			break;
 		case ADCS_DEPLOY_MAG_BOOM_ST:
+		#ifndef TESTING
 			//err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);//TODO:remove comment
+		#endif
 		#ifdef TESTING
 			printf("magnetometer not deployed \nBOOM\n");
 		#endif
@@ -492,6 +493,27 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_CURRENT_STATE_ST:
 			err = cspaceADCS_getCurrentState(ADCS_ID,(cspace_adcs_currstate_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_currstate_t),ADCS_GET_CURRENT_STATE_ST);
+			break;
+		case ADCS_GET_EST_ANG_ST:
+			i2c_cmd.id = GET_ADCS_EST_ANG_CMD_ID;
+			i2c_cmd.length = GET_ADCS_EST_ANG_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm(i2c_cmd.data,GET_ADCS_EST_ANG_DATA_LENGTH,ADCS_GET_EST_ANG_ST);
+			break;
+		case ADCS_GET_EST_ANG_RATE_ST:
+			i2c_cmd.id = GET_ADCS_EST_ANG_CMD_ID;
+			i2c_cmd.length = GET_ADCS_EST_ANG_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm(i2c_cmd.data,i2c_cmd.length,ADCS_GET_EST_ANG_RATE_ST);
+			break;
+		case ADCS_GET_SATELLITE_POSITION_ST:
+			i2c_cmd.id = ADCS_GET_SATELLITE_POSITION_CMD_ID;
+			i2c_cmd.length = ADCS_GET_SATELLITE_POSITION_DATA_LENGTH;
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			err = AdcsGenericI2cCmd(&i2c_cmd);
+			SendAdcsTlm(i2c_cmd.data,i2c_cmd.length,ADCS_GET_SATELLITE_POSITION_ST);
 			break;
 		case ADCS_GET_MAGNETIC_FIELD_VEC_ST:
 			err = cspaceADCS_getMagneticFieldVec(ADCS_ID,(cspace_adcs_magfieldvec_t*)data);
