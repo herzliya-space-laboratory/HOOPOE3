@@ -13,20 +13,6 @@
 #include "../../Misc/Macros.h"
 #include "Butchering.h"
 
-#define TESTING
-#ifdef TESTING
-	void printChunk(pixel_t* chunk, uint16_t chunk_width, uint16_t chunk_height)
-	{
-		uint16_t chunk_size = chunk_width * chunk_height;
-		for (unsigned int i = 0; i < chunk_size; i++)
-		{
-			if (i%chunk_width == 0 && i != 0) printf("\n");
-			printf("%u\t", *(chunk + i));
-		}
-		printf("\n\n");
-	}
-#endif
-
 ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t chunk_height, uint16_t index, pixel_t* image, fileType img_type, uint32_t image_size)
 {
 	CHECK_FOR_NULL(chunk, BUTCHER_NULL_POINTER);

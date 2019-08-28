@@ -310,7 +310,7 @@ int InitSubsystems()
 	InitializeFS(activation);
 	if (activation)
 	{
-		// resetSD();s
+		// resetSD();
 	}
 	create_files(activation);
 

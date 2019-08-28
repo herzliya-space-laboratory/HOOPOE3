@@ -54,6 +54,5 @@
 #define IMAGE_CHUNK_HEIGHT_ADDR 0xD002
 #define IMAGE_CHUNK_HEIGHT_SIZE 2
 
-
 #define DATABASEFRAMADDRESS 0x10000	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
 #endif /* FRAMADRESS_H_ */

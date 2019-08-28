@@ -19,10 +19,10 @@
 #define DEFALT_CHUNK_HEIGHT 13
 #define DEFALT_CHUNK_WIDTH 16
 
-#define SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP sizeof(imageid) + sizeof(byte) + sizeof(uint16_t)
-#define BIT_FIELD_SIZE SPL_TC_DATA_SIZE - SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP
+#define SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP (sizeof(imageid) + sizeof(byte) + sizeof(uint16_t))
+#define BIT_FIELD_SIZE (SPL_TC_DATA_SIZE - SIZE_OF_PARAMETERS_FOR_BIT_FIELD_DUMP)
 
-#define NUMBER_OF_CHUNKS_IN_CMD BIT_FIELD_SIZE * 8
+#define NUMBER_OF_CHUNKS_IN_CMD (BIT_FIELD_SIZE * 8)
 
 ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height);
 

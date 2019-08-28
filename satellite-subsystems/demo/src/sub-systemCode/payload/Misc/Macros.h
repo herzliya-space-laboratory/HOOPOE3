@@ -15,7 +15,6 @@
 			return return_value;
 
 #define CHECK_FOR_NULL(value, return_value)	\
-		if (value == NULL)					\
-			return return_value;
+		CMP_AND_RETURN(value, NULL, return_value);
 
 #endif /* FILEMACROS_H_ */

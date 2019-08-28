@@ -26,8 +26,19 @@
 
 #include "imageDump.h"
 
-static uint16_t chunk_width;
-static uint16_t chunk_height;
+uint16_t chunk_width;
+uint16_t chunk_height;
+
+ImageDataBaseResult readChunkDimentionsFromFRAM(void)
+{
+	int error = 0;
+	error = FRAM_read((unsigned char*)&chunk_width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+	error = FRAM_read((unsigned char*)&chunk_height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+
+	return DataBaseSuccess;
+}
 
 ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height)
 {
@@ -40,16 +51,11 @@ ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height)
 	error = FRAM_write((unsigned char*)&height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
 	CMP_AND_RETURN(error, 0, DataBaseFramFail);
 
-	return DataBaseSuccess;
-}
+	error = readChunkDimentionsFromFRAM();
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
 
-ImageDataBaseResult readChunkDimentionsFromFRAM(void)
-{
-	int error = 0;
-	error = FRAM_read((unsigned char*)&chunk_width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
-	CMP_AND_RETURN(error, 0, DataBaseFramFail);
-	error = FRAM_read((unsigned char*)&chunk_height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
-	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+	CMP_AND_RETURN(chunk_width, width, DataBaseFail);
+	CMP_AND_RETURN(chunk_height, height, DataBaseFail);
 
 	return DataBaseSuccess;
 }
