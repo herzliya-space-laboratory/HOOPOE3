@@ -53,7 +53,16 @@ int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 	byte raw_ACK[ACK_DATA_LENGTH];
 	build_data_field_ACK(type, err, ACKcommandId, raw_ACK);
 	error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
-	if (error != FS_SUCCSESS)
+	if (error == FS_NOT_EXIST)
+	{
+		error = c_fileCreate(ACK_FILE_NAME, ACK_DATA_LENGTH);
+		if (error != FS_SUCCSESS)
+			printf("could not create ACK file, error %d", error);
+		error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
+		if (error != FS_SUCCSESS)
+			printf("could not save ACK after creating one, error %d", error);
+	}
+	else if (error != FS_SUCCSESS)
 	{
 		printf("could not save ACK, error %d", error);
 		//if theres errors

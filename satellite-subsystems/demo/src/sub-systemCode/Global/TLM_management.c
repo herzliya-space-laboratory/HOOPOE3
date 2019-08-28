@@ -6,6 +6,7 @@
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+#include <freertos/task.h>
 
 #include <satellite-subsystems/GomEPS.h>
 
@@ -130,21 +131,27 @@ int f_managed_releaseFS()
 	printf("could not return the xEnterTaskFS\n");
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
 }
-
+static int counter1=0;
+static int counter2=0;
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 {
 	int lastError = 0;
+
 	if (xSemaphoreTake(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
-		*fileHandler = f_open(file_name, config);
-		if (*fileHandler == NULL)
+		do
 		{
-			portBASE_TYPE portRet = xSemaphoreGive(xFileOpenHandler);
-			check_portBASE_TYPE("could not return the xFileOpenHandler\n", portRet);
-			//TODO: write data to log error
-			lastError = f_getlasterror();
-			printf("FS last error: %d\n", lastError);
-		}
+			*fileHandler = f_open(file_name, config);
+			printf("counter1 is %d\n",++counter1);
+			if (*fileHandler == NULL)
+			{
+				counter1--;
+				//TODO: write data to log error
+				lastError = f_getlasterror();
+				printf("FS last error: %d\n", lastError);
+				vTaskDelay(1000);
+			}
+		}while(lastError==F_ERR_LOCKED);
 	}
 	else
 	{
@@ -158,8 +165,12 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 int f_managed_close(F_FILE** fileHandler)
 {
 	int error = f_close(*fileHandler);
+	printf("counter2 is %d\n",++counter2);
 	if (error != 0)
+	{
+		printf("f_close in f_managed_close, error: %d", error);
 		return error;
+	}
 
 	if (xSemaphoreGive(xFileOpenHandler) == pdTRUE)
 		return 0;
@@ -284,10 +295,11 @@ static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int t
 	//printf("writing element, time is: %u\n",time);
 	if(number_of_writes!=2)
 	{
+
 		printf("writewithEpochtime error\n");
 	}
 	f_flush( file ); /* only after flushing can data be considered safe */
-	f_managed_close(&file);	/* data is also considered safe when file is closed */
+
 }
 // get C_FILE struct from FRAM by name
 static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address)
@@ -373,9 +385,15 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	int error = f_managed_open(curr_file_name, "a+", &file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
-	if (file == NULL || error != F_NO_ERROR)
+	if (file == NULL)
 		return FS_FAIL;
+	if(error!=0)
+	{
+		printf("c_fileWrite FS_FAIL %d\n",error);
+		f_managed_close(&file);	/* data is also considered safe when file is closed */
+	}
 	writewithEpochtime(file,element,c_file.size_of_element,curr_time);
+	f_managed_close(&file);	/* data is also considered safe when file is closed */
 	c_file.last_time_modified= curr_time;
 	if(FRAM_write((unsigned char *)&c_file,addr,sizeof(C_FILE))!=0)//update last written
 	{
@@ -552,9 +570,11 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			if(element_time >= from_time)
 			{
 				*last_read_time = element_time;
-				if((unsigned int)buffer_index>(unsigned int)size_of_buffer)
+				if((unsigned int)buffer_index + size_elementWithTimeStamp>=(unsigned int)size_of_buffer)
 				{
-					//free(element);
+					error = f_managed_close(&current_file);
+					if (error == COULD_NOT_GIVE_SEMAPHORE_ERROR)
+								return FS_COULD_NOT_GIVE_SEMAPHORE;
 					return FS_BUFFER_OVERFLOW;
 				}
 				(*read)++;

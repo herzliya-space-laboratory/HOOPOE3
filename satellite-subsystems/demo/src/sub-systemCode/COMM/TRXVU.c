@@ -165,7 +165,7 @@ void TRXVU_task()
 }
 
 
-void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[5])
+void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[5])
 {
 	char fileName[MAX_F_FILE_NAME_SIZE];
 	ERR_type err = ERR_SUCCESS;
@@ -199,13 +199,15 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 			do
 			{
 				numberOfParameters = 0;
-				FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, start_time, end_time,
+				FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
 						&numberOfParameters, &last_read);
+				last_read++;
 
 				if (FS_result != FS_SUCCSESS && FS_result != FS_BUFFER_OVERFLOW)
 					break;
+				else if (FS_result == FS_BUFFER_OVERFLOW)
+					printf("overflow from reading data!!!!!\n");
 
-				last_read++;
 				for (int l = 0; l < numberOfParameters; l++)
 				{
 					build_HK_spl_packet(HK[i], Dump_buffer + l * parameterSize, &packet);
