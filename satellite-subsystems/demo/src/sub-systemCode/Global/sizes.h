@@ -32,7 +32,7 @@
 #define ACK_RAW_SIZE (SPL_TM_HEADER_SIZE + ACK_DATA_LENGTH)
 
 #define SPL_TC_DATA_SIZE (SIZE_TXFRAME - SPL_TC_HEADER_SIZE)
-#define SPL_TM_DATA_SIZE (SIZE_TXFRAME - SPL_TM_HEADER_SIZE)
+#define SPL_TM_DATA_SIZE (SIZE_RXFRAME - SPL_TM_HEADER_SIZE)
 
 #define APRS_SIZE_WITH_TIME		18//number of bytes in an APRS packet with time segment
 #define APRS_SIZE_WITHOUT_TIME 	14//number of bytes in an APRS packet without time segment
