@@ -60,7 +60,7 @@
 #define IMAGE_PACKET_SIZE				IMAGE_DATA_FIELD_PACKET_SIZE + SPL_TM_HEADER_SIZE
 
 #define STACK_DUMP_SIZE 2048//when you create the dump task, size of stack, //need to be tasted...
-#define DUMP_BUFFER_SIZE  400
+#define DUMP_BUFFER_SIZE  100000
 
 #define EPS_VOLTAGES_SIZE_RAW (EPS_VOLTAGE_TABLE_NUM_ELEMENTS * 2) //!< Size of EPS_VOLTAGES_ADDR
 
