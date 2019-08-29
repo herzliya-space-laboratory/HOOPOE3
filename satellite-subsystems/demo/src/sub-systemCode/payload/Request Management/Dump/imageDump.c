@@ -337,7 +337,15 @@ void imageDump_task(void* param)
 
 		byte* DataBaseBuffer = getImageDataBaseBuffer(startingTime, endTime);
 
-		error = imageDataBase_Dump(request, DataBaseBuffer);
+		if(DataBaseBuffer != NULL)
+		{
+			error = imageDataBase_Dump(request, DataBaseBuffer);
+		}
+		else
+		{
+			error = DataBaseNullPointer;
+			// ToDo: log error!
+		}
 	}
 
 	// ToDo: error log!

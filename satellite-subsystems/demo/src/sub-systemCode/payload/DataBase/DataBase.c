@@ -42,7 +42,7 @@ typedef struct __attribute__ ((__packed__))
 
 struct __attribute__ ((__packed__)) ImageDataBase_t
 {
-	// size = 22 bytes (padded to 24)
+	// size = 21 bytes
 	unsigned int numberOfPictures;		///< current number of pictures saved on the satellite
 	imageid nextId;						///< the next id we will use for a picture, (camera id)
 	CameraPhotographyValues cameraParameters;
@@ -107,17 +107,16 @@ static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 */
 ImageDataBaseResult zeroImageDataBase()
 {
-	// ToDo: do gud
-	uint8_t zero = 0;
-	int result;
+	uint32_t database_fram_size = DATABASE_FRAM_END - DATABASEFRAMADDRESS;
+	uint8_t zero[database_fram_size];
 
-	for (unsigned int i = DATABASEFRAMADDRESS; i < DATABASE_FRAM_END; i += sizeof(uint8_t))
+	for (uint32_t i = 0; i < database_fram_size; i++)
 	{
-		result = FRAM_write((unsigned char*)&zero, i, sizeof(uint8_t));
-		CMP_AND_RETURN(result, 0, DataBaseFramFail);
-
-		vTaskDelay(1);
+		zero[i] = 0;
 	}
+
+	int result = FRAM_write((unsigned char*)zero, DATABASEFRAMADDRESS, database_fram_size);
+	CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 	return DataBaseSuccess;
 }
@@ -625,6 +624,9 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 {
 	int err = 0;
+	
+	if (database->numberOfPictures == MAX_NUMBER_OF_PICTURES)
+		return DataBaseFull;
 
 	// Erasing previous image before taking one to clear this part of the SDs:
 
@@ -707,57 +709,57 @@ ImageDataBaseResult GetImageFileName(imageid id, fileType fileType, char fileNam
 
 //---------------------------------------------------------------
 
-byte* getImageDataBaseBuffer(imageid start, imageid end)
+ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buffer[])
 {
-	byte* buffer = malloc(sizeof(int));
-	CHECK_FOR_NULL(buffer, NULL);
+	unsigned int size = sizeof(int); // will be the first value in the array and will indicate its length (including itself!)
 
-	unsigned int size = 0; // will be the first value in the array and will indicate its length (including itself!)
-
-	memcpy(buffer + size, &size, sizeof(size));
-	size += sizeof(size);
-
-	ImageDataBase database = malloc(SIZEOF_IMAGE_DATABASE);
-	int FRAM_result = FRAM_read((unsigned char*)(database),  DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
-	if (FRAM_result != 0)
-	{
-		free(database);
+	int FRAM_result = FRAM_read((unsigned char*)(imageBuffer),  DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
+	if (FRAM_result != 0){
 		return NULL;
 	}
 
-	memcpy(buffer + size, database, SIZEOF_IMAGE_DATABASE);
 	size += SIZEOF_IMAGE_DATABASE;
 
-	free(database);
-
+	/*
 	printf("numberOfPictures = %u, nextId = %u, auto thumbnail creation = %u",
 			database->numberOfPictures, database->nextId, database->AutoThumbnailCreation);
-	printf("cameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %lu, pgaGain = %lu, exposure = %lu\n",
+	printf("\ncameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %lu, pgaGain = %lu, exposure = %lu\n\n",
 			database->cameraParameters.frameAmount, database->cameraParameters.frameRate,
 			(uint32_t)database->cameraParameters.adcGain, (uint32_t)database->cameraParameters.pgaGain,
 			database->cameraParameters.exposure);
+	*/
 
 	// Write MetaData:
 
-	int result;
 	ImageMetadata image_metadata;
-	uint32_t image_address = DATABASE_FRAM_START;
+	uint32_t empty_space[MAX_NUMBER_OF_PICTURES];
+	for (uint32_t i = 0; i < MAX_NUMBER_OF_PICTURES; i++)
+	{
+		empty_space[i] = 0;
+	}
+	uint32_t next_empty_space = 0;
+	uint32_t next_empty_space_for_use = 0;
 
-	while(image_address < DATABASE_FRAM_END)
+	for (uint32_t i = 0; i < MAX_NUMBER_OF_PICTURES; i++)
 	{
 		vTaskDelay(DELAY);
+		memcpy(&image_metadata, imageBuffer + SIZEOF_IMAGE_DATABASE + i * sizeof(ImageMetadata), sizeof(ImageMetadata));
 
-		result = FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
-		CMP_AND_RETURN(result, 0, NULL);
-
-		image_address += sizeof(ImageMetadata);
-
-		if (image_metadata.cameraId != 0 && (image_metadata.cameraId >= start && image_metadata.cameraId <= end)) // check if the current id is the requested id
+		if (image_metadata.cameraId == 0 || (image_metadata.cameraId < start || image_metadata.cameraId > end))
 		{
-			realloc(buffer, size + sizeof(ImageMetadata));
+			empty_space[next_empty_space] = i;
+			next_empty_space++;
+		}
 
-			memcpy(buffer + size, &image_metadata, sizeof(ImageMetadata));
-			size += sizeof(ImageMetadata);
+		if (image_metadata.cameraId != 0 && (image_metadata.cameraId >= start && image_metadata.cameraId <= end))
+		{
+			if (empty_space[next_empty_space_for_use] < i)
+			{
+				memcpy(imageBuffer + SIZEOF_IMAGE_DATABASE + i * sizeof(ImageMetadata),
+						imageBuffer + SIZEOF_IMAGE_DATABASE + empty_space[next_empty_space_for_use] * sizeof(ImageMetadata),
+						sizeof(ImageMetadata));
+				next_empty_space_for_use++;
+			}
 
 			// printing for tests:
 			printf("cameraId: %d, timestamp: %u, inOBC:", image_metadata.cameraId, image_metadata.timestamp);

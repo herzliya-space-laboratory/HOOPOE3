@@ -24,11 +24,7 @@
 
 #define FILE_NAME_SIZE 11	///< The size of the filename parameter. i00001.raw (+1 for '\0')
 
-#ifdef TESTING
-	#define MAX_NUMBER_OF_PICTURES 20
-#else
-	#define MAX_NUMBER_OF_PICTURES 1000	///< The maximum number of pictures the database supports
-#endif
+#define MAX_NUMBER_OF_PICTURES 1000	///< The maximum number of pictures the database supports
 
 #define DEFALT_FRAME_RATE 1		///< The frame rate that will be used when taking a picture if the value wasn't updated with an command from the ground
 #define DEFALT_FRAME_AMOUNT 1	///< The amount of frames that will be taken when taking a picture if the value wasn't updated with an command from the ground
@@ -51,7 +47,7 @@ typedef struct ImageDataBase_t* ImageDataBase;	///< ADT architecture
 
 typedef struct __attribute__ ((__packed__))
 {
-	// size = 66 bytes
+	// size = 14 bytes
 	imageid cameraId;
 	time_unix timestamp;
 	char fileTypes;
