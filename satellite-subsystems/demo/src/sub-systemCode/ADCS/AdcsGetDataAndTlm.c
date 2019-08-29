@@ -425,3 +425,28 @@ TroubleErrCode GatherTlmAndData()
 	f_managed_releaseFS();
 	return err_occured;
 }
+
+TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates)
+{
+	if(NULL == sen_rates){
+		return TRBL_NULL_DATA;
+	}
+	if(0 != cspaceADCS_getSensorRates(0,sen_rates)){
+		return TRBL_FAIL;
+	}
+	return TRBL_SUCCESS;
+}
+
+TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10])
+{
+	if(NULL == raw_css){
+		return TRBL_NULL_DATA;
+	}
+	if(0 != cspaceADCS_getRawCss1_6Measurements(0,raw_css)){
+		return TRBL_FAIL;
+	}
+	if(0 != cspaceADCS_getRawCss7_10Measurements(0,&raw_css[6])){
+		return TRBL_FAIL;
+	}
+	return TRBL_SUCCESS;
+}

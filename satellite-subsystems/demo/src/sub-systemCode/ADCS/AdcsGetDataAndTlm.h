@@ -2,6 +2,7 @@
 #define ADCSGETDATAANDTLM_H_
 
 #include <hcc/api_fat.h>
+#include <satellite-subsystems/cspaceADCS_types.h>
 #include "sub-systemCode/Global/Global.h"
 #include "AdcsTroubleShooting.h"
 
@@ -15,6 +16,7 @@
 #ifndef TLM_SAVE_VECTOR_END_ADDR
 	#define ADCS_TLM_SAVE_VECTOR_END_ADDR ((ADCS_TLM_SAVE_VECTOR_START_ADDR) + (NUM_OF_ADCS_TLM) * sizeof(Boolean8bit))
 #endif
+
 
 #define ADCS_MAX_TLM_SIZE 272
 
@@ -99,5 +101,22 @@ void GetTlmElementAtIndex(AdcsTlmElement_t * elem,unsigned int index);
  */
 TroubleErrCode GatherTlmAndData();
 
+/*!
+ * @brief returns the measured angular rates of the satellite.
+ * @param[out] sen_rates the angular rates of axis X, Y, Z
+ * @return 	TRBL_FAIL in case of error.
+ * 			TRBL_SUCCSESS in case of success.
+ * 			TRBL_NULL_DATA in case of NULL input data.
+ */
+TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates);
 
+/*!
+ * @brief	returns the measured CSS values
+ * @return 	TRBL_FAIL in case of error.
+ * 			TRBL_SUCCSESS in case of success.
+ * 			TRBL_NULL_DATA in case of NULL input data.
+ */
+TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]);
+
+}
 #endif /* ADCSGETDATAANDTLM_H_ */
