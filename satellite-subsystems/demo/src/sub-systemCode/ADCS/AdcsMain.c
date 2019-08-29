@@ -62,11 +62,8 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 
 }
 
-#define FIRST_ADCS_ACTIVATION
-
 TroubleErrCode AdcsInit()
 {
-
 	TroubleErrCode trbl = TRBL_SUCCESS;
 
 	unsigned char adcs_i2c = ADCS_I2C_ADRR;
@@ -93,12 +90,7 @@ TroubleErrCode AdcsInit()
 		//TODO: do somthing- continue with operations but re-init the system
 	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
-#ifdef FIRST_ADCS_ACTIVATION
-	delay_loop = DEFAULT_ADCS_LOOP_DELAY;
-	FRAM_write((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE);
-	*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
-	FRAM_write((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE);
-#endif
+
 	if(0 != FRAM_read((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 		//todo: log error
@@ -108,7 +100,6 @@ TroubleErrCode AdcsInit()
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
 	}
-
 	return TRBL_SUCCESS;
 }
 
@@ -117,6 +108,7 @@ void AdcsTask()
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
 	//TODO: log start task
+	vTaskDelay(10000); // enough time for the EPS to turn the ADCS on
 
 	while(TRUE)
 	{
@@ -124,10 +116,10 @@ void AdcsTask()
 			vTaskDelay(delay_loop);
 			continue;
 		}
-		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
-		if(SWITCH_OFF == get_system_state(ADCS_param)){
-			vTaskDelay(CHANNEL_OFF_DELAY);
-			continue;
+
+		UpdateAdcsStateMachine();
+		if(TRBL_SUCCESS != trbl){
+			AdcsTroubleShooting(trbl);
 		}
 
 		if(!AdcsCmdQueueIsEmpty()){

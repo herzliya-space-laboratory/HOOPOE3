@@ -62,7 +62,12 @@ Boolean CreateTlmElementFiles();
  * @note	default is save all TLM
  * @return	TODO: fill return values
  */
-int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
+int AdcsSelectWhichTlmToSave(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
+
+/*!
+ * @brief returns which telemetries are currently saved. TRUE = saved; FALSE = not saved
+ */
+void AdcsGetSelectTlmSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM]);
 
 /*!
  * @brief updates the Tlm element at index with the input parameters

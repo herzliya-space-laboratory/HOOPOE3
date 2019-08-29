@@ -28,7 +28,7 @@
 
 TroubleErrCode UpdateAdcsStateMachine()
 {
-
+	//TODO: finish, including return value errors
 	return TRBL_SUCCESS;
 }
 

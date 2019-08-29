@@ -260,27 +260,29 @@ int InitSubsystems()
 void no_reset_task()
 {
 	gom_eps_hk_t eps_tlm;
-	gom_eps_channelstates_t state;
+	gom_eps_channelstates_t state = {.raw = 0};
 	state.fields.channel3V3_1 = 1;
 	state.fields.channel5V_1 = 1;
-	int err=0;
+	int err = 0;
 
 	while(1)
 	{
-		err = GomEpsGetHkData_general(0, &eps_tlm);
-
-		if (err == 0)
-		{
-			if (eps_tlm.fields.output[0] == 0 || eps_tlm.fields.output[3] == 0)
+		portENTER_CRITICAL();
+			err = GomEpsGetHkData_general(0, &eps_tlm);
+			if (err == 0)
 			{
-				err = GomEpsSetOutput(0, state);
-				printf("\nEps channels:\n[");
-				for(int i = 0; i < 8 ; i++){
-					printf("%X,",eps_tlm.fields.output[i]);
+				if (eps_tlm.fields.output[0] == 0 || eps_tlm.fields.output[3] == 0)
+				{
+					EnterFullMode(&state);
+					printf("\nEps channels:\n[");
+					for(int i = 0; i < 8 ; i++){
+						printf("%X,",eps_tlm.fields.output[i]);
+					}
+					printf("]\n");
 				}
-				printf("]\n");
+				printf("Eps Total Current = %d",eps_tlm.fields.cursys);
 			}
-		}
+		portEXIT_CRITICAL();
 		vTaskDelay(1000);
 	}
 }
@@ -298,7 +300,9 @@ int SubSystemTaskStart()
 
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 
-	xTaskCreate(AdcsTestTask, (const signed char*)("ADCS_Test"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+//	xTaskCreate(AdcsTestTask, (const signed char*)("ADCS_Test"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+
+	xTaskCreate(TestTaskAdcsNew, (const signed char*)("ADCS_Test"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 	return 0;
 }

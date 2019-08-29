@@ -199,14 +199,8 @@ void taskMain()
 	SubSystemTaskStart();
 	printf("Task Main start: ADCS test mode\n");
 
-	//portTickType xLastWakeTime = xTaskGetTickCount();
-	//const portTickType xFrequency = 1000;
-	
-
-	gom_eps_hk_t eps_tlm;
 	while(1)
 	{
-		GomEpsGetHkData_general(0,&eps_tlm);
 
 		vTaskDelay(1000);
 	}

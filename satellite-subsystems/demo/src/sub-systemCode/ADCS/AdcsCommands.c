@@ -69,7 +69,6 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 }
 
 
-
 int ResetBootRegisters()
 {
 	unsigned char reset_boot_reg_cmd_id = 6;
@@ -632,6 +631,13 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST:
 			err = UpdateTlmElementAtIndex(cmd->data[0],cmd->data[1],cmd->data[2]);
 			break;
+		case ADCS_GET_WHICH_TLM_ARE_SAVED_ST:
+			AdcsGetSelectTlmSaveVector(data);
+			SendAdcsTlm(data, NUM_OF_ADCS_TLM * sizeof(Boolean8bit),ADCS_GET_ACP_EXECUTION_STATE_ST);
+		break;
+		case ADCS_SELECT_TLM_TO_SAVE_ST:
+			err = AdcsSelectWhichTlmToSave((Boolean8bit*)cmd->data);
+			break;
 		case ADCS_GET_TLM_ELEM_AT_INDEX_ST:
 			GetTlmElementAtIndex((AdcsTlmElement_t *)data,cmd->data[0]);
 			SendAdcsTlm(data, sizeof(AdcsTlmElement_t),ADCS_GET_TLM_ELEM_AT_INDEX_ST);
@@ -649,6 +655,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			//TODO: return unknown subtype
 			break;
 	}
-
+	if(!err)
+		printf("\t----Error in execution of subtype:%d\terror:%d\n");
 	return err;
 }

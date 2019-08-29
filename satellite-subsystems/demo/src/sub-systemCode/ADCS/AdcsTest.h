@@ -19,6 +19,7 @@ typedef enum tests
 #endif /* ADCSTEST_H_ */
 
 void AdcsTestTask();
+void TestTaskAdcsNew();
 void printErrFlag();
 void Mag_Test();
 void AddCommendToQ();

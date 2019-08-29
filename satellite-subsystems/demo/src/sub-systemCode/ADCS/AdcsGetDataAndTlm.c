@@ -18,40 +18,52 @@ AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 
 #define ADCS_DEFAULT_TLM_VECTOR	\
 		{{TRUE_8BIT,sizeof(cspace_adcs_statetlm_t),		(AdcsTlmCollectFunc)cspaceADCS_getStateTlm,					\
-		ADCS_STATE_TLM_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_STATE_TLM_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_estmetadata_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimationMetadata,		\
-		ADCS_EST_META_DATA,			ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_EST_META_DATA,			ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getCoarseSunVec,				\
-		ADCS_COARSE_SUN_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_COARSE_SUN_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getFineSunVec,				\
-		ADCS_FINE_SUN_VEC_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_FINE_SUN_VEC_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_angrate_t),		(AdcsTlmCollectFunc)cspaceADCS_getSensorRates,				\
-		ADCS_SENSOR_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_SENSOR_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_wspeed_t),		(AdcsTlmCollectFunc)cspaceADCS_getWheelSpeed,				\
-		ADCS_WHEEL_SPEED_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_WHEEL_SPEED_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_rawmagmeter_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawMagnetometerMeas,		\
-		ADCS_RAW_MAG_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_RAW_MAG_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_magfieldvec_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagneticFieldVec,			\
-		ADCS_MAG_FIELD_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_MAG_FIELD_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	FALSE_8BIT},				\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss1_6_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss1_6Measurements,	\
-		ADCS_RAW_CSS_FILENAME_1_6,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_RAW_CSS_FILENAME_1_6,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss7_10_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss7_10Measurements,	\
-		ADCS_RAW_CSS_FILENAME_7_10,ADCS_TLM_DEFAULT_COLLECT_PERIOD,		(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_RAW_CSS_FILENAME_7_10,ADCS_TLM_DEFAULT_COLLECT_PERIOD,		(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_pwtempms_t),	(AdcsTlmCollectFunc)cspaceADCS_getPowTempMeasTLM,				\
-		ADCS_POWER_TEMP_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
+		ADCS_POWER_TEMP_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
 		{TRUE_8BIT,	sizeof(cspace_adcs_misccurr_t),	(AdcsTlmCollectFunc)cspaceADCS_getMiscCurrentMeas,				\
-		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
+		{TRUE_8BIT,	sizeof(cspace_adcs_magtorqcmd_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagnetorquerCmd,			\
+		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
+		{TRUE_8BIT,	sizeof(cspace_adcs_wspeed_t),	(AdcsTlmCollectFunc)cspaceADCS_getWheelSpeedCmd,				\
+		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
+		{TRUE_8BIT,	sizeof(cspace_adcs_cctrlcurrms_t),	(AdcsTlmCollectFunc)cspaceADCS_getCControlCurrentMeasurements,\
+		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
+																													\
+		{TRUE_8BIT,	sizeof(cspace_adcs_unixtm_t),	(AdcsTlmCollectFunc)cspaceADCS_getCurrentTime,					\
+		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,	TRUE_8BIT},					\
 		};
 
 /*
@@ -166,6 +178,7 @@ config
 cspaceADCS_getSGP4OrbitParameters
 parameters
  */
+TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
 
 TroubleErrCode InitTlmElements()
 {
@@ -202,6 +215,7 @@ TroubleErrCode InitTlmElements()
 	return TRBL_SUCCESS;
 }
 
+
 Boolean CreateTlmElementFiles()
 {
 	FileSystemResult res = 0;
@@ -225,7 +239,6 @@ Boolean CreateTlmElementFiles()
 }
 
 
-TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
 
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 {
@@ -281,6 +294,17 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 }
 
 
+void AdcsGetTlmElementOperatingVector(Boolean8bit is_operating[NUM_OF_ADCS_TLM])
+{
+	if(NULL == is_operating){
+		return;
+	}
+	for(unsigned int i = 0; i < NUM_OF_ADCS_TLM; i++){
+		is_operating[i] = TlmElements[i].OperatingFlag;
+	}
+}
+
+
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 {
 	TroubleErrCode err = TRBL_SUCCESS;
@@ -306,7 +330,8 @@ int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 	//TODO: log update
 }
 
-int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
+
+int AdcsSelectWhichTlmToSave(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 {
 	if (NULL == save_tlm_flag) {
 		//TODO: log error
@@ -323,9 +348,23 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 
 	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
 		TlmElements[i].ToSave = save_tlm_flag[i];
+		TlmElements[i].OperatingFlag = TRUE_8BIT;		// force operation
 	}
 	return 0;
 }
+
+
+void AdcsGetSelectTlmSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
+{
+	 if(NULL == save_tlm_flag){
+		 return;
+	 }
+
+	 for(unsigned int i = 0; i < NUM_OF_ADCS_TLM; i++){
+		 save_tlm_flag[i] = TlmElements[i].ToSave;
+	 }
+}
+
 
 TroubleErrCode RestoreDefaultTlmElement(){
 	AdcsTlmElement_t def_tlm[] = ADCS_DEFAULT_TLM_VECTOR;

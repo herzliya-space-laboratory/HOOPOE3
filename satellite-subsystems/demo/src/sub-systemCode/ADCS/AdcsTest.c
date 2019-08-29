@@ -23,25 +23,18 @@
 #define TestDelay (10*1000)
 #define TEST_NUM 1
 
-void TaskMamagTest();
 void AdcsConfigPramTest()
 {
-	printf("config test\n");
+	printf("config test");
 	TC_spl test = {0};
-	test.type = TM_ADCS_T;
-	test.subType = ADCS_GET_ADCS_CONFIG_PARAM_ST;
-	test.length = 4;
+	test.id = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	test.data[0] = 0;
 	test.data[1] = 0;
 	test.data[2] = 10;
 	test.data[3] = 0;
 	AdcsCmdQueueAdd(&test);
-	test.subType = ADCS_GET_FULL_CONFIG_ST;
-	test.length = 4;
-	test.data[0] = 0;
-	test.data[1] = 0;
-	test.data[2] = 0;
-	test.data[3] = 0;
+
+	test.id = ADCS_GET_FULL_CONFIG_ST;
 	AdcsCmdQueueAdd(&test);
 	vTaskDelay(TestDelay);
 }
@@ -100,7 +93,7 @@ void TestUpdateTlmToSaveVector(){
 	AdcsTlmElement_t elem = {0};
 	memset(ToSaveVec,0xFF,NUM_OF_ADCS_TLM * sizeof(Boolean8bit));
 
-	UpdateTlmToSaveVector(ToSaveVec);
+	AdcsSelectWhichTlmToSave(ToSaveVec);
 	err = FRAM_read(temp,ADCS_TLM_SAVE_VECTOR_START_ADDR,NUM_OF_ADCS_TLM * sizeof(*temp));	// check update in FRAM
 	if(0 != err){
 		printf("Error in FRAM_read\n");
@@ -194,7 +187,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 
 	//test #1 data
 	getSubType[testNum] = ADCS_I2C_GENRIC_ST; //generic I2C command #131
-	getLength[testNum] = sizeof(adcs_i2c_cmd);
+	getLength[testNum] = sizeof(TC_spl);
 	i2c_cmd.id = 131;
 	i2c_cmd.length = 1;
 	i2c_cmd.ack = 3;
@@ -577,7 +570,7 @@ void AdcsTestTask()
 		get.id = 0;
 		get.subType = getSubType[test_num];
 		get.length = getLength[test_num];
-		if(test_num = 1)
+		if(test_num == 1)
 		{
 
 		}
@@ -609,74 +602,40 @@ void AdcsTestTask()
 	}while(TRUE);
 }
 
-/*
-//void ErrFlagTest()
-//{
-//	double sgp4_orbit_params[] = { 0,0,0,0,0,0,0,0 };
-//	cspaceADCS_setSGP4OrbitParameters(ADCS_ID, sgp4_orbit_params);
-//	vTaskDelay(5000);
-//	restart();
-//}
 
-//void printErrFlag()
-//{
-//
-//	cspace_adcs_statetlm_t data;
-//	cspaceADCS_getStateTlm(ADCS_ID, &data);
-//	printf("\nSGP ERR FLAG = %d \n", data.fields.curr_state.fields.orbitparam_invalid);
-//}
-
-//void Mag_Test()
-//{
-//	//generic i2c tm id 170 size 6 and print them
-//	cspace_adcs_rawmagmeter_t Mag;
-//	cspaceADCS_getRawMagnetometerMeas(0, &Mag);
-//	printf("mag raw x %d", Mag.fields.magnetic_x);
-//	printf("mag raw y %d", Mag.fields.magnetic_y);
-//	printf("mag raw z %d", Mag.fields.magnetic_z);
-//}
-
-//void AddCommendToQ()
-//{
-//	Test();
-//
-//	int input;
-//	int err;
-//	TC_spl adcsCmd;
-//	adcsCmd.id = TC_ADCS_T;
-//	if (UTIL_DbguGetIntegerMinMax((unsigned int *)&(adcsCmd.subType), 0, 666) != 0) {
-//		printf("Enter ADCS command data\n");
-//		UTIL_DbguGetString((char*)&(adcsCmd.data), SIZE_OF_COMMAND + 1);
-//		err = AdcsCmdQueueAdd(&adcsCmd);
-//		printf("ADCS command error = %d\n\n\n", err);
-//		printf("Send new command\n");
-//		printf("Enter ADCS sub type\n");
-//	}
-//
-//	if (UTIL_DbguGetIntegerMinMax((unsigned int *)&input, 900, 1000) != 0) {
-//		printf("Print the data\n");
-//	}
-//
-//}
-*/
-
-
-void TestMagnetometer()
+TC_spl test_cmd[] =
 {
-	//TODO: collect TLM, print + transmit
-}
+		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_RUN_MODE_ST,				.length = 1,	.data = {0x01},		.time = 0},
+		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_SET_PWR_CTRL_DEVICE_ST,		.length = 3,	.data = {0x50,0,0},	.time = 0},
+		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_SET_ATT_CTRL_MODE_ST,		.length = 3,	.data = {0x01,0,0},	.time = 0},
+		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_SET_EST_MODE_ST,			.length = 1,	.data = {0x01},		.time = 0},
+		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_GET_MAGNETIC_FIELD_VEC_ST,	.length = 0,	.data = {0},		.time = 0}
 
-void TaskMamagTest()
+};
+static unsigned int test_cmd_index = 0;
+void TestTaskAdcsNew()
 {
-	testInit();
-
-	TestAdcsTLM();
-
-	while(TRUE){
-
-		TestMagnetometer();
-
+	vTaskDelay(1000);
+	printf("\nStart ADCS Testing Task\n");
+	unsigned int num_of_cmd = sizeof(test_cmd)/sizeof(test_cmd[0]);
+	TroubleErrCode trbl =0;
+	while(1){
+		printf("Pushing a CMD to Queue:%d\n",test_cmd_index);
+		trbl = AdcsCmdQueueAdd(&test_cmd[test_cmd_index]);
+		if(TRBL_SUCCESS != trbl){
+			printf("----Error in AdcsCmdQueueAdd\n");
+		}
+		test_cmd_index++;
+		if(num_of_cmd == test_cmd_index){
+			printf("Finished All Tests...\n");
+			printf("Continue?\n");
+			for(unsigned int i = 10; i>=0;i--){
+				printf("%d...\n",i);
+				vTaskDelay(1000);
+			}
+			test_cmd_index = test_cmd_index % num_of_cmd;
+		}
 		vTaskDelay(1000);
 	}
-
 }
+
