@@ -141,10 +141,15 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
 
 	uint32_t offset = 0;
 
-	memcpy(packet.data + offset, &id, sizeof(imageid));
-	offset += sizeof(imageid);
+	if(isImage)
+	{
+		memcpy(packet.data + offset, &id, sizeof(imageid));
+		offset += sizeof(imageid);
+	}
+
 	memcpy(packet.data + offset, &chunk_index, sizeof(uint16_t));
 	offset += sizeof(uint16_t);
+
 	if (packet.subType == IMAGE_DUMP_JPG_FIRST_CHUNK_ST || packet.subType == IMAGE_DATABASE_DUMP_FIRST_CHUNK_ST)
 	{
 		memcpy(packet.data + offset, &image_size, sizeof(uint32_t));
@@ -152,6 +157,7 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
 
 		packet.length += 4;
 	}
+
 	memcpy(packet.data + offset, chunk_data, CHUNK_SIZE(chunk_height, chunk_width));
 	offset += CHUNK_SIZE(chunk_height, chunk_width);
 
@@ -211,7 +217,7 @@ ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], ui
 {
 	int error;
 
-	uint32_t image_packet_data_field_size = IMAGE_PACKET_DATA_FIELD_SIZE(CHUNK_SIZE(chunk_height, chunk_width));
+	uint32_t image_packet_data_field_size = CHUNK_SIZE(chunk_height, chunk_width);
 
 	byte* chunk;
 	for (unsigned short j = 0; (unsigned int)(j*image_packet_data_field_size) < size; j++)

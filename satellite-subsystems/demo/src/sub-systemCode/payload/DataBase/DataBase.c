@@ -53,6 +53,8 @@ struct __attribute__ ((__packed__)) ImageDataBase_t
 #define DATABASE_FRAM_START (DATABASEFRAMADDRESS + SIZEOF_IMAGE_DATABASE)	///< The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
 #define DATABASE_FRAM_END (DATABASE_FRAM_START + MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata))	///< The ImageDataBases ending address in the FRAM
 
+#define DATABASE_FRAM_SIZE (DATABASE_FRAM_END - DATABASEFRAMADDRESS)
+
 //---------------------------------------------------------------
 
 /*
@@ -711,12 +713,12 @@ ImageDataBaseResult GetImageFileName(imageid id, fileType fileType, char fileNam
 
 uint32_t getDataBaseSize()
 {
-	return DATABASE_FRAM_END - DATABASEFRAMADDRESS;
+	return DATABASE_FRAM_SIZE;
 }
 
-ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buffer[], uint32_t* size)
+ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buffer[DATABASE_FRAM_SIZE], uint32_t* size)
 {
-	int result = FRAM_read((unsigned char*)(buffer),  DATABASEFRAMADDRESS, getDataBaseSize());
+	int result = FRAM_read((unsigned char*)(buffer),  DATABASEFRAMADDRESS, DATABASE_FRAM_SIZE);
 	CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 	uint32_t database_size = SIZEOF_IMAGE_DATABASE;
@@ -729,7 +731,7 @@ ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buff
 	{
 		vTaskDelay(10);
 
-		memcpy(&image_metadata, imageBuffer + SIZEOF_IMAGE_DATABASE + i * sizeof(ImageMetadata), sizeof(ImageMetadata));
+		memcpy(&image_metadata, buffer + SIZEOF_IMAGE_DATABASE + i * sizeof(ImageMetadata), sizeof(ImageMetadata));
 
 		if (image_metadata.cameraId != 0 && (image_metadata.cameraId >= start && image_metadata.cameraId <= end))
 		{
