@@ -235,14 +235,13 @@ ImageDataBaseResult GetImageFileName(imageid cameraId, fileType fileType, char f
  * GetImageMetaData but has the general data that the DB has before the metadata about the images, at the start is the size if the array (the size is uint32)
  * @note User have to free the array
 */
-byte* getImageDataBaseBuffer(imageid start, imageid end);
-
-imageid* get_ID_list_withDefaltThumbnail(imageid start, imageid end);
+ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buffer[], uint32_t* size);
 
 ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type);
 ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type);
 ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address);
 void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
 uint32_t GetImageFactor(fileType image_type);
+uint32_t getDataBaseSize();
 
 #endif /* ImageDataBase_H_ */
