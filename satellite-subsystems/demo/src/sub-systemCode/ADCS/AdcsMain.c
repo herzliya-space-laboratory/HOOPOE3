@@ -108,7 +108,7 @@ void AdcsTask()
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
 	//TODO: log start task
-	vTaskDelay(10000); // enough time for the EPS to turn the ADCS on
+	vTaskDelay(5000); // enough time for the EPS to turn the ADCS on
 
 	while(TRUE)
 	{

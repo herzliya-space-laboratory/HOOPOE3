@@ -195,13 +195,10 @@ void taskMain()
 	InitSubsystems();
 
 	vTaskDelay(100);
-	printf("init finished\n");
 	SubSystemTaskStart();
-	printf("Task Main start: ADCS test mode\n");
 
 	while(1)
 	{
-
 		vTaskDelay(1000);
 	}
 }
@@ -214,12 +211,9 @@ int main()
 
 	WDT_start();
 
-	printf("Task Main 2121\n");
 	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 4000, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
-	printf("start sch\n");
 	vTaskStartScheduler();
 	while(1){
-		printf("should not be here\n");
 		vTaskDelay(2000);
 	}
 

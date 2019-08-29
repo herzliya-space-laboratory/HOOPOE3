@@ -158,6 +158,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	cspace_adcs_bootprogram bootindex;
 	cspace_adcs_runmode_t runmode;
 	cspace_adcs_estmode_sel att_est;
+	cspace_adcs_powerdev_t pwrdev;
 
 	cspace_adcs_clearflags_t clear;
 	cspace_adcs_magmode_t magmode;
@@ -226,18 +227,19 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		#endif
 			break;
 		case ADCS_RUN_MODE_ST:
-			memcpy(&runmode,cmd->data,sizeof(runmode));
-			err = cspaceADCS_setRunMode(ADCS_ID, runmode);
+			err = cspaceADCS_setRunMode(ADCS_ID, cmd->data[0]);
 			break;
 		case ADCS_SET_PWR_CTRL_DEVICE_ST:
-			err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, (cspace_adcs_powerdev_t*)cmd->data);
+
+			memcpy(&pwrdev,cmd->data,sizeof(pwrdev));
+			err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, &pwrdev);
 			break;
 		case ADCS_CLEAR_ERRORS_ST:
 			memcpy(&clear,cmd->data,sizeof(clear));
 			err = cspaceADCS_clearErrors(ADCS_ID, clear);
 			break;
 		case ADCS_SET_ATT_CTRL_MODE_ST:
-			err = cspaceADCS_setAttCtrlMode(ADCS_ID, (cspace_adcs_attctrl_mod_t*)cmd->data);
+			err = cspaceADCS_setAttCtrlMode(ADCS_ID, cmd->data);
 			break;
 		case ADCS_SET_EST_MODE_ST:
 			memcpy(&att_est,cmd->data,sizeof(att_est));
@@ -655,7 +657,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			//TODO: return unknown subtype
 			break;
 	}
-	if(!err)
-		printf("\t----Error in execution of subtype:%d\terror:%d\n");
+	if(0 != err)
+		printf("\t----Error in execution of subtype:%d\terror:%d\n",err);
 	return err;
 }

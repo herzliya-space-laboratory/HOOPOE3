@@ -214,10 +214,6 @@ int InitSubsystems()
 
 	StartFRAM();
 
-#ifdef TESTING
-	test_menu();
-#endif
-
 	Boolean activation = first_activation();
 
 	StartTIME();
@@ -248,11 +244,11 @@ int InitSubsystems()
 // #endif
 // #endif
 
-	AdcsInit();
-
 	// init_trxvu();
 
 	// init_command();
+
+	 AdcsInit();
 
 	return 0;
 }
@@ -267,7 +263,6 @@ void no_reset_task()
 
 	while(1)
 	{
-		portENTER_CRITICAL();
 			err = GomEpsGetHkData_general(0, &eps_tlm);
 			if (err == 0)
 			{
@@ -280,9 +275,9 @@ void no_reset_task()
 					}
 					printf("]\n");
 				}
-				printf("Eps Total Current = %d",eps_tlm.fields.cursys);
+				if(eps_tlm.fields.cursys <= 110)
+					printf("Eps Total Current = %d\n",eps_tlm.fields.cursys);
 			}
-		portEXIT_CRITICAL();
 		vTaskDelay(1000);
 	}
 }

@@ -606,36 +606,30 @@ void AdcsTestTask()
 TC_spl test_cmd[] =
 {
 		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_RUN_MODE_ST,				.length = 1,	.data = {0x01},		.time = 0},
-		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_SET_PWR_CTRL_DEVICE_ST,		.length = 3,	.data = {0x50,0,0},	.time = 0},
+		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_SET_PWR_CTRL_DEVICE_ST,		.length = 3,	.data = {0x05,0x04,0},	.time = 0},
+
 		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_SET_ATT_CTRL_MODE_ST,		.length = 3,	.data = {0x01,0,0},	.time = 0},
 		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_SET_EST_MODE_ST,			.length = 1,	.data = {0x01},		.time = 0},
 		{.id = 0x12345678 ,	.type = 154,	.subType = ADCS_GET_MAGNETIC_FIELD_VEC_ST,	.length = 0,	.data = {0},		.time = 0}
-
 };
 static unsigned int test_cmd_index = 0;
 void TestTaskAdcsNew()
 {
-	vTaskDelay(1000);
+	vTaskDelay(20000);
 	printf("\nStart ADCS Testing Task\n");
 	unsigned int num_of_cmd = sizeof(test_cmd)/sizeof(test_cmd[0]);
-	TroubleErrCode trbl =0;
+	TroubleErrCode trbl = 0;
 	while(1){
-		printf("Pushing a CMD to Queue:%d\n",test_cmd_index);
 		trbl = AdcsCmdQueueAdd(&test_cmd[test_cmd_index]);
 		if(TRBL_SUCCESS != trbl){
 			printf("----Error in AdcsCmdQueueAdd\n");
 		}
 		test_cmd_index++;
 		if(num_of_cmd == test_cmd_index){
-			printf("Finished All Tests...\n");
-			printf("Continue?\n");
-			for(unsigned int i = 10; i>=0;i--){
-				printf("%d...\n",i);
-				vTaskDelay(1000);
-			}
-			test_cmd_index = test_cmd_index % num_of_cmd;
+			test_cmd_index = 0;
 		}
-		vTaskDelay(1000);
+
+		vTaskDelay(5000);
 	}
 }
 

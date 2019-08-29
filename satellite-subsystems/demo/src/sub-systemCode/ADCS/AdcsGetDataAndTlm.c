@@ -403,6 +403,8 @@ void GetTlmElementAtIndex(AdcsTlmElement_t *elem,unsigned int index){
 
 TroubleErrCode GatherTlmAndData()
 {
+	return 0;
+
 	TroubleErrCode err = TRBL_SUCCESS;
 	TroubleErrCode err_occured = TRBL_SUCCESS;
 	if(F_NO_ERROR != f_managed_enterFS()){
