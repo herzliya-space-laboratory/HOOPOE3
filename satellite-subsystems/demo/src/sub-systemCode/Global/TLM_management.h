@@ -8,7 +8,7 @@
 #ifndef TM_MANAGMENT_H_
 #define TM_MANAGMENT_H_
 
-#include <hal/Boolean.h>
+#include <hcc/api_fat.h>
 #include "../Global/Global.h"
 
 #define MAX_F_FILE_NAME_SIZE 7
@@ -23,6 +23,9 @@
 #define FSFRAM 0x20000
 #endif
 
+#define COULD_NOT_TAKE_SEMAPHORE_ERROR -1
+#define COULD_NOT_GIVE_SEMAPHORE_ERROR -2
+
 typedef enum
 {
 	FS_SUCCSESS,
@@ -34,9 +37,16 @@ typedef enum
 	FS_ALLOCATION_ERROR,
 	FS_FRAM_FAIL,
 	FS_FAT_API_FAIL,
-	FS_FAIL
+	FS_FAIL,
+	FS_COULD_NOT_CREATE_SEMAPHORE,
+	FS_COULD_NOT_TAKE_SEMAPHORE,
+	FS_COULD_NOT_GIVE_SEMAPHORE
 } FileSystemResult;
 
+int f_managed_enterFS();
+int f_managed_releaseFS();
+int f_managed_open(char* file_name, char* config, F_FILE** fileHandler);
+int f_managed_close(F_FILE** fileHandler);
 /*
  *
  */

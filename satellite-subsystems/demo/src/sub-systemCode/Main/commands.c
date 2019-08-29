@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include "../Global/freertosExtended.h"
 #include <freertos/task.h>
 
 #include <at91/utility/exithandler.h>
@@ -35,10 +35,6 @@
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
 
-#ifdef TESTING
-#include "CMD/test_CMD.h"
-#endif
-
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
@@ -61,6 +57,13 @@ xSemaphoreHandle xCTE = NULL;
 TC_spl command_to_execute[COMMAND_LIST_SIZE];
 int place_in_list = 0;
 
+void save_ACK_s(Ack_type type, ERR_type err, command_id ACKcommandId)
+{
+	int i_error = f_managed_enterFS();
+	check_int("f_managed_enterFS in AUC", i_error);
+	save_ACK(type, err, ACKcommandId);
+	f_managed_releaseFS();
+}
 
 void copy_command(TC_spl source, TC_spl* to)
 {
@@ -99,12 +102,12 @@ int add_command(TC_spl command)
 {
 	portBASE_TYPE error;
 	// 1. try to take semaphore
-	if (xSemaphoreTake(xCTE, MAX_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xCTE, MAX_DELAY) == pdTRUE)
 	{
 		// 2. if queue full
 		if (place_in_list == COMMAND_LIST_SIZE)
 		{
-			error = xSemaphoreGive(xCTE);
+			error = xSemaphoreGive_extended(xCTE);
 			check_portBASE_TYPE("could not return xCTE in add_command", error);
 			return 1;
 		}
@@ -113,7 +116,7 @@ int add_command(TC_spl command)
 		// 4. moving forward current place in command queue
 		place_in_list++;
 		// 5. return semaphore
-		error = xSemaphoreGive(xCTE);
+		error = xSemaphoreGive_extended(xCTE);
 		check_portBASE_TYPE("cold not return xCTE in add_command", error);
 	}
 
@@ -123,13 +126,13 @@ int get_command(TC_spl* command)
 {
 	portBASE_TYPE error;
 	// 1. try to take semaphore
-	if (xSemaphoreTake(xCTE, MAX_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xCTE, MAX_DELAY) == pdTRUE)
 	{
 		// 2. check if there's commands in list
 		if (place_in_list == 0)
 		{
-			error = xSemaphoreGive(xCTE);
-			check_portBASE_TYPE("get_command, xSemaphoreGive(xCTE)", error);
+			error = xSemaphoreGive_extended(xCTE);
+			check_portBASE_TYPE("get_command, xSemaphoreGive_extended(xCTE)", error);
 			return 1;
 		}
 		// 3. copy first in command to TC_spl* command
@@ -145,8 +148,8 @@ int get_command(TC_spl* command)
 		reset_command(&command_to_execute[i]);
 		place_in_list--;
 		// 6. return semaphore
-		error = xSemaphoreGive(xCTE);
-		check_portBASE_TYPE("get_command, xSemaphoreGive(xCTE)", error);
+		error = xSemaphoreGive_extended(xCTE);
+		check_portBASE_TYPE("get_command, xSemaphoreGive_extended(xCTE)", error);
 	}
 	return 0;
 }
@@ -175,19 +178,26 @@ void act_upon_command(TC_spl decode)
 	case (TC_ADCS_T):
 		AUC_ADCS(decode);
 		break;
-	case (GENERALLY_SPEAKING_T):
-		AUC_GS(decode);
-		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
 		break;
 	case (SPECIAL_OPERATIONS_T):
 		AUC_special_operation(decode);
 		break;
+	case (TC_ONLINE_TM_T):
+		AUC_onlineTM(decode);
+		break;
 	default:
 		printf("wrong type: %d\n", decode.type);
 		break;
 	}
+}
+
+
+void cmd_error(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_NOTHING;
+	*err = ERR_FAIL;
 }
 
 
@@ -222,13 +232,16 @@ void AUC_COMM(TC_spl decode)
 	case (TIME_FREQUENCY_ST):
 		cmd_time_frequency(&type, &err, decode);
 		break;
+	case (UPDATE_BIT_RATE_ST):
+		cmd_change_def_bit_rate(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -284,7 +297,7 @@ void AUC_general(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -327,7 +340,7 @@ void AUC_payload(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -359,13 +372,16 @@ void AUC_EPS(TC_spl decode)
 	case (SHUT_CAM_ST):
 		cmd_SHUT_CAM(&type, &err, decode);
 		break;
+	case (UPDATE_EPS_ALPHA_ST):
+		cmd_update_alpha(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -382,7 +398,7 @@ void AUC_ADCS(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -408,7 +424,39 @@ void AUC_SW(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
+#endif
+}
+
+void AUC_onlineTM(TC_spl decode)
+{
+	Ack_type type;
+	ERR_type err;
+
+	switch (decode.subType)
+	{
+	case (GET_ONLINE_TM_INDEX_ST):
+		cmd_get_onlineTM(&type, &err, decode);
+		break;
+	case (RESET_OFF_LINE_LIST_ST):
+		cmd_reset_off_line(&type, &err, decode);
+		break;
+	case (ADD_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
+		break;
+	case (DELETE_ITEM_OFF_LINE_LIST_ST):
+		cmd_delete_item_off_line(&type, &err, decode);
+		break;
+	case GET_OFFLINE_LIST_SETTING_ST:
+		cmd_get_off_line_setting(&type, &err, decode);
+		break;
+	default:
+		cmd_error(&type, &err);
+		break;
+	}
+	//Builds ACK
+#ifndef NOT_USE_ACK_HK
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 
@@ -437,7 +485,7 @@ void AUC_special_operation(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
+	save_ACK_s(type, err, decode.id);
 #endif
 }
 

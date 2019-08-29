@@ -25,7 +25,7 @@
 #include "../COMM/GSC.h"
 #include "../Global/sizes.h"
 #include "../Global/Global.h"
-#include "../Global/TM_managment.h"
+#include "../Global/TLM_management.h"
 
 //ADCS
 #define ADCS_INDEX 1
@@ -55,4 +55,5 @@ void AUC_SW(TC_spl decode);
 
 void AUC_special_operation(TC_spl decode);
 
+void AUC_onlineTM(TC_spl decode);
 #endif /* COMMANDS_H_ */

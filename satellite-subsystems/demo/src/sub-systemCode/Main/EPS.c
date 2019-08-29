@@ -6,7 +6,6 @@
  *      Author: I7COMPUTER
  */
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
 #include <freertos/task.h>
 
 #include <at91/utility/exithandler.h>
@@ -42,7 +41,7 @@
 #define CHECK_CHANNEL_CHANGE(preState, currState) CHECK_CHANNEL_0(preState, currState) || CHECK_CHANNEL_3(preState, currState)
 
 voltage_t VBatt_previous;
-double alpha = EPS_ALPHA_DEFFAULT_VALUE;
+float alpha = EPS_ALPHA_DEFFAULT_VALUE;
 gom_eps_channelstates_t switches_states;
 EPS_mode_t batteryLastMode;
 EPS_enter_mode_t enterMode[NUM_BATTERY_MODE];
@@ -114,6 +113,10 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 	}
 }
 
+EPS_mode_t get_EPS_mode_t()
+{
+	return batteryLastMode;
+}
 
 void init_enterMode()
 {
@@ -188,6 +191,9 @@ void reset_FRAM_EPS()
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	i_error = FRAM_write(&data, SHUT_CAM_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
+	alpha = EPS_ALPHA_DEFFAULT_VALUE;
+	i_error = FRAM_write((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+	check_int("can't FRAM_write(EPS_ALPHA_ADDR), reset_FRAM_EPS", i_error);
 }
 
 void reset_EPS_voltages()
@@ -245,8 +251,15 @@ void EPS_Conditioning()
 		return;
 	set_Vbatt(eps_tlm.fields.vbatt);
 
+	i_error = FRAM_read((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+	check_int("can't FRAM_read(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
+	if (!CHECK_EPS_ALPHA_VALUE(alpha))
+	{
+		alpha = EPS_ALPHA_DEFFAULT_VALUE;
+	}
+
 	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
-	voltage_t VBatt_filtered = (voltage_t)(current_VBatt * alpha + (1 - alpha) * VBatt_previous);
+	voltage_t VBatt_filtered = (voltage_t)((float)current_VBatt * alpha + (1 - alpha) * (float)VBatt_previous);
 
 	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
 	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
@@ -261,7 +274,7 @@ void EPS_Conditioning()
 	}
 
 	update_powerLines(switches_states);
-	printf("last state: %d\n", batteryLastMode);
+	//printf("last state: %d\n", batteryLastMode);
 	//printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 	VBatt_previous = VBatt_filtered;
 }
@@ -409,4 +422,20 @@ void convert_raw_voltage(byte raw[EPS_VOLTAGES_SIZE_RAW], voltage_t voltages[EPS
 		voltages[i] += (voltage_t)(raw[l] << 8);
 		l++;
 	}
+}
+
+Boolean check_EPSTableCorrection(voltage_t table[2][NUM_BATTERY_MODE - 1])
+{
+	if (table[0][0] < EPS_VOL_LOGIC_MIN || table[0][0] >= table[1][NUM_BATTERY_MODE - 2])
+		return FALSE;
+	if (table[1][0] > EPS_VOL_LOGIC_MAX)
+		return FALSE;
+	for(int i = 1; i < NUM_BATTERY_MODE - 1; i++)
+	{
+		if (table[0][i] <= table[1][NUM_BATTERY_MODE - 1 - i] ||
+				table[0][i] >= table[1][NUM_BATTERY_MODE - 2 - i])
+			return FALSE;
+	}
+
+	return TRUE;
 }

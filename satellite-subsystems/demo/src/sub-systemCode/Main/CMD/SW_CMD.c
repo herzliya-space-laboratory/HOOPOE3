@@ -5,7 +5,6 @@
  *      Author: Hoopoe3n
  */
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
 #include <freertos/task.h>
 
 #include "SW_CMD.h"

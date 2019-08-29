@@ -9,8 +9,9 @@
 #define HOUSEKEEPING_H_
 
 #include "../Global/Global.h"
+#include "../Global/GlobalParam.h"
 #include "../COMM/GSC.h"
-#include "../Global/TM_managment.h"
+#include "../Global/TLM_management.h"
 
 #include <satellite-subsystems/cspaceADCS_types.h>
 
@@ -20,11 +21,12 @@
 #define NUMBER_OF_SOLAR_PANNELS	6
 
 #define ACK_HK_SIZE ACK_DATA_LENGTH
-#define EPS_HK_SIZE 49
+#define EPS_HK_SIZE 51
 #define SP_HK_SIZE	FLOAT_SIZE * NUMBER_OF_SOLAR_PANNELS
 #define CAM_HK_SIZE 62
-#define COMM_HK_SIZE 12
+#define COMM_HK_SIZE 18
 #define ADCS_HK_SIZE 34
+#define FS_HK_SIZE 4*4
 
 #define ADCS_SC_SIZE 6
 
@@ -34,38 +36,14 @@
 #define CAM_HK_FILE_NAME "CAMf"
 #define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
 #define ADCS_HK_FILE_NAME "ADCf"// ADCS
-#define BOS_HK_FILE_NAME	"BOSf"
+#define FS_HK_FILE_NAME "FSf"
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
-	EPS_HK_T = 1,
-	CAMERA_HK_T = 2,
-	COMM_HK_T = 3,
-	ADCS_HK_T = 4,
-	SP_HK_T = 5,
+	log_files_T = 1,
 	this_is_not_the_file_you_are_looking_for = 18,
-	ADCS_CSS_DATA_T = 20,
-	ADCS_Magnetic_filed_T = 21,
-	ADCS_CSS_sun_vector_T = 22,
-	ADCS_wheel_speed_T = 23,
-	ADCS_sensore_rate_T = 24,
-	ADCS_MAG_CMD_T = 25,
-	ADCS_wheel_CMD_T = 26,
-	ADCS_Mag_raw_T = 27,
-	ADCS_IGRF_MODEL_T = 28,
-	ADCS_Gyro_BIAS_T = 29,
-	ADCS_Inno_Vextor_T = 30,
-	ADCS_Error_Vec_T = 31,
-	ADCS_QUATERNION_COVARIANCE_T = 32,
-	ADCS_ANGULAR_RATE_COVARIANCE_T = 33,
-	ADCS_ESTIMATED_ANGLES_T = 34,
-	ADCS_Estimated_AR_T = 35,
-	ADCS_ECI_POS_T = 36,
-	ADCS_ECI_VEL_T = 255,
-	ADCS_SAV_Vel_T = 37,
-	ADCS_ECEF_POS_T = 38,
-	ADCS_LLH_POS_T = 39,
-	ADCS_EST_QUATERNION_T = 40
+	offlineTM_T = 50,
+	ADCS_sience_T = 128
 }HK_types;
 
 typedef union __attribute__ ((__packed__))
@@ -88,6 +66,8 @@ typedef union __attribute__ ((__packed__))
 		unsigned char Cause_of_last_reset;
 		unsigned char pptMode;
 		byte channelStatus;
+		systems_state systemState;
+		byte EPSSateNumber;
 	}fields;
 }EPS_HK;
 
@@ -132,6 +112,9 @@ typedef union __attribute__ ((__packed__))
 	{
 		voltage_t bus_vol;
 		current_t total_curr;
+        unsigned short tx_reflpwr;
+        unsigned short tx_fwrdpwr;
+        unsigned short rx_rssi;
 		unsigned short pa_temp;
 		unsigned short locosc_temp;
 		unsigned short ant_A_temp;
@@ -148,31 +131,20 @@ typedef union __attribute__ ((__packed__))
 	}fields;
 }SP_HK;
 
+typedef union __attribute__ ((__packed__))
+{
+	byte raw[FS_HK_SIZE];
+	struct __attribute__((packed))
+	{
+		  unsigned long  total;
+		  unsigned long  free;
+		  unsigned long  used;
+		  unsigned long  bad;
+	}fields;
+}FS_HK;
+
 typedef cspace_adcs_pwtempms_t ADCS_HK;
 
-/*
- * @brief 	saving every second telemetry from the ADCS, COMM, EPS and camera
- */
-void HouseKeeping_highRate_Task();
-/*
- * @brief 	saving every 10 seconds telemetry from the Solar panels
- */
-void HouseKeeping_lowRate_Task();
-
-/*
- * @brief 	creating the files in the TM_manegment for all the HK types
- * @return	-1 when its not the first activation, 0 on success
- */
-int create_files(Boolean firstActivation);
-
-/*
- * @brief		build correctly an SPL packet from raw data according to the HK type
- * @param[in]	the data type
- * @param[in]	the raw data from the TM_manegmant
- * @param[out]	the packet assembled
- * @return		-1 if the type is not the enum values, -2 if one of the pointers are NULL
- */
-int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet);
 
 /*
  * @brief		save a new execution ACK in ACK file with the online time
@@ -183,17 +155,13 @@ int build_HK_spl_packet(HK_types type, byte *raw_data, TM_spl *packet);
  */
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId);
 
-/*
- * @brief		find the name of a file from a HK type
- * @param[in]	HK type of the file
- * @param[out]	place to copy the file name
- * @return		-1 if the type is not the enum values, -2 if one of the pointers are NULL
- */
-int find_fileName(HK_types type, char *fileName);
+int SP_HK_collect(SP_HK* hk_out);
+int EPS_HK_collect(EPS_HK* hk_out);
+int CAM_HK_collect(CAM_HK* hk_out);
+int COMM_HK_collect(COMM_HK* hk_out);
+int FS_HK_collect(FS_HK* hk_out, int SD_num);
 
-/*
- * @brief		return the size of an HK element
- * @return		the size of the element requested, 0 if the value is not in the enum
- */
-int size_of_element(HK_types type);
+int HK_find_fileName(HK_types type, char* fileName);
+int HK_findElementSize(HK_types type);
+int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet);
 #endif /* HOUSEKEEPING_H_ */

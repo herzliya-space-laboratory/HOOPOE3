@@ -17,11 +17,6 @@
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
-void cmd_error(Ack_type* type, ERR_type* err)
-{
-	*type = ACK_NOTHING;
-	*err = ERR_FAIL;
-}
 void cmd_mute(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	//1. send ACK before mutes satellite
@@ -96,8 +91,13 @@ void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 
-	*err = ERR_SUCCESS;
 	change_trans_RSSI(cmd.data);
+	int error = FRAM_write(cmd.data, TRANSPONDER_RSSI_ADDR, 2);
+	check_int("cmd_change_trans_rssi, FRAM_write", error);
+	if (error == 0)
+		*err = ERR_SUCCESS;
+	else
+		*err = ERR_FRAM_WRITE_FAIL;
 }
 void cmd_aprs_dump(Ack_type* type, ERR_type* err)
 {
@@ -133,12 +133,56 @@ void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 	}
 	//2. update time in FRAM
-	else if (!FRAM_writeAndVerify(&cmd.data[0], BEACON_TIME_ADDR, 1))
+	else if (FRAM_writeAndVerify(&cmd.data[0], BEACON_TIME_ADDR, 1))
 	{
 		*err = ERR_FRAM_WRITE_FAIL;
 	}
 	else
 	{
 		*err = ERR_SUCCESS;
+	}
+}
+void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_UPDATE_BIT_RATE;
+	if (cmd.length != 1)
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	ISIStrxvuBitrate newParam;
+	Boolean validValue = FALSE;
+	for (uint8_t i = 1; i < 9; i *= 2)
+	{
+		if (cmd.data[0] == i)
+		{
+			newParam = (ISIStrxvuBitrate)cmd.data[0];
+			validValue = TRUE;
+			break;
+		}
+	}
+
+	if (validValue)
+	{
+		int error = FRAM_write(cmd.data, BIT_RATE_ADDR, 1);
+		check_int("FRAM_write, cmd_change_def_bit_rate", error);
+		if (error)
+		{
+			*err = ERR_FRAM_WRITE_FAIL;
+			return;
+		}
+		error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
+		check_int("IsisTrxvu_tcSetAx25Bitrate, cmd_change_def_bit_rate", error);
+		if (error)
+		{
+			*err = ERR_FAIL;
+			return;
+		}
+		*err = ERR_SUCCESS;
+	}
+	else
+	{
+		*err = ERR_PARAMETERS;
 	}
 }

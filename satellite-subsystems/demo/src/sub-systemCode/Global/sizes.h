@@ -27,6 +27,8 @@
 #define CHAR_SIZE	1
 #define SHORT_SIZE	2
 
+#define OFFLINE_FRAM_STRUCT_SIZE	10
+
 #define IMAGE_SIZE (IMAGE_WIDTH * IMAGE_HEIGHT)	///< image size in bytes
 #define MAX_SIZE_OF_PARAM_IMAGE_DUMP	9
 
@@ -58,7 +60,7 @@
 #define IMAGE_PACKET_SIZE				IMAGE_DATA_FIELD_PACKET_SIZE + SPL_TM_HEADER_SIZE
 
 #define STACK_DUMP_SIZE 2048//when you create the dump task, size of stack, //need to be tasted...
-#define DUMP_BUFFER_SIZE  40000
+#define DUMP_BUFFER_SIZE  100000
 
 #define EPS_VOLTAGES_SIZE_RAW (EPS_VOLTAGE_TABLE_NUM_ELEMENTS * 2) //!< Size of EPS_VOLTAGES_ADDR
 

@@ -11,7 +11,6 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <freertos/semphr.h>
 
 #include <hal/Utility/util.h>
 #include <hal/Timing/WatchDogTimer.h>
@@ -34,6 +33,8 @@
 #include "sub-systemCode/Main/Main_Init.h"
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
+
+#include "sub-systemCode/Global/OnlineTM.h"
 
 #define DEBUGMODE
 
@@ -107,7 +108,7 @@ int main()
 	WDT_start();
 
 	printf("Task Main 2121\n");
-	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 2048, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
+	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 8196, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
 	printf("start sch\n");
 	vTaskStartScheduler();
 	return 0;

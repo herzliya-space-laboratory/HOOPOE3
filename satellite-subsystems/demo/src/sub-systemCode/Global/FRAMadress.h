@@ -18,6 +18,7 @@
 #define SHUT_ADCS_ADDR		0x10D// << 1 byte >>
 #define SHUT_CAM_ADDR		0x10E// << 1 byte >>
 #define DEPLOY_ANTS_ATTEMPTS_ADDR	0x10F// << 3 byte >>, array of 3 variables - 3 attempts
+#define OFFLINE_LIST_SETTINGS_ADDR	0x600// << OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST = 9 * 20 = 180 >>
 //ANTS
 #define ARM_DEPLOY_ADDR 0x1100// << 1 byte >> , can be 0 or 255
 #define ANTS_FRAM_ADDR 0x1101
@@ -25,18 +26,19 @@
 //EPS
 #define EPS_VOLTAGES_ADDR 0x2100 // << EPS_VOLTAGES_SIZE_RAW bytes >>
 #define EPS_STATES_ADDR 0x211C // << 1 byte >> Address of consumption state
+#define EPS_ALPHA_ADDR		0x211D	//<< 4 byte >>
 
 //TRX
-#define FRAME_COUNT_ADDR 0x311C // << 1 byte >>
 #define BEACON_LOW_BATTERY_STATE_ADDR 0x311D // << 2 bytes >>
 #define TRANS_LOW_BATTERY_STATE_ADDR 0x311F
 #define NUMBER_COMMAND_FRAM_ADDR  0x3121 // << 1 byte >> The number of delayed command stored in the FRAM
 #define DELAY_COMMAD_FRAM_ADDR	0x3122 //<<100 * SIZE_OF_COMMAND = 30080 bytes >> All delayed command will be stored in this address ass one big array of bytes
 #define NUMBER_PACKET_APRS_ADDR 0x8CEE // << 1 byte >> number of APRS packets in the FRAM
 #define APRS_PACKETS_ADDR 0x8CEF// << 20 * 18 = 360 >>
-#define BEACON_BIT_RATE_ADDR 0x8E57// << 1 byte >>
 #define BEACON_TIME_ADDR 0x8E58// << 1 byte >>
-#define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
+#define MUTE_TIME_ADDR		0x8E59//<<4 bytes>>
+#define BIT_RATE_ADDR		0x8E5D //<<1 bytes>>
+#define TRANSPONDER_RSSI_ADDR	0x8E5E// << 2 bytes>
 
 //ADCS
 #define STAGE_TABLE_ADDR 0x9044
