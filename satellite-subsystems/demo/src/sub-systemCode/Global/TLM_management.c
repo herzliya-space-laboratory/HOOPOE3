@@ -332,6 +332,10 @@ static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address
 static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 {
 	PLZNORESTART();
+	if(current_time<creation_time)
+	{
+		return 0;
+	}
 	return ((current_time-creation_time)/SKIP_FILE_TIME_SEC);
 }
 //write to curr_file_name
@@ -353,12 +357,13 @@ FileSystemResult c_fileReset(char* c_file_name)
 	{
 		return FS_NOT_EXIST;
 	}
-	for(int i =0; i<c_file.num_of_files;i++)
+	int last_index = getFileIndex(c_file.creation_time,c_file.last_time_modified);
+	for(int i =0; i<last_index+1;i++)
 	{
 		get_file_name_by_index(c_file_name,i,curr_file_name);
-		f_delete(c_file_name);
+		f_delete(curr_file_name);
 	}
-	c_file.last_time_modified=-1;
+	c_file.last_time_modified=curr_time;
 	c_file.creation_time =curr_time;
 	return FS_SUCCSESS;
 }
@@ -425,12 +430,12 @@ static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long fro
 	else if (error != 0)
 		return FS_FAIL;
 	char* buffer = allocked_delete_element;
-	for(int i = 0; i<f_filelength(file_name); i++)
+	for(int i = 0; i<f_filelength(file_name); i+=full_element_size)
 	{
 
 		f_read(buffer,1,full_element_size,file);
 		unsigned int element_time = *((unsigned int*)buffer);
-		if(element_time>=from_time&&element_time<=to_time)
+		if(element_time<from_time||element_time>to_time)
 		{
 			f_write(buffer,1,full_element_size,temp_file);
 		}
@@ -543,9 +548,9 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
-		int error = f_managed_open(curr_file_name, "r+", &current_file);
+		int error = f_managed_open(curr_file_name, "r", &current_file);
 		if (current_file == NULL)
-			return FS_NOT_EXIST;
+			continue;
 		unsigned int length =f_filelength(curr_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
 		int err_fread=0;
 		(void)err_fread;
