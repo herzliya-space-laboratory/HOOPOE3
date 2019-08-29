@@ -482,6 +482,7 @@ void Rx_logic()
 			i_error = decode_TCpacket(dataBuffer, dataBuffer_length ,&packet);
 			if (i_error == 0)
 			{
+				GomEpsResetWDT(0);
 				set_ground_conn(TRUE);
 				// 1.3. sends receive ACK
 				byte rawACK[ACK_RAW_SIZE];
