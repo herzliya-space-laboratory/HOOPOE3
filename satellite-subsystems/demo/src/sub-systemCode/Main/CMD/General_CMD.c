@@ -141,7 +141,11 @@ void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
 {
 	*type = ACK_RESET_SD_TLM;
 	*err = ERR_SUCCESS;
-	delete_allTMFilesFromSD();
+	if(f_managed_enterFS() == 0)
+	{
+		delete_allTMFilesFromSD();
+		f_managed_releaseFS();
+	}
 }
 
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)

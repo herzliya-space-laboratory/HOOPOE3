@@ -73,7 +73,15 @@ void delete_allTMFilesFromSD()
 			count++;
 			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
 			{
-				f_delete(find.filename);
+				int err = 0;
+				for(int i = 0; i < 20; i++)
+				{
+					err = f_delete(find.filename);
+					if (err == 0)
+						break;
+					else
+						printf("f_delete in delete_allTMFilesFromSD: %d\n", err);
+				}
 			}
 
 		} while (!f_findnext(&find));
@@ -353,6 +361,7 @@ FileSystemResult c_fileReset(char* c_file_name)
 	PLZNORESTART();
 	unsigned int curr_time;
 	Time_getUnixEpoch(&curr_time);
+	int err;
 	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
 	{
 		return FS_NOT_EXIST;
@@ -360,8 +369,18 @@ FileSystemResult c_fileReset(char* c_file_name)
 	int last_index = getFileIndex(c_file.creation_time,c_file.last_time_modified);
 	for(int i =0; i<last_index+1;i++)
 	{
+		int j=0;
 		get_file_name_by_index(c_file_name,i,curr_file_name);
-		f_delete(curr_file_name);
+		do
+		{
+			err = f_delete(curr_file_name);
+			if(err!=0)
+			{
+				printf("c_fileReset  f_delete: %d\n",err);
+			}
+			vTaskDelay(100);
+		}
+		while(err !=0 &&(j++)<20);
 	}
 	c_file.last_time_modified=curr_time;
 	c_file.creation_time =curr_time;
