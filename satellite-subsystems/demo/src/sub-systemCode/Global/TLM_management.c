@@ -5,7 +5,7 @@
  *      Author: Idan
  */
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include "freertosExtended.h"
 #include <freertos/task.h>
 
 #include <satellite-subsystems/GomEPS.h>
@@ -104,7 +104,7 @@ static int setNumOfFilesInFS(int new_num_of_files)
 
 int f_managed_enterFS()
 {
-	if (xSemaphoreTake(xEnterTaskFS, FS_TAKE_SEMPH_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xEnterTaskFS, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
 		int error = f_enterFS();
 		if (error != 0)
@@ -136,7 +136,7 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 {
 	int lastError = 0;
 
-	if (xSemaphoreTake(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
 		do
 		{

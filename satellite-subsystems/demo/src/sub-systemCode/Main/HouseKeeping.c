@@ -6,10 +6,6 @@
  *  Created on: Jan 18, 2019
  *      Author: elain
  */
-#include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
-#include <freertos/task.h>
-
 #include <at91/utility/exithandler.h>
 #include <at91/commons.h>
 #include <at91/utility/trace.h>

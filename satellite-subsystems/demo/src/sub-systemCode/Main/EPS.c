@@ -6,7 +6,6 @@
  *      Author: I7COMPUTER
  */
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
 #include <freertos/task.h>
 
 #include <at91/utility/exithandler.h>

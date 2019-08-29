@@ -18,14 +18,14 @@ src/main.d: ../src/main.c \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/mpu_wrappers.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/task.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/list.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/WatchDogTimer.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/boolean.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/Time.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Drivers/LED.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Drivers/I2C.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Drivers/SPI.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/version/version.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Storage/FRAM.h \
@@ -113,10 +113,6 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/task.h
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/list.h:
 
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h:
-
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/WatchDogTimer.h:
@@ -128,6 +124,10 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/Time.h:
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Drivers/LED.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Drivers/I2C.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Drivers/SPI.h:
 

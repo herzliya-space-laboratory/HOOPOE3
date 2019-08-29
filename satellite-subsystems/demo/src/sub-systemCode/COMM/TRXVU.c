@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include "../Global/freertosExtended.h"
 #include <freertos/task.h>
 
 #include <at91/utility/exithandler.h>
@@ -359,7 +359,7 @@ void Transponder_task(void *arg)
 		time = time_now + DEFAULT_TIME_TRANSMITTER;
 	}
 
-	if (xSemaphoreTake(xIsTransmitting, MAX_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xIsTransmitting, MAX_DELAY) == pdTRUE)
 	{
 		if (!get_system_state(mute_param) && get_system_state(Tx_param))
 		{
@@ -381,7 +381,7 @@ void Transponder_task(void *arg)
 	}
 
 	change_TRXVU_state(NOMINAL_MODE);
-	lu_error = xSemaphoreGive(xIsTransmitting);
+	lu_error = xSemaphoreGive_extended(xIsTransmitting);
 	check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
 	vTaskDelete(NULL);
 }
@@ -400,7 +400,7 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 			check_int("f_managed_enterFS in Transponder task", i_error);
 			save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
 			change_TRXVU_state(NOMINAL_MODE);
-			portBASE_TYPE lu_error = xSemaphoreGive(xIsTransmitting);
+			portBASE_TYPE lu_error = xSemaphoreGive_extended(xIsTransmitting);
 			check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
 			terminateTask();
 		}
@@ -769,7 +769,7 @@ int TRX_sendFrame(byte* data, uint8_t length)
 		return 5;
 	}
 
-	if (xSemaphoreTake(xIsTransmitting, MAX_DELAY))
+	if (xSemaphoreTake_extended(xIsTransmitting, MAX_DELAY))
 	{
 		unsigned char avalFrames = VALUE_TX_BUFFER_FULL;
 
@@ -790,8 +790,8 @@ int TRX_sendFrame(byte* data, uint8_t length)
 		}while(avalFrames == VALUE_TX_BUFFER_FULL);
 
 		// returns xIsTransmitting semaphore
-		lu_error = xSemaphoreGive(xIsTransmitting);
-		check_portBASE_TYPE("TRX_sendFrame, xSemaphoreGive", lu_error);
+		lu_error = xSemaphoreGive_extended(xIsTransmitting);
+		check_portBASE_TYPE("TRX_sendFrame, xSemaphoreGive_extended", lu_error);
 		retVal = 0;
 	}
 	else

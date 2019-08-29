@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include "../Global/freertosExtended.h"
 #include <freertos/task.h>
 
 #include <at91/utility/exithandler.h>
@@ -102,12 +102,12 @@ int add_command(TC_spl command)
 {
 	portBASE_TYPE error;
 	// 1. try to take semaphore
-	if (xSemaphoreTake(xCTE, MAX_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xCTE, MAX_DELAY) == pdTRUE)
 	{
 		// 2. if queue full
 		if (place_in_list == COMMAND_LIST_SIZE)
 		{
-			error = xSemaphoreGive(xCTE);
+			error = xSemaphoreGive_extended(xCTE);
 			check_portBASE_TYPE("could not return xCTE in add_command", error);
 			return 1;
 		}
@@ -116,7 +116,7 @@ int add_command(TC_spl command)
 		// 4. moving forward current place in command queue
 		place_in_list++;
 		// 5. return semaphore
-		error = xSemaphoreGive(xCTE);
+		error = xSemaphoreGive_extended(xCTE);
 		check_portBASE_TYPE("cold not return xCTE in add_command", error);
 	}
 
@@ -126,13 +126,13 @@ int get_command(TC_spl* command)
 {
 	portBASE_TYPE error;
 	// 1. try to take semaphore
-	if (xSemaphoreTake(xCTE, MAX_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xCTE, MAX_DELAY) == pdTRUE)
 	{
 		// 2. check if there's commands in list
 		if (place_in_list == 0)
 		{
-			error = xSemaphoreGive(xCTE);
-			check_portBASE_TYPE("get_command, xSemaphoreGive(xCTE)", error);
+			error = xSemaphoreGive_extended(xCTE);
+			check_portBASE_TYPE("get_command, xSemaphoreGive_extended(xCTE)", error);
 			return 1;
 		}
 		// 3. copy first in command to TC_spl* command
@@ -148,8 +148,8 @@ int get_command(TC_spl* command)
 		reset_command(&command_to_execute[i]);
 		place_in_list--;
 		// 6. return semaphore
-		error = xSemaphoreGive(xCTE);
-		check_portBASE_TYPE("get_command, xSemaphoreGive(xCTE)", error);
+		error = xSemaphoreGive_extended(xCTE);
+		check_portBASE_TYPE("get_command, xSemaphoreGive_extended(xCTE)", error);
 	}
 	return 0;
 }
