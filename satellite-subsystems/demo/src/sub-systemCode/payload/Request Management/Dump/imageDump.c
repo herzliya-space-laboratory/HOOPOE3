@@ -314,6 +314,13 @@ void imageDump_task(void* param)
 		byte packetsToSend[BIT_FIELD_SIZE];
 		memcpy(packetsToSend, request.data + sizeof(imageid) + sizeof(byte) + sizeof(uint16_t), BIT_FIELD_SIZE);
 
+		printf("\n\n");
+		for (uint32_t i = 0; i < BIT_FIELD_SIZE; i++)
+		{
+			printf("%u ", packetsToSend[i]);
+		}
+		printf("\n\n");
+
 		error = bitField_imageDump(image_id, comprasionType, request.cmd_id, firstIndex, packetsToSend);
 	}
 	else if (request.id == Image_Dump_chunkField)
