@@ -236,7 +236,6 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 
 					lookForRequestToDelete_dump(cmdID);
 				}
-				vTaskDelay(1000);
 			}
 			while (FS_result == FS_BUFFER_OVERFLOW);
 		}
