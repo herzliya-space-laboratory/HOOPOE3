@@ -177,7 +177,7 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
  * @param[in]	the bit field. every bit represent a chunk, 1 means send this chunk 0 means skip this chunk.
  * 				the first bit is for @firstChunk_index.
  */
-ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[NUMBER_OF_CHUNKS_IN_CMD / 8])
+ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[BIT_FIELD_SIZE])
 {
 	int error;
 
@@ -197,7 +197,7 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 	pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
 	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
 	{
-		if (getBitValueByIndex(packetsToSend + i, NUMBER_OF_CHUNKS_IN_CMD / 8, i))
+		if (getBitValueByIndex(packetsToSend + i, BIT_FIELD_SIZE, i))
 		{
 			error = GetChunkFromImage(chunk, chunk_width, chunk_height, i + firstChunk_index, imageBuffer, comprasionType, image_size);
 			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
@@ -307,12 +307,12 @@ void imageDump_task(void* param)
 		imageid image_id;
 		memcpy(&image_id, request.data, sizeof(imageid));
 		fileType comprasionType;
-		memcpy(&comprasionType, request.data + 2, sizeof(byte));
+		memcpy(&comprasionType, request.data + sizeof(imageid), sizeof(byte));
 		uint16_t firstIndex;
-		memcpy(&firstIndex, request.data + 3, sizeof(uint16_t));
+		memcpy(&firstIndex, request.data + sizeof(imageid) + sizeof(byte), sizeof(uint16_t));
 
 		byte packetsToSend[BIT_FIELD_SIZE];
-		memcpy(packetsToSend, request.data + 5, BIT_FIELD_SIZE);
+		memcpy(packetsToSend, request.data + sizeof(imageid) + sizeof(byte) + sizeof(uint16_t), BIT_FIELD_SIZE);
 
 		error = bitField_imageDump(image_id, comprasionType, request.cmd_id, firstIndex, packetsToSend);
 	}
