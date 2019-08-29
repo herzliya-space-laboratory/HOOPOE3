@@ -193,9 +193,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	//TODO: finish switch from the TLC dictionary
 	int err = TRBL_SUCCESS;
 	int rv = 0;
-	unsigned char sub_type = cmd->subType;
+	byte sub_type = cmd->subType;
 
-	unsigned char data[300] = {0};
+	byte data[300] = {0};
 
 	cspace_adcs_bootprogram bootindex;
 	cspace_adcs_runmode_t runmode;
@@ -230,8 +230,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			}
 			else { // is TLM
 				if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
-					SendAdcsTlm((byte*)i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
-					SendAdcsTlm((byte*)&i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
+					SendAdcsTlm(i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
+					SendAdcsTlm(&(i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2]), i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
+
 				}else{
 					SendAdcsTlm((byte*)i2c_cmd.data,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
 				}
@@ -641,7 +642,8 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_GET_FULL_CONFIG_ST:
 			err = cspaceADCS_getADCSConfiguration(ADCS_ID,(unsigned char*)data);
-			SendAdcsTlm(data, ADCS_FULL_CONFIG_DATA_LENGTH,ADCS_GET_FULL_CONFIG_ST);//TODO: send in two parts. data is too long
+			SendAdcsTlm(data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_GET_FULL_CONFIG_ST);//send first half
+			SendAdcsTlm(&(data[ADCS_CMD_MAX_DATA_LENGTH/2]), ADCS_FULL_CONFIG_DATA_LENGTH - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_GET_FULL_CONFIG_ST);//send second half
 			break;
 		case ADCS_GET_SGP4_ORBIT_PARAMETERS_ST:
 			err = cspaceADCS_getSGP4OrbitParameters(ADCS_ID,(double*)data);
@@ -677,7 +679,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			i2c_cmd.id = GET_ADCS_FULL_CONFIG_CMD_ID;
 			i2c_cmd.length = ADCS_FULL_CONFIG_DATA_LENGTH;
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm(&(i2c_cmd.data[(data[0]<<8) + data[1]]),data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
+			SendAdcsTlm(&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
 			break;
 		case ADCS_SET_DATA_LOG_ST:
 			//TODO: implement
