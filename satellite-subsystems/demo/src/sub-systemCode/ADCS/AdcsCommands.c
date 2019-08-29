@@ -5,17 +5,17 @@
 #include <hal/Drivers/I2C.h>
 #include <hal/errors.h>
 
-#include "AdcsCommands.h"
-#include "AdcsMain.h"
 
 #include <satellite-subsystems/cspaceADCS_types.h>
 #include <satellite-subsystems/cspaceADCS.h>
+#include "../COMM/GSC.h"
+#include "../TRXVU.h"
 
 #include "sub-systemCode/COMM/splTypes.h"	// for ADCS command subtypes
 #include "sub-systemCode/ADCS/AdcsGetDataAndTlm.h"
 
-#include "../COMM/GSC.h"
-#include "../TRXVU.h"
+#include "AdcsCommands.h"
+#include "AdcsMain.h"
 
 
 
@@ -69,49 +69,6 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 }
 
 
-////'id' the command id to send to the adcs
-////'data' data to send to the ADCS.
-////'length' length of data
-////'ack' return value of the command
-//int AdcsI2cCmdWithID(unsigned char id,unsigned char* data, unsigned int length , int *ack)
-//{
-//	if(NULL == ack){
-//		return -2;
-//	}
-//	if(NULL == data ){
-//		return AdcsGenericI2cCmd(&id,sizeof(id),ack);
-//	}
-//
-//	unsigned char *buffer = malloc(length+sizeof(id));
-//	if(NULL == buffer){
-//		return -2;
-//	}
-//
-//	int err = 0;
-//	err = AdcsGenericI2cCmd(buffer,sizeof(buffer),ack);
-//	if(0 != err){
-//		free(buffer);
-//		return err;
-//	}
-//	free(buffer);
-//	return err;
-//}
-//
-//int AdcsI2cCmdReadTLM(unsigned char tlm_type, unsigned char* data, unsigned int length , int *ack)
-//{
-//	if(NULL == data){
-//		return -1;
-//	}
-//	int err = AdcsI2cCmdWithID(tlm_type,NULL,0,ack);
-//	if(0 != err){
-//		return -2;
-//	}
-//	err = I2C_read(ADCS_I2C_ADRR,data,length);
-//	if(0 != err){
-//		return err;
-//	}
-//	return 0;
-//}
 
 int ResetBootRegisters()
 {
@@ -141,10 +98,12 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	if(NULL == i2c_cmd){
 		return E_INPUT_POINTER_NULL;
 	}
-	char is_tlm = (i2c_cmd->id & 0x80); // if MSB is 1 then it is TLM. if 0 then TC
+	memcpy(&i2c_cmd->data[1],i2c_cmd->data,i2c_cmd->length);	// data bytes of the CMD(length can be 0)
+	i2c_cmd->data[0] = i2c_cmd->id;								// first byte is the CMD ID
 
+	char is_tlm = (i2c_cmd->id & 0x80); // if MSB is 1 then it is TLM. if 0 then TC
 	if(!is_tlm){ // is command
-		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length + 1); // +1 in case of 0 length cmd
+		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length + 1); // +1 in case of 0 length CMD
 		if(0 != err){
 			//TODO: log I2c write Err
 			return err;
@@ -212,16 +171,18 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
 			memcpy(&i2c_cmd,cmd->data,cmd->length);
-			if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
+			if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH / 2){
+
 				if ((i2c_cmd.data[0] & 0x0F) == 0){	// 4 LSB indicate which half of the CMD did we send.
 					memcpy(I2cData, &i2c_cmd.data[1], ADCS_CMD_MAX_DATA_LENGTH/2);
-				}else{
-					memcpy(&I2cData[ADCS_CMD_MAX_DATA_LENGTH/2], &i2c_cmd.data[1], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2);
-					memcpy(i2c_cmd.data, I2cData, i2c_cmd.length);
 				}
-			}
-			if((i2c_cmd.data[0] & 0xF0) != 0xF0){	// 4MSB indicate if CMD is assembled
-				break;
+				else{
+					memcpy(&I2cData[ADCS_CMD_MAX_DATA_LENGTH/2], &i2c_cmd.data[1], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2);
+				}
+				if((i2c_cmd.data[0] & 0xF0) != 0xF0){	// 4MSB indicate if CMD is assembled
+					break;
+				}
+				memcpy(i2c_cmd.data,I2cData,i2c_cmd.length);
 			}
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 
