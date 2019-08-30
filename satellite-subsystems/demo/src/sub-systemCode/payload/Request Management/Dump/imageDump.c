@@ -299,9 +299,6 @@ void imageDump_task(void* param)
 
 	error = readChunkDimentionsFromFRAM();
 
-	error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
-
 	if (request.id == Image_Dump_bitField)
 	{
 		imageid image_id;

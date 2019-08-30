@@ -94,43 +94,6 @@ void test_menu()
 }
 #endif
 
-static Boolean printImage(char fileName[12])
-{
-	f_enterFS();
-
-	unsigned int number_of_bytes = f_filelength(fileName);
-	F_FILE* file_handle = f_open(fileName, "r");
-
-	printf("\n\n%d\n\n", f_getlasterror());
-
-	unsigned char somebyte;
-
-	uint8_t pixel = 0;
-
-	for (unsigned int i = 0; i < number_of_bytes; i++)
-	{
-		f_read(&pixel, sizeof(char), 1, file_handle);
-		printf("%u ", pixel);
-
-		if (i % 200 == 0)
-			vTaskDelay(3);
-		if(i%1000000==0)
-		{
-			GomEpsPing(0, 0, &somebyte);
-			GomEpsResetWDT(0);
-		}
-	}
-
-	f_close(file_handle);
-
-	f_releaseFS();
-
-	printf("closed. \n");
-	printf("\n\nfinished. \n");
-	return TRUE;
-}
-
-
 void numberOfRestarts()
 {
 	byte raw[4];
@@ -244,49 +207,6 @@ void resetSD()
 	}
 }
 
-void pre_written_test(void)
-{
-	TurnOffGecko();
-	TurnOnGecko();
-
-	setCameraPhotographyValues(imageDataBase, 1, 53, 1, 2048, 1);
-
-	int err = takePicture(imageDataBase, FALSE_8BIT);
-	printf("\n\n\ttakePicture (%d)\n\n", err);
-
-	err = transferImageToSD(imageDataBase, 4);
-	printf("\n\n\ttransferImageToSD (%d)\n\n", err);
-
-	TurnOffGecko();
-/*
-	int err = CompressImage(1, raw, 50);
-	printf("\n\n\tCompressImage (%d)\n\n", err);
-
-	GomEpsResetWDT(0);
-
-	err = CreateImageThumbnail(1, t04, FALSE);
-	printf("\n\n\tCreateImageThumbnail - Binning (%d)\n\n", err);
-
-	err = CreateImageThumbnail(1, t16, TRUE);
-	printf("\n\n\tCreateImageThumbnail - Skipping (%d)\n\n", err);
-
-	char fileName[FILE_NAME_SIZE];
-
-	err = GetImageFileName(1, jpg, fileName);
-	printImage(fileName);
-
-	err = GetImageFileName(1, raw, fileName);
-	printImage(fileName);
-
-	err = GetImageFileName(1, t04, fileName);
-	printImage(fileName);
-
-	err = GetImageFileName(1, t16, fileName);
-	printImage(fileName);
-*/
-	printImage("i4.raw");
-}
-
 int InitSubsystems()
 {
 	StartI2C();
@@ -342,27 +262,6 @@ int InitSubsystems()
 	init_command();
 
 	init_onlineParam();
-
-	int error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-	check_int("IsisTrxvu_tcSetAx25Bitrate, image dump", error);
-
-	unsigned int selection;
-	printf( "\n\r Would you like to run the pre-written test?? \n\r");
-	printf("\t 0) no\n\r");
-	printf("\t 1) yes\n\r");
-
-	while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
-
-	switch (selection)
-	{
-		case 0:
-			break;
-		case 1:
-			pre_written_test();
-			break;
-		default:
-			break;
-	}
 
 	return 0;
 }
