@@ -334,8 +334,8 @@ void reset_offline_TM_list()
 	for (int i = 0; i < 4; i++)
 		add_onlineTM_param_to_save_list(i, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_SP_HK, 20, 4294967295u);
-	add_onlineTM_param_to_save_list(TM_FS_Space_A, 60, 4294967295u);
-	add_onlineTM_param_to_save_list(TM_FS_Space_B, 60, 4294967295u);
+	add_onlineTM_param_to_save_list(TM_FS_Space_A, 60*30, 4294967295u);
+	//add_onlineTM_param_to_save_list(TM_FS_Space_B, 60*30, 4294967295u);
 
 	save_offlineSetting_FRAM();
 }
