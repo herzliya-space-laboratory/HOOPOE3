@@ -100,8 +100,6 @@ void taskMain()
 
 int main()
 {
-	xTaskHandle taskMainHandle;
-
 	TRACE_CONFIGURE_ISP(DBGU_STANDARD, 2000000, BOARD_MCK);
 	// Enable the Instruction cache of the ARM9 core. Keep the MMU and Data Cache disabled.
 	CP15_Enable_I_Cache();
