@@ -2,6 +2,7 @@
  * main.c
  *      Author: Akhil
  */
+
 #include <satellite-subsystems/version/version.h>
 
 #include <at91/utility/exithandler.h>
@@ -42,10 +43,6 @@
 	#define DEBUGMODE
 #endif
 
-
-#define HK_DELAY_SEC 10
-#define MAX_SIZE_COMMAND_Q 20
-
 void save_time()
 {
 	int err;
@@ -80,10 +77,12 @@ void Command_logic()
 void taskMain()
 {
 	WDT_startWatchdogKickTask(10 / portTICK_RATE_MS, FALSE);
+
 	InitSubsystems();
+	printf("init\n");
 
 	vTaskDelay(100);
-	printf("init\n");
+
 	SubSystemTaskStart();
 	printf("Task Main start\n");
 
@@ -101,15 +100,19 @@ void taskMain()
 
 int main()
 {
+	xTaskHandle taskMainHandle;
+
 	TRACE_CONFIGURE_ISP(DBGU_STANDARD, 2000000, BOARD_MCK);
 	// Enable the Instruction cache of the ARM9 core. Keep the MMU and Data Cache disabled.
 	CP15_Enable_I_Cache();
 
+	// The actual watchdog is already started, this only initializes the watchdog-kick interface.
 	WDT_start();
 
 	printf("Task Main 2121\n");
 	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 8196, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
 	printf("start sch\n");
 	vTaskStartScheduler();
+
 	return 0;
 }

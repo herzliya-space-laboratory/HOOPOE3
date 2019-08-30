@@ -45,8 +45,12 @@
 #include "../ADCS.h"
 #include "../ADCS/Stage_Table.h"
 #include "../TRXVU.h"
+#include "../payload/Request Management/CameraManeger.h"
 #include "HouseKeeping.h"
 #include "commands.h"
+
+#include "../payload/Compression/ImageConversion.h"
+#include "../payload/Compression/jpeg/ImgCompressor.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -58,15 +62,17 @@
 stageTable ST;
 
 #ifdef TESTING
+void reset_FIRST_activation(Boolean8bit dataFRAM)
+{
+	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+}
 
 void test_menu()
 {
-	byte dataFRAM = FALSE_8BIT;
-	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+	reset_FIRST_activation(FALSE_8BIT);
 
 	Boolean exit = FALSE;
 	unsigned int selection;
-	byte data;
 	while (!exit)
 	{
 		printf( "\n\r Select a test to perform: \n\r");
@@ -82,7 +88,7 @@ void test_menu()
 			exit = TRUE;
 			break;
 		case 1:
-			FRAM_write(&data, FIRST_ACTIVATION_ADDR, 1);
+			reset_FIRST_activation(TRUE_8BIT);
 			break;
 		}
 	}
@@ -181,9 +187,6 @@ Boolean first_activation()
 	return TRUE;
 }
 
-#define BUFFLEN 30+F_MAXNAME
-
-
 void resetSD()
 {
 	F_FIND find;
@@ -245,11 +248,14 @@ int InitSubsystems()
 	printf("after deploy\n");
 	readAntsState();
 #endif
+
 #endif
 
 	init_adcs(activation);
 
 	init_trxvu();
+
+	initCamera(activation);
 
 	init_command();
 
@@ -263,6 +269,9 @@ int SubSystemTaskStart()
 	vTaskDelay(100);
 
 	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	vTaskDelay(100);
+
+	KickStartCamera();
 	return 0;
 }
 
