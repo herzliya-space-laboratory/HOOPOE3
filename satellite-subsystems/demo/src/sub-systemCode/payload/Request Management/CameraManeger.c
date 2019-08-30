@@ -10,16 +10,8 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 
-#include <at91/utility/exithandler.h>
-#include <at91/commons.h>
-#include <at91/utility/trace.h>
-#include <at91/peripherals/cp15/cp15.h>
-
 #include <hal/Utility/util.h>
-#include <hal/Timing/WatchDogTimer.h>
 #include <hal/Timing/Time.h>
-#include <hal/Drivers/I2C.h>
-#include <hal/Drivers/LED.h>
 #include <hal/errors.h>
 #include <hal/Storage/FRAM.h>
 
@@ -44,8 +36,6 @@
 
 static xQueueHandle interfaceQueue;
 xTaskHandle	camManeger_handler;
-
-static imageid last_image_taken;
 
 static time_unix lastPicture_time;
 static time_unix timeBetweenPictures;
@@ -112,7 +102,7 @@ void CameraManagerTaskMain()
 
 		vTaskDelay(DELAY);
 
-		if ( !get_ground_conn() && (last_image_taken > getLatestID(imageDataBase)) )
+		if ( !get_ground_conn() )
 		{
 			Time_getUnixEpoch(&turnedOnCamera);
 			ImageDataBaseResult error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
@@ -133,8 +123,6 @@ int initCamera(Boolean first_activation)
 	imageDataBase = initImageDataBase(first_activation);
 	if (imageDataBase == NULL)
 		error = -1;
-
-	last_image_taken = getLatestID(imageDataBase);
 
 	if (first_activation)
 	{
@@ -198,7 +186,7 @@ void Take_pictures_with_time_in_between()
 	time_unix currentTime;
 	Time_getUnixEpoch(&currentTime);
 
-	if ( (lastPicture_time + timeBetweenPictures <= currentTime) && (numberOfPicturesLeftToBeTaken != 0) )
+	if ( (lastPicture_time + timeBetweenPictures <= currentTime) && (numberOfPicturesLeftToBeTaken != 0)  && (get_system_state(cam_operational_param)) )
 	{
 		lastPicture_time = currentTime;
 
@@ -206,7 +194,6 @@ void Take_pictures_with_time_in_between()
 		TurnOnGecko();
 
 		takePicture(imageDataBase, FALSE_8BIT);
-		last_image_taken = getLatestID(imageDataBase);
 
 		numberOfPicturesLeftToBeTaken--;
 	}
@@ -242,13 +229,11 @@ void act_upon_request(Camera_Request request)
 	case take_picture:
 		Time_getUnixEpoch(&turnedOnCamera);
 		error = TakePicture(imageDataBase, request.data);
-		last_image_taken = getLatestID(imageDataBase);
 		break;
 
 	case take_picture_with_special_values:
 		Time_getUnixEpoch(&turnedOnCamera);
 		error = TakeSpecialPicture(imageDataBase, request.data);
-		last_image_taken = getLatestID(imageDataBase);
 		break;
 
 	case take_pictures_with_time_in_between:
@@ -263,12 +248,19 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case delete_picture:
-		Time_getUnixEpoch(&turnedOnCamera);
-		error = DeletePicture(imageDataBase, request.data);
+		if (get_system_state(cam_operational_param))
+		{
+			Time_getUnixEpoch(&turnedOnCamera);
+			error = DeletePicture(imageDataBase, request.data);
+		}
+		else
+		{
+			addRequestToQueue(request);
+		}
 		break;
 
 	case transfer_image_to_OBC:
-		if (get_ground_conn())
+		if (get_ground_conn() && !get_system_state(cam_operational_param))
 		{
 			addRequestToQueue(request);
 		}
@@ -306,8 +298,11 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case Turn_On_Camera:
-		Time_getUnixEpoch(&turnedOnCamera);
-		TurnOnGecko();
+		if (get_system_state(cam_operational_param))
+		{
+			Time_getUnixEpoch(&turnedOnCamera);
+			TurnOnGecko();
+		}
 		break;
 
 	case Turn_Off_Camera:

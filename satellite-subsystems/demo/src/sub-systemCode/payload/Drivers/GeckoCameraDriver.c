@@ -16,6 +16,7 @@
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
 
+#include "../../Global/GlobalParam.h"
 #include "../../Global/logger.h"
 
 #include "GeckoCameraDriver.h"
@@ -69,6 +70,7 @@ Boolean TurnOnGecko()
 
 	//Initialized_GPIO();
 
+	set_system_state(cam_param, SWITCH_ON);
 	WritePayloadLog(PAYLOAD_TURNED_GECKO_ON, 0);
 
 	return TRUE;
@@ -92,6 +94,7 @@ Boolean TurnOffGecko()
 
 	//De_Initialized_GPIO();
 
+	set_system_state(cam_param, SWITCH_OFF);
 	WritePayloadLog(PAYLOAD_TURNED_GECKO_OFF, 0);
 
 	return TRUE;

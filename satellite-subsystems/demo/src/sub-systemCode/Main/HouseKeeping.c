@@ -156,8 +156,8 @@ int CAM_HK_collect(CAM_HK* hk_out)
 {
 	if (get_system_state(cam_param) == SWITCH_OFF)
 		return -1;
-	hk_out->fields.VoltageInput5V = (voltage_t)(GECKO_GetCurrentInput5V() * 1000);
-	hk_out->fields.CurrentInput5V = (current_t)(GECKO_GetVoltageInput5V() * 1000);
+	hk_out->fields.VoltageInput5V = (voltage_t)(GECKO_GetVoltageInput5V() * 1000);
+	hk_out->fields.CurrentInput5V = (current_t)(GECKO_GetCurrentInput5V() * 1000);
 	hk_out->fields.VoltageFPGA1V = (voltage_t)(GECKO_GetVoltageFPGA1V() * 1000);
 	hk_out->fields.CurrentFPGA1V = (current_t)(GECKO_GetCurrentFPGA1V() * 1000);
 	hk_out->fields.VoltageFPGA1V8 = (voltage_t)(GECKO_GetVoltageFPGA1V8() * 1000);

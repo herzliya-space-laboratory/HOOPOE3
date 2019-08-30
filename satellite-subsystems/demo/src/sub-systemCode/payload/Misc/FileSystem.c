@@ -64,8 +64,6 @@ int ReadFromFile(F_FILE* file, byte* buffer, uint32_t size_of_element, uint32_t 
 		return -1;
 	}
 
-	f_flush(file);
-
 	return f_getlasterror();
 }
 int WriteToFile(F_FILE* file, byte* buffer, uint32_t number_of_elements, uint32_t size_of_element)
