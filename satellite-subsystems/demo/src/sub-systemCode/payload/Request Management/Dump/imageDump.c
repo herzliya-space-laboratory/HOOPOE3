@@ -197,7 +197,7 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 	pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
 	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
 	{
-		if (getBitValueByIndex(packetsToSend + i, BIT_FIELD_SIZE, i))
+		if (getBitValueByIndex(packetsToSend, BIT_FIELD_SIZE, i))
 		{
 			error = GetChunkFromImage(chunk, chunk_width, chunk_height, i + firstChunk_index, imageBuffer, comprasionType, image_size);
 			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
@@ -315,7 +315,8 @@ void imageDump_task(void* param)
 		memcpy(packetsToSend, request.data + sizeof(imageid) + sizeof(byte) + sizeof(uint16_t), BIT_FIELD_SIZE);
 
 		printf("\n\n");
-		for (uint32_t i = 0; i < BIT_FIELD_SIZE; i++)
+		unsigned int i;
+		for (i = 0; i < BIT_FIELD_SIZE; i++)
 		{
 			printf("%u ", packetsToSend[i]);
 		}
