@@ -20,7 +20,8 @@
 #include "../EPS.h"
 #define ADCS_ID 0
 #define CMD_FOR_TEST_AMOUNT 34
-#define TestDelay (10*1000)
+#define TestDelay (30*1000)
+#define INIT_DELAY (20*1000)
 #define TEST_NUM 1
 
 void TaskMamagTest();
@@ -58,7 +59,7 @@ void testInit()
 	if(0 != err){
 		printf("\t---ADCS test init command error = %d\n", err);
 	}
-	vTaskDelay(10000);
+	vTaskDelay(INIT_DELAY);
 
 	cmd.subType = ADCS_SET_PWR_CTRL_DEVICE_ST;
 	cmd.length = sizeof(cspace_adcs_powerdev_t);
@@ -194,10 +195,10 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 
 	//test #1 data
 	getSubType[testNum] = ADCS_I2C_GENRIC_ST; //generic I2C command #131
-	getLength[testNum] = sizeof(adcs_i2c_cmd);
 	i2c_cmd.id = 131;
 	i2c_cmd.length = 1;
 	i2c_cmd.ack = 3;
+	getLength[testNum] = sizeof(adcs_i2c_cmd) - ADCS_CMD_MAX_DATA_LENGTH + i2c_cmd.length;
 	memcpy(getData[testNum],&i2c_cmd,getLength[testNum]);
 	setSubType[testNum] = ADCS_CACHE_ENABLE_ST;
 	setData[testNum][0] = 1;
@@ -247,13 +248,12 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	testNum++;
 
 	//test #6 data
-	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_SET_MTQ_CONFIG_ST;
-	setLength[testNum] = 4;
-	setData[testNum][0] = ADCS_SET_MTQ_CONFIG_ST;
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = MTQ_CONFIG_CMD_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 0;
 	getData[testNum][1] = 0;
@@ -261,13 +261,12 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	testNum++;
 
 	//test #7 data
-	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_RW_CONFIG_ST;
-	setLength[testNum] = 5;
-	setData[testNum][0] = ADCS_RW_CONFIG_ST;
+	setLength[testNum] = SET_WHEEL_CONFIG_DATA_LENGTH;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 3;
 	getData[testNum][1] = 0;
@@ -275,14 +274,12 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	testNum++;
 
 	//test #8 data
-	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	setSubType[testNum] = ADCS_GYRO_CONFIG_ST;
-	setLength[testNum] = 4;
-	setData[testNum][0] = ADCS_GYRO_CONFIG_ST;
-
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = SET_GYRO_CONFIG_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 6;
 	}
+	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 7;
 	getData[testNum][1] = 0;
@@ -296,9 +293,8 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 10;
 	setSubType[testNum] = ADCS_CSS_CONFIG_ST;
-	setLength[testNum] = 11;
-	setData[testNum][0] = ADCS_CSS_CONFIG_ST;
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = SET_CSS_CONFIG_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
 	testNum++;
@@ -310,29 +306,31 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 11;
 	setSubType[testNum] = ADCS_CSS_RELATIVE_SCALE_ST;
-	setLength[testNum] = 12;
-	setData[testNum][0] = ADCS_CSS_RELATIVE_SCALE_ST;
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = SET_CSS_SCALE_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
 	testNum++;
 
-	//test #11 data
+	//test #11 data  TODO
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 101;
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 6;
 	setSubType[testNum] = ADCS_SET_MAGNETMTR_MOUNT_ST;
-	setLength[testNum] = 7;
+	setLength[testNum] = sizeof(cspace_adcs_magmountcfg_t);
+	cspace_adcs_magmountcfg_t magMount;
+	magMount.fields.mounttrans_alpha_ang = 0;
+	magMount.fields.mounttrans_beta_ang = 0;
+	magMount.fields.mounttrans_gamma_ang = 0;
 	setData[testNum][0] = ADCS_SET_MAGNETMTR_MOUNT_ST;
-
 	for(int i = 1; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
 	testNum++;
 
-	//test #12 data
+	//test #12 data //TODO
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 107;
@@ -347,7 +345,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	}
 	testNum++;
 
-	//test #13 data
+	//test #13 data //TODO
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 113;
@@ -361,7 +359,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	}
 	testNum++;
 
-	//test #14 data
+	//test #14 data //TODO
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 131;
@@ -375,7 +373,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	}
 	testNum++;
 
-	//test #15 data
+	//test #15 data //TODO
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 138;
@@ -397,10 +395,8 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 14;
 	setSubType[testNum] = ADCS_SET_DETUMB_CTRL_PARAM_ST;
-	setLength[testNum] = 15;
-	setData[testNum][0] = ADCS_SET_DETUMB_CTRL_PARAM_ST;
-
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = DETUMB_CTRL_PARAM_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
 	testNum++;
@@ -412,10 +408,8 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 20;
 	setSubType[testNum] = ADCS_SET_YWHEEL_CTRL_PARAM_ST;
-	setLength[testNum] = 20;
-	setData[testNum][0] = ADCS_SET_YWHEEL_CTRL_PARAM_ST;
-
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = SET_YWHEEL_CTRL_PARAM_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
 	testNum++;
@@ -427,10 +421,8 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 8;
 	setSubType[testNum] = ADCS_SET_RWHEEL_CTRL_PARAM_ST;
-	setLength[testNum] = 9;
-	setData[testNum][0] = ADCS_SET_RWHEEL_CTRL_PARAM_ST;
-
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = SET_RWHEEL_CTRL_PARAM_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
 	testNum++;
@@ -442,10 +434,8 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 24;
 	setSubType[testNum] = ADCS_SET_MOMENT_INTERTIA_ST;
-	setLength[testNum] = 12;
-	setData[testNum][0] =ADCS_SET_MOMENT_INTERTIA_ST;
-
-	for(int i = 1; i<setLength[testNum]; i++){
+	setLength[testNum] = SET_MOMENT_INERTIA_DATA_LENGTH;
+	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
 	testNum++;
@@ -457,9 +447,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getData[testNum][1] = 0;
 	getData[testNum][2] = 0;
 	setSubType[testNum] = ADCS_PROD_INERTIA_ST;
-	setLength[testNum] = 13;
-	setData[testNum][0] = ADCS_PROD_INERTIA_ST;
-
+	setLength[testNum] = SET_PROD_INERTIA_DATA_LENGTH;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
@@ -513,8 +501,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 		SGP4_Init[testNum-24] = 1; //change from 0 there from last test
 		getSubType[testNum] = ADCS_GET_SGP4_ORBIT_PARAMETERS_ST;
 		setLength[testNum] = sizeof(double);
-		setData[testNum][0] = setSubType[testNum];
-		memcpy(&(setData[testNum][1]), &SGP4_Init[testNum-24], setLength[testNum]);
+		memcpy(&(setData[testNum][0]), &SGP4_Init[testNum-24], setLength[testNum]);
 	}
 	testNum++;
 

@@ -81,8 +81,8 @@ typedef struct _adcs_i2c_cmd
 {
 	unsigned char id;
 	unsigned short length;
-	byte data[ADCS_CMD_MAX_DATA_LENGTH];
 	AdcsTcErrorReason ack;
+	byte data[ADCS_CMD_MAX_DATA_LENGTH];
 }adcs_i2c_cmd;
 
 

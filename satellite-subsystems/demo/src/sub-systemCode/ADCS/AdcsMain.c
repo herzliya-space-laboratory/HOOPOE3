@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ADCS_INIT_DELAY 				10000 	//10sec delay fot the ADCS to start
 #define DEFAULT_ADCS_LOOP_DELAY 		1000 	//the loop runs in 1Hz
 #define DEFAULT_ADCS_QUEUE_WAIT_TIME	 100	// amount of time to wait or cmd to arrive into Queue
 
@@ -117,6 +118,8 @@ void AdcsTask()
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
 	//TODO: log start task
+
+	vTaskDelay(ADCS_INIT_DELAY);
 
 	while(TRUE)
 	{

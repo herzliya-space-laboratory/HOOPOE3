@@ -98,11 +98,12 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	if(NULL == i2c_cmd){
 		return E_INPUT_POINTER_NULL;
 	}
-	memcpy(&i2c_cmd->data[1],i2c_cmd->data,i2c_cmd->length);	// data bytes of the CMD(length can be 0)
-	i2c_cmd->data[0] = i2c_cmd->id;								// first byte is the CMD ID
+
 
 	char is_tlm = (i2c_cmd->id & 0x80); // if MSB is 1 then it is TLM. if 0 then TC
 	if(!is_tlm){ // is command
+		memcpy(&i2c_cmd->data[1],i2c_cmd->data,i2c_cmd->length);	// data bytes of the CMD(length can be 0)
+		i2c_cmd->data[0] = i2c_cmd->id;								// first byte is the CMD ID
 		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length + 1); // +1 in case of 0 length CMD
 		if(0 != err){
 			//TODO: log I2c write Err
@@ -169,7 +170,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	switch(sub_type)
 	{
 		//generic I2C command
-	case ADCS_I2C_GENRIC_ST:
+		case ADCS_I2C_GENRIC_ST:
 				memcpy(&i2c_cmd,cmd->data,cmd->length);
 				if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH / 2){
 
