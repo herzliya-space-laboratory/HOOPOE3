@@ -118,5 +118,5 @@ TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates);
  */
 TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]);
 
-}
+
 #endif /* ADCSGETDATAANDTLM_H_ */

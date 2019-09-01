@@ -442,10 +442,10 @@ TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10])
 	if(NULL == raw_css){
 		return TRBL_NULL_DATA;
 	}
-	if(0 != cspaceADCS_getRawCss1_6Measurements(0,raw_css)){
+	if(0 != cspaceADCS_getRawCss1_6Measurements(0,(cspace_adcs_rawcss1_6_t*)raw_css)){
 		return TRBL_FAIL;
 	}
-	if(0 != cspaceADCS_getRawCss7_10Measurements(0,&raw_css[6])){
+	if(0 != cspaceADCS_getRawCss7_10Measurements(0,(cspace_adcs_rawcss7_10_t*)&raw_css[6])){
 		return TRBL_FAIL;
 	}
 	return TRBL_SUCCESS;
