@@ -42,13 +42,14 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 	int err = 0;
 	unsigned char data[4] = {0};
 	unsigned char id = ADCS_I2C_TELEMETRY_ACK_REQUEST;
-	err = I2C_write(ADCS_I2C_ADRR, &id, 1);
-	if(0 != err){
-		return err;
-	}
+
 	unsigned char processed_flag = 0;
 	unsigned char counter = 0;
 	do{
+		err = I2C_write(ADCS_I2C_ADRR, &id, 1);
+		if(0 != err){
+			return err;
+		}
 		err = I2C_read(ADCS_I2C_ADRR,  data, sizeof(data));
 		if(0 != err){
 			return err;
@@ -58,9 +59,10 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 			break;
 		}
 		vTaskDelay(5);
-		if(10 == counter ){	// try 10 times and then exit
+		if(10 <= counter ){	// try 10 times and then exit
 			return E_COMMAND_NACKED;
 		}
+		counter++;
 	}while(1);
 	if(NULL != rv){
 		*rv = (AdcsTcErrorReason)data[ADCS_ACK_TC_ERR_INDEX];
