@@ -420,6 +420,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			memcpy(&savimag_param,cmd->data,sizeof(savimag_param));
 			err = cspaceADCS_saveImage(ADCS_ID, savimag_param);
 			break;
+		case ADCS_NOP_ST:
+			printf("\n\t----ADCS NOP:\t-_(\"/)_- \n");
+			 break;
 		case ADCS_SET_BOOT_INDEX_ST:
 			memcpy(&bootindex,cmd->data,sizeof(bootindex));
 			err = cspaceADCS_BLSetBootIndex(ADCS_ID,bootindex);
