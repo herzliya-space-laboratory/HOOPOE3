@@ -179,21 +179,26 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
  */
 ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[BIT_FIELD_SIZE])
 {
-	int error;
+	int error = f_managed_enterFS();
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	char file_name[FILE_NAME_SIZE];
 	GetImageFileName(image_id, comprasionType, file_name);
 
-	F_FILE* current_file = NULL;
-	error = OpenFile(&current_file, file_name, "r");;
+	F_FILE *file = NULL;
+	error = f_managed_open(file_name, "r", &file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t image_size = f_filelength(file_name);
 	byte* buffer = imageBuffer;
 
-	error = ReadFromFile(current_file, buffer, image_size, 1);
+	error = ReadFromFile(file, buffer, image_size, 1);
 	check_int("f_read in bitField_imageDump", error);
 
-	error = CloseFile(&current_file);
+	error = f_managed_close(&file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
+	error = f_managed_releaseFS();
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
@@ -240,13 +245,15 @@ ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], ui
 
 ImageDataBaseResult chunkField_imageDump(Camera_Request request, imageid image_id, fileType comprasionType, uint16_t firstIndex, uint16_t lastIndex)
 {
-	int error;
+	int error = f_managed_enterFS();
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	char file_name[FILE_NAME_SIZE];
 	GetImageFileName(image_id, comprasionType, file_name);
 
 	F_FILE* current_file = NULL;
-	error = OpenFile(&current_file, file_name, "r");;
+	error = f_managed_open(file_name, "r", &current_file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t image_size = f_filelength(file_name);
 	byte* buffer = imageBuffer;
@@ -254,7 +261,10 @@ ImageDataBaseResult chunkField_imageDump(Camera_Request request, imageid image_i
 	error = ReadFromFile(current_file, buffer, image_size, 1);
 	check_int("f_read in bitField_imageDump", error);
 
-	error = CloseFile(&current_file);
+	error = f_managed_close(&current_file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
+	error = f_managed_releaseFS();
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	pixel_t chunk[CHUNK_SIZE(chunk_width, chunk_height)];
@@ -290,9 +300,8 @@ void imageDump_task(void* param)
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
-	int error = 0;
-
-	keepTryingTo_enterFS();
+	int error = f_managed_enterFS();
+	// ToDo: error log
 
 	vTaskDelay(SYSTEM_DEALY);
 

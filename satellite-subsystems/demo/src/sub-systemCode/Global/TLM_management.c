@@ -117,7 +117,7 @@ int f_managed_enterFS()
 		int error = f_enterFS();
 		if (error != 0)
 		{
-			portBASE_TYPE portRet = xSemaphoreGive(xEnterTaskFS);
+			portBASE_TYPE portRet = xSemaphoreGive_extended(xEnterTaskFS);
 			check_portBASE_TYPE("could not return the xEnterTaskFS", portRet);
 			return error;
 		}
@@ -133,7 +133,7 @@ int f_managed_enterFS()
 int f_managed_releaseFS()
 {
 	f_releaseFS();
-	if (xSemaphoreGive(xEnterTaskFS) == pdTRUE)
+	if (xSemaphoreGive_extended(xEnterTaskFS) == pdTRUE)
 		return 0;
 
 	printf("could not return the xEnterTaskFS\n");
@@ -176,7 +176,7 @@ int f_managed_close(F_FILE** fileHandler)
 		return error;
 	}
 
-	if (xSemaphoreGive(xFileOpenHandler) == pdTRUE)
+	if (xSemaphoreGive_extended(xFileOpenHandler) == pdTRUE)
 		return 0;
 
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;

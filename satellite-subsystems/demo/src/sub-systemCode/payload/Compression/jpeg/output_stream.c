@@ -18,7 +18,7 @@ BooleanJpeg open_jpeg_file(output_stream * stream, char *pFilename)
 	stream->data.file_stream.m_bStatus = (stream->data.file_stream.singles_buff != NULL);
 
 	stream->data.file_stream.m_pFile = NULL;
-	int error = OpenFile(&stream->data.file_stream.m_pFile, pFilename, "w");
+	int error = f_managed_open(pFilename, "w", &stream->data.file_stream.m_pFile);
 	stream->data.file_stream.m_bStatus = stream->data.file_stream.m_bStatus && (stream->data.file_stream.m_pFile != NULL) && !error;
 	return stream->data.file_stream.m_bStatus;
 }
@@ -39,7 +39,7 @@ BooleanJpeg close_jpeg_file(output_stream * stream)
 		}
 
 		f_flush(stream->data.file_stream.m_pFile);
-		if (CloseFile(&stream->data.file_stream.m_pFile) != 0)
+		if (f_managed_close(&stream->data.file_stream.m_pFile) != 0)
 		{
 			stream->data.file_stream.m_bStatus = FALSE_JPEG;
 		}
