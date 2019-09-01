@@ -95,9 +95,6 @@ ImageDataBaseResult CompressImage(imageid id, fileType reductionLevel, unsigned 
 
 	GomEpsResetWDT(0);
 
-	int error = f_managed_enterFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
 	result = Create_BMP_File(pSrc_filename_raw, pSrc_filename_bmp, compfact, buffer);
 	CMP_AND_RETURN(result, JpegCompression_Success, result);
 
@@ -109,9 +106,6 @@ ImageDataBaseResult CompressImage(imageid id, fileType reductionLevel, unsigned 
 	CMP_AND_RETURN(result, JpegCompression_Success, result);
 
 	f_delete(pSrc_filename_bmp);	// deleting the BMP file
-
-	error = f_managed_releaseFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	return JpegCompression_Success;
 }

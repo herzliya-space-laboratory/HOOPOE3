@@ -22,6 +22,8 @@
 #include "DB_RequestHandling.h"
 #include "Dump/imageDump.h"
 
+#include "../../Global/TLM_management.h"
+
 #include "../../Global/GlobalParam.h"
 #include "../../TRXVU.h"
 #include "../../Main/HouseKeeping.h"
@@ -100,13 +102,10 @@ void CameraManagerTaskMain()
 
 		Take_pictures_with_time_in_between();
 
-		vTaskDelay(DELAY);
-
 		if ( !get_ground_conn() )
 		{
-			Time_getUnixEpoch(&turnedOnCamera);
-			ImageDataBaseResult error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
-			// ToDo: error log
+			Camera_Request request = { .cmd_id = 0, .id = Handle_Mark, .keepOnCamera = 10 };
+			act_upon_request(request);
 		}
 
 		vTaskDelay(SYSTEM_DEALY);
@@ -223,6 +222,8 @@ void startDumpTask(Camera_Request request)
 void act_upon_request(Camera_Request request)
 {
 	ImageDataBaseResult error = DataBaseSuccess;
+	error = f_managed_enterFS();
+	// ToDo: log error
 
 	switch (request.id)
 	{
@@ -314,6 +315,11 @@ void act_upon_request(Camera_Request request)
 		error = setChunkDimensions(request.data);
 		break;
 
+	case Handle_Mark:
+		Time_getUnixEpoch(&turnedOnCamera);
+		error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
+		break;
+
 	default:
 		return;
 		break;
@@ -321,5 +327,9 @@ void act_upon_request(Camera_Request request)
 
 	Gecko_TroubleShooter(error);
 
-	save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
+	if ( !(request.id == Handle_Mark || request.id == transfer_image_to_OBC) )
+		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
+
+	error = f_managed_releaseFS();
+	// ToDo: log error
 }

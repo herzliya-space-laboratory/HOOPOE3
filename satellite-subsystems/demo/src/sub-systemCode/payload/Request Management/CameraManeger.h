@@ -46,7 +46,8 @@ typedef enum{
 	Turn_Off_Camera,
 	Turn_On_Camera,
 	Set_Chunk_Size,
-	number_of_request_types
+	number_of_request_types,
+	Handle_Mark
 }cam_Request_id_t;
 
 typedef struct __attribute__ ((__packed__))

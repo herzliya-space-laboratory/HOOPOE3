@@ -459,6 +459,7 @@ void save_onlineTM_logic()
 	time_unix time_now;
 	i_error = Time_getUnixEpoch(&time_now);
 	check_int("Time_getUnixEpoch, save_onlineTM_logic", i_error);
+	printf("        time now: %u\n", time_now);
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
 		if (offline_TM_list[i].type == TM_emptySpace)
@@ -488,12 +489,11 @@ void save_onlineTM_task()
 	}
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 		offline_TM_list[i].lastSave = 0;
+	int i_error = f_managed_enterFS();
+	check_int("save_onlineTM_task, f_managed_enterFS", i_error);
 	while(TRUE)
 	{
-		int i_error = f_managed_enterFS();
-		check_int("save_onlineTM_task, f_managed_enterFS", i_error);
 		save_onlineTM_logic();
-		f_managed_releaseFS();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }

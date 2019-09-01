@@ -28,6 +28,8 @@
 #define	totalPageCount 136
 #define totalFlashCount 4096
 
+#define MAGIC_NUM 10000
+
 void Initialized_GPIO()
 {
 	Pin gpio12 = PIN_GPIO12;
@@ -264,10 +266,10 @@ int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 		buffer[i] = GECKO_GetImgData();
 
 		// Printimg a value one every 40000 pixels:
-		if(i % 5000 == 0)
+		if(i % MAGIC_NUM == 0)
 		{
 			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
-			vTaskDelay(100);
+			vTaskDelay(SYSTEM_DEALY);
 		}
 	}
 

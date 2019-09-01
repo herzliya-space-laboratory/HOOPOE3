@@ -241,10 +241,7 @@ ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type)
 	DB_RETURN_ERROR(result);
 
 	F_FILE *file = NULL;
-	int error = f_managed_enterFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	error = f_managed_open(fileName, "r", &file);
+	int error = f_managed_open(fileName, "r", &file);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t factor = GetImageFactor(image_type);
@@ -256,9 +253,6 @@ ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type)
 	error = f_managed_close(&file);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	error = f_managed_releaseFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
 	return DataBaseSuccess;
 }
 
@@ -268,11 +262,8 @@ ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type)
 	ImageDataBaseResult result = GetImageFileName(id, image_type, fileName);
 	DB_RETURN_ERROR(result);
 
-	int error = f_managed_enterFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
 	F_FILE *file = NULL;
-	error = f_managed_open(fileName, "r", &file);
+	int error = f_managed_open(fileName, "w", &file);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t factor = GetImageFactor(image_type);
@@ -282,9 +273,6 @@ ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type)
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	error = f_managed_close(&file);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	error = f_managed_releaseFS();
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	return DataBaseSuccess;
@@ -450,13 +438,7 @@ ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType 
 	int result = checkForFileType(image_metadata, type);
 	DB_RETURN_ERROR(result);
 
-	int error = f_managed_enterFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	error = f_delete(fileName);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	error = f_managed_releaseFS();
+	int error = f_delete(fileName);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	updateFileTypes(&image_metadata, image_address, type, FALSE);
