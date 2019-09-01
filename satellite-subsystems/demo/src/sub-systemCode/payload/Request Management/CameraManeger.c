@@ -143,7 +143,7 @@ int KickStartCamera(void)
 
 	cameraActivation_duration = DEFALT_DURATION;
 
-	xTaskCreate(CameraManagerTaskMain, (const signed char*)CameraManagmentTask_Name, CameraManagmentTask_StackDepth, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 1), NULL);
+	xTaskCreate(CameraManagerTaskMain, (const signed char*)CameraManagmentTask_Name, CameraManagmentTask_StackDepth, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 
 	return 0;
 }
@@ -215,7 +215,7 @@ void Gecko_TroubleShooter(ImageDataBaseResult error)
 
 void startDumpTask(Camera_Request request)
 {
-	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraManagmentTask_StackDepth, &request, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 1), NULL);
+	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraManagmentTask_StackDepth, &request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(SYSTEM_DEALY);
 }
 

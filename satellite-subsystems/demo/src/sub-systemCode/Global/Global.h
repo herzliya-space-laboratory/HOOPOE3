@@ -59,6 +59,7 @@ typedef unsigned int  Boolean;
 #define MAX_DELAY 100000//test...
 #define ONE_MINUTE	60 * 1000
 
+#define TASK_DEFAULT_PRIORITIES 3
 
 //tasks buffer
 #define BEACON_TASK_BUFFER	2048
