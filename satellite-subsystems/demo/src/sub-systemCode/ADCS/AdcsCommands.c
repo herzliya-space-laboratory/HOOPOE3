@@ -169,37 +169,37 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	switch(sub_type)
 	{
 		//generic I2C command
-		case ADCS_I2C_GENRIC_ST:
-			memcpy(&i2c_cmd,cmd->data,cmd->length);
-			if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH / 2){
+	case ADCS_I2C_GENRIC_ST:
+				memcpy(&i2c_cmd,cmd->data,cmd->length);
+				if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH / 2){
 
-				if ((i2c_cmd.data[0] & 0x0F) == 0){	// 4 LSB indicate which half of the CMD did we send.
-					memcpy(I2cData, &i2c_cmd.data[1], ADCS_CMD_MAX_DATA_LENGTH/2);
+					if ((i2c_cmd.data[0] & 0x0F) == 0){	// 4 LSB indicate which half of the CMD did we send.
+						memcpy(I2cData, &i2c_cmd.data[1], ADCS_CMD_MAX_DATA_LENGTH/2);
+					}
+					else{
+						memcpy(&I2cData[ADCS_CMD_MAX_DATA_LENGTH/2], &i2c_cmd.data[1], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2);
+					}
+					if((i2c_cmd.data[0] & 0xF0) != 0xF0){	// 4MSB indicate if CMD is assembled
+						break;
+					}
+					memcpy(i2c_cmd.data,I2cData,i2c_cmd.length);
 				}
-				else{
-					memcpy(&I2cData[ADCS_CMD_MAX_DATA_LENGTH/2], &i2c_cmd.data[1], i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2);
-				}
-				if((i2c_cmd.data[0] & 0xF0) != 0xF0){	// 4MSB indicate if CMD is assembled
-					break;
-				}
-				memcpy(i2c_cmd.data,I2cData,i2c_cmd.length);
-			}
-			err = AdcsGenericI2cCmd(&i2c_cmd);
+				err = AdcsGenericI2cCmd(&i2c_cmd);
 
-			if (i2c_cmd.id < 128){	// is TLC
-				SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
-			}
-			else { // is TLM
-				if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
-					SendAdcsTlm(i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
-					SendAdcsTlm(&(i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2]), i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
-
-				}else{
-					SendAdcsTlm((byte*)i2c_cmd.data,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
+				if (i2c_cmd.id < 128){	// is TLC
+					SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
 				}
-			}
-			//TODO: log 'i2c_cmd.ack'. maybe send it in ACK form
-			break;
+				else { // is TLM
+					if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
+						SendAdcsTlm(i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
+						SendAdcsTlm(&(i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2]), i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
+
+					}else{
+						SendAdcsTlm((byte*)i2c_cmd.data,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
+					}
+				}
+				//TODO: log 'i2c_cmd.ack'. maybe send it in ACK form
+				break;
 		
 		//ADCS telecommand
 		case ADCS_COMPONENT_RESET_ST:
@@ -597,9 +597,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_getMiscCurrentMeas(ADCS_ID,(cspace_adcs_misccurr_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_misccurr_t),ADCS_GET_MISC_CURRENT_MEAS_ST);
 			break;
-		case ADCS_GET_COMMANDED_ANDEDATTITUDE_ANGLES_ST:
+		case ADCS_GET_COMMANDED_ATTITUDE_ANGLES_ST:
 			err = cspaceADCS_getCommandedAttitudeAngles(ADCS_ID,(cspace_adcs_cmdangles_t*)data);
-			SendAdcsTlm(data, sizeof(cspace_adcs_cmdangles_t),ADCS_GET_COMMANDED_ANDEDATTITUDE_ANGLES_ST);
+			SendAdcsTlm(data, sizeof(cspace_adcs_cmdangles_t),ADCS_GET_COMMANDED_ATTITUDE_ANGLES_ST);
 			break;
 		case ADCS_GET_FULL_CONFIG_ST:
 			err = cspaceADCS_getADCSConfiguration(ADCS_ID,(unsigned char*)data);

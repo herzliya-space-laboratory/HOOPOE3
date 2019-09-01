@@ -577,7 +577,7 @@ void AdcsTestTask()
 		get.id = 0;
 		get.subType = getSubType[test_num];
 		get.length = getLength[test_num];
-		if(test_num = 1)
+		if(test_num == 1)
 		{
 
 		}
