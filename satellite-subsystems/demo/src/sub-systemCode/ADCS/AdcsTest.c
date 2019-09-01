@@ -24,7 +24,7 @@
 #define INIT_DELAY (20*1000)
 #define TEST_NUM 1
 
-void TaskMamagTest();
+
 void AdcsConfigPramTest()
 {
 	printf("config test\n");
@@ -203,7 +203,6 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	setSubType[testNum] = ADCS_CACHE_ENABLE_ST;
 	setData[testNum][0] = 1;
 	setLength[testNum] = 1;
-
 	testNum++;
 
 	//test #2 data
@@ -378,7 +377,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	memcpy(setData[testNum],rateOffset.raw,setLength[testNum]);
 	testNum++;
 
-	//test #15 data //TODO
+	//test #15 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 0;
@@ -512,14 +511,420 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	//test #32 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 0;
-	getData[testNum][0] = 0x01;
-	getData[testNum][1] = 0x0f;
+	getData[testNum][0] = 0x0f;
+	getData[testNum][1] = 0x01;
 	getData[testNum][2] = 1;
 	setSubType[testNum] = ADCS_SET_MAGNETOMETER_MODE_ST;
 	setLength[testNum] = 3;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
+	testNum++;
+
+	//test #33 data
+	getSubType[testNum] = ADCS_NOP_ST;
+	getLength[testNum] = 0;
+	setSubType[testNum] = ADCS_RESET_BOOT_REGISTER_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	memset(setData[testNum],0,setLength[testNum]);
+	testNum++;
+
+	//test #34 data
+	getSubType[testNum] = ADCS_NOP_ST;
+	getLength[testNum] = 0;
+	setSubType[testNum] = ADCS_CLEAR_ERRORS_ST;
+	setLength[testNum] = 1;
+	setData[testNum][0] = 0xFF;
+	//memset(setData[testNum],0,setLength[testNum]);
+	testNum++;
+
+	//test #35 data
+	getSubType[testNum] = ADCS_NOP_ST;
+	getLength[testNum] = 0;
+	setSubType[testNum] = ADCS_SAVE_CONFIG_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0xFF;
+	testNum++;
+
+	//test #36 data
+	getSubType[testNum] = ADCS_NOP_ST;
+	getLength[testNum] = 0;
+	setSubType[testNum] = ADCS_SAVE_ORBIT_PARAM_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0xFF;
+	testNum++;
+
+	//test #37 data
+	getSubType[testNum] = ADCS_NOP_ST;
+	getLength[testNum] = 0;
+	setSubType[testNum] = ADCS_SAVE_IMAGE_ST;
+	setLength[testNum] = 2;
+	setData[testNum][0] = 0x01;
+	setData[testNum][1] = 0x02;
+	testNum++;
+
+
+	//test #38 data
+	getSubType[testNum] = ADCS_I2C_GENRIC_ST;
+	i2c_cmd.id = 130;
+	i2c_cmd.length = 2;
+	getLength[testNum] = sizeof(adcs_i2c_cmd) - ADCS_CMD_MAX_DATA_LENGTH + i2c_cmd.length;
+	memcpy(getData[testNum],&i2c_cmd,getLength[testNum]);
+
+	setSubType[testNum] = ADCS_SET_BOOT_INDEX_ST;
+	setLength[testNum] = 1;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #39 data
+	getSubType[testNum] = ADCS_NOP_ST;
+	getLength[testNum] = 0
+
+	setSubType[testNum] = ADCS_RUN_BOOT_PROGRAM_ST;
+	setLength[testNum] = 0;
+	testNum++;
+
+	//test #40 data
+	getSubType[testNum] = ADCS_GET_GENERAL_INFO_ST;
+	getLength[testNum] = 8;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #41 data
+	getSubType[testNum] = ADCS_GET_BOOT_PROGRAM_INFO_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #42 data
+	getSubType[testNum] = ADCS_GET_SRAM_LATCHUP_COUNTERS_ST;
+	getLength[testNum] = 4;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #43 data
+	getSubType[testNum] = ADCS_GET_EDAC_COUNTERS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #44 data
+	getSubType[testNum] = ADCS_GET_COMM_STATUS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #45 data
+	getSubType[testNum] = ADCS_GET_MAGNETIC_FIELD_VEC_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #46 data
+	getSubType[testNum] = ADCS_GET_COARSE_SUN_VEC_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #47 data
+	getSubType[testNum] = ADCS_GET_FINE_SUN_VEC_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #48 data
+	getSubType[testNum] = ADCS_GET_NADIR_VECTOR_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #49 data
+	getSubType[testNum] = ADCS_GET_SENSOR_RATES_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #50 data
+	getSubType[testNum] = ADCS_GET_ADC_RAW_RED_MAG_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #51 data
+	getSubType[testNum] = ADCS_GET_ACP_EXECUTION_STATE_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #52 data
+	getSubType[testNum] = ADCS_GET_RAW_CSS_1_6_MEASURMENTS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #53 data
+	getSubType[testNum] = ADCS_GET_RAW_CSS_7_10_MEASURMENTS_ST;
+	getLength[testNum] = 4;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #54 data
+	getSubType[testNum] = ADCS_GET_RAW_MAGNETOMETER_MEAS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #55 data
+	getSubType[testNum] = ADCS_GET_C_SENSE_CURRENT_MEASUREMENTS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #56 data
+	getSubType[testNum] = ADCS_GET_C_CONTROL_CURRENT_MEASUREMENTS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #57 data
+	getSubType[testNum] = ADCS_GET_WHEEL_CURRENTS_TLM_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #58 data
+	getSubType[testNum] = ADCS_GET_ADCS_TEMPERATURE_TLM_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #59 data
+	getSubType[testNum] = ADCS_GET_RATE_SENSOR_TEMP_TLM_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #60 data
+	getSubType[testNum] = ADCS_GET_RAW_GPS_STATUS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #61 data
+	getSubType[testNum] = ADCS_GET_RAW_GPS_TIME_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #62 data
+	getSubType[testNum] = ADCS_GET_RAW_GPS_X_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #63 data
+	getSubType[testNum] = ADCS_GET_RAW_GPS_Y_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #64 data
+	getSubType[testNum] = ADCS_GET_RAW_GPS_Z_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #65 data
+	getSubType[testNum] = ADCS_GET_STATE_TLM_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++
+
+	//test #66 data
+	getSubType[testNum] = ADCS_GET_ADCS_MEASUREMENTS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #67 data
+	getSubType[testNum] = ADCS_GET_ESTIMATION_METADATA_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #68 data
+	getSubType[testNum] = ADCS_GET_SENSOR_MEASUREMENTS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #69 data
+	getSubType[testNum] = ADCS_GET_POW_TEMP_MEAS_TLM_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #70 data
+	getSubType[testNum] = ADCS_GET_ADCS_EXC_TIMES_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #71 data
+	getSubType[testNum] = ADCS_GET_PWR_CTRL_DEVICE_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #72 data
+	getSubType[testNum] = ADCS_GET_MISC_CURRENT_MEAS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #73 data
+	getSubType[testNum] = ADCS_GET_COMMANDED_ATTITUDE_ANGLES_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+
+	//test #74 data
+	getSubType[testNum] = ADCS_GET_ADCS_RAW_GPS_MEAS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #75 data
+	getSubType[testNum] = ADCS_GET_STAR_TRACKER_TLM_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
+	testNum++;
+
+	//test #76 data
+	getSubType[testNum] = ADCS_RESET_TLM_ELEMENTS_ST;
+	getLength[testNum] = 6;
+
+	setSubType[testNum] = ADCS_NOP_ST;
+	setLength[testNum] = 0;
+	setData[testNum][0] = 0;
 	testNum++;
 }
 
@@ -531,7 +936,6 @@ void AdcsTestTask()
 	get.type = TM_ADCS_T;
 	set.type = TM_ADCS_T;
 
-	//TaskMamagTest(); // currently in infinite loop
 
 	uint8_t getSubType[CMD_FOR_TEST_AMOUNT] = {0};
 	int getLength[CMD_FOR_TEST_AMOUNT] = {0};
@@ -541,7 +945,7 @@ void AdcsTestTask()
 	uint8_t setSubType[CMD_FOR_TEST_AMOUNT] = {0};//function to test sst
 	int setLength[CMD_FOR_TEST_AMOUNT] = {0};
 	byte setData[CMD_FOR_TEST_AMOUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE] = {{0}};
-	
+
 	BuildTests(getSubType, getLength, GetData, setSubType, setLength, setData);
 	printf("start test\n");
 	int err;
@@ -596,74 +1000,3 @@ void AdcsTestTask()
 	}while(TRUE);
 }
 
-/*
-//void ErrFlagTest()
-//{
-//	double sgp4_orbit_params[] = { 0,0,0,0,0,0,0,0 };
-//	cspaceADCS_setSGP4OrbitParameters(ADCS_ID, sgp4_orbit_params);
-//	vTaskDelay(5000);
-//	restart();
-//}
-
-//void printErrFlag()
-//{
-//
-//	cspace_adcs_statetlm_t data;
-//	cspaceADCS_getStateTlm(ADCS_ID, &data);
-//	printf("\nSGP ERR FLAG = %d \n", data.fields.curr_state.fields.orbitparam_invalid);
-//}
-
-//void Mag_Test()
-//{
-//	//generic i2c tm id 170 size 6 and print them
-//	cspace_adcs_rawmagmeter_t Mag;
-//	cspaceADCS_getRawMagnetometerMeas(0, &Mag);
-//	printf("mag raw x %d", Mag.fields.magnetic_x);
-//	printf("mag raw y %d", Mag.fields.magnetic_y);
-//	printf("mag raw z %d", Mag.fields.magnetic_z);
-//}
-
-//void AddCommendToQ()
-//{
-//	Test();
-//
-//	int input;
-//	int err;
-//	TC_spl adcsCmd;
-//	adcsCmd.id = TC_ADCS_T;
-//	if (UTIL_DbguGetIntegerMinMax((unsigned int *)&(adcsCmd.subType), 0, 666) != 0) {
-//		printf("Enter ADCS command data\n");
-//		UTIL_DbguGetString((char*)&(adcsCmd.data), SIZE_OF_COMMAND + 1);
-//		err = AdcsCmdQueueAdd(&adcsCmd);
-//		printf("ADCS command error = %d\n\n\n", err);
-//		printf("Send new command\n");
-//		printf("Enter ADCS sub type\n");
-//	}
-//
-//	if (UTIL_DbguGetIntegerMinMax((unsigned int *)&input, 900, 1000) != 0) {
-//		printf("Print the data\n");
-//	}
-//
-//}
-*/
-
-
-void TestMagnetometer()
-{
-	//TODO: collect TLM, print + transmit
-}
-
-void TaskMamagTest()
-{
-	testInit();
-
-	TestAdcsTLM();
-
-	while(TRUE){
-
-		TestMagnetometer();
-
-		vTaskDelay(1000);
-	}
-
-}
