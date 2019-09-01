@@ -24,68 +24,26 @@
 
 
 
-typedef enum __attribute__ ((__packed__)){
+typedef enum __attribute__ ((__packed__)) AdcsFunctionType{
 	fType_TLM = 0,
 	fType_Get_Config = 1,
 	fType_Set_Config = 2,
 	fType_Misc = 3
 }AdcsFunctionType;
 
-typedef struct __attribute__ ((__packed__)){
+typedef struct __attribute__ ((__packed__)) AdcsCmdTestProtocol_t{
 	unsigned char subtype;
 	AdcsFunctionType func_type;
 	Boolean8bit DefaultDataField;
 	short CrspdngSt;
 	unsigned short dataLength;
-	unsigned char data[ADCS_FULL_CONFIG_DATA_LENGTH];
+	unsigned char data[80];		//excluding the 272 ADCS config TLM/CMD
+	unsigned char I2cData[70];
 }AdcsCmdTestProtocol_t;
 
+
 AdcsCmdTestProtocol_t TestCmd[] = {
-		{.subtype = ADCS_I2C_GENRIC_ST,					.func_type = fType_Misc,		.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0}} ,
-		{.subtype = ADCS_COMPONENT_RESET_ST,			.func_type = fType_Misc,		.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0}} ,
-		{.subtype = ADCS_SET_CURR_UNIX_TIME_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 6, 	.data = {0}},
-		{.subtype = ADCS_CACHE_ENABLE_ST,				.func_type = fType_Set_Config,	.DefaultDataField = FALSE_8BIT,	.CrspdngSt = -1, .dataLength = 1,	.data = {0x01}},
-		{.subtype = ADCS_RESET_BOOT_REGISTER_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0}},
-		{.subtype = ADCS_RUN_MODE_ST,					.func_type = fType_Set_Config,	.DefaultDataField = FALSE_8BIT,	.CrspdngSt = -1, .dataLength = 1, 	.data = {0x01}},
-		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,		.func_type = fType_Set_Config,	.DefaultDataField = FALSE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0x05,0x01,0x00}},
-		{.subtype = ADCS_CLEAR_ERRORS_ST,				.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 1, 	.data = {0}},
-		{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,			.func_type = fType_Set_Config,	.DefaultDataField = FALSE_8BIT,	.CrspdngSt = -1, .dataLength = 3, 	.data = {0x01,0x00,0x00}},
-		{.subtype = ADCS_SET_EST_MODE_ST,				.func_type = fType_Set_Config,	.DefaultDataField = FALSE_8BIT,	.CrspdngSt = -1, .dataLength = 1, 	.data = {0x01}},
-		{.subtype = ADCS_SET_MAG_OUTPUT_ST,				.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 6, 	.data = {0}},
-		{.subtype = ADCS_SET_WHEEL_SPEED_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 6, 	.data = {0}},
-		{.subtype = ADCS_SET_MTQ_CONFIG_ST,				.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 3, 	.data = {0}},
-		{.subtype = ADCS_RW_CONFIG_ST,					.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 3, 	.data = {0}},
-		{.subtype = ADCS_GYRO_CONFIG_ST,				.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 3, 	.data = {0}},
-		{.subtype = ADCS_CSS_CONFIG_ST,					.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 10, 	.data = {0}},
-		{.subtype = ADCS_CSS_RELATIVE_SCALE_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 11, 	.data = {0}},
-		{.subtype = ADCS_SET_MAGNETMTR_MOUNT_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 6,  	.data = {0}},
-		{.subtype = ADCS_SET_MAGNETMTR_OFFSET_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 12, 	.data = {0}},
-		{.subtype = ADCS_SET_MAGNETMTR_SENSTVTY_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 12, 	.data = {0}},
-		{.subtype = ADCS_RATE_SENSOR_OFFSET_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 6,	.data = {0}},
-		{.subtype = ADCS_SET_DETUMB_CTRL_PARAM_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 14, 	.data = {0}},
-		{.subtype = ADCS_SET_YWHEEL_CTRL_PARAM_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 20, 	.data = {0}},
-		{.subtype = ADCS_SET_RWHEEL_CTRL_PARAM_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_MOMENT_INTERTIA_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 12, 	.data = {0}},
-		{.subtype = ADCS_PROD_INERTIA_ST,				.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 12, 	.data = {0}},
-		{.subtype = ADCS_ESTIMATION_PARAM1_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 16, 	.data = {0}},
-		{.subtype = ADCS_ESTIMATION_PARAM2_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 14, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_PARAMS_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 64, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_INC_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_ECC_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_RAAN_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST,	.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST,	.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST,	.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST,	.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_SGP4_ORBIT_EPOCH_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 8, 	.data = {0}},
-		{.subtype = ADCS_SET_MAGNETOMETER_MODE_ST,		.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 1, 	.data = {0}},
-		{.subtype = ADCS_SAVE_CONFIG_ST,				.func_type = fType_Misc,		.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0}},
-		{.subtype = ADCS_SAVE_ORBIT_PARAM_ST,			.func_type = fType_Misc,		.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0}},
-		{.subtype = ADCS_SAVE_IMAGE_ST,					.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 2, 	.data = {0}},
-		{.subtype = ADCS_SET_BOOT_INDEX_ST,				.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 1, 	.data = {0}},
-		{.subtype = ADCS_RUN_BOOT_PROGRAM_ST,			.func_type = fType_Set_Config,	.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0}},
-		{.subtype = ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST,.func_type = fType_Misc,		.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 3, 	.data = {0}},
-		{.subtype = ADCS_RESET_TLM_ELEMENTS_ST,			.func_type = fType_Misc,		.DefaultDataField = TRUE_8BIT,	.CrspdngSt = -1, .dataLength = 0, 	.data = {0}}
+		{}
 };
 
 
