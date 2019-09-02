@@ -46,6 +46,7 @@ void AdcsConfigPramTest()
 	AdcsCmdQueueAdd(&test);
 	vTaskDelay(TestDelay);
 }
+
 void testInit()
 {
 	TC_spl cmd;
@@ -411,7 +412,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	}
 	testNum++;
 
-	//test #17 data //TODO
+	//test #17 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 3;
 	getData[testNum][0] = 0;
@@ -442,7 +443,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getLength[testNum] = 3;
 	getData[testNum][0] = 0;
 	getData[testNum][1] = 218;
-	getData[testNum][2] = 24; //TODO: set is only 12
+	getData[testNum][2] = 24;
 	setSubType[testNum] = ADCS_SET_MOMENT_INTERTIA_ST;
 	setLength[testNum] = SET_MOMENT_INERTIA_DATA_LENGTH;
 	for(int i = 0; i<setLength[testNum]; i++){

@@ -30,14 +30,6 @@ typedef enum TroubleErrCode
 }TroubleErrCode;
 
 
-/*!
- * @solve the ADCS SYSTEM problems by their spaspic err code
- *
- * get:
- * 		problems err codes
- * return:
- * 		log code todo:check what log get?
- */
 int AdcsTroubleShooting(TroubleErrCode trbl);
 
 #endif /* ADCSTROUBLESHOOTING_H_ */

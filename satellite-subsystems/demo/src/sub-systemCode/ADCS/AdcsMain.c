@@ -6,7 +6,7 @@
 #include <hcc/api_fs_err.h>
 
 #include "sub-systemCode/Main/commands.h"
-#include "sub-systemCode/Main/CMD/ADCS_CMD.h"	//TODO: use this API
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 #include "sub-systemCode/Global/GlobalParam.h"
 
 #include "AdcsMain.h"
@@ -23,8 +23,6 @@
 #define DEFAULT_ADCS_QUEUE_WAIT_TIME	 100	// amount of time to wait or cmd to arrive into Queue
 
 time_unix delay_loop = DEFAULT_ADCS_LOOP_DELAY;
-xSemaphoreHandle xAdcs_loop_param_mutex = NULL;	//TODO: need to check if need this
-
 
 TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data)
 {
@@ -91,7 +89,6 @@ TroubleErrCode AdcsInit()
 	Boolean b = CreateTlmElementFiles();
 	if (b != TRUE){
 		//TODO: log err
-		//TODO: do somthing- continue with operations but re-init the system
 	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 #ifdef FIRST_ADCS_ACTIVATION
@@ -127,7 +124,7 @@ void AdcsTask()
 			vTaskDelay(delay_loop);
 			continue;
 		}
-		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
+		UpdateAdcsStateMachine();
 
 		if(!AdcsCmdQueueIsEmpty()){
 			trbl = AdcsCmdQueueGet(&cmd);

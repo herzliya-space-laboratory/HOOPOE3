@@ -2,19 +2,11 @@
 #define ADCS_CMD_H_
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
-//#include <freertos/semphr.h>
-//#include <freertos/task.h>
-//#include "../../ADCS/Stage_Table.h"
-//#include "../../TRXVU.h"
-//#include "../../ADCS.h"
+
 #include "../../COMM/GSC.h"
-//#include "../../COMM/splTypes.h"
-//#include "../HouseKeeping.h"
 #include "../commands.h"
 #include "../../ADCS/AdcsTroubleShooting.h"
-//#include <hal/Drivers/I2C.h>
-//#include <stdlib.h>
-//#include <string.h>
+
 
 /*
  * InitAdcsCmdQueue - create the queue for the commands of the ADCS

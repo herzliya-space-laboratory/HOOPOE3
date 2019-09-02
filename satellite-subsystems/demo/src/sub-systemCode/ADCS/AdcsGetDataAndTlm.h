@@ -60,7 +60,7 @@ Boolean CreateTlmElementFiles();
  * 			and which will not.
  * @param[in] tlm_to_save a boolean array stating which TLM will be saved.
  * @note	default is save all TLM
- * @return	TODO: fill return values
+ * @return	Errors According to TroubleErrCode enum.
  */
 int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
 
@@ -70,7 +70,7 @@ int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
  * @param[in]	ToSave		save telemetry flag(TRUE = save; FALSE = don't save)
  * @param[in] 	Period 		TLM save period- time in seconds between TLM saves
  * @note if you don't want to update 'Period' put 0 in it
- * @return	Errors According to TroubleErrCode enum
+ * @return	Errors According to TroubleErrCode enum.
  */
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period);
 

@@ -129,7 +129,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		//TODO: log err
 		return TRBL_NULL_DATA;
 	}
-	//TODO: finish switch from the TLC dictionary
 	int err = TRBL_SUCCESS;
 	int rv = 0;
 	byte sub_type = cmd->subType;
@@ -278,7 +277,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_RATE_SENSOR_OFFSET_ST:
 			err = cspaceADCS_setRateSensorConfig(ADCS_ID,(cspace_adcs_ratesencfg_t*)cmd->data);
-			//TODO: send ack with 'rv'
 			SendAdcsTlm((byte*)&rv,sizeof(rv), ADCS_RATE_SENSOR_OFFSET_ST);
 			break;
 		case ADCS_SET_STAR_TRACKER_CONFIG_ST:
