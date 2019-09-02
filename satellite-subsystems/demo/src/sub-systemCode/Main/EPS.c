@@ -264,7 +264,7 @@ void EPS_Conditioning()
 
 	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
 	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
-	printf("EPS valtage: %u\n", current_VBatt);
+	printf("\n       EPS valtage: %u\n\n", current_VBatt);
 	if (VBatt_filtered < VBatt_previous)
 	{
 		battery_downward(VBatt_filtered, VBatt_previous);

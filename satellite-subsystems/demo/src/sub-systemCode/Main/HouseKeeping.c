@@ -102,6 +102,8 @@ void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 // collect from the drivers telemetry for each of the HK types
 int SP_HK_collect(SP_HK* hk_out)
 {
+	if (get_system_state(cam_param))
+		return -33;
 	int errors[NUMBER_OF_SOLAR_PANNELS];
 	int error_combine = 1;
 	IsisSolarPanelv2_wakeup();

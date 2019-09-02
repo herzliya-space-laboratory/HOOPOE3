@@ -157,10 +157,17 @@ void TRXVU_task()
 		set_system_state(dump_param, SWITCH_OFF);
 	}
 	//6. entering infinite loop
+	int loop = 0;
 	while(1)
 	{
+		if (loop % 10 == 0)
+		{
+			loop = 1;
+			printf("\n         TRXVU logic\n\n");
+		}
 		trxvu_logic();
 		vTaskDelay(TASK_DELAY);
+		loop++;
 	}
 }
 
@@ -570,6 +577,7 @@ void Beacon_task()
 	voltage_t low_v_beacon;
 	while(1)
 	{
+		printf("\n         Beacon logic\n\n");
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
 			buildAndSend_beacon();
