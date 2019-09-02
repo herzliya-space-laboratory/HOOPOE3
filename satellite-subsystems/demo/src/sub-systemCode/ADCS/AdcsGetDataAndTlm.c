@@ -12,6 +12,8 @@
 
 #define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1) //TODO: check if needed
 
+Boolean OverrideSaveTLM = TRUE;
+
 AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 
 #define ADCS_TLM_DEFAULT_COLLECT_PERIOD 10	// (1/10) Hz - once every 10 seconds
@@ -198,6 +200,9 @@ TroubleErrCode InitTlmElements()
 		TlmElements[i].SavePeriod = Periods[i];
 	}
 
+	if(0 != FRAM_read((unsigned char*)&OverrideSaveTLM,ADCS_OVERRIDE_SAVE_TLM_ADDR,sizeof(OverrideSaveTLM))){
+		OverrideSaveTLM = TRUE;
+	}
 	//TODO: log successful init
 	return TRBL_SUCCESS;
 }
@@ -237,9 +242,11 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 	FileSystemResult res = 0;
 	unsigned char adcs_tlm[ADCS_MAX_TLM_SIZE] = { 0 };
 
-	if (NULL 	== TlmElements[index].TlmCollectFunc||
-		NULL	== TlmElements[index].TlmFileName 	||
-		TRUE_8BIT != TlmElements[index].ToSave)
+	if ((NULL 	== TlmElements[index].TlmCollectFunc||
+		 NULL	== TlmElements[index].TlmFileName 	||
+		 TRUE_8BIT != TlmElements[index].ToSave		)
+			&&
+		FALSE == OverrideSaveTLM)
 	{
 		return TRBL_SUCCESS;
 	}

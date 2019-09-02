@@ -50,9 +50,10 @@ void testInit()
 {
 	TC_spl cmd;
 	int err = 0;
+
 	cmd.type = TM_ADCS_T;
 	cmd.subType = ADCS_RUN_MODE_ST;
-	cmd.length =1;
+	cmd.length = 1;
 	cmd.data[0] = 1;
 
 	err = AdcsCmdQueueAdd(&cmd);
@@ -946,7 +947,6 @@ void AdcsTestTask()
 	get.type = TM_ADCS_T;
 	set.type = TM_ADCS_T;
 
-
 	uint8_t getSubType[CMD_FOR_TEST_AMOUNT] = {0};
 	int getLength[CMD_FOR_TEST_AMOUNT] = {0};
 	byte GetData[CMD_FOR_TEST_AMOUNT][SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE] = {{0}};
@@ -967,9 +967,11 @@ void AdcsTestTask()
 	cspace_adcs_currstate_t State;
 	cspace_adcs_powerdev_t PowerADCS;
 
+
 	do{
 		printf("which test would you like to perform?(0 to %d)\n",CMD_FOR_TEST_AMOUNT);
 		while(UTIL_DbguGetIntegerMinMax(&test_num,0,CMD_FOR_TEST_AMOUNT) == 0);
+
 		cspaceADCS_getPwrCtrlDevice(0,&PowerADCS);
 		cspaceADCS_getCurrentState(0,&State);
 		printf("run:%d\t",State.fields.run_mode);

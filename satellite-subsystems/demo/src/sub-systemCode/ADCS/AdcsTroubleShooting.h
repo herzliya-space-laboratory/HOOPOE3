@@ -40,6 +40,4 @@ typedef enum TroubleErrCode
  */
 int AdcsTroubleShooting(TroubleErrCode trbl);
 
-TroubleErrCode FindErr();
-
 #endif /* ADCSTROUBLESHOOTING_H_ */

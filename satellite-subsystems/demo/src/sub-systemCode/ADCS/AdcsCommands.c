@@ -71,29 +71,6 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 }
 
 
-
-int ResetBootRegisters()
-{
-	unsigned char reset_boot_reg_cmd_id = 6;
-	adcs_i2c_cmd i2c_cmd;
-	memcpy(i2c_cmd.data,&reset_boot_reg_cmd_id,sizeof(reset_boot_reg_cmd_id));
-	i2c_cmd.length=sizeof(reset_boot_reg_cmd_id);
-	return AdcsGenericI2cCmd(&i2c_cmd);
-}
-
-typedef enum {
-	All_sgp4_params = 0,
-	Inclination 	= 46,
-	Eccentricity 	= 47,
-	RAAN 			= 48,
-	ArgOfPerigee 	= 49,
-	BStardrag 		= 50,
-	MeanMotion 		= 51,
-	MeanAnomaly 	= 52,
-	Epoch 			= 53
-}Sgp4OrbitParam;
-
-
 int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 {
 	int err = 0;

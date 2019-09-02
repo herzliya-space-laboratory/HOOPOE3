@@ -10,19 +10,19 @@ int AdcsTroubleShooting(TroubleErrCode trbl)
 	switch(trbl)
 		{
 		case(TRBL_FAIL):
-			cspaceADCS_componentReset(ADCS_ID);
+//			cspaceADCS_componentReset(ADCS_ID);
 			break;
 		case(TRBL_ADCS_INIT_ERR):
-			cspaceADCS_componentReset(ADCS_ID);
+//			cspaceADCS_componentReset(ADCS_ID);
 			//todo: the init function return this err can't be called twice
 			break;
 		case(TRBL_BOOT_ERROR):
-			cspaceADCS_componentReset(ADCS_ID);
+//			cspaceADCS_componentReset(ADCS_ID);
 			//data = malloc(sizeof(cspace_adcs_geninfo_t));
 			//cspaceADCS_getGeneralInfo(ADCS_ID, data);
 			//free(data);
-			cspaceADCS_BLSetBootIndex(ADCS_ID,1);
-			cspaceADCS_BLRunSelectedProgram(ADCS_ID);
+//			cspaceADCS_BLSetBootIndex(ADCS_ID,1);
+//			cspaceADCS_BLRunSelectedProgram(ADCS_ID);
 			break;
 		case(TRBL_CHANNEL_OFF):
 			//while(SWITCH_OFF == get_system_state(ADCS_param)){
@@ -62,9 +62,9 @@ int AdcsTroubleShooting(TroubleErrCode trbl)
 
 				break;
 		case(TRBL_QUEUE_CREATE_ERR):
-				if(TRBL_SUCCESS != AdcsCmdQueueInit()){
-					//todo: find a different way to manage cmd to skip the Q
-				}
+//				if(TRBL_SUCCESS != AdcsCmdQueueInit()){
+//					//todo: find a different way to manage cmd to skip the Q
+//				}
 				break;
 		case(TRBL_SEMAPHORE_CREATE_ERR):
 				//todo: SEMAPHORE?
@@ -81,9 +81,3 @@ int AdcsTroubleShooting(TroubleErrCode trbl)
 	return 0;
 }
 
-
-TroubleErrCode FindErr()
-{
-
-	return TRBL_SUCCESS;
-}

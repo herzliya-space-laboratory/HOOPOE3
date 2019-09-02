@@ -128,10 +128,6 @@ void AdcsTask()
 			continue;
 		}
 		UpdateAdcsStateMachine(); //TODO: finish, including return value errors
-		if(SWITCH_OFF == get_system_state(ADCS_param)){
-			vTaskDelay(CHANNEL_OFF_DELAY);
-			continue;
-		}
 
 		if(!AdcsCmdQueueIsEmpty()){
 			trbl = AdcsCmdQueueGet(&cmd);
