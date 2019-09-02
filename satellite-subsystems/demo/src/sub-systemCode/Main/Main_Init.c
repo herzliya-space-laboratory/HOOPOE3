@@ -27,7 +27,7 @@
 #include <hal/Drivers/LED.h>
 #include <hal/Drivers/I2C.h>
 #include <hal/Drivers/SPI.h>
-
+#include <hal/errors.h>
 #include <hal/boolean.h>
 
 #include <hal/version/version.h>
@@ -42,10 +42,13 @@
 #include "../Global/OnlineTM.h"
 #include "../EPS.h"
 #include "../Ants.h"
-#include "../ADCS.h"
-#include "../ADCS/Stage_Table.h"
+
+#include "../ADCS/AdcsMain.h"
+#include "../ADCS/AdcsTest.h"
+
 #include "../TRXVU.h"
 #include "../payload/Request Management/CameraManeger.h"
+#include "sub-systemCode/ADCS/AdcsMain.h"
 #include "HouseKeeping.h"
 #include "commands.h"
 
@@ -59,7 +62,7 @@
 // will Boot- deploy all  appropriate subsytems
 
 //extern unsigned short* Vbat_Prv;
-stageTable ST;
+
 
 #ifdef TESTING
 void reset_FIRST_activation(Boolean8bit dataFRAM)
@@ -73,6 +76,7 @@ void test_menu()
 
 	Boolean exit = FALSE;
 	unsigned int selection;
+	byte data;
 	while (!exit)
 	{
 		printf( "\n\r Select a test to perform: \n\r");
@@ -234,15 +238,15 @@ int InitSubsystems()
 
 	EPS_Init();
 
-#ifdef ANTS_ON
-	init_Ants();
+// #ifdef ANTS_ON
+	// init_Ants();
 
-#ifdef TESTING
-	printf("before deploy\n");
-	readAntsState();
-#endif
+// #ifdef TESTING
+	// printf("before deploy\n");
+	// readAntsState();
+// #endif
 
-	Auto_Deploy();
+	// Auto_Deploy();
 
 #ifdef TESTING
 	printf("after deploy\n");
@@ -251,15 +255,46 @@ int InitSubsystems()
 
 #endif
 
-	init_adcs(activation);
+	AdcsInit();
 
-	init_trxvu();
+	// init_trxvu();
 
 	initCamera(activation);
 
 	init_command();
 
 	return 0;
+}
+
+void no_reset_task()
+{
+	gom_eps_hk_t eps_tlm;
+	gom_eps_channelstates_t state;
+	state.fields.channel3V3_1 = 1;
+	state.fields.channel5V_1 = 1;
+	int err=0;
+
+	while(1)
+	{
+		err = GomEpsGetHkData_general(0, &eps_tlm);
+
+		if (err == 0)
+		{
+			if(eps_tlm.fields.cursys < 110){
+				printf("\nTotal EPS Output Current: %d\n",eps_tlm.fields.cursys);
+			}
+			if (eps_tlm.fields.output[0] == 0 || eps_tlm.fields.output[3] == 0)
+			{
+				EnterFullMode(&state);
+				printf("\nEps channels:\n[");
+				for(int i = 0; i < 8 ; i++){
+					printf("%X,",eps_tlm.fields.output[i]);
+				}
+				printf("]\n");
+			}
+		}
+		vTaskDelay(1000);
+	}
 }
 
 // this function initializes all neccesary subsystem tasks in main
@@ -272,6 +307,7 @@ int SubSystemTaskStart()
 	vTaskDelay(100);
 
 	KickStartCamera();
+	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	return 0;
 }
 

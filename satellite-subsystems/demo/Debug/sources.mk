@@ -17,6 +17,7 @@ S_UPPER_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
+<<<<<<< HEAD
 src/sub-systemCode/payload/Request\ Management/Dump \
 src/sub-systemCode/payload/Request\ Management \
 src/sub-systemCode/payload/Misc \
@@ -25,6 +26,8 @@ src/sub-systemCode/payload/DataBase \
 src/sub-systemCode/payload/Compression/jpeg \
 src/sub-systemCode/payload/Compression/jpeg/bmp \
 src/sub-systemCode/payload/Compression \
+=======
+>>>>>>> Main
 src/sub-systemCode/Main \
 src/sub-systemCode/Main/CMD \
 src/sub-systemCode/Global \

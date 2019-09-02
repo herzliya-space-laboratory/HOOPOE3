@@ -8,6 +8,9 @@
 #include <hal/Storage/FRAM.h>
 #include "string.h"
 
+#include "../Global/GlobalParam.h"
+#include "../Global/Global.h"
+
 #include "DelayedCommand_list.h"
 #include "../Main/commands.h"
 

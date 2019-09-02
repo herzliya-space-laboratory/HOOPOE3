@@ -35,8 +35,8 @@
 #define	SP_HK_FILE_NAME	"SPF"
 #define CAM_HK_FILE_NAME "CAMf"
 #define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
-#define ADCS_HK_FILE_NAME "ADCf"// ADCS
 #define FS_HK_FILE_NAME "FSf"
+#define ADCS_HK_FILE_NAME "ADCf"// ADCS
 
 typedef enum HK_dump_types{
 	ACK_T = 0,

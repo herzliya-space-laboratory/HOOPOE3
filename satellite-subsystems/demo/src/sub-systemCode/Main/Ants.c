@@ -155,9 +155,6 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 2, side B\n");
 		deploye_ants(isisants_sideB);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = TRUE;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
@@ -170,9 +167,6 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 3, side A\n");
 		deploye_ants(isisants_sideA);
-#ifdef TESTING
-		collect_TM_during_deploy();
-#endif
 
 		deploy_status.isAtemptDone = TRUE;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
