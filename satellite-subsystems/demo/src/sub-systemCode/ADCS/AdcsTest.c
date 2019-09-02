@@ -19,7 +19,7 @@
 
 #include "../EPS.h"
 #define ADCS_ID 0
-#define CMD_FOR_TEST_AMOUNT 34
+#define CMD_FOR_TEST_AMOUNT 80
 #define TestDelay (10*1000)
 #define INIT_DELAY (20*1000)
 #define TEST_NUM 1
@@ -68,6 +68,8 @@ void testInit()
 	pwr_dev.fields.motor_cubecontrol = 1;
 	pwr_dev.fields.pwr_motor = 1;
 	memcpy(cmd.data,pwr_dev.raw,cmd.length);
+
+	printf("\n\n\t-- Send SET_PWR_CTRL CMD to queue\n\n");
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
 		printf("\t---ADCS set pwr mode error = %d\n", err);
@@ -76,6 +78,8 @@ void testInit()
 	cmd.subType = ADCS_SET_EST_MODE_ST;
 	cmd.length = 1;
 	cmd.data[0] = 1;
+
+	printf("\n\n\t-- Send SET_EST_MODE CMD to queue\n\n");
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
 		printf("\t---ADCS set est mode error = %d\n", err);
@@ -86,6 +90,8 @@ void testInit()
 	cspace_adcs_attctrl_mod_t ctrl = {.raw = {0}};
 	ctrl.fields.ctrl_mode = 1;
 	memcpy(cmd.data,&ctrl,cmd.length);
+
+	printf("\n\n\t-- Send _SET_ATT_CTRL_MODE CMD to queue\n\n");
 	err = AdcsCmdQueueAdd(&cmd);
 	if(0 != err){
 		printf("\t---ADCS set ctrl mode error = %d\n", err);
@@ -511,11 +517,14 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	//test #32 data
 	getSubType[testNum] = ADCS_GET_ADCS_CONFIG_PARAM_ST;
 	getLength[testNum] = 0;
-	getData[testNum][0] = 0x0f;
+	getData[testNum][0] = 0x0F;
 	getData[testNum][1] = 0x01;
 	getData[testNum][2] = 1;
 	setSubType[testNum] = ADCS_SET_MAGNETOMETER_MODE_ST;
 	setLength[testNum] = 3;
+	setData[testNum][0] = 0x01;
+	setData[testNum][1] = 0x00;
+	setData[testNum][2] = 0x00;
 	for(int i = 0; i<setLength[testNum]; i++){
 		setData[testNum][i] = 0;
 	}
@@ -572,14 +581,15 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	getLength[testNum] = sizeof(adcs_i2c_cmd) - ADCS_CMD_MAX_DATA_LENGTH + i2c_cmd.length;
 	memcpy(getData[testNum],&i2c_cmd,getLength[testNum]);
 
+	cspace_adcs_bootprogram boot = program_bootloader;
 	setSubType[testNum] = ADCS_SET_BOOT_INDEX_ST;
 	setLength[testNum] = 1;
-	setData[testNum][0] = 0;
+	memcpy(&setData[testNum][0],&boot,sizeof(boot));
 	testNum++;
 
 	//test #39 data
 	getSubType[testNum] = ADCS_NOP_ST;
-	getLength[testNum] = 0
+	getLength[testNum] = 0;
 
 	setSubType[testNum] = ADCS_RUN_BOOT_PROGRAM_ST;
 	setLength[testNum] = 0;
@@ -825,7 +835,7 @@ void BuildTests(uint8_t getSubType[CMD_FOR_TEST_AMOUNT], int getLength[CMD_FOR_T
 	setSubType[testNum] = ADCS_NOP_ST;
 	setLength[testNum] = 0;
 	setData[testNum][0] = 0;
-	testNum++
+	testNum++;
 
 	//test #66 data
 	getSubType[testNum] = ADCS_GET_ADCS_MEASUREMENTS_ST;
@@ -956,6 +966,7 @@ void AdcsTestTask()
 	vTaskDelay(10);
 	cspace_adcs_currstate_t State;
 	cspace_adcs_powerdev_t PowerADCS;
+
 	do{
 		printf("which test would you like to perform?(0 to %d)\n",CMD_FOR_TEST_AMOUNT);
 		while(UTIL_DbguGetIntegerMinMax(&test_num,0,CMD_FOR_TEST_AMOUNT) == 0);
@@ -965,15 +976,18 @@ void AdcsTestTask()
 		printf("signel:%d\t",PowerADCS.fields.signal_cubecontrol);
 		printf("control:%d\t",PowerADCS.fields.motor_cubecontrol);
 		printf("moter:%d\n",PowerADCS.fields.pwr_motor);
+
 		set.subType = setSubType[test_num];
 		set.length = setLength[test_num];
 		memcpy(set.data,&setData[test_num][0],set.length);
 		vTaskDelay(10);
+
 		get.id = 0;
 		get.subType = getSubType[test_num];
 		get.length = getLength[test_num];
 		memcpy(get.data,&GetData[test_num][0],get.length);
 		vTaskDelay(10);
+
 		err = AdcsCmdQueueAdd(&get);
 		vTaskDelay(10);
 		printf("\nsst:%d\terr:%d\n",get.subType, err);

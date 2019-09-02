@@ -220,7 +220,7 @@ int main()
 
 	WDT_start();
 
-	printf("Task Main 2121\n");
+	printf("Task Main \n");
 	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 4000, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
 	printf("start sch\n");
 	vTaskStartScheduler();

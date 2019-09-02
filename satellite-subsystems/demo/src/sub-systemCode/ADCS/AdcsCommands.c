@@ -167,8 +167,10 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	cspace_adcs_magmode_t magmode;
 	cspace_adcs_savimag_t savimag_param;
 
-	adcs_i2c_cmd i2c_cmd;
-
+	adcs_i2c_cmd i2c_cmd = {0};
+#ifdef TESTING
+	printf("\n\nExecuting CMD with subtyp:%d\n\n",sub_type);
+#endif
 	switch(sub_type)
 	{
 		//generic I2C command
@@ -247,9 +249,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			memcpy(&att_est,cmd->data,sizeof(att_est));
 			err = cspaceADCS_setAttEstMode(ADCS_ID,att_est);
 			break;
-//		case ADCS_USE_IN_EKF_ST:
-//			 err = cspaceADCS_setAttEstMode(ADCS_ID, estmode_full_state_ekf);
-//			 break;
 		case ADCS_SET_MAG_OUTPUT_ST:
 			err = cspaceADCS_setMagOutput(ADCS_ID, (cspace_adcs_magnetorq_t*)cmd->data);
 			break;

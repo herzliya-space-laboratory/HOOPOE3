@@ -71,13 +71,13 @@
 #define ADCS_CMD_MAX_DATA_LENGTH			300
 
 typedef enum __attribute__ ((__packed__)){
-	ADCS_TC_NO_ERR 			= 0,
+	ADCS_TC_NO_ERR 				= 0,
 	ADCS_TC_INVALID_TC 			= 1,
 	ADCS_TC_INCORRECT_LENGTH 	= 2,
 	ADCS_TC_INCORRECT_PARAM 	= 3
 }AdcsTcErrorReason;
 
-typedef struct _adcs_i2c_cmd
+typedef struct __attribute__ ((__packed__)) _adcs_i2c_cmd
 {
 	unsigned char id;
 	unsigned short length;

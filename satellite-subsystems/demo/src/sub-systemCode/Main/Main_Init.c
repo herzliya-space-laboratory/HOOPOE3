@@ -214,10 +214,6 @@ int InitSubsystems()
 
 	StartFRAM();
 
-#ifdef TESTING
-	test_menu();
-#endif
-
 	Boolean activation = first_activation();
 
 	StartTIME();
@@ -271,9 +267,12 @@ void no_reset_task()
 
 		if (err == 0)
 		{
+			if(eps_tlm.fields.cursys < 110){
+				printf("\nTotal EPS Output Current: %d\n",eps_tlm.fields.cursys);
+			}
 			if (eps_tlm.fields.output[0] == 0 || eps_tlm.fields.output[3] == 0)
 			{
-				err = GomEpsSetOutput(0, state);
+				EnterFullMode(&state);
 				printf("\nEps channels:\n[");
 				for(int i = 0; i < 8 ; i++){
 					printf("%X,",eps_tlm.fields.output[i]);
