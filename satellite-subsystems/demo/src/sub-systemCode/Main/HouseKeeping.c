@@ -33,6 +33,7 @@
 
 #include "HouseKeeping.h"
 
+#include "sub-systemCode/ADCS/AdcsGetDataAndTlm.h"
 #include "../EPS.h"
 #include "../COMM/splTypes.h"
 #include "../Global/Global.h"
@@ -40,7 +41,6 @@
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
 #include "../Global/OnlineTM.h"
-#include "../ADCS.h"
 
 
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
@@ -229,6 +229,51 @@ int FS_HK_collect(FS_HK* hk_out, int SD_num)
 	return 0;
 }
 
+void HK_find_ADCSTM_fileName(HK_AdcsTlmTypes type, char* fileName)
+{
+	if(NULL == fileName){
+		return;
+	}
+
+	switch(type){
+	case AdcsTlm_State:
+		strcpy(fileName,ADCS_STATE_TLM_FILENAME );
+		break;
+	case AdcsTlm_MetaData:
+		strcpy(fileName,ADCS_EST_META_DATA );
+		break;
+	case AdcsTlm_CSSVec:
+		strcpy(fileName,ADCS_COARSE_SUN_VEC_FILENAME );
+		break;
+	case AdcsTlm_FineSunVec:
+		strcpy(fileName,ADCS_FINE_SUN_VEC_FILENAME);
+		break;
+	case AdcsTlm_Sensor:
+		strcpy(fileName,ADCS_SENSOR_FILENAME);
+		break;
+	case AdcsTlm_SheelSpeed:
+		strcpy(fileName,ADCS_WHEEL_SPEED_FILENAME );
+		break;
+	case AdcsTlm_RawMag:
+		strcpy(fileName,ADCS_RAW_MAG_FILENAME );
+		break;
+	case AdcsTlm_MagFieldVec:
+		strcpy(fileName,ADCS_MAG_FIELD_VEC_FILENAME );
+		break;
+	case AdcsTlm_Css1_6:
+		strcpy(fileName,ADCS_RAW_CSS_FILENAME_1_6 );
+		break;
+	case AdcsTlm_Css7_10:
+		strcpy(fileName,ADCS_RAW_CSS_FILENAME_7_10 );
+		break;
+	case AdcsTlm_PowerTemp:
+		strcpy(fileName,ADCS_POWER_TEMP_FILENAME );
+		break;
+	case AdcsTlm_MiscCurrents:
+		strcpy(fileName,ADCS_MISC_CURR_FILENAME);
+		break;
+	}
+}
 int HK_find_fileName(HK_types type, char* fileName)
 {
 	if (fileName == NULL)
@@ -239,13 +284,46 @@ int HK_find_fileName(HK_types type, char* fileName)
 		return 0;
 	}
 
-	if (offlineTM_T <= type && type < ADCS_sience_T)
+	if (offlineTM_T <= type && type < ADCS_science_T)
 	{
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		strcpy(fileName, OnlineTM_type.name);
 		return 0;
 	}
+
+	if (type >= ADCS_science_T){
+		HK_find_ADCSTM_fileName(type-ADCS_science_T,fileName);
+	}
 	return -13;
+}
+
+int HK_find_ADCSTM_ElementSize(HK_AdcsTlmTypes type)
+{
+	switch(type){
+	case AdcsTlm_State:
+		return 48;
+	case AdcsTlm_MetaData:
+		return 42;
+	case AdcsTlm_CSSVec:
+		return 6;
+	case AdcsTlm_FineSunVec:
+		return 6;
+	case AdcsTlm_Sensor:
+		return 6;
+	case AdcsTlm_SheelSpeed:
+		return 6;
+	case AdcsTlm_RawMag:
+		return 6;
+	case AdcsTlm_MagFieldVec:
+		return 6;
+	case AdcsTlm_Css1_6:
+		return 6;
+	case AdcsTlm_Css7_10:
+		return 4;
+	case AdcsTlm_PowerTemp:
+		return 34;
+	case AdcsTlm_MiscCurrents:
+		return 4;
 }
 int HK_findElementSize(HK_types type)
 {
@@ -254,13 +332,18 @@ int HK_findElementSize(HK_types type)
 		return ACK_DATA_LENGTH;
 	}
 
-	if (offlineTM_T <= type && type < ADCS_sience_T)
+	if (offlineTM_T <= type && type < ADCS_science_T)
 	{
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		return OnlineTM_type.TM_param_length;
 	}
+	if (type >= ADCS_science_T){
+		HK_find_ADCSTM_fileName(type-ADCS_science_T,fileName);
+	}
 	return -13;
 }
+
+
 int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 {
 	if (raw_data == NULL || packet == NULL)
@@ -275,7 +358,7 @@ int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 		return 0;
 	}
 
-	if (offlineTM_T <= type && type < ADCS_sience_T)
+	if (offlineTM_T <= type && type < ADCS_science_T)
 	{
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		packet->type = TM_ONLINE_TM_T;

@@ -16,7 +16,7 @@
 #define IMAGE_DUMP_T			11
 #define IMAGE_DATABASE_DUMP_T	12
 #define ACK_ST					90
-#define TM_ADCS_ST 				42
+#define TM_ADCS_T 				154
 #define TM_ONLINE_TM_T	        88
 
 //Types (TC)
@@ -48,32 +48,6 @@
 #define IMAGE_DUMP_RAW_ST					104
 #define IMAGE_DUMP_JPG_ST					105
 #define IMAGE_DUMP_JPG_FIRST_CHUNK_ST		106
-
-//ADCS science sub-types
-#define ADCS_CSS_DATA_ST 				122
-#define ADCS_MAGNETIC_FILED_ST			123
-#define ADCS_CSS_SUN_VECTOR_ST			124
-#define ADCS_WHEEL_SPEED_ST				125
-#define ADCS_SENSORE_RATE_ST			126
-#define ADCS_MAG_CMD_ST					127
-#define ADCS_WHEEL_CMD_ST				128
-#define ADCS_MAG_RAW_ST					129
-#define ADCS_IGRF_MODEL_ST				130
-#define ADCS_GYRO_BIAS_ST				131
-#define ADCS_INNO_VEXTOR_ST				132
-#define ADCS_ERROR_VEC_ST				133
-#define ADCS_QUATERNION_COVARIANCE_ST 	134
-#define ADCS_ANGULAR_RATE_COVARIANCE_ST 135
-#define ADCS_ESTIMATED_ANGLES_ST		136
-#define ADCS_ESTIMATED_AR_ST			137
-#define ADCS_ECI_POS_ST					138
-#define ADCS_SAV_VEL_ST					139
-#define ADCS_ECEF_POS_ST				140
-#define ADCS_LLH_POS_ST					141
-#define ADCS_EST_QUATERNION_ST			142
-
-//camm staff
-//#define IMAGE_DUMP_ST 122
 
 //Subtypes (TC)
 //comm

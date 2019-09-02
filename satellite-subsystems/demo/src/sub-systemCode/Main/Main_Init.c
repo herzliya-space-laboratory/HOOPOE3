@@ -76,7 +76,6 @@ void test_menu()
 
 	Boolean exit = FALSE;
 	unsigned int selection;
-	byte data;
 	while (!exit)
 	{
 		printf( "\n\r Select a test to perform: \n\r");
@@ -238,63 +237,21 @@ int InitSubsystems()
 
 	EPS_Init();
 
-// #ifdef ANTS_ON
-	// init_Ants();
+#ifdef ANTS_ON
+	init_Ants();
 
-// #ifdef TESTING
-	// printf("before deploy\n");
-	// readAntsState();
-// #endif
-
-	// Auto_Deploy();
-
-#ifdef TESTING
-	printf("after deploy\n");
-	readAntsState();
-#endif
-
+	Auto_Deploy();
 #endif
 
 	AdcsInit();
 
-	// init_trxvu();
+	init_trxvu();
 
 	initCamera(activation);
 
 	init_command();
 
 	return 0;
-}
-
-void no_reset_task()
-{
-	gom_eps_hk_t eps_tlm;
-	gom_eps_channelstates_t state;
-	state.fields.channel3V3_1 = 1;
-	state.fields.channel5V_1 = 1;
-	int err=0;
-
-	while(1)
-	{
-		err = GomEpsGetHkData_general(0, &eps_tlm);
-
-		if (err == 0)
-		{
-			if(eps_tlm.fields.cursys < 110){
-				printf("\nTotal EPS Output Current: %d\n",eps_tlm.fields.cursys);
-			}
-			if (eps_tlm.fields.output[0] == 0 || eps_tlm.fields.output[3] == 0)
-			{
-				EnterFullMode(&state);
-				printf("\nEps channels:\n[");
-				for(int i = 0; i < 8 ; i++){
-					printf("%X,",eps_tlm.fields.output[i]);
-				}
-				printf("]\n");
-			}
-		}
-		vTaskDelay(1000);
-	}
 }
 
 // this function initializes all neccesary subsystem tasks in main
@@ -307,6 +264,7 @@ int SubSystemTaskStart()
 	vTaskDelay(100);
 
 	KickStartCamera();
+	vTaskDelay(100);
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	return 0;
 }

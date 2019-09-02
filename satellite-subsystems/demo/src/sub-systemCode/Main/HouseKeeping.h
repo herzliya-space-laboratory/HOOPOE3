@@ -43,8 +43,24 @@ typedef enum HK_dump_types{
 	log_files_T = 1,
 	this_is_not_the_file_you_are_looking_for = 18,
 	offlineTM_T = 50,
-	ADCS_sience_T = 128
+	ADCS_science_T = 128,
+
 }HK_types;
+
+typedef enum __attribute__ ((__packed__)) HK_AdcsTlmTypes{
+	AdcsTlm_State,
+	AdcsTlm_MetaData,
+	AdcsTlm_CSSVec,
+	AdcsTlm_FineSunVec,
+	AdcsTlm_Sensor,
+	AdcsTlm_SheelSpeed,
+	AdcsTlm_RawMag,
+	AdcsTlm_MagFieldVec,
+	AdcsTlm_Css1_6,
+	AdcsTlm_Css7_10,
+	AdcsTlm_PowerTemp,
+	AdcsTlm_MiscCurrents
+}HK_AdcsTlmTypes;
 
 typedef union __attribute__ ((__packed__))
 {

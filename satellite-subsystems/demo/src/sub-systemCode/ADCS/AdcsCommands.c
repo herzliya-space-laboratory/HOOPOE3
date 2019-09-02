@@ -120,7 +120,7 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	byte rawData[SPL_TM_HEADER_SIZE + tm.length];
 	int rawDataLength = 0;
 	encode_TMpacket(rawData, &rawDataLength, tm);
-	TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
+	TRX_sendFrame(rawData, (unsigned char)rawDataLength);
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)

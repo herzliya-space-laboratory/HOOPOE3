@@ -34,6 +34,7 @@
 #include "CMD/COMM_CMD.h"
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
+#include "CMD/ADCS_CMD.h"
 
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
@@ -177,7 +178,7 @@ void act_upon_command(TC_spl decode)
 		AUC_EPS(decode);
 		break;
 	case (TC_ADCS_T):
-		AUC_ADCS(decode);
+		AdcsCmdQueueAdd(&decode); // TODO: save ACK
 		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
@@ -253,6 +254,8 @@ void AUC_general(TC_spl decode)
 
 	switch (decode.subType)
 	{
+	//todo: add generic ADCS I2C command as bypass to the ADCS logic = use the AdcsGenericI2C...
+
 	case (GENERIC_I2C_ST):
 		cmd_generic_I2C(&type, &err, decode);
 		break;
@@ -411,23 +414,6 @@ void AUC_EPS(TC_spl decode)
 	case (UPDATE_EPS_ALPHA_ST):
 		cmd_update_alpha(&type, &err, decode);
 		break;
-	default:
-		cmd_error(&type, &err);
-		break;
-	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
-#endif
-}
-
-void AUC_ADCS(TC_spl decode)
-{
-	Ack_type type;
-	ERR_type err;
-
-	switch (decode.subType)
-	{
 	default:
 		cmd_error(&type, &err);
 		break;
