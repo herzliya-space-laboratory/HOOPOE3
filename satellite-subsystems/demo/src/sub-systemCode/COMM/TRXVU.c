@@ -554,8 +554,40 @@ void pass_above_Ground()
 	}
 }
 
+void check_TRXVUState()
+{
+	byte dat;
+	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
+	check_int("TRXVU_init_softWare, FRAM_read", error);
+
+	ISIStrxvuBitrateStatus FRAMBitRate;
+	if (dat == trxvu_bitrate_1200)
+		FRAMBitRate = trxvu_bitratestatus_1200;
+	if (dat == trxvu_bitrate_2400)
+		FRAMBitRate = trxvu_bitratestatus_2400;
+	if (dat == trxvu_bitrate_4800)
+		FRAMBitRate = trxvu_bitratestatus_4800;
+	if (dat == trxvu_bitrate_9600)
+		FRAMBitRate = trxvu_bitratestatus_9600;
+
+	ISIStrxvuTransmitterState TxState;
+	error = IsisTrxvu_tcGetState(0, &TxState);
+	if (error)
+	{
+		printf("error in IsisTrxvu_tcGetState\n");
+		return;
+	}
+
+	if (TxState.fields.transmitter_bitrate != FRAMBitRate)
+	{
+		update_FRAM_bitRate();
+	}
+}
+
 void trxvu_logic()
 {
+	check_TRXVUState();
+
 	Rx_logic();
 
 	check_time_off_mute();
