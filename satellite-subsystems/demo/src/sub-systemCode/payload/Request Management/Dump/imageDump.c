@@ -276,26 +276,26 @@ void imageDump_task(void* param)
 {
 	Camera_Request request;
 	memcpy(&request, param, sizeof(Camera_Request));
+	int f_error = f_managed_enterFS();
+	check_int("error in Dump_task, f_managed_enterFS - data abort exeption\n", f_error);
 
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
 		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, request.cmd_id);
-		vTaskDelete(NULL);
+		terminateTask();
 	}
 	else
 	{
 		set_system_state(dump_param, SWITCH_ON);
 	}
-
-	int error = f_managed_enterFS();
 	// ToDo: error log
 
 	vTaskDelay(SYSTEM_DEALY);
 
 	xQueueReset(xDumpQueue);
 
-	error = readChunkDimentionsFromFRAM();
+	int error = readChunkDimentionsFromFRAM();
 
 	if (request.id == Image_Dump_bitField)
 	{
@@ -357,9 +357,6 @@ void imageDump_task(void* param)
 	// ToDo: error log!
 	printf("\n-IMAGE DUMP- ERROR (%u), type (%u)\n\n", error, request.id);
 
-	error = f_managed_releaseFS();
-
 	set_system_state(dump_param, SWITCH_OFF);
-
-	vTaskDelete(NULL);
+	terminateTask();
 }

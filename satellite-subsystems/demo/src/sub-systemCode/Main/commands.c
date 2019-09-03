@@ -377,10 +377,6 @@ void AUC_payload(TC_spl decode)
 	if (err == ERR_SUCCESS)
 		addRequestToQueue(request);
 
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
-#endif
 }
 
 void AUC_EPS(TC_spl decode)

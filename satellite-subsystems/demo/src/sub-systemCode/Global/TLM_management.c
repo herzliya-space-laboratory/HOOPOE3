@@ -152,7 +152,7 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 			{
 				//TODO: write data to log error
 				lastError = f_getlasterror();
-				printf("FS last error: %d\n", lastError);
+				printf("file open: %s FS last error: %d\n", file_name, lastError);
 				vTaskDelay(SYSTEM_DEALY);
 			}
 		}while(lastError==F_ERR_LOCKED);
