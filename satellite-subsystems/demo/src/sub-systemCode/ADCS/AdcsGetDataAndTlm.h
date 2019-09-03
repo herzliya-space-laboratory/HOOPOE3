@@ -75,6 +75,21 @@ int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period);
 
 /*!
+ * @breif return the current state of the override flag.
+ * @param[out] override_flag output buffer for the flag.
+ * @return 	Errors According to TroubleErrCode enum.
+ */
+int AdcsGetTlmOverrideFlag(Boolean *override_flag);
+
+/*!
+ * @brief the override flag forces the system to save telemetry even if errors occure.
+ * @param[in] override_flag value to be set to the override flag.
+ * @note faulty telemtry will be saved in the file and will be garbage data(all zeros or random figures).
+ * @return	Errors According to TroubleErrCode enum.
+ */
+int AdcsSetTlmOverrideFlag(Boolean override_flag);
+
+/*!
  * @brief restores the TLM element array to its default values and updated the FRAM.
  * @return 	TRBL_FAIL in case of error.
  * 			TRBL_SUCCSESS in case of successful restoration

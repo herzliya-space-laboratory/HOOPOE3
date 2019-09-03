@@ -9,31 +9,31 @@
 #define SPLTYPES_H_
 
 //Types (TM)
-#define BEACON_T				3
-#define APRS					20
-#define ACK_TYPE				13
-#define DUMP_T					173
-#define IMAGE_DUMP_T			11
-#define IMAGE_DATABASE_DUMP_T	12
-#define ACK_ST					90
-#define TM_ADCS_T 				154
-#define TM_ONLINE_TM_T	        88
+#define BEACON_T							3
+#define APRS								20
+#define ACK_TYPE							13
+#define DUMP_T								173
+#define IMAGE_DUMP_T						11
+#define IMAGE_DATABASE_DUMP_T				12
+#define ACK_ST								90
+#define TM_ADCS_T 							154
+#define TM_ONLINE_TM_T	        			88
 
 //Types (TC)
-#define COMM_T 					13
-#define GENERAL_T 				20
-#define TC_ADCS_T 				154
-#define GENERALLY_SPEAKING_T	195
-#define PAYLOAD_T				251
-#define EPS_T					6
-#define SOFTWARE_T 				42
-#define TC_ONLINE_TM_T		    TM_ONLINE_TM_T
-#define SPECIAL_OPERATIONS_T	69
+#define COMM_T 								13
+#define GENERAL_T 							20
+#define TC_ADCS_T 							154
+#define GENERALLY_SPEAKING_T				195
+#define PAYLOAD_T							251
+#define EPS_T								6
+#define SOFTWARE_T 							42
+#define TC_ONLINE_TM_T				    TM_ONLINE_TM_T
+#define SPECIAL_OPERATIONS_T				69
 
 //SubType (TM)
-#define BEACON_ST 25
-#define APRS_PACKET_FRAM 33
-#define OFFLINE_SETTING_ST	255
+#define BEACON_ST 							25
+#define APRS_PACKET_FRAM 					33
+#define OFFLINE_SETTING_ST					255
 
 //Payload dump subTypes:
 #define IMAGE_DATABASE_DUMP_ST				96
@@ -51,30 +51,30 @@
 
 //Subtypes (TC)
 //comm
-#define MUTE_ST						0
-#define UNMUTE_ST					1
-#define ACTIVATE_TRANS_ST			24
-#define SHUT_TRANS_ST				25
-#define CHANGE_TRANS_RSSI_ST		26
-#define APRS_DUMP_ST				90
-#define STOP_DUMP_ST				91
-#define TIME_FREQUENCY_ST			5
-#define UPDATE_BIT_RATE_ST			55
+#define MUTE_ST								0
+#define UNMUTE_ST							1
+#define ACTIVATE_TRANS_ST					24
+#define SHUT_TRANS_ST						25
+#define CHANGE_TRANS_RSSI_ST				26
+#define APRS_DUMP_ST						90
+#define STOP_DUMP_ST						91
+#define TIME_FREQUENCY_ST					5
+#define UPDATE_BIT_RATE_ST					55
 
 //general
-#define SOFT_RESET_ST			68
-#define HARD_RESET_ST			66
-#define RESET_SAT_ST 			67
-#define GRACEFUL_RESET_ST		69
-#define UPLOAD_TIME_ST 			17
-#define GENERIC_I2C_ST			0
-#define DUMP_ST					33
-#define DELETE_PACKETS_ST		35
-#define RESET_FILE_ST			45
-#define RESTSRT_FS_ST			46
-#define DUMMY_FUNC_ST			122
-#define REDEPLOY				56
-#define ARM_DISARM				57
+#define SOFT_RESET_ST						68
+#define HARD_RESET_ST						66
+#define RESET_SAT_ST 						67
+#define GRACEFUL_RESET_ST					69
+#define UPLOAD_TIME_ST 						17
+#define GENERIC_I2C_ST						0
+#define DUMP_ST								33
+#define DELETE_PACKETS_ST					35
+#define RESET_FILE_ST						45
+#define RESTSRT_FS_ST						46
+#define DUMMY_FUNC_ST						122
+#define REDEPLOY							56
+#define ARM_DISARM							57
 
 //payload
 #define SEND_PIC_CHUNCK_CHUNK_FIELD_ST		1
@@ -96,14 +96,14 @@
 #define SET_CHUNK_SIZE						17
 
 //eps
-#define ALLOW_ADCS_ST			99
-#define SHUT_ADCS_ST			100
-#define ALLOW_CAM_ST			101
-#define SHUT_CAM_ST			102
-#define UPD_LOGIC_VOLT_ST		255
-#define UPD_COMM_VOLTAGE		20
-#define CHANGE_HEATER_TMP_ST	0
-#define UPDATE_EPS_ALPHA_ST		11
+#define ALLOW_ADCS_ST						99
+#define SHUT_ADCS_ST						100
+#define ALLOW_CAM_ST						101
+#define SHUT_CAM_ST							102
+#define UPD_LOGIC_VOLT_ST					255
+#define UPD_COMM_VOLTAGE					20
+#define CHANGE_HEATER_TMP_ST				0
+#define UPDATE_EPS_ALPHA_ST					11
 
 //adcs
 #define ADCS_I2C_GENRIC_ST					0
@@ -200,31 +200,33 @@
 #define ADCS_GET_ADC_RAW_RED_MAG_ST			215
 #define ADCS_GET_ACP_EXECUTION_STATE_ST		220
 
+
 #define ADCS_RESET_TLM_ELEMENTS_ST			240
 #define ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST	241
 #define ADCS_GET_TLM_ELEM_AT_INDEX_ST		242
-
 #define ADCS_GET_ADCS_CONFIG_PARAM_ST 		243
+#define ADCS_SET_TLM_OVERRIDE_FLAG_ST		244
+#define ADCS_GET_TLM_OVERRIDE_FLAG_ST		245
 #define ADCS_SET_DATA_LOG_ST				255
 
 
 //sw
-#define RESET_DELAYED_CM_LIST_ST 		32
-#define RESET_APRS_LIST_ST				15
-#define RESET_FRAM_ST					42
+#define RESET_DELAYED_CM_LIST_ST 			32
+#define RESET_APRS_LIST_ST					15
+#define RESET_FRAM_ST						42
 
 //online TM
-#define GET_ONLINE_TM_INDEX_ST		0
-#define RESET_OFF_LINE_LIST_ST		1
-#define ADD_ITEM_OFF_LINE_LIST_ST		2
+#define GET_ONLINE_TM_INDEX_ST				0
+#define RESET_OFF_LINE_LIST_ST				1
+#define ADD_ITEM_OFF_LINE_LIST_ST			2
 #define	DELETE_ITEM_OFF_LINE_LIST_ST		3
 #define GET_OFFLINE_LIST_SETTING_ST			4
 
 //special operations
-#define DELETE_UNF_CUF_ST				156
-#define UPLOAD_CUF_ST					157
-#define CON_UNF_CUF_ST					158
-#define PAUSE_UP_CUF_ST					159
-#define EXECUTE_CUF						160
-#define REVERT_CUF						161
+#define DELETE_UNF_CUF_ST					156
+#define UPLOAD_CUF_ST						157
+#define CON_UNF_CUF_ST						158
+#define PAUSE_UP_CUF_ST						159
+#define EXECUTE_CUF							160
+#define REVERT_CUF							161
 #endif /* SPLTYPES_H_ */

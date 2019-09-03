@@ -334,6 +334,37 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 	return 0;
 }
 
+int AdcsGetTlmOverrideFlag(Boolean *override_flag){
+	if(NULL == override_flag){
+		return TRBL_NULL_DATA;
+	}
+
+	int trbl;
+	trbl = FRAM_read((unsigned char*)override_flag,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
+	if(0 != trbl){
+		return TRBL_FRAM_READ_ERR;
+	}
+	return TRBL_SUCCESS;
+}
+
+int AdcsSetTlmOverrideFlag(Boolean override_flag){
+	Boolean temp = TRUE;
+	int trbl;
+	if(override_flag){
+		temp = TRUE;
+		trbl = FRAM_write((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
+	}else{
+		temp = FALSE;
+		trbl = FRAM_write((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
+	}
+	if(0 != trbl){
+		return TRBL_FRAM_WRITE_ERR;
+	}
+	OverrideSaveTLM = temp;
+	return TRBL_SUCCESS;
+
+}
+
 TroubleErrCode RestoreDefaultTlmElement(){
 	AdcsTlmElement_t def_tlm[] = ADCS_DEFAULT_TLM_VECTOR;
 	if(NULL == memcpy(TlmElements,def_tlm,sizeof(def_tlm))){

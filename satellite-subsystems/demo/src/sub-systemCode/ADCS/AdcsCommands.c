@@ -622,6 +622,13 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
 			break;
+		case ADCS_SET_TLM_OVERRIDE_FLAG_ST:
+			memcpy(&rv,cmd->data,sizeof(Boolean));
+			err = AdcsSetTlmOverrideFlag((Boolean)rv);
+			break;
+		case ADCS_GET_TLM_OVERRIDE_FLAG_ST:
+
+			break;
 		case ADCS_SET_DATA_LOG_ST:
 			//TODO: implement
 			break;

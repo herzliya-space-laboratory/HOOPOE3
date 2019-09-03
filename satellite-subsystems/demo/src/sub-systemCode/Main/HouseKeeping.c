@@ -278,21 +278,19 @@ int HK_find_fileName(HK_types type, char* fileName)
 {
 	if (fileName == NULL)
 		return -12;
-	if (type == ACK_T)
-	{
+	if (type == ACK_T){
 		strcpy(fileName, ACK_FILE_NAME);
 		return 0;
 	}
 
-	if (offlineTM_T <= type && type < ADCS_science_T)
-	{
+	if (offlineTM_T <= type && type < ADCS_science_T){
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		strcpy(fileName, OnlineTM_type.name);
 		return 0;
 	}
 
 	if (type >= ADCS_science_T){
-		HK_find_ADCSTM_fileName(type-ADCS_science_T,fileName);
+		HK_find_ADCSTM_fileName(type - ADCS_science_T,fileName);
 	}
 	return -13;
 }
@@ -324,6 +322,10 @@ int HK_find_ADCSTM_ElementSize(HK_AdcsTlmTypes type)
 		return 34;
 	case AdcsTlm_MiscCurrents:
 		return 4;
+	default:
+		return -13;
+	}
+	return -13;
 }
 int HK_findElementSize(HK_types type)
 {
@@ -338,7 +340,7 @@ int HK_findElementSize(HK_types type)
 		return OnlineTM_type.TM_param_length;
 	}
 	if (type >= ADCS_science_T){
-		HK_find_ADCSTM_fileName(type-ADCS_science_T,fileName);
+		return HK_find_ADCSTM_ElementSize(type - ADCS_science_T);
 	}
 	return -13;
 }
@@ -346,11 +348,11 @@ int HK_findElementSize(HK_types type)
 
 int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 {
-	if (raw_data == NULL || packet == NULL)
+	if (raw_data == NULL || packet == NULL){
 		return -12;
+	}
 	memcpy(&packet->time, raw_data, TIME_SIZE);
-	if (type == ACK_T)
-	{
+	if (type == ACK_T){
 		packet->type = ACK_TYPE;
 		packet->subType = ACK_ST;
 		packet->length = ACK_DATA_LENGTH;
@@ -358,8 +360,11 @@ int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 		return 0;
 	}
 
-	if (offlineTM_T <= type && type < ADCS_science_T)
-	{
+	if(type == ADCS_science_T){
+		//TODO: finish build adcs spl packet
+	}
+
+	if (offlineTM_T <= type && type < ADCS_science_T){
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		packet->type = TM_ONLINE_TM_T;
 		packet->subType = (byte)type;
@@ -367,6 +372,5 @@ int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 		memcpy(packet->data, raw_data + TIME_SIZE, OnlineTM_type.TM_param_length);
 		return 0;
 	}
-
 	return -13;
 }
