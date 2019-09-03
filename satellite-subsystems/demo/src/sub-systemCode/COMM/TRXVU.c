@@ -563,12 +563,14 @@ void check_TRXVUState()
 	ISIStrxvuBitrateStatus FRAMBitRate;
 	if (dat == trxvu_bitrate_1200)
 		FRAMBitRate = trxvu_bitratestatus_1200;
-	if (dat == trxvu_bitrate_2400)
+	else if (dat == trxvu_bitrate_2400)
 		FRAMBitRate = trxvu_bitratestatus_2400;
-	if (dat == trxvu_bitrate_4800)
+	else if (dat == trxvu_bitrate_4800)
 		FRAMBitRate = trxvu_bitratestatus_4800;
-	if (dat == trxvu_bitrate_9600)
+	else if (dat == trxvu_bitrate_9600)
 		FRAMBitRate = trxvu_bitratestatus_9600;
+	else
+		return;
 
 	ISIStrxvuTransmitterState TxState;
 	error = IsisTrxvu_tcGetState(0, &TxState);
