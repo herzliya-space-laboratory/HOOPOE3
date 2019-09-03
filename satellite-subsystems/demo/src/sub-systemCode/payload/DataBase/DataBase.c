@@ -630,6 +630,8 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 
 	// Erasing previous image before taking one to clear this part of the SDs:
 
+	vTaskDelay(CAMERA_DELAY);
+
 	for (unsigned int i = 0; i < database->cameraParameters.frameAmount; i++)
 	{
 		err = GECKO_EraseBlock(database->nextId + i);
@@ -649,7 +651,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
 	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);
 
-	vTaskDelay(DELAY);
+	vTaskDelay(CAMERA_DELAY);
 
 	// ImageDataBase handling:
 

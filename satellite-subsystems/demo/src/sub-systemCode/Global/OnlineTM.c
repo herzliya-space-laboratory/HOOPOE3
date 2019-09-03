@@ -331,8 +331,11 @@ void reset_offline_TM_list()
 		offline_TM_list[i].period = 0;
 		offline_TM_list[i].stopTime = 0;
 	}
-	for (int i = 0; i < 4; i++)
-		add_onlineTM_param_to_save_list(i, 1, 4294967295u);
+
+	add_onlineTM_param_to_save_list(TM_EPS_HK, 1, 4294967295u);
+	add_onlineTM_param_to_save_list(TM_COMM_HK, 1, 4294967295u);
+	add_onlineTM_param_to_save_list(TM_ADCS_HK, 1, 4294967295u);
+	add_onlineTM_param_to_save_list(TM_CAM_HK, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_SP_HK, 20, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_FS_Space_A, 60*30, 4294967295u);
 	//add_onlineTM_param_to_save_list(TM_FS_Space_B, 60*30, 4294967295u);

@@ -89,7 +89,7 @@ void CameraManagerTaskMain()
 	int loop = 0;
 	while(TRUE)
 	{
-		if (loop % 8 == 0)
+		if (loop % 80 == 0)
 		{
 			loop = 1;
 			printf("\n         Camera task\n\n");
@@ -335,7 +335,10 @@ void act_upon_request(Camera_Request request)
 	Gecko_TroubleShooter(error);
 
 	if ( !(request.id == Handle_Mark || request.id == transfer_image_to_OBC) )
+	{
+		printf("\n\n\n\n\n\n\n\n\nDID CAMERA THINGI (%u)\n\n\n\n\n\n\n\n\n\n", error);
 		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
+	}
 
 	error = f_managed_releaseFS();
 	// ToDo: log error

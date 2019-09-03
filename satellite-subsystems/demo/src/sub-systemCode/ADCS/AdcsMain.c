@@ -96,6 +96,8 @@ TroubleErrCode AdcsInit()
 	FRAM_write((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE);
 	*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 	FRAM_write((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE);
+	Boolean temp = TRUE;
+	FRAM_read((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,sizeof(temp));
 #endif
 	if(0 != FRAM_read((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
@@ -120,6 +122,8 @@ void AdcsTask()
 
 	while(TRUE)
 	{
+		printf("\n             ADCS task\n\n");
+
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
 			vTaskDelay(delay_loop);
 			continue;

@@ -179,14 +179,11 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
  */
 ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[BIT_FIELD_SIZE])
 {
-	int error = f_managed_enterFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
 	char file_name[FILE_NAME_SIZE];
 	GetImageFileName(image_id, comprasionType, file_name);
 
 	F_FILE *file = NULL;
-	error = f_managed_open(file_name, "r", &file);
+	int error = f_managed_open(file_name, "r", &file);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t image_size = f_filelength(file_name);
@@ -196,9 +193,6 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 	check_int("f_read in bitField_imageDump", error);
 
 	error = f_managed_close(&file);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	error = f_managed_releaseFS();
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
@@ -245,14 +239,11 @@ ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], ui
 
 ImageDataBaseResult chunkField_imageDump(Camera_Request request, imageid image_id, fileType comprasionType, uint16_t firstIndex, uint16_t lastIndex)
 {
-	int error = f_managed_enterFS();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
 	char file_name[FILE_NAME_SIZE];
 	GetImageFileName(image_id, comprasionType, file_name);
 
 	F_FILE* current_file = NULL;
-	error = f_managed_open(file_name, "r", &current_file);
+	int error = f_managed_open(file_name, "r", &current_file);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	uint32_t image_size = f_filelength(file_name);
@@ -262,9 +253,6 @@ ImageDataBaseResult chunkField_imageDump(Camera_Request request, imageid image_i
 	check_int("f_read in bitField_imageDump", error);
 
 	error = f_managed_close(&current_file);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	error = f_managed_releaseFS();
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	pixel_t chunk[CHUNK_SIZE(chunk_width, chunk_height)];
@@ -368,6 +356,8 @@ void imageDump_task(void* param)
 
 	// ToDo: error log!
 	printf("\n-IMAGE DUMP- ERROR (%u), type (%u)\n\n", error, request.id);
+
+	error = f_managed_releaseFS();
 
 	set_system_state(dump_param, SWITCH_OFF);
 
