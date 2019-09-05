@@ -47,8 +47,8 @@
 #define ADCS_LOOP_DELAY_FRAM_ADDR 0X6542			// main loop delay
 #define ADCS_LOOP_DELAY_FRAM_SIZE 4
 
-#define ADCS_RESPONSE_DELAY_FRAM_ADDR 0x6548
-#define ADCS_RESPONSE_DELAY_FRAM_SIZE 4
+#define ADCS_SYS_OFF_DELAY_ADDR 0x6546				// delay incase the system is off- wait to wakeup
+#define ADCS_SYS_OFF_DELAY_SIZE	4
 
 #define ADCS_QUEUE_WAIT_TIME_FRAM_ADDR 0X6552		// max wait time for the adcs cmd queue
 #define ADCS_QUEUE_WAIT_TIME_FRAM_SIZE 4

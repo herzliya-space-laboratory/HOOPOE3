@@ -668,6 +668,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = AdcsGetTlmOverrideFlag((Boolean*)&rv);
 			SendAdcsTlm((byte*)&rv,sizeof(rv),ADCS_GET_TLM_OVERRIDE_FLAG_ST);
 			break;
+		case ADCS_SET_ADCS_LOOP_PARAMETERS:
+			err = UpdateAdcsFramParameters(cmd->data[0],cmd->data+1);
+			break;
 		case ADCS_SET_DATA_LOG_ST:
 			//TODO: implement
 			break;
