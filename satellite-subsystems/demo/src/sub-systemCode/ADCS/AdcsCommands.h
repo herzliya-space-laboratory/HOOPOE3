@@ -93,8 +93,6 @@ typedef struct __attribute__ ((__packed__)) _adcs_i2c_cmd
  */
 int AdcsReadI2cAck(AdcsTcErrorReason *rv);
 
-int AdcsI2cCmdReadTLM(unsigned char tlm_type, unsigned char* data, unsigned int length , int *ack);
-
 /*!
  * @brief allows the user to send a command directly to the I2C bus to the ADCS, and receive data.
  * @param[in][out] i2c_cmd executes data according to 'i2c_cmd' data. Saves ADCS ack into the struct.

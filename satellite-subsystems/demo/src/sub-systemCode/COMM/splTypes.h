@@ -2,128 +2,108 @@
  * splTypes.h
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DataBaseRefactorn
  */
 
 #ifndef SPLTYPES_H_
 #define SPLTYPES_H_
 
 //Types (TM)
-#define BEACON_T 						3
-#define APRS 							20
-#define ACK_TYPE 						13
-#define DUMP_T 							173
-#define IMAGE_DUMP_T 					11
-#define ACK_ST 							90
-#define TM_ADCS_ST 						42
-#define ADCS_SC_ST						55
-#define TM_ADCS_T						154
+#define BEACON_T							3
+#define APRS								20
+#define ACK_TYPE							13
+#define DUMP_T								173
+#define IMAGE_DUMP_T						11
+#define IMAGE_DATABASE_DUMP_T				12
+#define ACK_ST								90
+#define TM_ADCS_T 							154
+#define TM_ONLINE_TM_T	        			88
 
 //Types (TC)
-
-#define NONE_APRS_T 					33
-#define COMM_T 							13
-#define GENERAL_T 						20
-#define TC_ADCS_T 						TM_ADCS_T
-#define GENERALLY_SPEAKING_T			195
-#define PAYLOAD_T						251
-#define EPS_T							6
-#define SOFTWARE_T 						42
-#define SPECIAL_OPERATIONS_T			69
+#define COMM_T 								13
+#define GENERAL_T 							20
+#define TC_ADCS_T 							154
+#define GENERALLY_SPEAKING_T				195
+#define PAYLOAD_T							251
+#define EPS_T								6
+#define SOFTWARE_T 							42
+#define TC_ONLINE_TM_T				    TM_ONLINE_TM_T
+#define SPECIAL_OPERATIONS_T				69
 
 //SubType (TM)
-#define BEACON_ST 						25
-#define APRS_PACKET_FRAM 				33
-//dumps subTypes:
-#define EPS_DUMP_ST 					13
-#define CAM_DUMP_ST 					23
-#define COMM_DUMP_ST 					45
-#define ADCS_DUMP_ST 					78
-#define SP_DUMP_ST						91
+#define BEACON_ST 							25
+#define APRS_PACKET_FRAM 					33
+#define OFFLINE_SETTING_ST					255
 
-#define IMAGE_DUMP_THUMBNAIL4_ST		100
-#define IMAGE_DUMP_THUMBNAIL3_ST		101
-#define IMAGE_DUMP_THUMBNAIL2_ST		102
-#define IMAGE_DUMP_THUMBNAIL1_ST		103
-#define IMAGE_DUMP_RAW_ST				104
-#define IMAGE_DUMP_JPG_ST				105
+//Payload dump subTypes:
+#define IMAGE_DATABASE_DUMP_ST				96
+#define IMAGE_DATABASE_DUMP_FIRST_CHUNK_ST	97
 
-//ADCS science sub-types
-#define ADCS_CSS_DATA_ST 				122
-#define ADCS_MAGNETIC_FILED_ST			123
-#define ADCS_CSS_SUN_VECTOR_ST			124
-#define ADCS_WHEEL_SPEED_ST				125
-#define ADCS_SENSORE_RATE_ST			126
-#define ADCS_MAG_CMD_ST					127
-#define ADCS_WHEEL_CMD_ST				128
-#define ADCS_MAG_RAW_ST					129
-#define ADCS_IGRF_MODEL_ST				130
-#define ADCS_GYRO_BIAS_ST				131
-#define ADCS_INNO_VEXTOR_ST				132
-#define ADCS_ERROR_VEC_ST				133
-#define ADCS_QUATERNION_COVARIANCE_ST 	134
-#define ADCS_ANGULAR_RATE_COVARIANCE_ST 135
-#define ADCS_ESTIMATED_ANGLES_ST		136
-#define ADCS_ESTIMATED_AR_ST			137
-#define ADCS_ECI_POS_ST					138
-#define ADCS_SAV_VEL_ST					139
-#define ADCS_ECEF_POS_ST				140
-#define ADCS_LLH_POS_ST					141
-#define ADCS_EST_QUATERNION_ST			142
-
-//camm staff
-#define IMAGE_DUMP_ST 					122
+#define IMAGE_DUMP_THUMBNAIL6_ST			98
+#define IMAGE_DUMP_THUMBNAIL5_ST			99
+#define IMAGE_DUMP_THUMBNAIL4_ST			100
+#define IMAGE_DUMP_THUMBNAIL3_ST			101
+#define IMAGE_DUMP_THUMBNAIL2_ST			102
+#define IMAGE_DUMP_THUMBNAIL1_ST			103
+#define IMAGE_DUMP_RAW_ST					104
+#define IMAGE_DUMP_JPG_ST					105
+#define IMAGE_DUMP_JPG_FIRST_CHUNK_ST		106
 
 //Subtypes (TC)
 //comm
-#define MUTE_ST							0
-#define UNMUTE_ST						1
-#define ACTIVATE_TRANS_ST				24
-#define SHUT_TRANS_ST					25
-#define CHANGE_TRANS_RSSI_ST			26
-#define APRS_DUMP_ST					90
-#define STOP_DUMP_ST					91
-#define TIME_FREQUENCY_ST				5
+#define MUTE_ST								0
+#define UNMUTE_ST							1
+#define ACTIVATE_TRANS_ST					24
+#define SHUT_TRANS_ST						25
+#define CHANGE_TRANS_RSSI_ST				26
+#define APRS_DUMP_ST						90
+#define STOP_DUMP_ST						91
+#define TIME_FREQUENCY_ST					5
+#define UPDATE_BIT_RATE_ST					55
 
 //general
-#define SOFT_RESET_ST					68
-#define HARD_RESET_ST					66
-#define RESET_SAT_ST 					67
-#define GRACEFUL_RESET_ST				69
-#define UPLOAD_TIME_ST 					17
-
-//generally speaking
-#define GENERIC_I2C_ST					0
-#define DUMP_ST							33
-#define DELETE_PACKETS_ST				35
-#define RESET_FILE_ST					45
-#define RESTSRT_FS_ST					46
-#define DUMMY_FUNC_ST					122
-#define REDEPLOY						56
-#define ARM_DISARM						57
+#define SOFT_RESET_ST						68
+#define HARD_RESET_ST						66
+#define RESET_SAT_ST 						67
+#define GRACEFUL_RESET_ST					69
+#define UPLOAD_TIME_ST 						17
+#define GENERIC_I2C_ST						0
+#define DUMP_ST								33
+#define DELETE_PACKETS_ST					35
+#define RESET_FILE_ST						45
+#define RESTSRT_FS_ST						46
+#define DUMMY_FUNC_ST						122
+#define REDEPLOY							56
+#define ARM_DISARM							57
 
 //payload
-#define SEND_PIC_CHUNCK_ST				1
-#define UPDATE_STN_PARAM_ST 			2
-#define GET_IMG_DATA_BASE_ST			7
-#define RESET_DATA_BASE_ST				11
-#define DELETE_PIC_ST					42
-#define UPD_DEF_DUR_ST					69
-#define	OFF_CAM_ST						73
-#define ON_CAM_ST						101
-#define MOV_IMG_CAM_OBS_ST				123
-#define TAKE_IMG_DEF_VAL_ST				213
-#define TAKE_IMG_ST						255
-#define CREATE_TB_FROM_IMAGE_ST			51
+#define SEND_PIC_CHUNCK_CHUNK_FIELD_ST		1
+#define SEND_PIC_CHUNCK_BIT_FIELD_ST 		2
+#define TAKE_IMG_ST							3
+#define TAKE_IMG_SPECIAL_VAL_ST				4
+#define TAKE_PICTURE_WITH_TIME_IN_BETWEEN 	5
+#define UPDATE_PHOTOGRAPHY_VALUES_ST		6
+#define DELETE_PIC_FILE_ST					7
+#define DELETE_PIC_ST						8
+#define MOV_IMG_CAM_OBS_ST					9
+#define CREATE_THUMBNAIL_FROM_IMAGE_ST		10
+#define CREATE_JPEG_FROM_IMAGE_ST			11
+#define RESET_DATA_BASE_ST					12
+#define SEND_IMAGE_DATA_BASE_ST				13
+#define UPDATE_DEF_DUR_ST					14
+#define	OFF_CAM_ST							15
+#define ON_CAM_ST							16
+#define SET_CHUNK_SIZE						17
 
 //eps
-#define ALLOW_ADCS_ST					99
-#define SHUT_ADCS_ST					100
-#define ALLOW_CAM_ST					101
-#define SHUT_CAM_ST						102
-#define UPD_LOGIC_VOLT_ST				255
-#define UPD_COMM_VOLTAGE				20
-#define CHANGE_HEATER_TMP_ST			0
+#define ALLOW_ADCS_ST						99
+#define SHUT_ADCS_ST						100
+#define ALLOW_CAM_ST						101
+#define SHUT_CAM_ST							102
+#define UPD_LOGIC_VOLT_ST					255
+#define UPD_COMM_VOLTAGE					20
+#define CHANGE_HEATER_TMP_ST				0
+#define UPDATE_EPS_ALPHA_ST					11
 
 //adcs
 #define ADCS_I2C_GENRIC_ST					0
@@ -220,24 +200,34 @@
 #define ADCS_GET_ADC_RAW_RED_MAG_ST			215
 #define ADCS_GET_ACP_EXECUTION_STATE_ST		220
 
-#define ADCS_RESET_TLM_ELEMENTS_ST			240
-#define ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST	241
-#define ADCS_GET_TLM_ELEM_AT_INDEX_ST		242
 
-#define ADCS_GET_ADCS_CONFIG_PARAM_ST 		243
+#define ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST	90
+#define ADCS_RESET_TLM_ELEMENTS_ST			91
+#define ADCS_SET_TLM_OVERRIDE_FLAG_ST		92
+#define ADCS_SET_ADCS_LOOP_PARAMETERS		93
+#define ADCS_GET_TLM_ELEM_AT_INDEX_ST		250
+#define ADCS_GET_ADCS_CONFIG_PARAM_ST 		251
+#define ADCS_GET_TLM_OVERRIDE_FLAG_ST		252
 #define ADCS_SET_DATA_LOG_ST				255
 
 
 //sw
-#define RESET_DELAYED_CM_LIST_ST 		32
-#define RESET_APRS_LIST_ST				15
-#define RESET_FRAM_ST					42
+#define RESET_DELAYED_CM_LIST_ST 			32
+#define RESET_APRS_LIST_ST					15
+#define RESET_FRAM_ST						42
+
+//online TM
+#define GET_ONLINE_TM_INDEX_ST				0
+#define RESET_OFF_LINE_LIST_ST				1
+#define ADD_ITEM_OFF_LINE_LIST_ST			2
+#define	DELETE_ITEM_OFF_LINE_LIST_ST		3
+#define GET_OFFLINE_LIST_SETTING_ST			4
 
 //special operations
-#define DELETE_UNF_CUF_ST				156
-#define UPLOAD_CUF_ST					157
-#define CON_UNF_CUF_ST					158
-#define PAUSE_UP_CUF_ST					159
-#define EXECUTE_CUF						160
-#define REVERT_CUF						161
+#define DELETE_UNF_CUF_ST					156
+#define UPLOAD_CUF_ST						157
+#define CON_UNF_CUF_ST						158
+#define PAUSE_UP_CUF_ST						159
+#define EXECUTE_CUF							160
+#define REVERT_CUF							161
 #endif /* SPLTYPES_H_ */

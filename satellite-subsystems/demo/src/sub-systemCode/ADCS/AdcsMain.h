@@ -16,6 +16,7 @@ typedef enum
 
 typedef enum __attribute__ ((__packed__)){
 	DELAY_LOOP,
+	DELAY_SYSTEM_OFF,
 	QUEUE_WAIT_TIME
 }AdcsFramParameters;
 
