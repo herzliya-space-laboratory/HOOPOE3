@@ -164,7 +164,6 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 		lastError = f_getlasterror();
 		printf("FS last error: %d\n", lastError);
 	}
-	printf("open file: %s, pointer: %u\n", file_name, *fileHandler);
 	return lastError;
 }
 int f_managed_close(F_FILE** fileHandler)
@@ -175,7 +174,6 @@ int f_managed_close(F_FILE** fileHandler)
 		printf("f_close in f_managed_close, error: %d", error);
 		return error;
 	}
-	printf("close file, pointer: %u\n", *fileHandler);
 	if (xSemaphoreGive_extended(xFileOpenHandler) == pdTRUE)
 		return 0;
 

@@ -156,17 +156,10 @@ void TRXVU_task()
 		set_system_state(dump_param, SWITCH_OFF);
 	}
 	//6. entering infinite loop
-	int loop = 0;
 	while(1)
 	{
-		if (loop % 10 == 0)
-		{
-			loop = 1;
-			printf("\n         TRXVU logic\n\n");
-		}
 		trxvu_logic();
 		vTaskDelay(TASK_DELAY);
-		loop++;
 	}
 }
 

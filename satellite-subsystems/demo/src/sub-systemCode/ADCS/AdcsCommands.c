@@ -152,7 +152,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		//generic I2C command
 		case ADCS_I2C_GENRIC_ST:
 				memcpy(&i2c_cmd,cmd->data,cmd->length);
-				if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH / 2){
+				if ((i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH / 2)&&(i2c_cmd.id < 128)){
 
 					if ((i2c_cmd.data[0] & 0x0F) == 0){	// 4 LSB indicate which half of the CMD did we send.
 						memcpy(I2cData, &i2c_cmd.data[1], ADCS_CMD_MAX_DATA_LENGTH/2);
@@ -168,15 +168,15 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 				err = AdcsGenericI2cCmd(&i2c_cmd);
 
 				if (i2c_cmd.id < 128){	// is TLC
-					SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_I2C_GENRIC_ST);
+					SendAdcsTlm((byte*)&i2c_cmd.ack,ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);
 				}
 				else { // is TLM
 					if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
 						SendAdcsTlm(i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
-						SendAdcsTlm(&(i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2]), i2c_cmd.length - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
+						SendAdcsTlm(&(i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2]), ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
 
 					}else{
-						SendAdcsTlm((byte*)i2c_cmd.data,i2c_cmd.length, ADCS_I2C_GENRIC_ST);
+						SendAdcsTlm((byte*)i2c_cmd.data,ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);
 					}
 				}
 				//TODO: log 'i2c_cmd.ack'. maybe send it in ACK form

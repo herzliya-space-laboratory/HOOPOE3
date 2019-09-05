@@ -122,8 +122,6 @@ void AdcsTask()
 
 	while(TRUE)
 	{
-		printf("\n             ADCS task\n\n");
-
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
 			vTaskDelay(delay_loop);
 			continue;

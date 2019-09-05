@@ -90,6 +90,8 @@ void execute_delayedCommand(int startingPoint)
 	TC_spl decode;	//decode command
 	decode_TCpacket(DelayCommand_list + startingPoint, -1, &decode);	//docoded packet to execute
 	add_command(decode);	//executing command
+	printf("execute command: %u\n", decode.id);
+	printf("Time stamp: %u\n", decode.time);
 }
 
 void check_delaycommand()
@@ -189,6 +191,8 @@ int add_delayCommand(TC_spl decode)
 	if (count != -1)//if there's an empty space in the list
 	{
 		memcpy(DelayCommand_list + count, command, decode.length + SPL_TC_HEADER_SIZE);
+		printf("add command: %u\n", decode.id);
+		printf("Time stamp: %u\n", decode.time);
 	}
 
 	// 7.1. returns the list to the FRAM
@@ -230,6 +234,7 @@ void EmptyOldestCommand()
 		if (OldTime == cmdTime)
 		{
 			DELETE_CMD_FROM_LIST(i);
+			printf("The list is full, delete the command with the oldest time stamp\n");
 			break;
 		}
 	}

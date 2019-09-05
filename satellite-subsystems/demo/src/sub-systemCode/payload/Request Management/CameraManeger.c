@@ -86,15 +86,8 @@ void CameraManagerTaskMain()
 	Camera_Request req;
 	time_unix timeNow;
 
-	int loop = 0;
 	while(TRUE)
 	{
-		if (loop % 80 == 0)
-		{
-			loop = 1;
-			printf("\n         Camera task\n\n");
-		}
-		loop++;
 		if (removeRequestFromQueue(&req) > -1)
 		{
 			act_upon_request(req);
