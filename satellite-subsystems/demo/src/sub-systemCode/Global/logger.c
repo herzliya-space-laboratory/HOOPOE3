@@ -8,9 +8,6 @@
 #include <stdio.h>
 #include "logger.h"
 
-#define ERROR_LOG_FILENAME "error"
-#define EVENT_LOG_FILENAME "event"
-
 typedef struct
 {
 	int log_num;

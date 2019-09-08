@@ -40,6 +40,7 @@
 #include "../Global/sizes.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
+#include "../Global/logger.h"
 #include "../Global/OnlineTM.h"
 
 
@@ -283,6 +284,16 @@ int HK_find_fileName(HK_types type, char* fileName)
 		return 0;
 	}
 
+	if (type == log_files_erorrs_T){
+		strcpy(fileName, ERROR_LOG_FILENAME);
+		return 0;
+	}
+
+	if (type == log_files_events_T){
+		strcpy(fileName, EVENT_LOG_FILENAME);
+		return 0;
+	}
+
 	if (offlineTM_T <= type && type < ADCS_science_T){
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		strcpy(fileName, OnlineTM_type.name);
@@ -333,7 +344,13 @@ int HK_findElementSize(HK_types type)
 	{
 		return ACK_DATA_LENGTH;
 	}
+	if (type == log_files_erorrs_T){
+		return sizeof(int);
+	}
 
+	if (type == log_files_events_T){
+		return sizeof(int);
+	}
 	if (offlineTM_T <= type && type < ADCS_science_T)
 	{
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);

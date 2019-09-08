@@ -9,6 +9,10 @@
 #define LOGGER_H_
 
 #include "TLM_management.h"
+
+#define ERROR_LOG_FILENAME "error"
+#define EVENT_LOG_FILENAME "event"
+
 #define EPS_LOG_OFFSET 0
 #define PAYLOAD_LOG_OFFSET 50
 #define TRANSPONDER_LOG_OFFSET 100

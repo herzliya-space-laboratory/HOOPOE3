@@ -213,7 +213,8 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 					build_HK_spl_packet(HK[i], Dump_buffer + l * parameterSize, &packet);
 					encode_TMpacket(raw_packet, &length_raw_packet, packet);
 
-					if (last_send + (time_unix)resulotion <= packet.time || HK[i] == ACK_T || HK[i] == log_files_T)
+					if (last_send + (time_unix)resulotion <= packet.time || HK[i] == ACK_T ||
+							HK[i] == log_files_erorrs_T || HK[i] == log_files_events_T)
 					{
 						last_send = packet.time;
 						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
