@@ -104,15 +104,12 @@ TroubleErrCode AdcsInit()
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 		//todo: log error
 	}
-	if(0 != FRAM_read(system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
+	if(0 != FRAM_read((unsigned char*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
 	if(0 != FRAM_read((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
-	}
-	if(0 != FRAM_read(system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
-		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
 
 	return TRBL_SUCCESS;
