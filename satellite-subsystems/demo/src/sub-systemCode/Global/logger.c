@@ -9,12 +9,15 @@
 #include "logger.h"
 
 #define ERROR_LOG_FILENAME "error"
-#define RESET_LOG_FILENAME "reset"
-#define PAYLOAD_LOG_FILENAME "image"
-#define EPS_LOG_FILENAME "EPS"
-#define TRANSPONDER_LOG_FILENAME "TRXVU"
+#define EVENT_LOG_FILENAME "event"
 
-FileSystemResult WriteLog(void *log, char filename[5])
+typedef struct
+{
+	int log_num;
+	int info;
+}LogStruct;
+
+static FileSystemResult WriteLog(void *log, char filename[5])
 {
 	FileSystemResult fs = c_fileWrite(filename, log);
 	if (fs == FS_SUCCSESS)
@@ -33,36 +36,42 @@ FileSystemResult WriteLog(void *log, char filename[5])
 	return fs;
 }
 
-FileSystemResult WriteErrorLog(log_errors ErrNum)
+FileSystemResult WriteErrorLog(log_errors log_num, log_systems system, int info)
 {
-	return WriteLog(&ErrNum, ERROR_LOG_FILENAME);
+	LogStruct log;
+	log.info = info;
+	log.log_num = log_num + system * 50;
+	return WriteLog(&log, ERROR_LOG_FILENAME);
 }
 
-FileSystemResult WriteResetLog(log_systems SysNum)
+FileSystemResult WriteResetLog(log_systems log_num, int info)
 {
-	return WriteLog(&SysNum, RESET_LOG_FILENAME);
+	LogStruct log;
+	log.info = info;
+	log.log_num = log_num + RESETS_LOG_OFFSET;
+	return WriteLog(&log, EVENT_LOG_FILENAME);
 }
-
-typedef struct
-{
-	log_payload log_num;
-	short info;
-}PayloadLog;
 
 FileSystemResult WritePayloadLog(log_payload log_num, int info)
 {
-	PayloadLog log;
-	log.log_num =log_num;
+	LogStruct log;
 	log.info = info;
-	return WriteLog(&log, PAYLOAD_LOG_FILENAME);
+	log.log_num = log_num + PAYLOAD_LOG_OFFSET;
+	return WriteLog(&log, EVENT_LOG_FILENAME);
 }
 
-FileSystemResult WriteEpsLog(log_states StateNum)
+FileSystemResult WriteEpsLog(log_states log_num, int info)
 {
-	return WriteLog(&StateNum, EPS_LOG_FILENAME);
+	LogStruct log;
+	log.info = info;
+	log.log_num = log_num + EPS_LOG_OFFSET;
+	return WriteLog(&log, EVENT_LOG_FILENAME);
 }
 
-FileSystemResult WriteTransponderLog(log_activation activity)
+FileSystemResult WriteTransponderLog(log_activation log_num, int info)
 {
-	return WriteLog(&activity, TRANSPONDER_LOG_FILENAME);
+	LogStruct log;
+	log.info = info;
+	log.log_num = log_num + EPS_LOG_OFFSET;
+	return WriteLog(&log, EVENT_LOG_FILENAME);
 }

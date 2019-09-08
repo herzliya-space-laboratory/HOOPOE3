@@ -27,6 +27,7 @@
 
 #include <string.h>
 #include "../Global/Global.h"
+#include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
 #include "../EPS.h"
 
@@ -306,11 +307,33 @@ Boolean overRide_Camera()
 	return TRUE;
 }
 
+
+void writeState_log(EPS_mode_t mode)
+{
+	f_managed_enterFS();
+	switch(mode)
+	{
+	case full_mode:
+		WriteEpsLog(EPS_ENTER_FULL, 0);
+		break;
+	case cruise_mode:
+		WriteEpsLog(EPS_ENTER_CRUISE, 0);
+		break;
+	case safe_mode:
+		WriteEpsLog(EPS_ENTER_SAFE, 0);
+		break;
+	case critical_mode:
+		WriteEpsLog(EPS_ENTER_CRITICAL, 0);
+		break;
+	}
+	f_releaseFS();
+}
 //EPS modes
 void EnterFullMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
 	printf("Enter Full Mode\n");
 	*mode = full_mode;
+	writeState_log(*mode);
 	set_system_state(Tx_param, SWITCH_ON);
 
 	if (overRide_ADCS(switches_states))
@@ -335,6 +358,7 @@ void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
 	printf("Enter Cruise Mode\n");
 	*mode = cruise_mode;
+	writeState_log(*mode);
 	set_system_state(Tx_param, SWITCH_ON);
 
 	if (overRide_ADCS(switches_states))
@@ -358,6 +382,7 @@ void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
 	printf("Enter Safe Mode\n");
 	*mode = safe_mode;
+	writeState_log(*mode);
 	set_system_state(Tx_param, SWITCH_OFF);
 
 	if (overRide_ADCS(switches_states))
@@ -381,6 +406,7 @@ void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mod
 {
 	printf("Enter Critical Mode\n");
 	*mode = critical_mode;
+	writeState_log(*mode);
 	switches_states->fields.quadbatSwitch = 0;
 	switches_states->fields.quadbatHeater = 0;
 	switches_states->fields.channel3V3_1 = 0;

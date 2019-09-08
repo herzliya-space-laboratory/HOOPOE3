@@ -35,6 +35,7 @@
 #include "../Global/TLM_management.h"
 #include "splTypes.h"
 #include "APRS.h"
+#include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
 #include "DelayedCommand_list.h"
 
@@ -295,8 +296,13 @@ void Dump_task(void *arg)
 
 void transponder_logic(time_unix time, command_id cmdID)
 {
+	f_managed_enterFS();
+	WriteTransponderLog(TRANSPONDER_ACTIVE, 0);
+	f_managed_releaseFS();
+
 	time_unix time_now;
 	int i_error;
+	int stopInfo = TRANSPONDER_STOP_TIMER_INFO;
 	voltage_t low_shut_vol = DEFULT_COMM_VOL;
 	for (;;)
 	{
@@ -304,7 +310,10 @@ void transponder_logic(time_unix time, command_id cmdID)
 		i_error = Time_getUnixEpoch(&time_now);
 		check_int("error from Transponder Task, get_time", i_error);
 		if (time < time_now)
+		{
+			stopInfo = TRANSPONDER_STOP_TIMER_INFO;
 			break;
+		}
 
 		lookForRequestToDelete_transponder(cmdID);
 
@@ -312,10 +321,17 @@ void transponder_logic(time_unix time, command_id cmdID)
 		i_error = FRAM_read((byte*)&low_shut_vol, TRANS_LOW_BATTERY_STATE_ADDR, 2);
 		check_int("Transponder Task ,FRAM_read(TRANS_LOW_BATTERY_STATE_ADDR)", i_error);
 		if (low_shut_vol > get_Vbatt())
+		{
+			stopInfo = TRANSPONDER_STOP_VOLTAGE_INFO;
 			break;
+		}
 
 		vTaskDelay(TASK_DELAY);
 	}
+
+	f_managed_enterFS();
+	WriteTransponderLog(TRANSPONDER_SHUT_DOWN, stopInfo);
+	f_managed_releaseFS();
 }
 
 void Transponder_task(void *arg)
@@ -396,6 +412,7 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 			int i_error = f_managed_enterFS();
 			check_int("f_managed_enterFS in Transponder task", i_error);
 			save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
+			WriteTransponderLog(TRANSPONDER_SHUT_DOWN, TRANSPONDER_STOP_CMD_INFO);
 			change_TRXVU_state(NOMINAL_MODE);
 			portBASE_TYPE lu_error = xSemaphoreGive_extended(xIsTransmitting);
 			check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);

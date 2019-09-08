@@ -149,7 +149,7 @@
 #define ADCS_SAVE_CONFIG_ST					63
 #define ADCS_SAVE_ORBIT_PARAM_ST			64
 #define ADCS_SAVE_IMAGE_ST					80
-#define ADCS_NOP_ST							90
+#define ADCS_NOP_ST							89
 #define ADCS_SET_BOOT_INDEX_ST				100
 #define ADCS_RUN_BOOT_PROGRAM_ST			101
 #define ADCS_GET_GENERAL_INFO_ST			128
