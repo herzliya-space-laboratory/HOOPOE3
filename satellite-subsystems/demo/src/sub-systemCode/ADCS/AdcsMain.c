@@ -20,6 +20,7 @@
 
 #define ADCS_INIT_DELAY 				10000 	//10sec delay fot the ADCS to start
 #define DEFAULT_ADCS_LOOP_DELAY 		1000 	//the loop runs in 1Hz
+#define DEFAULT_ADCS_SYSTEM_OFF_DELAY	(10000)	// wait 10 seconds if the system is off
 #define DEFAULT_ADCS_QUEUE_WAIT_TIME	 100	// amount of time to wait or cmd to arrive into Queue
 #define DEFAULT_ADCS_SYSTEM_OFF_DELAY	(10000)	// wait 10 seconds if the system is off
 
@@ -41,7 +42,6 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 		addr = ADCS_LOOP_DELAY_FRAM_ADDR;
 		size = ADCS_LOOP_DELAY_FRAM_SIZE;
 		ptr = (void*)&delay_loop;
-
 		break;
 
 	case QUEUE_WAIT_TIME:
@@ -49,6 +49,7 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 		size = ADCS_LOOP_DELAY_FRAM_SIZE;
 		ptr = (void*)getAdcsQueueWaitPointer();
 		break;
+
 	case DELAY_SYSTEM_OFF:
 		addr = ADCS_SYS_OFF_DELAY_ADDR;
 		size = ADCS_SYS_OFF_DELAY_SIZE;
@@ -98,19 +99,14 @@ TroubleErrCode AdcsInit()
 		//TODO: log err
 	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
-#ifdef FIRST_ADCS_ACTIVATION
-	delay_loop = DEFAULT_ADCS_LOOP_DELAY;
-	FRAM_write((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE);
-	*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
-	FRAM_write((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE);
-	Boolean temp = TRUE;
-	FRAM_read((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,sizeof(temp));
-#endif
+
 	if(0 != FRAM_read((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 		//todo: log error
 	}
-
+	if(0 != FRAM_read(system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
+		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
+	}
 	if(0 != FRAM_read((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
@@ -133,7 +129,7 @@ void AdcsTask()
 	while(TRUE)
 	{
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
-			vTaskDelay(delay_loop);
+			vTaskDelay(system_off_delay);
 			continue;
 		}
 		UpdateAdcsStateMachine();

@@ -70,7 +70,6 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv)
 	return 0;
 }
 
-
 int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 {
 	int err = 0;
@@ -678,6 +677,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			//TODO: return unknown subtype
 			break;
 	}
-
+//TODO: save ACK with 'err' value
 	return err;
 }
