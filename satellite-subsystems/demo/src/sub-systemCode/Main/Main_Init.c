@@ -182,6 +182,7 @@ Boolean first_activation()
 	// 3. reset TRXVU FRAM adress
 	reset_FRAM_EPS();
 
+	reset_FRAM_ants();
 	reset_offline_TM_list();
 	// 3. cahnge the first activation to false
 	dataFRAM = FALSE_8BIT;
@@ -239,8 +240,6 @@ int InitSubsystems()
 
 #ifdef ANTS_ON
 	init_Ants();
-
-	Auto_Deploy();
 #endif
 
 	AdcsInit();

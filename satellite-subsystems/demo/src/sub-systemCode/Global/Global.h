@@ -67,6 +67,7 @@ typedef unsigned int  Boolean;
 
 // times
 #define CONVERT_SECONDS_TO_MS(ms) (ms * 1000)
+#define CONVERT_MINUTES_TO_SECONDS(m) (m * 60)
 
 #define SAVE_TELEMETRY_TIME 60
 #define MAIN_ITERATION_TIME 1000

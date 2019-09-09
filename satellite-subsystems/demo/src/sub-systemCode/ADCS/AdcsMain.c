@@ -115,7 +115,7 @@ TroubleErrCode AdcsInit()
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
 	}
-	if(0 != FRAM_read(system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
+	if(0 != FRAM_read((byte*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
 

@@ -18,6 +18,8 @@
 #define SHUT_ADCS_ADDR		0x10D// << 1 byte >>
 #define SHUT_CAM_ADDR		0x10E// << 1 byte >>
 #define DEPLOY_ANTS_ATTEMPTS_ADDR	0x10F// <<3 * 4 = 12 byte >>, array of 3 variables - 3 attempts
+#define STOP_DEPLOY_ATTEMPTS_ADDR	0x11B// << 1 byte >>
+#define FINISH_AUTO_DEPLOY_ADDR		0x11C// << 1 byte >>
 #define OFFLINE_LIST_SETTINGS_ADDR	0x200// << OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST = 9 * 20 = 180 >>
 //ANTS
 #define ARM_DEPLOY_ADDR 0x1100// << 1 byte >> , can be 0 or 255

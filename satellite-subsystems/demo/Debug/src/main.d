@@ -80,7 +80,8 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Global/../Main/../Global/sizes.h \
  ../src/sub-systemCode/Global/../Main/../Global/Global.h \
  ../src/sub-systemCode/Global/../Main/../COMM/GSC.h \
- ../src/sub-systemCode/Global/../Main/../Global/TLM_management.h
+ ../src/sub-systemCode/Global/../Main/../Global/TLM_management.h \
+ ../src/sub-systemCode/Ants.h
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h:
 
@@ -247,3 +248,5 @@ C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h:
 ../src/sub-systemCode/Global/../Main/../COMM/GSC.h:
 
 ../src/sub-systemCode/Global/../Main/../Global/TLM_management.h:
+
+../src/sub-systemCode/Ants.h:

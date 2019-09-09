@@ -8,6 +8,8 @@
 #include <stdio.h>
 
 #include <satellite-subsystems/GomEPS.h>
+#include "../TRXVU.h"
+#include "../EPS.h"
 
 static ISISantsSide nextDeploy;
 
@@ -108,59 +110,93 @@ int deploye_ants(ISISantsSide side)
 }
 
 
-void update_nextDeploy()
+int checkDeployAttempt(int attemptNumber)
 {
+	if (attemptNumber >= NUMBER_OF_ATTEMPTS)
+		return -3;
+
+	deploy_attempt attempt;
+	unsigned int addres = OFFLINE_LIST_SETTINGS_ADDR + attemptNumber*SIZE_DEPLOY_ATTEMPT_UNION;
+	int i_error = FRAM_read((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+	check_int("FRAM_read, checkDeployAttempt", i_error);
+
+	if (attempt.isAtemptDone == ATTEMPT_DONE)
+		return -1;//the deploy been done
+
+	time_unix time;
+	i_error = Time_getUnixEpoch(&time);
+	check_int("Time_getUnixEpoch, checkDeployAttempt", i_error);
+	if (time > attempt.timeToDeploy)
+		return -2;// there is time for the deploy
+
+	deploye_ants(nextDeploy);
+	attempt.isAtemptDone = ATTEMPT_DONE;
+	i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+	check_int("FRAM_write, checkDeployAttempt", i_error);
 	if (nextDeploy == isisants_sideA)
 		nextDeploy = isisants_sideB;
 	else
 		nextDeploy = isisants_sideA;
+
+	return 0;
 }
 
-Boolean checkTime_nextDeploy(int deployCount)
+void reset_deployStatusFRAM(int delayForNextAttempt)
 {
-	if (deployCount > 2)
-		return FALSE;
-
+	time_unix time;
 	deploy_attempt attempt;
-	int i_error = FRAM_read(&attempt, DEPLOY_ANTS_ATTEMPTS_ADDR, SIZE_DEPLOY_ATTEMPT_UNION);
-	check_int("FRAM_read, checkTime_nextDeploy", i_error);
+	int i_error = Time_getUnixEpoch(&time);
+	check_int("Time_getUnixEpoch, reset_deployStatusFRAM", i_error);
+	for (int i = 0 ; i < NUMBER_OF_ATTEMPTS; i++)
+	{
+		attempt.timeToDeploy = time + delayForNextAttempt + i * DELAY_BETWEEN_3_ATTEMPTS;
+		unsigned int addres = OFFLINE_LIST_SETTINGS_ADDR + i*SIZE_DEPLOY_ATTEMPT_UNION;
+		i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+		check_int("FRAM_write, reset_deployStatusFRAM", i_error);
+	}
+}
 
-	if (attempt.isAtemptDone == ATTEMPT_DONE)
+void reset_FRAM_ants()
+{
+	Boolean8bit stopDeploy = FALSE;
+	int i_error = FRAM_write(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	check_int("FRAM_write, DeployIfNeeded", i_error);
+
+	Boolean8bit autoDeploy = FALSE;
+	int err = FRAM_write(&autoDeploy, FINISH_AUTO_DEPLOY_ADDR, 1);
+	check_int("reset_FRAM_MAIN, FRAM_write(FINISH_AUTO_DEPLOY_ADDR)", err);
+
+	reset_deployStatusFRAM(START_MUTE_TIME_FIRST);
+
+	shut_ADCS(SWITCH_OFF);
+	set_mute_time(START_MUTE_TIME_FIRST + 2*60);
+}
+
+
+Boolean DeployIfNeeded()
+{
+	Boolean8bit stopDeploy;
+	int i_error = FRAM_read(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	check_int("FRAM_read, DeployIfNeeded", i_error);
+	if (stopDeploy)
 		return FALSE;
 
-	time_unix time_now;
-	i_error = Time_getUnixEpoch(&time_now);
-	check_int("Time_getUnixEpoch, checkTime_nextDeploy", i_error);
-
-	if (time_now <= attempt.timeToDeploy)
+	for (int i = 0; i < NUMBER_OF_ATTEMPTS; i++)
 	{
-		deploye_ants(nextDeploy);
-		update_nextDeploy();
-		deploy_attempt = ATTEMPT_DONE;
-		int i_error = FRAM_write(&attempt, DEPLOY_ANTS_ATTEMPTS_ADDR, SIZE_DEPLOY_ATTEMPT_UNION);
-		check_int("FRAM_write, checkTime_nextDeploy", i_error);
-		return TRUE;
+		int deployRet = checkDeployAttempt(i);
+		if (deployRet == -2)
+			return FALSE;
+		if (deployRet == 0 && i == NUMBER_OF_ATTEMPTS-1)
+			reset_deployStatusFRAM(DELAY_BETWEEN_ATTEMPTS_NORMAL);
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
-void Auto_Deploy()
-{
-	deploy_attempt deploy_status;
-	time_unix time_now;
-	for (int i = 0; i < 10; i++)
-	{
 
-	}
-	int i_error;
-}
-
-Boolean activeDeploySequence(Boolean firstActivationFalg)
+void update_stopDeploy_FRAM()
 {
-	if (firstActivationFalg)
-	{
-		Auto_Deploy();
-		return TRUE;
-	}
+	Boolean8bit stopDeploy = TRUE_8BIT;
+	int i_error = FRAM_write(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	check_int("FRAM_write, update_stopDeploy_FRAM", i_error);
 }

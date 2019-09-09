@@ -265,12 +265,6 @@ void reset_FRAM_MAIN()
 	Boolean8bit bool = FALSE_8BIT;
 	err = FRAM_write(&bool, STOP_TELEMETRY_ADDR, 1);
 	check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
-	for (int i = 0; i < 3; i++)
-	{
-		bool = FALSE_8BIT;
-		err = FRAM_write(&bool, DEPLOY_ANTS_ATTEMPTS_ADDR + i, 1);
-		check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
-	}
 }
 
 Boolean getBitValueByIndex(byte* data, int length, int index)

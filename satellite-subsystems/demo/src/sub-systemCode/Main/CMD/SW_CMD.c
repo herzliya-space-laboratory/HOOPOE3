@@ -14,6 +14,7 @@
 #include "../../Main/Main_Init.h"
 #include "../../COMM/APRS.h"
 #include "../../COMM/DelayedCommand_list.h"
+#include "../../Ants.h"
 
 void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err)
 {
@@ -45,6 +46,9 @@ void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		case TRXVU:
 			reset_FRAM_TRXVU();
 			break;
+		case Ants:
+			reset_FRAM_ants();
+			break;
 		case ADCS:
 			break;
 		case OBC:
@@ -56,6 +60,7 @@ void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			reset_FRAM_MAIN();
 			reset_EPS_voltages();
 			reset_FRAM_TRXVU();
+			reset_FRAM_ants();
 			//reset ADCS, cammera
 			//grecful reset
 			break;

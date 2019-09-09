@@ -31,6 +31,7 @@
 
 #include "../Main/HouseKeeping.h"
 #include "../Main/commands.h"
+#include "../Ants.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/TLM_management.h"
 #include "splTypes.h"
@@ -499,6 +500,7 @@ void Rx_logic()
 			if (i_error == 0)
 			{
 				GomEpsResetWDT(0);
+				update_stopDeploy_FRAM();
 				set_ground_conn(TRUE);
 				// 1.3. sends receive ACK
 				byte rawACK[ACK_RAW_SIZE];
