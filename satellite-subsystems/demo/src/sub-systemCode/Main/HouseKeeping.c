@@ -147,7 +147,10 @@ int EPS_HK_collect(EPS_HK* hk_out)
 	hk_out->fields.channelStatus = 0;
 	for (i = 0; i < 8; i++)
 	{
-		hk_out->fields.channelStatus += (byte)(1 >> gom_hk.fields.output[i]);
+		if (gom_hk.fields.output[i])
+		{
+			hk_out->fields.channelStatus |= 1 << i;
+		}
 	}
 	hk_out->fields.EPSSateNumber = (byte)get_EPS_mode_t();
 	hk_out->fields.systemState = get_systems_state_param();
@@ -345,11 +348,11 @@ int HK_findElementSize(HK_types type)
 		return ACK_DATA_LENGTH;
 	}
 	if (type == log_files_erorrs_T){
-		return sizeof(int);
+		return LOG_STRUCT_ELEMENT_SIZE;
 	}
 
 	if (type == log_files_events_T){
-		return sizeof(int);
+		return LOG_STRUCT_ELEMENT_SIZE;
 	}
 	if (offlineTM_T <= type && type < ADCS_science_T)
 	{

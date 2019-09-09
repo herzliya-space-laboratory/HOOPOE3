@@ -17,6 +17,15 @@
 #define PAYLOAD_LOG_OFFSET 50
 #define TRANSPONDER_LOG_OFFSET 100
 #define RESETS_LOG_OFFSET 150
+
+#define LOG_STRUCT_ELEMENT_SIZE sizeof(LogStruct)
+
+typedef struct
+{
+	int log_num;
+	int info;
+}LogStruct;
+
 typedef enum {
 	/*
 	 * --------Payload Errors--------
