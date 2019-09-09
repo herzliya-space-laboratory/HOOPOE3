@@ -73,7 +73,15 @@ void delete_allTMFilesFromSD()
 			count++;
 			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
 			{
-				f_delete(find.filename);
+				int err = 0;
+				for(int i = 0; i < 20; i++)
+				{
+					err = f_delete(find.filename);
+					if (err == 0)
+						break;
+					else
+						printf("f_delete in delete_allTMFilesFromSD: %d\n", err);
+				}
 			}
 
 		} while (!f_findnext(&find));
@@ -109,7 +117,7 @@ int f_managed_enterFS()
 		int error = f_enterFS();
 		if (error != 0)
 		{
-			portBASE_TYPE portRet = xSemaphoreGive(xEnterTaskFS);
+			portBASE_TYPE portRet = xSemaphoreGive_extended(xEnterTaskFS);
 			check_portBASE_TYPE("could not return the xEnterTaskFS", portRet);
 			return error;
 		}
@@ -125,7 +133,7 @@ int f_managed_enterFS()
 int f_managed_releaseFS()
 {
 	f_releaseFS();
-	if (xSemaphoreGive(xEnterTaskFS) == pdTRUE)
+	if (xSemaphoreGive_extended(xEnterTaskFS) == pdTRUE)
 		return 0;
 
 	printf("could not return the xEnterTaskFS\n");
@@ -135,7 +143,6 @@ int f_managed_releaseFS()
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 {
 	int lastError = 0;
-
 	if (xSemaphoreTake_extended(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
 		do
@@ -145,7 +152,7 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 			{
 				//TODO: write data to log error
 				lastError = f_getlasterror();
-				printf("FS last error: %d\n", lastError);
+				printf("file open: %s FS last error: %d\n", file_name, lastError);
 				vTaskDelay(SYSTEM_DEALY);
 			}
 		}while(lastError==F_ERR_LOCKED);
@@ -167,8 +174,7 @@ int f_managed_close(F_FILE** fileHandler)
 		printf("f_close in f_managed_close, error: %d", error);
 		return error;
 	}
-
-	if (xSemaphoreGive(xFileOpenHandler) == pdTRUE)
+	if (xSemaphoreGive_extended(xFileOpenHandler) == pdTRUE)
 		return 0;
 
 	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
@@ -332,6 +338,10 @@ static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address
 static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 {
 	PLZNORESTART();
+	if(current_time<creation_time)
+	{
+		return 0;
+	}
 	return ((current_time-creation_time)/SKIP_FILE_TIME_SEC);
 }
 //write to curr_file_name
@@ -349,16 +359,28 @@ FileSystemResult c_fileReset(char* c_file_name)
 	PLZNORESTART();
 	unsigned int curr_time;
 	Time_getUnixEpoch(&curr_time);
+	int err;
 	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
 	{
 		return FS_NOT_EXIST;
 	}
-	for(int i =0; i<c_file.num_of_files;i++)
+	int last_index = getFileIndex(c_file.creation_time,c_file.last_time_modified);
+	for(int i =0; i<last_index+1;i++)
 	{
+		int j=0;
 		get_file_name_by_index(c_file_name,i,curr_file_name);
-		f_delete(c_file_name);
+		do
+		{
+			err = f_delete(curr_file_name);
+			if(err!=0)
+			{
+				printf("c_fileReset  f_delete: %d\n",err);
+			}
+			vTaskDelay(100);
+		}
+		while(err !=0 &&(j++)<20);
 	}
-	c_file.last_time_modified=-1;
+	c_file.last_time_modified=curr_time;
 	c_file.creation_time =curr_time;
 	return FS_SUCCSESS;
 }
@@ -425,12 +447,12 @@ static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long fro
 	else if (error != 0)
 		return FS_FAIL;
 	char* buffer = allocked_delete_element;
-	for(int i = 0; i<f_filelength(file_name); i++)
+	for(int i = 0; i<f_filelength(file_name); i+=full_element_size)
 	{
 
 		f_read(buffer,1,full_element_size,file);
 		unsigned int element_time = *((unsigned int*)buffer);
-		if(element_time>=from_time&&element_time<=to_time)
+		if(element_time<from_time||element_time>to_time)
 		{
 			f_write(buffer,1,full_element_size,temp_file);
 		}
@@ -543,9 +565,9 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
-		int error = f_managed_open(curr_file_name, "r+", &current_file);
+		int error = f_managed_open(curr_file_name, "r", &current_file);
 		if (current_file == NULL)
-			return FS_NOT_EXIST;
+			continue;
 		unsigned int length =f_filelength(curr_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
 		int err_fread=0;
 		(void)err_fread;

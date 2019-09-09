@@ -35,16 +35,32 @@
 #define	SP_HK_FILE_NAME	"SPF"
 #define CAM_HK_FILE_NAME "CAMf"
 #define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
-#define ADCS_HK_FILE_NAME "ADCf"// ADCS
 #define FS_HK_FILE_NAME "FSf"
+#define ADCS_HK_FILE_NAME "ADCf"// ADCS
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
 	log_files_T = 1,
 	this_is_not_the_file_you_are_looking_for = 18,
 	offlineTM_T = 50,
-	ADCS_sience_T = 128
+	ADCS_science_T = 128,
+
 }HK_types;
+
+typedef enum __attribute__ ((__packed__)) HK_AdcsTlmTypes{
+	AdcsTlm_State,
+	AdcsTlm_MetaData,
+	AdcsTlm_CSSVec,
+	AdcsTlm_FineSunVec,
+	AdcsTlm_Sensor,
+	AdcsTlm_SheelSpeed,
+	AdcsTlm_RawMag,
+	AdcsTlm_MagFieldVec,
+	AdcsTlm_Css1_6,
+	AdcsTlm_Css7_10,
+	AdcsTlm_PowerTemp,
+	AdcsTlm_MiscCurrents
+}HK_AdcsTlmTypes;
 
 typedef union __attribute__ ((__packed__))
 {

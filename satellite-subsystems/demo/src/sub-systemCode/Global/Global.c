@@ -2,7 +2,7 @@
  * Global.c
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
