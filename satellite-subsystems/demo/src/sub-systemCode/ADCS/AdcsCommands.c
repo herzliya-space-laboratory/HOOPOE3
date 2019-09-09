@@ -194,9 +194,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_RESET_BOOT_REGISTER_ST:
 			i2c_cmd.id = RESET_BOOT_REGISTER_CMD_ID;
 			i2c_cmd.length = RESET_BOOT_REGISTER_LENGTH;
-			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);//length is 0
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(int), ADCS_RESET_BOOT_REGISTER_ST);
+			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_RESET_BOOT_REGISTER_ST);
 			break;
 		case ADCS_DEPLOY_MAG_BOOM_ST:
 		#ifndef TESTING
@@ -241,7 +241,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 			break;
 		case ADCS_SET_EST_MODE_ST:
-			memcpy(&att_est,cmd->data,sizeof(att_est));
+			memcpy(&att_est,cmd->data,sizeof(att_est));//copy for ENUM?
 			err = cspaceADCS_setAttEstMode(ADCS_ID,att_est);
 #ifdef TESTING
 			printf("\nSet Estimation Mode:\n");
@@ -419,11 +419,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			memcpy(&savimag_param,cmd->data,sizeof(savimag_param));
 			err = cspaceADCS_saveImage(ADCS_ID, savimag_param);
 			break;
-		case ADCS_NOP_ST:
-#ifdef TESTING
-			printf("\n\t----ADCS NOP:\t-_(\"/)_- \n");
-#endif
-			 break;
 		case ADCS_SET_BOOT_INDEX_ST:
 			memcpy(&bootindex,cmd->data,sizeof(bootindex));
 			err = cspaceADCS_BLSetBootIndex(ADCS_ID,bootindex);
@@ -464,21 +459,21 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_EST_ANG_ST:
 			i2c_cmd.id = GET_ADCS_EST_ANG_CMD_ID;
 			i2c_cmd.length = GET_ADCS_EST_ANG_DATA_LENGTH;
-			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length); //TODO: check implementation
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(i2c_cmd.data,GET_ADCS_EST_ANG_DATA_LENGTH,ADCS_GET_EST_ANG_ST);
 			break;
-		case ADCS_GET_EST_ANG_RATE_ST:
+		case ADCS_GET_EST_ANG_RATE_ST: 
 			i2c_cmd.id = GET_ADCS_EST_ANG_CMD_ID;
 			i2c_cmd.length = GET_ADCS_EST_ANG_DATA_LENGTH;
-			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length); //TODO: check implementation
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(i2c_cmd.data,i2c_cmd.length,ADCS_GET_EST_ANG_RATE_ST);
 			break;
 		case ADCS_GET_SATELLITE_POSITION_ST:
 			i2c_cmd.id = ADCS_GET_SATELLITE_POSITION_CMD_ID;
 			i2c_cmd.length = ADCS_GET_SATELLITE_POSITION_DATA_LENGTH;
-			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length); //TODO: check implementation
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(i2c_cmd.data,i2c_cmd.length,ADCS_GET_SATELLITE_POSITION_ST);
 			break;
@@ -621,7 +616,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_FULL_CONFIG_ST:
 			err = cspaceADCS_getADCSConfiguration(ADCS_ID,(unsigned char*)data);
 			SendAdcsTlm(data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_GET_FULL_CONFIG_ST);//send first half
-			SendAdcsTlm(&(data[ADCS_CMD_MAX_DATA_LENGTH/2]), ADCS_FULL_CONFIG_DATA_LENGTH - ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_GET_FULL_CONFIG_ST);//send second half
+			SendAdcsTlm(&(data[ADCS_CMD_MAX_DATA_LENGTH/2]), ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_GET_FULL_CONFIG_ST);//send second half
 			break;
 		case ADCS_GET_SGP4_ORBIT_PARAMETERS_ST:
 			err = cspaceADCS_getSGP4OrbitParameters(ADCS_ID,(double*)data);
