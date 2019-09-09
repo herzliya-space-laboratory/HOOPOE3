@@ -11,6 +11,8 @@
 #include "Global/Global.h"
 #include <satellite-subsystems/IsisAntS.h>
 
+#define ATTEMPT_DONE FALSE
+
 #define DEFFULT_DEPLOY_TIME 10
 #define START_MUTE_TIME_MIN		10
 #define NUMBER_OF_ANTS			4
@@ -19,10 +21,13 @@
 #define DEPLOY_ATTEMPT_NUMBER_2 1
 #define DEPLOY_ATTEMPT_NUMBER_3 2
 
-typedef struct __attribute__ ((__packed__))
+#define FIRST_DEPLOY_SIDE isisants_sideA
+#define SIZE_DEPLOY_ATTEMPT_UNION sizeof(deploy_attempt)
+
+typedef union __attribute__ ((__packed__))
 {
-	char isAtemptDone : 1,
-		 minutesToAttempt : 7;
+	Boolean isAtemptDone;
+	time_unix timeToDeploy;
 }deploy_attempt;
 
 int ARM_ants();

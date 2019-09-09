@@ -9,6 +9,8 @@
 
 #include <satellite-subsystems/GomEPS.h>
 
+static ISISantsSide nextDeploy;
+
 void init_Ants()
 {
     int retValInt = 0;
@@ -20,6 +22,8 @@ void init_Ants()
 	//Initialize the AntS system
 	retValInt = IsisAntS_initialize(myAntennaAddress, 1);
 	check_int("init_Ants, IsisAntS_initialize", retValInt);
+
+	nextDeploy = FIRST_DEPLOY_SIDE;
 }
 
 int ARM_ants()
@@ -103,75 +107,60 @@ int deploye_ants(ISISantsSide side)
 #endif
 }
 
-int time_out_before_deploy(int attempt_number)
+
+void update_nextDeploy()
 {
-	if (attempt_number > 2)
-		return -1;
+	if (nextDeploy == isisants_sideA)
+		nextDeploy = isisants_sideB;
+	else
+		nextDeploy = isisants_sideA;
+}
 
-	int i_error;
-	deploy_attempt deploy_status;
-	i_error = FRAM_read((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
-	check_int("FRAM_read(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-	if (deploy_status.isAtemptDone)
-		return 1;
+Boolean checkTime_nextDeploy(int deployCount)
+{
+	if (deployCount > 2)
+		return FALSE;
 
-	gom_eps_hk_t eps_tlm;
-	portTickType xLastWakeTime = xTaskGetTickCount();
-	const portTickType xFrequency = ONE_MINUTE;
+	deploy_attempt attempt;
+	int i_error = FRAM_read(&attempt, DEPLOY_ANTS_ATTEMPTS_ADDR, SIZE_DEPLOY_ATTEMPT_UNION);
+	check_int("FRAM_read, checkTime_nextDeploy", i_error);
 
-	while (deploy_status.minutesToAttempt < START_MUTE_TIME_MIN)
+	if (attempt.isAtemptDone == ATTEMPT_DONE)
+		return FALSE;
+
+	time_unix time_now;
+	i_error = Time_getUnixEpoch(&time_now);
+	check_int("Time_getUnixEpoch, checkTime_nextDeploy", i_error);
+
+	if (time_now <= attempt.timeToDeploy)
 	{
-		i_error = GomEpsGetHkData_general(0, &eps_tlm);
-		check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
-
-		deploy_status.minutesToAttempt++;
-		i_error = FRAM_write((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		printf("%d minutes to deploy!\n", START_MUTE_TIME_MIN - deploy_status.minutesToAttempt);
+		deploye_ants(nextDeploy);
+		update_nextDeploy();
+		deploy_attempt = ATTEMPT_DONE;
+		int i_error = FRAM_write(&attempt, DEPLOY_ANTS_ATTEMPTS_ADDR, SIZE_DEPLOY_ATTEMPT_UNION);
+		check_int("FRAM_write, checkTime_nextDeploy", i_error);
+		return TRUE;
 	}
 
-	return 0;
+	return FALSE;
 }
 
 void Auto_Deploy()
 {
 	deploy_attempt deploy_status;
+	time_unix time_now;
+	for (int i = 0; i < 10; i++)
+	{
+
+	}
 	int i_error;
+}
 
-	if (time_out_before_deploy(DEPLOY_ATTEMPT_NUMBER_1) == 0)
+Boolean activeDeploySequence(Boolean firstActivationFalg)
+{
+	if (firstActivationFalg)
 	{
-		printf("starts deployment 1, side A\n");
-		deploye_ants(isisants_sideA);
-		deploy_status.isAtemptDone = 1;
-		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
-		i_error = FRAM_write((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_1, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-		printf("ended attempt 1 to deploy ants, side A\n");
+		Auto_Deploy();
+		return TRUE;
 	}
-
-	/*if (time_out_before_deploy(DEPLOY_ATTEMPT_NUMBER_1) == 0)
-	{
-		printf("starts deployment 2, side B\n");
-		deploye_ants(isisants_sideB);
-
-		deploy_status.isAtemptDone = TRUE;
-		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
-		i_error = FRAM_write(&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_2, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-		printf("ended attempt 2 to deploy ants, side B\n");
-	}
-
-	if (time_out_before_deploy(DEPLOY_ATTEMPT_NUMBER_1) == 0)
-	{
-		printf("starts deployment 3, side A\n");
-		deploye_ants(isisants_sideA);
-
-		deploy_status.isAtemptDone = TRUE;
-		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
-		i_error = FRAM_write(&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_3, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-		printf("ended attempt 3 to deploy ants, side A\n");
-	}*/
 }
