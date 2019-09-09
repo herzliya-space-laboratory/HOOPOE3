@@ -3,11 +3,13 @@
 
 #include <hcc/api_fat.h>
 #include <hal/boolean.h>
+#include <hal/errors.h>
 #include <satellite-subsystems/cspaceADCS.h>
 #include <satellite-subsystems/cspaceADCS_types.h>
 
 #include "sub-systemCode/Global/TLM_management.h"
 #include "sub-systemCode/Global/FRAMadress.h"
+#include "AdcsCommands.h"
 #include "AdcsGetDataAndTlm.h"
 
 #define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1) //TODO: check if needed
@@ -18,8 +20,113 @@ AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 
 #define ADCS_TLM_DEFAULT_COLLECT_PERIOD 10	// (1/10) Hz - once every 10 seconds
 
+// Estimated Attitude Angles Telemetry(TLM ID 146)
+typedef union __attribute__((__packed__)){
+	unsigned char raw[6];
+	struct __attribute__((__packed__)){
+		unsigned short est_roll_angle;
+		unsigned short est_pitch_angle;
+		unsigned short est_yaw_angle;
+	}fields;
+}cspace_adcs_estAng_t;
+int cspaceADCS_getEstimatedAngles(int adcs_id, cspace_adcs_estAng_t *est_ang){
+	adcs_i2c_cmd i2c_cmd;
+	int err = 0;
+	(void)adcs_id;
+	if(NULL == est_ang){
+		return E_INPUT_POINTER_NULL;
+	}
+	i2c_cmd.id = GET_ADCS_EST_ANG_CMD_ID;
+	i2c_cmd.length = GET_ADCS_EST_ANG_DATA_LENGTH;
+	err = AdcsGenericI2cCmd(&i2c_cmd);
+	if(0 != err){
+		return err;
+	}
+	memcpy(est_ang,i2c_cmd.data,sizeof(*est_ang));
+	return i2c_cmd.ack;
+}
+
+// Estimated Angular Rates Telemetry(TLM ID 147)
+typedef union __attribute__((__packed__)){
+	unsigned char raw[6];
+	struct __attribute__((__packed__)){
+		unsigned short est_X_ang_rate;
+		unsigned short est_Y_ang_rate;
+		unsigned short est_Z_ang_rate;
+	}fields;
+}cspace_adcs_estAngRates_t;
+int cspaceADCS_getEstimatedAnglesRates(int adcs_id, cspace_adcs_estAngRates_t *est_ang){
+	adcs_i2c_cmd i2c_cmd;
+	(void)adcs_id;
+	int err = 0;
+	if(NULL == est_ang){
+		return E_INPUT_POINTER_NULL;
+	}
+	i2c_cmd.id = GET_ADCS_EST_ANG_RATE_CMD_ID;
+	i2c_cmd.length = GET_ADCS_EST_ANG_RATE_DATA_LENGTH;
+	err = AdcsGenericI2cCmd(&i2c_cmd);
+	if(0 != err){
+		return err;
+	}
+	memcpy(est_ang,i2c_cmd.data,sizeof(*est_ang));
+	return i2c_cmd.ack;
+}
+
+//  Satellite Position (LLH) Telemetry(TLM ID 150)
+typedef union __attribute__((__packed__)){
+	unsigned char raw[6];
+	struct __attribute__((__packed__)){
+		unsigned short latitude;
+		unsigned short longitude;
+		unsigned short altitude;
+	}fields;
+}cspace_adcs_satellitePosition_t;
+int cspaceADCS_getSatellitePosition(int adcs_id, cspace_adcs_satellitePosition_t *est_ang){
+	adcs_i2c_cmd i2c_cmd;
+	(void)adcs_id;
+	int err = 0;
+	if(NULL == est_ang){
+		return E_INPUT_POINTER_NULL;
+	}
+	i2c_cmd.id = ADCS_GET_SATELLITE_POSITION_CMD_ID;
+	i2c_cmd.length = ADCS_GET_SATELLITE_POSITION_DATA_LENGTH;
+	err = AdcsGenericI2cCmd(&i2c_cmd);
+	if(0 != err){
+		return err;
+	}
+	memcpy(est_ang,i2c_cmd.data,sizeof(*est_ang));
+	return i2c_cmd.ack;
+}
+
 #define ADCS_DEFAULT_TLM_VECTOR	\
-		{{TRUE_8BIT,sizeof(cspace_adcs_statetlm_t),		(AdcsTlmCollectFunc)cspaceADCS_getStateTlm,					\
+		{{TRUE_8BIT,	sizeof(cspace_adcs_estAng_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimatedAngles,			\
+		ADCS_EST_ANGLES_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_estAngRates_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimatedAnglesRates,	\
+		ADCS_EST_ANG_RATE_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_satellitePosition_t),	(AdcsTlmCollectFunc)cspaceADCS_getSatellitePosition,\
+		ADCS_SAT_POSITION_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_magfieldvec_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagneticFieldVec,			\
+		ADCS_MAG_FIELD_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_angrate_t),		(AdcsTlmCollectFunc)cspaceADCS_getSensorRates,				\
+		ADCS_SENSOR_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_wspeed_t),		(AdcsTlmCollectFunc)cspaceADCS_getWheelSpeed,				\
+		ADCS_WHEEL_SPEED_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_magtorqcmd_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagnetorquerCmd,			\
+		ADCS_MAG_CMD_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},						\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_rawmagmeter_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawMagnetometerMeas,		\
+		ADCS_RAW_MAG_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_cctrlcurrms_t),	(AdcsTlmCollectFunc)cspaceADCS_getCControlCurrentMeasurements,\
+		ADCS_CUBECTRL_CURRENTS_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},			\
+		\
+		{TRUE_8BIT,sizeof(cspace_adcs_statetlm_t),		(AdcsTlmCollectFunc)cspaceADCS_getStateTlm,					\
 		ADCS_STATE_TLM_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_estmetadata_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimationMetadata,		\
@@ -31,143 +138,16 @@ AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getFineSunVec,				\
 		ADCS_FINE_SUN_VEC_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_angrate_t),		(AdcsTlmCollectFunc)cspaceADCS_getSensorRates,				\
-		ADCS_SENSOR_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_wspeed_t),		(AdcsTlmCollectFunc)cspaceADCS_getWheelSpeed,				\
-		ADCS_WHEEL_SPEED_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_rawmagmeter_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawMagnetometerMeas,		\
-		ADCS_RAW_MAG_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_magfieldvec_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagneticFieldVec,			\
-		ADCS_MAG_FIELD_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss1_6_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss1_6Measurements,	\
 		ADCS_RAW_CSS_FILENAME_1_6,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss7_10_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss7_10Measurements,	\
 		ADCS_RAW_CSS_FILENAME_7_10,ADCS_TLM_DEFAULT_COLLECT_PERIOD,		(time_unix)0,FALSE_8BIT},					\
 		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_pwtempms_t),	(AdcsTlmCollectFunc)cspaceADCS_getPowTempMeasTLM,				\
-		ADCS_POWER_TEMP_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_misccurr_t),	(AdcsTlmCollectFunc)cspaceADCS_getMiscCurrentMeas,				\
 		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		};
 
-/*
-cspaceADCS_getGeneralInfo
-cspace_adcs_geninfo_t
-
-cspaceADCS_getBootProgramInfo
-cspace_adcs_bootinfo_t
-
-cspaceADCS_getSRAMLatchupCounters
-cspace_adcs_sramlatchupcnt_t
-
-cspaceADCS_getEDACCounters
-cspace_adcs_edaccnt_t
-
-cspaceADCS_getCurrentTime
-cspace_adcs_unixtm_t
-
-cspaceADCS_getCommStatus
-cspace_adcs_commstat_t
-
-cspaceADCS_getCurrentState
-cspace_adcs_currstate_t
-
-cspaceADCS_getMagneticFieldVec
-cspace_adcs_magfieldvec_t
-
-cspaceADCS_getCoarseSunVec
-cspace_adcs_sunvec_t
-
-cspaceADCS_getFineSunVec
-cspace_adcs_sunvec_t
-
-cspaceADCS_getNadirVector
-cspace_adcs_nadirvec_t
-
-cspaceADCS_getSensorRates
-cspace_adcs_angrate_t
-
-cspaceADCS_getWheelSpeed
-cspace_adcs_wspeed_t
-
-cspaceADCS_getMagnetorquerCmd
-cspace_adcs_magtorqcmd_t
-
-cspaceADCS_getWheelSpeedCmd
-cspace_adcs_wspeed_t
-
-cspaceADCS_getRawCam2Sensor
-cspace_adcs_rawcam_t
-
-cspaceADCS_getRawCam1Sensor
-cspace_adcs_rawcam_t
-
-cspaceADCS_getRawCss1_6Measurements
-cspace_adcs_rawcss1_6_t
-
-cspaceADCS_getRawCss7_10Measurements
-cspace_adcs_rawcss7_10_t
-
-cspaceADCS_getRawMagnetometerMeas
-cspace_adcs_rawmagmeter_t
-
-cspaceADCS_getCSenseCurrentMeasurements
-cspace_adcs_csencurrms_t
-
-cspaceADCS_getCControlCurrentMeasurements
-cspace_adcs_cctrlcurrms_t
-
-cspaceADCS_getWheelCurrentsTlm
-cspace_adcs_wheelcurr_t
-
-cspaceADCS_getADCSTemperatureTlm
-cspace_adcs_msctemp_t
-
-cspaceADCS_getRateSensorTempTlm
-cspace_adcs_ratesen_temp_t
-
-cspaceADCS_getStateTlm
-cspace_adcs_statetlm_t
-
-cspaceADCS_getADCSMeasurements
-cspace_adcs_measure_t
-
-cspaceADCS_getActuatorsCmds
-cspace_adcs_actcmds_t
-
-cspaceADCS_getEstimationMetadata
-cspace_adcs_estmetadata_t
-
-cspaceADCS_getRawSensorMeasurements
-cspace_adcs_rawsenms_t
-
-cspaceADCS_getPowTempMeasTLM
-cspace_adcs_pwtempms_t
-
-cspaceADCS_getADCSExcTimes
-cspace_adcs_exctm_t
-
-cspaceADCS_getPwrCtrlDevice
-cspace_adcs_powerdev_t
-
-cspaceADCS_getMiscCurrentMeas
-cspace_adcs_misccurr_t
-
-cspaceADCS_getCommandedAttitudeAngles
-cspace_adcs_cmdangles_t
-
-cspaceADCS_getADCSConfiguration
-config
-
-cspaceADCS_getSGP4OrbitParameters
-parameters
- */
 
 TroubleErrCode InitTlmElements()
 {
@@ -414,9 +394,7 @@ TroubleErrCode GatherTlmAndData()
 			TlmElements[i].ToSave = FALSE_8BIT;			// stop saving tlm if error
 			TlmElements[i].OperatingFlag = FALSE_8BIT;	// raise the 'not operating correctly' flag
 			//TODO: log err
-#ifdef TESTING
-			printf("\t----- Error in 'SaveElementTlmAtIndex': %d", err);
-#endif
+
 		}
 	}
 	f_managed_releaseFS();
