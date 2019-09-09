@@ -2,7 +2,7 @@
  * commands.c
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 #include <stdlib.h>
 
@@ -34,15 +34,17 @@
 #include "CMD/COMM_CMD.h"
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
+#include "CMD/ADCS_CMD.h"
 
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
 #include "../TRXVU.h"
 #include "../Ants.h"
-#include "../ADCS.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
+#include "../payload/Request Management/CameraManeger.h"
+#include "../payload/DataBase/DataBase.h"
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
@@ -176,7 +178,7 @@ void act_upon_command(TC_spl decode)
 		AUC_EPS(decode);
 		break;
 	case (TC_ADCS_T):
-		AUC_ADCS(decode);
+		AdcsCmdQueueAdd(&decode); // TODO: save ACK
 		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
@@ -252,6 +254,8 @@ void AUC_general(TC_spl decode)
 
 	switch (decode.subType)
 	{
+	//todo: add generic ADCS I2C command as bypass to the ADCS logic = use the AdcsGenericI2C...
+
 	case (GENERIC_I2C_ST):
 		cmd_generic_I2C(&type, &err, decode);
 		break;
@@ -269,6 +273,7 @@ void AUC_general(TC_spl decode)
 		cmd_reset_file(&type, &err, decode);
 		break;
 	case (RESTSRT_FS_ST):
+		cmd_reset_TLM_SD(&type, &err);
 		break;
 	case (REDEPLOY):
 		break;
@@ -303,45 +308,75 @@ void AUC_general(TC_spl decode)
 
 void AUC_payload(TC_spl decode)
 {
-	Ack_type type;
-	ERR_type err;
+	Ack_type type = ACK_CAMERA;
+	ERR_type err = ERR_SUCCESS;
+
+	Camera_Request request;
+	request.cmd_id = decode.id;
+	request.keepOnCamera = 24*60*60;	// currently one day, ToDo: just do something!
+	memcpy(request.data, decode.data, SPL_TC_DATA_SIZE);
 
 	switch (decode.subType)
 	{
-	case (SEND_PIC_CHUNCK_ST):
-		break;
-	case (UPDATE_STN_PARAM_ST):
-		return;
-		break;
-	case GET_IMG_DATA_BASE_ST:
-		break;
-	case RESET_DATA_BASE_ST:
-		break;
-	case DELETE_PIC_ST:
-		return;
-		break;
-	case UPD_DEF_DUR_ST:
-		break;
-	case OFF_CAM_ST:
-		break;
-	case ON_CAM_ST:
-		break;
-	case MOV_IMG_CAM_OBS_ST:
-		return;
-		break;
-	case TAKE_IMG_DEF_VAL_ST:
-		return;
-		break;
-	case TAKE_IMG_ST:
-		break;
-	default:
-		cmd_error(&type, &err);
-		break;
+		case (SEND_PIC_CHUNCK_CHUNK_FIELD_ST):
+			request.id = Image_Dump_chunkField;
+			break;
+		case (SEND_PIC_CHUNCK_BIT_FIELD_ST):
+			request.id = Image_Dump_bitField;
+			break;
+		case (TAKE_IMG_ST):
+			request.id = take_picture;
+			break;
+		case (TAKE_IMG_SPECIAL_VAL_ST):
+			request.id = take_picture_with_special_values;
+			break;
+		case (TAKE_PICTURE_WITH_TIME_IN_BETWEEN):
+			request.id = take_pictures_with_time_in_between;
+			break;
+		case (UPDATE_PHOTOGRAPHY_VALUES_ST):
+			request.id = update_photography_values;
+			break;
+		case (DELETE_PIC_FILE_ST):
+			request.id = delete_picture_file;
+			break;
+		case (DELETE_PIC_ST):
+			request.id = delete_picture;
+			break;
+		case (MOV_IMG_CAM_OBS_ST):
+			request.id = transfer_image_to_OBC;
+			break;
+		case (CREATE_THUMBNAIL_FROM_IMAGE_ST):
+			request.id = create_thumbnail;
+			break;
+		case (CREATE_JPEG_FROM_IMAGE_ST):
+			request.id = create_jpg;
+			break;
+		case (RESET_DATA_BASE_ST):
+			request.id = reset_DataBase;
+			break;
+		case (SEND_IMAGE_DATA_BASE_ST):
+			request.id = DataBase_Dump;
+			break;
+		case (UPDATE_DEF_DUR_ST):
+			request.id = update_defult_duration;
+			break;
+		case (OFF_CAM_ST):
+			request.id = Turn_Off_Camera;
+			break;
+		case (ON_CAM_ST):
+			request.id = Turn_On_Camera;
+			break;
+		case (SET_CHUNK_SIZE):
+			request.id = Set_Chunk_Size;
+			break;
+		default:
+			cmd_error(&type, &err);
+			break;
 	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
-#endif
+
+	if (err == ERR_SUCCESS)
+		addRequestToQueue(request);
+
 }
 
 void AUC_EPS(TC_spl decode)
@@ -375,23 +410,6 @@ void AUC_EPS(TC_spl decode)
 	case (UPDATE_EPS_ALPHA_ST):
 		cmd_update_alpha(&type, &err, decode);
 		break;
-	default:
-		cmd_error(&type, &err);
-		break;
-	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
-#endif
-}
-
-void AUC_ADCS(TC_spl decode)
-{
-	Ack_type type;
-	ERR_type err;
-
-	switch (decode.subType)
-	{
 	default:
 		cmd_error(&type, &err);
 		break;
@@ -497,9 +515,6 @@ void AUC_test(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	case IMAGE_DUMP_ST:
-
-		break;
 	default:
 		cmd_error(&type, &err);
 		break;
