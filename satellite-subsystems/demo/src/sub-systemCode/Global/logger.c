@@ -1,15 +1,12 @@
 /*
  * logger.c
  *
- *  Created on: 8 баев 2019
+ *  Created on: 8 пїЅпїЅпїЅпїЅ 2019
  *      Author: USER1
  */
 
 #include <stdio.h>
 #include "logger.h"
-
-#define ERROR_LOG_FILENAME "error"
-#define EVENT_LOG_FILENAME "event"
 
 typedef struct
 {

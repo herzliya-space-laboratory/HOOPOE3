@@ -52,6 +52,8 @@
 #include "HouseKeeping.h"
 #include "commands.h"
 
+#include "sub-systemCode/Global/logger.h"
+
 #include "../payload/Compression/ImageConversion.h"
 #include "../payload/Compression/jpeg/ImgCompressor.h"
 
@@ -253,7 +255,41 @@ int InitSubsystems()
 
 	return 0;
 }
+void LoggerTestTask(){
+	int i = 0;
+	time_unix current_time = 0;
+	time_unix start_time = 0;
+	Time_getUnixEpoch(&start_time);
+	unsigned char buffer[150];
+	unsigned int read =0;
+	unsigned int a = 0;
+	while(1){
+		printf("\nLogging Error Codes\n");
+		WriteErrorLog(i + 150, i, i);
+		WriteResetLog(i, i);
+		WritePayloadLog(i, i);
+		WriteEpsLog(i, i);
+		WriteTransponderLog(i, i);
 
+		if(++i == 30){
+			Time_getUnixEpoch(&current_time);
+			c_fileRead(ERROR_LOG_FILENAME, buffer, sizeof(buffer), start_time, current_time, (int*)&read, &a);
+			printf("Error Log  Data:\n");
+			for(unsigned int k = 0; k < read;k++ ){
+				printf("%d\t", buffer[k]);
+			}
+			c_fileRead(EVENT_LOG_FILENAME, buffer, sizeof(buffer), start_time, current_time, (int*)&read, &a);
+			printf("\n\nEvent Log Data:\n");
+			for(unsigned int k = 0; k < read;k++ )
+			{
+				printf("%d\t", buffer[k]);
+			}
+			start_time = current_time;
+			i=0;
+		}
+		vTaskDelay(1000);
+	}
+}
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
@@ -265,7 +301,9 @@ int SubSystemTaskStart()
 
 	KickStartCamera();
 	vTaskDelay(100);
-	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), NULL);
+
+	xTaskCreate(LoggerTestTask, (const signed char*)("LoggerTestTask"), 4096, NULL, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), NULL);
 	return 0;
 }
 

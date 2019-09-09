@@ -1,7 +1,7 @@
 /*
  * logger.h
  *
- *  Created on: 8 баев 2019
+ *  Created on: 8 пїЅпїЅпїЅпїЅ 2019
  *      Author: USER1
  */
 
@@ -13,6 +13,10 @@
 #define PAYLOAD_LOG_OFFSET 50
 #define TRANSPONDER_LOG_OFFSET 100
 #define RESETS_LOG_OFFSET 150
+
+#define ERROR_LOG_FILENAME "error"
+#define EVENT_LOG_FILENAME "event"
+
 typedef enum {
 	/*
 	 * --------Payload Errors--------
@@ -89,7 +93,11 @@ typedef enum {
 } log_errors;
 
 typedef enum {
-	SYSTEM_TRXVU, SYSTEM_EPS, SYSTEM_PAYLOAD, SYSTEM_OBC, SYSTEM_ADCS,
+	SYSTEM_TRXVU,
+	SYSTEM_EPS,
+	SYSTEM_PAYLOAD,
+	SYSTEM_OBC,
+	SYSTEM_ADCS,
 } log_systems;
 
 typedef enum {
