@@ -2,14 +2,14 @@
  * Global.h
  *
  *  Created on: Oct 20, 2018
- *      Author: DBTn
+ *      Author: Hoopoe3n
  */
 
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
 #define TESTING
-#define PRINTTLM
+
 //#define ANTS_ON
 #define ANTS_DO_NOT_DEPLOY
 #include <hal/boolean.h>
@@ -53,13 +53,12 @@ typedef unsigned int  Boolean;
 
 //delay
 #define SYSTEM_DEALY		5
-#define TASK_DELAY 20//test...
+#define TASK_DELAY 100//test...
 #define QUEUE_DELAY 100//test...
 #define QUEUE_DELETE_DELAY 1000//test...
 #define MAX_DELAY 100000//test...
 #define ONE_MINUTE	60 * 1000
 
-#define TASK_DEFAULT_PRIORITIES 3
 
 //tasks buffer
 #define BEACON_TASK_BUFFER	2048

@@ -8,14 +8,6 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/sub-systemCode/payload/Request\ Management/Dump/subdir.mk
--include src/sub-systemCode/payload/Request\ Management/subdir.mk
--include src/sub-systemCode/payload/Misc/subdir.mk
--include src/sub-systemCode/payload/Drivers/subdir.mk
--include src/sub-systemCode/payload/DataBase/subdir.mk
--include src/sub-systemCode/payload/Compression/jpeg/bmp/subdir.mk
--include src/sub-systemCode/payload/Compression/jpeg/subdir.mk
--include src/sub-systemCode/payload/Compression/subdir.mk
 -include src/sub-systemCode/Main/CMD/subdir.mk
 -include src/sub-systemCode/Main/subdir.mk
 -include src/sub-systemCode/Global/subdir.mk

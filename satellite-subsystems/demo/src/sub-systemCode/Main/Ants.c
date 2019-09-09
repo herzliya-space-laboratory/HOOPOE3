@@ -84,6 +84,7 @@ int DISARM_ants()
 
 int deploye_ants(ISISantsSide side)
 {
+	(void)side;
 #ifndef ANTS_DO_NOT_DEPLOY
 	int error = ARM_ants();
 
@@ -144,6 +145,7 @@ void Auto_Deploy()
 	{
 		printf("starts deployment 1, side A\n");
 		deploye_ants(isisants_sideA);
+
 		deploy_status.isAtemptDone = 1;
 		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
 		i_error = FRAM_write((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_1, 1);

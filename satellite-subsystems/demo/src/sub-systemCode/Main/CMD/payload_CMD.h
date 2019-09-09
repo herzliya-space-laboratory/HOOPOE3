@@ -2,7 +2,7 @@
  * payload_CMD.h
  *
  *  Created on: Jun 22, 2019
- *      Author: DBTn
+ *      Author: Hoopoe3n
  */
 
 #ifndef PAYLOAD_CMD_H_

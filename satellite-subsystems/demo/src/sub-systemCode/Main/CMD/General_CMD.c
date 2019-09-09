@@ -44,7 +44,7 @@ void cmd_dump(TC_spl cmd)
 	BigEnE_uInt_to_raw(cmd.id, &raw[0]);
 	// 1.2. copying command data
 	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + 5 + 1);
-	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, xDumpHandle);
+	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xDumpHandle);
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
@@ -141,11 +141,7 @@ void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
 {
 	*type = ACK_RESET_SD_TLM;
 	*err = ERR_SUCCESS;
-	if(f_managed_enterFS() == 0)
-	{
-		delete_allTMFilesFromSD();
-		f_managed_releaseFS();
-	}
+	delete_allTMFilesFromSD();
 }
 
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)

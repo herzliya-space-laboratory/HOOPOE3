@@ -80,6 +80,7 @@ int init_GP()
 	current_global_param.TxForw = 0;
 	current_global_param.TxRefl = 0;
 
+	current_global_param.ST = malloc(STAGE_TABLE_SIZE);
 	for (int i = 0; i < 3; i++)
 	{
 		current_global_param.Attitude[i] = 0;
@@ -266,6 +267,7 @@ void get_current_global_param(global_param* param_out)
 		param_out->TxForw = current_global_param.TxForw;
 		param_out->TxRefl = current_global_param.TxRefl;
 
+		param_out->ST = current_global_param.ST;
 		for (int i = 0; i < 3; i++)
 		{
 			param_out->Attitude[i] = current_global_param.Attitude[i];
@@ -578,6 +580,19 @@ void set_TxForw(unsigned short param)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_TxForw", lu_error);
 	}
+}
+// CGP-> ST
+stageTable get_ST()
+{
+	portBASE_TYPE lu_error;
+	stageTable return_value;
+	if(xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
+	{
+		return_value = current_global_param.ST;
+		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
+		check_portBASE_TYPE("can't return xCGP_semaphore in get_TxForw", lu_error);
+	}
+	return return_value;
 }
 // CGP-> Attitude
 short get_Attitude(int index)

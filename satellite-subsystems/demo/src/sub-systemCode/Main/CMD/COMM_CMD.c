@@ -64,7 +64,7 @@ void cmd_active_trans(Ack_type* type, ERR_type* err, TC_spl cmd)
 	// 2.2. copying data to raw
 	raw[4] = cmd.data[0];
 	// 3. activate transponder
-	create_task(Transponder_task, (const signed char * const)"Transponder_Task", 1024, &raw, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, xTransponderHandle);
+	create_task(Transponder_task, (const signed char * const)"Transponder_Task", 1024, &raw, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xTransponderHandle);
 	//no ACK
 }
 void cmd_shut_trans(Ack_type* type, ERR_type* err)

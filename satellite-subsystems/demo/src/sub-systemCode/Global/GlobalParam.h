@@ -10,6 +10,7 @@
 
 #include "sizes.h"
 #include "Global.h"
+#include "../ADCS/Stage_Table.h"
 
 typedef enum
 {
@@ -58,6 +59,7 @@ typedef struct __attribute__ ((__packed__))
 	unsigned short TxRefl;
 	unsigned short TxForw;
 
+	stageTable ST;
 	short Attitude[3];
 
 	uint8_t numOfPics;//number of pictures saved in the file system of the satellite
@@ -118,7 +120,8 @@ void set_TxRefl(unsigned short param);
 // CGP-> TxFrow
 unsigned short get_TxForw();
 void set_TxForw(unsigned short param);
-
+// CGP-> ST
+stageTable get_ST();
 // CGP-> Attitude
 short get_Attitude(int index);
 void set_Attitude(int index, short param);

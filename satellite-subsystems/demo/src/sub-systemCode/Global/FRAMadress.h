@@ -2,7 +2,7 @@
  * FRAMadress.h
  *
  *  Created on: Dec 5, 2018
- *      Author: DBTn
+ *      Author: Hoopoe3n
  */
 
 #ifndef FRAMADRESS_H_
@@ -23,12 +23,10 @@
 #define ARM_DEPLOY_ADDR 0x1100// << 1 byte >> , can be 0 or 255
 #define ANTS_FRAM_ADDR 0x1101
 
-
 //EPS
 #define EPS_VOLTAGES_ADDR 0x2100 // << EPS_VOLTAGES_SIZE_RAW bytes >>
 #define EPS_STATES_ADDR 0x211C // << 1 byte >> Address of consumption state
 #define EPS_ALPHA_ADDR		0x211D	//<< 4 byte >>
-
 
 //TRX
 #define BEACON_LOW_BATTERY_STATE_ADDR 0x311D // << 2 bytes >>
@@ -42,31 +40,36 @@
 #define BIT_RATE_ADDR		0x8E5D //<<1 bytes>>
 #define TRANSPONDER_RSSI_ADDR	0x8E5E// << 2 bytes>
 
-
 //ADCS
-#define ADCS_LOOP_DELAY_FRAM_ADDR 0X6542			// main loop delay
-#define ADCS_LOOP_DELAY_FRAM_SIZE 4
-
-#define ADCS_SYS_OFF_DELAY_ADDR 0x6546				// delay incase the system is off- wait to wakeup
-#define ADCS_SYS_OFF_DELAY_SIZE	4
-
-#define ADCS_QUEUE_WAIT_TIME_FRAM_ADDR 0X6552		// max wait time for the adcs cmd queue
-#define ADCS_QUEUE_WAIT_TIME_FRAM_SIZE 4
-
-#define ADCS_TLM_SAVE_VECTOR_START_ADDR 	(0x6242)		//<! FRAM start address
-
-#define ADCS_TLM_PERIOD_VECTOR_START_ADDR 		(ADCS_TLM_SAVE_VECTOR_START_ADDR + NUM_OF_ADCS_TLM + 1)	//<! FRAM start address
-#define ADCS_TLM_PERIOD_VECTOR_END_ADDR 		(ADCS_TLM_PERIOD_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) 	//<! FRAM end address
-
-#define ADCS_OVERRIDE_SAVE_TLM_ADDR				(0X6300)
-#define ADCS_OVERRIDE_SAVE_TLM_SIZE				(4)
+#define STAGE_TABLE_ADDR 0x9044
 
 //CAMERA
-#define IMAGE_CHUNK_WIDTH_ADDR 0xD000
-#define IMAGE_CHUNK_WIDTH_SIZE 2
+#define AUTO_PILOT_STATE_ADDR			0x9FFB
+#define CAMERA_LAST_PICTUR_TIME_ADDR	0x9FFC // <<4 bytes>>
 
-#define IMAGE_CHUNK_HEIGHT_ADDR 0xD002
-#define IMAGE_CHUNK_HEIGHT_SIZE 2
+#define GECKO_STATUS_FLAG_ADDR 0xA000
+#define GECKO_STATUS_FLAG_SIZE 1
+
+#define GECKO_ADC_GAIN_ADDR 0xA001
+#define GECKO_ADC_GAIN_SIZE 1
+
+#define GECKO_PGA_GAIN_ADDR 0xA002
+#define GECKO_PGA_GAIN_SIZE 1
+
+#define GECKO_EXPOSURE_ADDR 0xA003
+#define GECKO_EXPOSURE_SIZE 4
+
+#define GECKO_FRAME_AMOUNT_ADDR 0xA007
+#define GECKO_FRAME_AMOUNT_SIZE 4
+
+#define GECKO_FRAME_RATE_ADDR 0xA011
+#define GECKO_FRAME_RATE_SIZE 4
+
+#define GECKO_FAST_ADDR 0xA015
+#define GECKO_FAST_SIZE 4
+
+#define GECKO_MAX_ON_TIME_ADDR 0xA019
+#define GECKO_MAX_ON_TIME_SIZE 4
 
 #define DATABASEFRAMADDRESS 0x10000	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
 #endif /* FRAMADRESS_H_ */

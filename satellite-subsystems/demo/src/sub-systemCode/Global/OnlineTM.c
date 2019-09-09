@@ -331,14 +331,11 @@ void reset_offline_TM_list()
 		offline_TM_list[i].period = 0;
 		offline_TM_list[i].stopTime = 0;
 	}
-
-	add_onlineTM_param_to_save_list(TM_EPS_HK, 1, 4294967295u);
-	add_onlineTM_param_to_save_list(TM_COMM_HK, 1, 4294967295u);
-	add_onlineTM_param_to_save_list(TM_ADCS_HK, 1, 4294967295u);
-	add_onlineTM_param_to_save_list(TM_CAM_HK, 1, 4294967295u);
+	for (int i = 0; i < 4; i++)
+		add_onlineTM_param_to_save_list(i, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_SP_HK, 20, 4294967295u);
-	add_onlineTM_param_to_save_list(TM_FS_Space_A, 60*30, 4294967295u);
-	//add_onlineTM_param_to_save_list(TM_FS_Space_B, 60*30, 4294967295u);
+	add_onlineTM_param_to_save_list(TM_FS_Space_A, 60, 4294967295u);
+	add_onlineTM_param_to_save_list(TM_FS_Space_B, 60, 4294967295u);
 
 	save_offlineSetting_FRAM();
 }
@@ -462,7 +459,6 @@ void save_onlineTM_logic()
 	time_unix time_now;
 	i_error = Time_getUnixEpoch(&time_now);
 	check_int("Time_getUnixEpoch, save_onlineTM_logic", i_error);
-	printf("        time now: %u\n", time_now);
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
 		if (offline_TM_list[i].type == TM_emptySpace)
@@ -492,11 +488,12 @@ void save_onlineTM_task()
 	}
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 		offline_TM_list[i].lastSave = 0;
-	int i_error = f_managed_enterFS();
-	check_int("save_onlineTM_task, f_managed_enterFS", i_error);
 	while(TRUE)
 	{
+		int i_error = f_managed_enterFS();
+		check_int("save_onlineTM_task, f_managed_enterFS", i_error);
 		save_onlineTM_logic();
+		f_managed_releaseFS();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }

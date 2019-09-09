@@ -36,6 +36,7 @@
 #include "splTypes.h"
 #include "APRS.h"
 #include "../Global/GlobalParam.h"
+#include "../ADCS/Stage_Table.h"
 #include "DelayedCommand_list.h"
 
 #define FIRST 0
@@ -146,7 +147,7 @@ void init_trxvu(void)
 void TRXVU_task()
 {
 	//3. create beacon task
-	portBASE_TYPE lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, xBeaconTask);
+	portBASE_TYPE lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xBeaconTask);
 	check_portBASE_TYPE("could not create Beacon Task.", lu_error);
 	vTaskDelay(SYSTEM_DEALY);
 	//4. checks if theres was a dump before the reset and turned him off
@@ -232,6 +233,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 
 						vTaskDelay(SYSTEM_DEALY);
 					}
+
 					lookForRequestToDelete_dump(cmdID);
 				}
 			}
@@ -480,7 +482,6 @@ void Rx_logic()
 			i_error = decode_TCpacket(dataBuffer, dataBuffer_length ,&packet);
 			if (i_error == 0)
 			{
-				GomEpsResetWDT(0);
 				set_ground_conn(TRUE);
 				// 1.3. sends receive ACK
 				byte rawACK[ACK_RAW_SIZE];
@@ -547,42 +548,8 @@ void pass_above_Ground()
 	}
 }
 
-void check_TRXVUState()
-{
-	byte dat;
-	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
-	check_int("TRXVU_init_softWare, FRAM_read", error);
-
-	ISIStrxvuBitrateStatus FRAMBitRate;
-	if (dat == trxvu_bitrate_1200)
-		FRAMBitRate = trxvu_bitratestatus_1200;
-	else if (dat == trxvu_bitrate_2400)
-		FRAMBitRate = trxvu_bitratestatus_2400;
-	else if (dat == trxvu_bitrate_4800)
-		FRAMBitRate = trxvu_bitratestatus_4800;
-	else if (dat == trxvu_bitrate_9600)
-		FRAMBitRate = trxvu_bitratestatus_9600;
-	else
-		return;
-
-	ISIStrxvuTransmitterState TxState;
-	error = IsisTrxvu_tcGetState(0, &TxState);
-	if (error)
-	{
-		printf("error in IsisTrxvu_tcGetState\n");
-		return;
-	}
-
-	if (TxState.fields.transmitter_bitrate != FRAMBitRate)
-	{
-		update_FRAM_bitRate();
-	}
-}
-
 void trxvu_logic()
 {
-	check_TRXVUState();
-
 	Rx_logic();
 
 	check_time_off_mute();
@@ -602,7 +569,6 @@ void Beacon_task()
 	voltage_t low_v_beacon;
 	while(1)
 	{
-		printf("\n         Beacon logic\n\n");
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
 			buildAndSend_beacon();
@@ -696,30 +662,42 @@ void buildAndSend_beacon()
 	beacon.data[29] = beacon_param.TxRefl;
 	beacon.data[30] = beacon_param.TxForw << 8;
 	beacon.data[31] = beacon_param.TxForw;
+	// 4.4. ADCS
+	byte raw_stageTable[STAGE_TABLE_SIZE];
+	getTableTo(get_ST(), raw_stageTable);
+	beacon.data[32] = raw_stageTable[2];
+	beacon.data[33] = raw_stageTable[1];
+	beacon.data[34] = raw_stageTable[0];
+	beacon.data[35] = raw_stageTable[3];
+	beacon.data[36] = raw_stageTable[4];
+	beacon.data[37] = raw_stageTable[5];
+	beacon.data[38] = raw_stageTable[8];
+	beacon.data[39] = raw_stageTable[7];
+	beacon.data[40] = raw_stageTable[6];
 	for (i = 0; i < 3; i++)
 	{
 		raw_param = (byte*)&(beacon_param.Attitude[i]);
 		for (l = 0; l < 2; l++)
 		{
-			beacon.data[32 + i * 2 + l] = raw_param[l];
+			beacon.data[41 + i * 2 + l] = raw_param[l];
 		}
 	}
 	// 4.5. stats
-	beacon.data[38] = beacon_param.numOfPics;
-	beacon.data[39] = beacon_param.numOfAPRS;
-	beacon.data[40] = beacon_param.numOfDelayedCommand;
+	beacon.data[47] = beacon_param.numOfPics;
+	beacon.data[48] = beacon_param.numOfAPRS;
+	beacon.data[49] = beacon_param.numOfDelayedCommand;
 	raw_param = (byte*)&beacon_param.numOfResets;
 	for(i = 0; i < 4; i++)
 	{
-		beacon.data[41 + i] = raw_param[3 - i];
+		beacon.data[50 + i] = raw_param[3 - i];
 	}
 	raw_param = (byte*)&beacon_param.lastReset;
 	for(i = 0; i < 4; i++)
 	{
-		beacon.data[45 + i] = raw_param[3 - i];
+		beacon.data[54 + i] = raw_param[3 - i];
 	}
 	// 4.6. states
-	beacon.data[49] = beacon_param.state.raw;
+	beacon.data[58] = beacon_param.state.raw;
 	// 5. Encoding beacon for sending
 	byte rawData[BEACON_LENGTH + SPL_TM_HEADER_SIZE];
 	int size = 0;

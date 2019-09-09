@@ -50,7 +50,7 @@
 //(portTickType)((length + 30) * (5 / 6) + 30)
 #define TRANSMMIT_DELAY_1200(length) (portTickType)(20 * 100)
 
-#define GROUND_PASSING_TIME	(60*2)//todo: find real values
+#define GROUND_PASSING_TIME	(60*10)//todo: find real values
 
 //todo: find real values
 #define DEFULT_COMM_VOL		7250

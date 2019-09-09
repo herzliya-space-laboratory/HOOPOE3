@@ -27,7 +27,7 @@
 #include <hal/Drivers/LED.h>
 #include <hal/Drivers/I2C.h>
 #include <hal/Drivers/SPI.h>
-#include <hal/errors.h>
+
 #include <hal/boolean.h>
 
 #include <hal/version/version.h>
@@ -42,18 +42,11 @@
 #include "../Global/OnlineTM.h"
 #include "../EPS.h"
 #include "../Ants.h"
-
-#include "../ADCS/AdcsMain.h"
-#include "../ADCS/AdcsTest.h"
-
+#include "../ADCS.h"
+#include "../ADCS/Stage_Table.h"
 #include "../TRXVU.h"
-#include "../payload/Request Management/CameraManeger.h"
-#include "sub-systemCode/ADCS/AdcsMain.h"
 #include "HouseKeeping.h"
 #include "commands.h"
-
-#include "../payload/Compression/ImageConversion.h"
-#include "../payload/Compression/jpeg/ImgCompressor.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -62,20 +55,18 @@
 // will Boot- deploy all  appropriate subsytems
 
 //extern unsigned short* Vbat_Prv;
-
+stageTable ST;
 
 #ifdef TESTING
-void reset_FIRST_activation(Boolean8bit dataFRAM)
-{
-	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
-}
 
 void test_menu()
 {
-	reset_FIRST_activation(FALSE_8BIT);
+	byte dataFRAM = FALSE_8BIT;
+	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 
 	Boolean exit = FALSE;
 	unsigned int selection;
+	byte data;
 	while (!exit)
 	{
 		printf( "\n\r Select a test to perform: \n\r");
@@ -91,7 +82,7 @@ void test_menu()
 			exit = TRUE;
 			break;
 		case 1:
-			reset_FIRST_activation(TRUE_8BIT);
+			FRAM_write(&data, FIRST_ACTIVATION_ADDR, 1);
 			break;
 		}
 	}
@@ -190,6 +181,9 @@ Boolean first_activation()
 	return TRUE;
 }
 
+#define BUFFLEN 30+F_MAXNAME
+
+
 void resetSD()
 {
 	F_FIND find;
@@ -240,14 +234,22 @@ int InitSubsystems()
 #ifdef ANTS_ON
 	init_Ants();
 
-	Auto_Deploy();
+#ifdef TESTING
+	printf("before deploy\n");
+	readAntsState();
 #endif
 
-	AdcsInit();
+	Auto_Deploy();
+
+#ifdef TESTING
+	printf("after deploy\n");
+	readAntsState();
+#endif
+#endif
+
+	init_adcs(activation);
 
 	init_trxvu();
-
-	initCamera(activation);
 
 	init_command();
 
@@ -257,15 +259,10 @@ int InitSubsystems()
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
-	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
+	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	vTaskDelay(100);
 
-	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
-	vTaskDelay(100);
-
-	KickStartCamera();
-	vTaskDelay(100);
-	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
 	return 0;
 }
 
