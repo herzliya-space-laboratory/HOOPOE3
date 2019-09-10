@@ -260,33 +260,67 @@ void LoggerTestTask(){
 	time_unix current_time = 0;
 	time_unix start_time = 0;
 	Time_getUnixEpoch(&start_time);
+
 	unsigned char buffer[150];
 	unsigned int read =0;
 	unsigned int a = 0;
+	FileSystemResult res;
 	while(1){
+		int err = f_managed_enterFS();
+		{
+			if(err!=0)
+			{
+				printf("welp");
+			}
+		}
 		printf("\nLogging Error Codes\n");
-		WriteErrorLog(i + 150, i, i);
-		WriteResetLog(i, i);
-		WritePayloadLog(i, i);
-		WriteEpsLog(i, i);
-		WriteTransponderLog(i, i);
+		res= WriteErrorLog(i + 150, 0, i);
+		if(res!=FS_SUCCSESS)
+		{
+			printf("WriteErrorLog err: %d",res);
+		}
+		res = WriteResetLog(i, i);
+		if(res!=FS_SUCCSESS)
+		{
+			printf("WriteResetLog err: %d",res);
+		}
+		res = WritePayloadLog(i, i);
+		if(res!=FS_SUCCSESS)
+		{
+			printf("WritePayloadLog err: %d",res);
+		}
+		res = WriteEpsLog(i, i);
+		if(res!=FS_SUCCSESS)
+		{
+			printf("WriteEpsLog err: %d",res);
+		}
+		res = WriteTransponderLog(i, i);
+		if(res!=FS_SUCCSESS)
+		{
+			printf("WriteTransponderLog err: %d",res);
+		}
 
-		if(++i == 30){
+		if(++i == 15){
 			Time_getUnixEpoch(&current_time);
 			c_fileRead(ERROR_LOG_FILENAME, buffer, sizeof(buffer), start_time, current_time, (int*)&read, &a);
 			printf("Error Log  Data:\n");
-			for(unsigned int k = 0; k < read;k++ ){
+			for(unsigned int k = 0; k < read * 12;k++ ){
 				printf("%d\t", buffer[k]);
+				if (k % 12 == 0)
+					printf("\n");
 			}
 			c_fileRead(EVENT_LOG_FILENAME, buffer, sizeof(buffer), start_time, current_time, (int*)&read, &a);
 			printf("\n\nEvent Log Data:\n");
-			for(unsigned int k = 0; k < read;k++ )
+			for(unsigned int k = 0; k < read * 12;k++ )
 			{
 				printf("%d\t", buffer[k]);
+				if (k % 12 == 0)
+					printf("\n");
 			}
 			start_time = current_time;
 			i=0;
 		}
+		f_managed_releaseFS();
 		vTaskDelay(1000);
 	}
 }
@@ -303,7 +337,7 @@ int SubSystemTaskStart()
 	vTaskDelay(100);
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), NULL);
 
-	xTaskCreate(LoggerTestTask, (const signed char*)("LoggerTestTask"), 4096, NULL, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), NULL);
+	xTaskCreate(LoggerTestTask, (const signed char*)("LoggerTestTask"), 4096, NULL, (unsigned portBASE_TYPE)(4), NULL);
 	return 0;
 }
 

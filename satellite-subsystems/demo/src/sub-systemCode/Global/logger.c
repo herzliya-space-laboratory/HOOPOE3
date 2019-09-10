@@ -23,7 +23,7 @@ static FileSystemResult WriteLog(void *log, char filename[5])
 	}
 	if (fs == FS_NOT_EXIST)
 	{
-		fs = c_fileCreate(filename, sizeof(int));
+		fs = c_fileCreate(filename, sizeof(LogStruct));
 		if (fs == FS_SUCCSESS)
 		{
 			return c_fileWrite(filename, log);
