@@ -349,8 +349,11 @@ int get_online_packet(int TM_index, TM_spl* packet)
 		return -1;
 	if (packet == NULL)
 		return -2;
-
+	if (TM_index == 23 || TM_index == 24)
+		f_managed_enterFS();
 	int error = onlineTM_list[TM_index].fn(DEFULT_INDEX, onlineTM_list[TM_index].TM_param);
+	if (TM_index == 23 || TM_index == 24)
+		f_managed_releaseFS();
 	if (error != 0)
 		return error;
 
