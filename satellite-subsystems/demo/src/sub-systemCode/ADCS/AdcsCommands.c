@@ -129,7 +129,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		return TRBL_NULL_DATA;
 	}
 	int err = TRBL_SUCCESS;
-	int rv = 0;
+	int temp = 0;
 	byte sub_type = cmd->subType;
 
 	byte data[300] = {0};
@@ -196,7 +196,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			i2c_cmd.length = RESET_BOOT_REGISTER_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);//length is 0
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_RESET_BOOT_REGISTER_ST);
 			break;
 		case ADCS_DEPLOY_MAG_BOOM_ST:
 		#ifndef TESTING
@@ -238,8 +237,8 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			printf("override_flag: %d\n",((cspace_adcs_attctrl_mod_t*)cmd->data)->fields.override_flag);
 			printf("timeout: %d\n",((cspace_adcs_attctrl_mod_t*)cmd->data)->fields.timeout);
 #endif
-
 			break;
+
 		case ADCS_SET_EST_MODE_ST:
 			memcpy(&att_est,cmd->data,sizeof(att_est));//copy for ENUM?
 			err = cspaceADCS_setAttEstMode(ADCS_ID,att_est);
@@ -248,6 +247,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			printf("Estimation: %d\n",att_est);
 #endif
 			break;
+
 		case ADCS_SET_MAG_OUTPUT_ST:
 			err = cspaceADCS_setMagOutput(ADCS_ID, (cspace_adcs_magnetorq_t*)cmd->data);
 			break;
@@ -259,35 +259,30 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			i2c_cmd.length = MTQ_CONFIG_CMD_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_MTQ_CONFIG_ST);
 			break;
 		case ADCS_RW_CONFIG_ST:
 			i2c_cmd.id = SET_WHEEL_CONFIG_CMD_ID;
 			i2c_cmd.length = SET_WHEEL_CONFIG_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_RW_CONFIG_ST);
 			break;
 		case ADCS_GYRO_CONFIG_ST:
 			i2c_cmd.id = SET_GYRO_CONFIG_CMD_ID;
 			i2c_cmd.length = SET_GYRO_CONFIG_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_GYRO_CONFIG_ST);
 			break;
 		case ADCS_CSS_CONFIG_ST:
 			i2c_cmd.id = SET_CSS_CONFIG_CMD_ID;
 			i2c_cmd.length = SET_CSS_CONFIG_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_CSS_CONFIG_ST);
 			break;
 		case ADCS_CSS_RELATIVE_SCALE_ST:
 			i2c_cmd.id = SET_CSS_SCALE_CMD_ID;
 			i2c_cmd.length = SET_CSS_SCALE_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_CSS_RELATIVE_SCALE_ST);
 			break;
 		case ADCS_SET_MAGNETMTR_MOUNT_ST:
 			err = cspaceADCS_setMagMountConfig(ADCS_ID,(cspace_adcs_magmountcfg_t*)cmd->data);
@@ -300,7 +295,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_RATE_SENSOR_OFFSET_ST:
 			err = cspaceADCS_setRateSensorConfig(ADCS_ID,(cspace_adcs_ratesencfg_t*)cmd->data);
-			SendAdcsTlm((byte*)&rv,sizeof(rv), ADCS_RATE_SENSOR_OFFSET_ST);
 			break;
 		case ADCS_SET_STAR_TRACKER_CONFIG_ST:
 			err = cspaceADCS_setStarTrackerConfig(ADCS_ID,(cspace_adcs_startrkcfg_t*)cmd->data);
@@ -310,35 +304,30 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			i2c_cmd.length = DETUMB_CTRL_PARAM_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_DETUMB_CTRL_PARAM_ST);
 			break;
 		case ADCS_SET_YWHEEL_CTRL_PARAM_ST:
 			i2c_cmd.id = SET_YWHEEL_CTRL_PARAM_CMD_ID;
 			i2c_cmd.length = SET_YWHEEL_CTRL_PARAM_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_YWHEEL_CTRL_PARAM_ST);
 			break;
 		case ADCS_SET_RWHEEL_CTRL_PARAM_ST:
 			i2c_cmd.id = SET_RWHEEL_CTRL_PARAM_CMD_ID;
 			i2c_cmd.length = SET_RWHEEL_CTRL_PARAM_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_RWHEEL_CTRL_PARAM_ST);
 			break;
 		case ADCS_SET_MOMENT_INTERTIA_ST:
 			i2c_cmd.id = SET_MOMENT_INERTIA_CMD_ID;
 			i2c_cmd.length = SET_MOMENT_INERTIA_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_MOMENT_INTERTIA_ST);
 			break;
 		case ADCS_PROD_INERTIA_ST:
 			i2c_cmd.id = SET_PROD_INERTIA_CMD_ID;
 			i2c_cmd.length = SET_PROD_INERTIA_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_PROD_INERTIA_ST);
 			break;
 		case ADCS_ESTIMATION_PARAM1_ST:
 			err =  cspaceADCS_setEstimationParam1(ADCS_ID,(cspace_adcs_estparam1_t*)cmd->data);
@@ -354,56 +343,48 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_INC_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_ECC_ST:
 			i2c_cmd.id = SET_SGP4_ORBIT_ECC_CMD_ID;
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_ECC_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_RAAN_ST:
 			i2c_cmd.id = SET_SGP4_ORBIT_RAAN_CMD_ID;
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_RAAN_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST:
 			i2c_cmd.id = SET_SGP4_ORBIT_ARG_OF_PER_CMD_ID;
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_ARG_OF_PER_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST:
 			i2c_cmd.id = SET_SGP4_ORBIT_BSTAR_DRAG_CMD_ID;
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_BSTAR_DRAG_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST:
 			i2c_cmd.id = SET_SGP4_ORBIT_MEAN_MOT_CMD_ID;
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_MEAN_MOT_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST:
 			i2c_cmd.id = SET_SGP4_ORBIT_MEAN_ANOM_CMD_ID;
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_MEAN_ANOM_ST);
 			break;
 		case ADCS_SET_SGP4_ORBIT_EPOCH_ST:
 			i2c_cmd.id = SET_SGP4_ORBIT_EPOCH_CMD_ID;
 			i2c_cmd.length = SET_SGP4_ORBIT_DATA_LENGTH;
 			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm((byte*)&i2c_cmd.ack,sizeof(i2c_cmd.ack), ADCS_SET_SGP4_ORBIT_EPOCH_ST);
 			break;
 		case ADCS_SET_MAGNETOMETER_MODE_ST:
 			memcpy(&magmode,cmd->data,sizeof(magmode));
@@ -419,6 +400,26 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			memcpy(&savimag_param,cmd->data,sizeof(savimag_param));
 			err = cspaceADCS_saveImage(ADCS_ID, savimag_param);
 			break;
+		case ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST:
+			err = UpdateTlmElementAtIndex(cmd->data[0],cmd->data[1],cmd->data[2]);
+			break;
+		case ADCS_RESET_TLM_ELEMENTS_ST:
+			err = RestoreDefaultTlmElement();
+			break;
+		case ADCS_SET_TLM_OVERRIDE_FLAG_ST:
+			memcpy(&temp,cmd->data,sizeof(Boolean));
+			err = AdcsSetTlmOverrideFlag((Boolean)temp);
+			break;
+		case ADCS_SET_ADCS_LOOP_PARAMETERS:
+			err = UpdateAdcsFramParameters(cmd->data[0],cmd->data+1);
+			break;
+		case ADCS_UPDATE_TLM_PERIOD_VEC:
+			err = UpdateTlmPeriodVector(cmd->data);
+			break;
+		case ADCS_UPDATE_TLM_SAVE_VEC:
+			err = UpdateTlmToSaveVector((Boolean8bit*)cmd->data);
+			break;
+
 		case ADCS_SET_BOOT_INDEX_ST:
 			memcpy(&bootindex,cmd->data,sizeof(bootindex));
 			err = cspaceADCS_BLSetBootIndex(ADCS_ID,bootindex);
@@ -429,7 +430,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			
 		/**** Telemetry ****/
 		case ADCS_GET_GENERAL_INFO_ST:
-			rv = cspaceADCS_getGeneralInfo(ADCS_ID,(cspace_adcs_geninfo_t*)data);
+			err = cspaceADCS_getGeneralInfo(ADCS_ID,(cspace_adcs_geninfo_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_geninfo_t),ADCS_GET_GENERAL_INFO_ST);
 			break;
 		case ADCS_GET_BOOT_PROGRAM_INFO_ST:
@@ -638,12 +639,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
 			break;
-		case ADCS_RESET_TLM_ELEMENTS_ST:
-			err = RestoreDefaultTlmElement();
-			break;
-		case ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST:
-			err = UpdateTlmElementAtIndex(cmd->data[0],cmd->data[1],cmd->data[2]);
-			break;
 		case ADCS_GET_TLM_ELEM_AT_INDEX_ST:
 			GetTlmElementAtIndex((AdcsTlmElement_t*)data,cmd->data[0]);
 			SendAdcsTlm(data, sizeof(AdcsTlmElement_t),ADCS_GET_TLM_ELEM_AT_INDEX_ST);
@@ -654,16 +649,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
 			break;
-		case ADCS_SET_TLM_OVERRIDE_FLAG_ST:
-			memcpy(&rv,cmd->data,sizeof(Boolean));
-			err = AdcsSetTlmOverrideFlag((Boolean)rv);
-			break;
 		case ADCS_GET_TLM_OVERRIDE_FLAG_ST:
-			err = AdcsGetTlmOverrideFlag((Boolean*)&rv);
-			SendAdcsTlm((byte*)&rv,sizeof(rv),ADCS_GET_TLM_OVERRIDE_FLAG_ST);
-			break;
-		case ADCS_SET_ADCS_LOOP_PARAMETERS:
-			err = UpdateAdcsFramParameters(cmd->data[0],cmd->data+1);
+			err = AdcsGetTlmOverrideFlag((Boolean*)&temp);
+			SendAdcsTlm((byte*)&temp,sizeof(temp),ADCS_GET_TLM_OVERRIDE_FLAG_ST);
 			break;
 		case ADCS_SET_DATA_LOG_ST:
 			//TODO: implement
@@ -672,6 +660,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			//TODO: return unknown subtype
 			break;
 	}
+
+	unsigned int error_codes[] = {sub_type,err,i2c_cmd.ack};
+	SendAdcsTlm((byte*)error_codes,sizeof(error_codes),ADCS_ACK_DATA_ST);
 //TODO: save ACK with 'err' value
 	return err;
 }

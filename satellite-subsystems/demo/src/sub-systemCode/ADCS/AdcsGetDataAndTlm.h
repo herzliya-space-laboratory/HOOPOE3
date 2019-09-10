@@ -70,6 +70,14 @@ Boolean CreateTlmElementFiles();
 int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
 
 /*!
+ * @brief 	allows the ground to command TLM collection period between TLM saves.
+ * @param[in] periods time periods array in [sec].
+ * @note	default is 10 seconds between saves(1/10 Hz)
+ * @return	Errors According to TroubleErrCode enum.
+ */
+int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM]);
+
+/*!
  * @brief updates the Tlm element at index with the input parameters
  * @param[in] 	index index at which to update in the elements array
  * @param[in]	ToSave		save telemetry flag(TRUE = save; FALSE = don't save)

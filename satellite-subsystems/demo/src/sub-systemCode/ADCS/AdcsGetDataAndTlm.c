@@ -314,6 +314,31 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 	return 0;
 }
 
+
+int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM])
+{
+	if (NULL == periods) {
+		//TODO: log error
+		return (int) TRBL_NULL_DATA;
+	}
+	int err = 0;
+	for(unsigned int i = 0; i < NUM_OF_ADCS_TLM; i++ ){
+		if(0 == periods[i]){
+			periods[i] = ADCS_TLM_DEFAULT_COLLECT_PERIOD;
+		}
+	}
+	err = FRAM_write(periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
+			NUM_OF_ADCS_TLM * sizeof(*periods));
+	if (0 != err) {
+		return err;
+	}
+
+	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
+		TlmElements[i].SavePeriod = periods[i];
+	}
+	return 0;
+}
+
 int AdcsGetTlmOverrideFlag(Boolean *override_flag){
 	if(NULL == override_flag){
 		return TRBL_NULL_DATA;
