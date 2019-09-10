@@ -103,7 +103,9 @@ void taskMain()
 
 		save_time();
 
+#ifndef ANTS_DO_NOT_DEPLOY
 		DeployIfNeeded();
+#endif
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
