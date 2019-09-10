@@ -99,7 +99,7 @@ int deploye_ants(ISISantsSide side)
 		return error;
 	}
 
-	error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
+	//error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
 	check_int("IsisAntS_autoDeployment, side A", error);
 
 	return 0;
@@ -129,7 +129,8 @@ int checkDeployAttempt(int attemptNumber)
 	if (time > attempt.timeToDeploy)
 		return -2;// there is time for the deploy
 
-	deploye_ants(nextDeploy);
+	printf("\n\n\n       deploy ants!!!!!!!\n\n\n");
+	//deploye_ants(nextDeploy);
 	attempt.isAtemptDone = ATTEMPT_DONE;
 	i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
 	check_int("FRAM_write, checkDeployAttempt", i_error);

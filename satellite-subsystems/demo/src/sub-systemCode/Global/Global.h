@@ -10,7 +10,7 @@
 
 #define TESTING
 #define PRINTTLM
-//#define ANTS_ON
+#define ANTS_ON
 #define ANTS_DO_NOT_DEPLOY
 #include <hal/boolean.h>
 
