@@ -398,9 +398,6 @@ void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 	unsigned int choice = 0;
 
 	TC_spl cmd;
-	cmd.id = 0x00000000;
-	cmd.type = TC_ADCS_T;
-
 	for(unsigned int i = 0; i < length; i++){
 		printf("Continue to Next Command?\n(0 = Exit,1 = Continue; 2 = Costume Command)\n");
 		while(UTIL_DbguGetIntegerMinMax(&choice,0,1));
@@ -426,11 +423,13 @@ void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 				continue;
 			break;
 		}
-
+		cmd.id = i;
+		cmd.type = TC_ADCS_T;
 		cmd.subType = modeCmd[i].subtype;
 		cmd.length = modeCmd[i].length;
 		cmd.id++;
 		memcpy(cmd.data,modeCmd[i].data,modeCmd[i].length);
+		printf("Sending command to execution.\t\t---subtype = %d",cmd.subType);
 		AdcsCmdQueueAdd(&cmd);
 		vTaskDelay(1000);
 	}
