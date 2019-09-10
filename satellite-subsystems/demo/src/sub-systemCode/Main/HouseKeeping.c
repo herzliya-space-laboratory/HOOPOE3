@@ -380,8 +380,22 @@ int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 		return 0;
 	}
 
-	if(type == ADCS_science_T){
-		//TODO: finish build adcs spl packet
+	if(type == log_files_events_T)
+	{
+		packet->type = LOG_T;
+		packet->subType = LOG_EVENTS_ST;
+		packet->length = LOG_STRUCT_ELEMENT_SIZE;
+		memcpy(packet->data, raw_data + TIME_SIZE, ACK_DATA_LENGTH);
+		return 0;
+	}
+
+	if(type == log_files_erorrs_T)
+	{
+		packet->type = LOG_T;
+		packet->subType = LOG_ERROR_ST;
+		packet->length = LOG_STRUCT_ELEMENT_SIZE;
+		memcpy(packet->data, raw_data + TIME_SIZE, ACK_DATA_LENGTH);
+		return 0;
 	}
 
 	if (offlineTM_T <= type && type < ADCS_science_T){
