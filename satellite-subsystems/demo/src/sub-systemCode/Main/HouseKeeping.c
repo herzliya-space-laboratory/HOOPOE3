@@ -249,7 +249,7 @@ void HK_find_ADCSTM_fileName(HK_AdcsTlmTypes type, char* fileName)
 		strcpy(fileName,ADCS_FINE_SUN_VEC_FILENAME);
 		break;
 	case AdcsTlm_Sensor:
-		strcpy(fileName,ADCS_SENSOR_FILENAME);
+		strcpy(fileName,ADCS_RATE_SENSOR_FILENAME);
 		break;
 	case AdcsTlm_SheelSpeed:
 		strcpy(fileName,ADCS_WHEEL_SPEED_FILENAME );

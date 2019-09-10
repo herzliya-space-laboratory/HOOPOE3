@@ -38,6 +38,8 @@ int init_command();
 int add_command(TC_spl command);
 int get_command(TC_spl* command);
 
+void save_ACK_s(Ack_type type, ERR_type err, command_id ACKcommandId);
+
 void act_upon_command(TC_spl decode);
 
 

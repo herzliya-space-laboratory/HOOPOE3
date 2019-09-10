@@ -44,7 +44,6 @@
 #include "../Ants.h"
 
 #include "../ADCS/AdcsMain.h"
-#include "../ADCS/AdcsTest.h"
 
 #include "../TRXVU.h"
 #include "../payload/Request Management/CameraManeger.h"
@@ -54,6 +53,8 @@
 
 #include "../payload/Compression/ImageConversion.h"
 #include "../payload/Compression/jpeg/ImgCompressor.h"
+
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -70,32 +71,6 @@ void reset_FIRST_activation(Boolean8bit dataFRAM)
 	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 }
 
-void test_menu()
-{
-	reset_FIRST_activation(FALSE_8BIT);
-
-	Boolean exit = FALSE;
-	unsigned int selection;
-	while (!exit)
-	{
-		printf( "\n\r Select a test to perform: \n\r");
-		printf("\t 0) continue to code\n\r");
-		printf("\t 1) set first activation flag to TRUE\n\r");
-
-		exit = FALSE;
-		while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
-
-		switch(selection)
-		{
-		case 0:
-			exit = TRUE;
-			break;
-		case 1:
-			reset_FIRST_activation(TRUE_8BIT);
-			break;
-		}
-	}
-}
 #endif
 
 void numberOfRestarts()
@@ -219,10 +194,6 @@ int InitSubsystems()
 
 	StartFRAM();
 
-#ifdef TESTING
-	test_menu();
-#endif
-
 	init_onlineParam();
 
 	Boolean activation = first_activation();
@@ -254,6 +225,136 @@ int InitSubsystems()
 	return 0;
 }
 
+typedef struct __attribute__ ((__packed__))
+{
+	unsigned char subtype;
+	unsigned char data[20];
+	unsigned char length;
+	unsigned short delay_duration;
+}AdcsComsnCmd_t;
+
+AdcsComsnCmd_t InitialAngularRateEstimation[] =
+{
+		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+
+		{.subtype = 11,	.data = {0x05,0x01,0x00}, .length = 3, .delay_duration = 100},
+
+		{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 100},
+
+		{.subtype = 95,	.data =
+		{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+		.length = 18, .delay_duration = 100},
+
+		{.subtype = 94,	.data =
+		{10,0,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
+		.length = 18, .delay_duration = 100},
+};
+
+AdcsComsnCmd_t Detumbling[] =
+{
+	{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+
+	{.subtype = 11,	.data = {0x05,0x01,0x00}, .length = 3,	.delay_duration = 100},
+
+	{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 6000},
+
+	{.subtype = 13,	.data = {0x01,0x00,0x58,0x02},	.length = 4, .delay_duration = 100},
+
+	{.subtype = 95,	.data =
+	{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+	.length = 1, .delay_duration = 100},
+
+	{.subtype = 94,	.data =
+	{10,0,10,0,10,0,0,10,0,10,0,0,0,0,0,0,0,0},
+	.length = 18, .delay_duration = 100},
+
+};
+void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
+
+	unsigned int choice = 0;
+
+	TC_spl cmd;
+	cmd.id = 0x00000000;
+	cmd.type = TC_ADCS_T;
+
+	for(unsigned int i = 0; i < length; i++){
+		printf("Continue to Next Command?\n(0 = Exit,1 = Continue; 2 = Costume Command)\n");
+		while(UTIL_DbguGetIntegerMinMax(&choice,0,1));
+
+		switch(choice){
+		case 0:
+			return;
+		case 1:
+			break;
+		case 2:
+				printf("subtype:(0 to 255)\n");
+				while(UTIL_DbguGetIntegerMinMax(&cmd.subType,0,255));
+				printf("cmd length:(0 to %d)\n",sizeof(cmd.data));
+				while(UTIL_DbguGetIntegerMinMax(&cmd.length,0,sizeof(cmd.data)));
+				printf("Insert Data:\n");
+				for(unsigned int i = 0; i< cmd.length; i++){
+					printf("data[%d]:",i);
+					while(UTIL_DbguGetIntegerMinMax(&cmd.data[i],0,255));
+					printf("\n");
+				}
+				AdcsCmdQueueAdd(&cmd);
+				i--;
+				continue;
+			break;
+		}
+
+		cmd.subType = modeCmd[i].subtype;
+		cmd.length = modeCmd[i].length;
+		cmd.id++;
+		memcpy(cmd.data,modeCmd[i].data,modeCmd[i].length);
+		AdcsCmdQueueAdd(&cmd);
+		vTaskDelay(1000);
+	}
+
+
+}
+
+void TestAdcsCommissioningTask(){
+
+	unsigned int coms_mode = 1;
+	vTaskDelay(10000);
+	unsigned int length = 0;
+	while(1){
+		printf("\nChoose Commissioning mode:\n");
+		printf("\t%d) %s\n",	coms_mode++,"Initial Angular Rate Estimation");
+		printf("\t%d) %s\n",	coms_mode++,"Detumbling");
+		printf("\t%d) %s\n",	coms_mode++,"Magnetometer Deployment");
+		printf("\t%d) %s\n",	coms_mode++,"Magnetometer Calibration");
+		printf("\t%d) %s\n",	coms_mode++,"Angular Rate And Pitch Angle Estimation");
+		printf("\t%d) %s\n",	coms_mode++,"Y-Wheel Ramp-Up Test");
+		printf("\t%d) %s\n",	coms_mode++,"Y-Momentum Mode Commissioning");
+		while(UTIL_DbguGetIntegerMinMax(&coms_mode,1,coms_mode));
+
+		AdcsComsnCmd_t *mode = NULL;
+
+		switch(coms_mode){
+		case 1:
+			mode = &InitialAngularRateEstimation;
+			break;
+		case 2:
+			mode = &Detumbling;
+			break;
+		case 3:
+			break;
+		case 4:
+			break;
+		case 5:
+			break;
+		case 6:
+			break;
+		case 7:
+			break;
+		}
+		length = (sizeof(*mode)/sizeof(AdcsComsnCmd_t));
+		CommissionAdcsMode(mode,length);
+	}
+}
+
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
@@ -265,7 +366,12 @@ int SubSystemTaskStart()
 
 	KickStartCamera();
 	vTaskDelay(100);
+
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	vTaskDelay(100);
+
+	xTaskCreate(TestAdcsCommissioningTask, (const signed char*)("AdcsTestTask"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
+	vTaskDelay(100);
 	return 0;
 }
 

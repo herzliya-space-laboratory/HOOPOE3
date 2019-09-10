@@ -6,7 +6,7 @@
 #include "AdcsTroubleShooting.h"
 
 //TODO: update this number to the correct number of telemetries
-#define NUM_OF_ADCS_TLM 17						//<! states the maximum number of telemetries the ADCS can save
+#define NUM_OF_ADCS_TLM 18						//<! states the maximum number of telemetries the ADCS can save
 
 #ifndef TLM_SAVE_VECTOR_START_ADDR
 	#define TLM_SAVE_VECTOR_START_ADDR (0x6242)
@@ -18,23 +18,24 @@
 
 #define ADCS_MAX_TLM_SIZE 272
 
-#define ADCS_EST_ANGLES_FILENAME 		("EstAng")
-#define ADCS_EST_ANG_RATE_FILENAME 		("EAngRt")
-#define ADCS_SAT_POSITION_FILENAME 		("SatPos")
-#define ADCS_STATE_TLM_FILENAME 		("StTlm")
-#define ADCS_EST_META_DATA				("EstMtDt")
-#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVc")
-#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVc")
-#define ADCS_SENSOR_FILENAME			("Snsr")
-#define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")
-#define ADCS_CUBECTRL_CURRENTS_FILENAME	("CCCrnt")
-#define ADCS_RAW_MAG_FILENAME 			("RawMag")
-#define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldVc")
-#define ADCS_RAW_CSS_FILENAME_1_6 		("RCss16")
-#define ADCS_RAW_CSS_FILENAME_7_10		("RCss7A")// A =10
-#define ADCS_POWER_TEMP_FILENAME		("PowTemp")
-#define ADCS_MAG_CMD_FILENAME			("MagCmd")
-#define	ADCS_MISC_CURR_FILENAME 		("MscCurr")
+#define ADCS_UNIX_TIME_FILENAME 		("UnxTm")	//TLM ID 140
+#define ADCS_EST_ANGLES_FILENAME 		("EstAng")	//TLM ID 146
+#define ADCS_EST_ANG_RATE_FILENAME 		("EAngRt")	//TLM ID 147
+#define ADCS_SAT_POSITION_FILENAME 		("SatPos")	//TLM ID 150
+#define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldVc")	//TLM ID 151
+#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVc")	//TLM ID 152
+#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVc")	//TLM ID 153
+#define ADCS_RATE_SENSOR_FILENAME		("RtSnsr")	//TLM ID 155
+#define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")	//TLM ID 156
+#define ADCS_MAG_CMD_FILENAME			("MagCmd")	//TLM ID 157
+#define ADCS_RAW_CSS_FILENAME_1_6 		("RCss16")	//TLM ID 168
+#define ADCS_RAW_CSS_FILENAME_7_10		("RCss7A")	//TLM ID 169
+#define ADCS_RAW_MAG_FILENAME 			("RawMag")	//TLM ID 170
+#define ADCS_CUBECTRL_CURRENTS_FILENAME	("CCCrnt")	//TLM ID 172
+#define ADCS_STATE_TLM_FILENAME 		("StTlm")	//TLM ID 190
+#define ADCS_EST_META_DATA				("EstMtDt")	//TLM ID 193
+#define ADCS_POWER_TEMP_FILENAME		("PowTemp")	//TLM ID 195 (includes 174 inside)
+#define	ADCS_MISC_CURR_FILENAME 		("MscCurr")	//TLM ID 198
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
@@ -68,6 +69,14 @@ Boolean CreateTlmElementFiles();
  * @return	Errors According to TroubleErrCode enum.
  */
 int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
+
+/*!
+ * @brief 	allows the ground to command TLM collection period between TLM saves.
+ * @param[in] periods time periods array in [sec].
+ * @note	default is 10 seconds between saves(1/10 Hz)
+ * @return	Errors According to TroubleErrCode enum.
+ */
+int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM]);
 
 /*!
  * @brief updates the Tlm element at index with the input parameters

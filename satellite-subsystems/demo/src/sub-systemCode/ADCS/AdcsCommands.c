@@ -419,6 +419,26 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			memcpy(&savimag_param,cmd->data,sizeof(savimag_param));
 			err = cspaceADCS_saveImage(ADCS_ID, savimag_param);
 			break;
+		case ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST:
+			err = UpdateTlmElementAtIndex(cmd->data[0],cmd->data[1],cmd->data[2]);
+			break;
+		case ADCS_RESET_TLM_ELEMENTS_ST:
+			err = RestoreDefaultTlmElement();
+			break;
+		case ADCS_SET_TLM_OVERRIDE_FLAG_ST:
+			memcpy(&rv,cmd->data,sizeof(Boolean));
+			err = AdcsSetTlmOverrideFlag((Boolean)rv);
+			break;
+		case ADCS_SET_ADCS_LOOP_PARAMETERS:
+			err = UpdateAdcsFramParameters(cmd->data[0],cmd->data+1);
+			break;
+		case ADCS_UPDATE_TLM_PERIOD_VEC:
+			err = UpdateTlmPeriodVector(cmd->data);
+			break;
+		case ADCS_UPDATE_TLM_SAVE_VEC:
+			err = UpdateTlmToSaveVector((Boolean8bit*)cmd->data);
+			break;
+
 		case ADCS_SET_BOOT_INDEX_ST:
 			memcpy(&bootindex,cmd->data,sizeof(bootindex));
 			err = cspaceADCS_BLSetBootIndex(ADCS_ID,bootindex);
@@ -638,12 +658,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
 			break;
-		case ADCS_RESET_TLM_ELEMENTS_ST:
-			err = RestoreDefaultTlmElement();
-			break;
-		case ADCS_UPDATE_TLM_ELEMENT_AT_INDEX_ST:
-			err = UpdateTlmElementAtIndex(cmd->data[0],cmd->data[1],cmd->data[2]);
-			break;
 		case ADCS_GET_TLM_ELEM_AT_INDEX_ST:
 			GetTlmElementAtIndex((AdcsTlmElement_t*)data,cmd->data[0]);
 			SendAdcsTlm(data, sizeof(AdcsTlmElement_t),ADCS_GET_TLM_ELEM_AT_INDEX_ST);
@@ -654,16 +668,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
 			break;
-		case ADCS_SET_TLM_OVERRIDE_FLAG_ST:
-			memcpy(&rv,cmd->data,sizeof(Boolean));
-			err = AdcsSetTlmOverrideFlag((Boolean)rv);
-			break;
 		case ADCS_GET_TLM_OVERRIDE_FLAG_ST:
 			err = AdcsGetTlmOverrideFlag((Boolean*)&rv);
 			SendAdcsTlm((byte*)&rv,sizeof(rv),ADCS_GET_TLM_OVERRIDE_FLAG_ST);
-			break;
-		case ADCS_SET_ADCS_LOOP_PARAMETERS:
-			err = UpdateAdcsFramParameters(cmd->data[0],cmd->data+1);
 			break;
 		case ADCS_SET_DATA_LOG_ST:
 			//TODO: implement
@@ -672,6 +679,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			//TODO: return unknown subtype
 			break;
 	}
+
 //TODO: save ACK with 'err' value
 	return err;
 }

@@ -99,10 +99,13 @@ int cspaceADCS_getSatellitePosition(int adcs_id, cspace_adcs_satellitePosition_t
 }
 
 #define ADCS_DEFAULT_TLM_VECTOR	\
-		{{TRUE_8BIT,	sizeof(cspace_adcs_estAng_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimatedAngles,			\
+		{{TRUE_8BIT,	sizeof(cspace_adcs_unixtm_t),	(AdcsTlmCollectFunc)cspaceADCS_getCurrentTime,				\
+		ADCS_UNIX_TIME_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_estAng_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimatedAngles,				\
 		ADCS_EST_ANGLES_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_estAngRates_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimatedAnglesRates,	\
+		{TRUE_8BIT,	sizeof(cspace_adcs_estAngRates_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimatedAnglesRates,		\
 		ADCS_EST_ANG_RATE_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_satellitePosition_t),	(AdcsTlmCollectFunc)cspaceADCS_getSatellitePosition,\
@@ -111,14 +114,26 @@ int cspaceADCS_getSatellitePosition(int adcs_id, cspace_adcs_satellitePosition_t
 		{TRUE_8BIT,	sizeof(cspace_adcs_magfieldvec_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagneticFieldVec,			\
 		ADCS_MAG_FIELD_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getCoarseSunVec,				\
+		ADCS_COARSE_SUN_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getFineSunVec,				\
+		ADCS_FINE_SUN_VEC_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_angrate_t),		(AdcsTlmCollectFunc)cspaceADCS_getSensorRates,				\
-		ADCS_SENSOR_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		ADCS_RATE_SENSOR_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},				\
 		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_wspeed_t),		(AdcsTlmCollectFunc)cspaceADCS_getWheelSpeed,				\
 		ADCS_WHEEL_SPEED_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_magtorqcmd_t),	(AdcsTlmCollectFunc)cspaceADCS_getMagnetorquerCmd,			\
 		ADCS_MAG_CMD_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},						\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss1_6_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss1_6Measurements,	\
+		ADCS_RAW_CSS_FILENAME_1_6,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
+		\
+		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss7_10_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss7_10Measurements,	\
+		ADCS_RAW_CSS_FILENAME_7_10,ADCS_TLM_DEFAULT_COLLECT_PERIOD,		(time_unix)0,FALSE_8BIT},					\
 		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_rawmagmeter_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawMagnetometerMeas,		\
 		ADCS_RAW_MAG_FILENAME,		ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
@@ -132,17 +147,8 @@ int cspaceADCS_getSatellitePosition(int adcs_id, cspace_adcs_satellitePosition_t
 		{TRUE_8BIT,	sizeof(cspace_adcs_estmetadata_t),	(AdcsTlmCollectFunc)cspaceADCS_getEstimationMetadata,		\
 		ADCS_EST_META_DATA,			ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getCoarseSunVec,				\
-		ADCS_COARSE_SUN_VEC_FILENAME,ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_sunvec_t),		(AdcsTlmCollectFunc)cspaceADCS_getFineSunVec,				\
-		ADCS_FINE_SUN_VEC_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss1_6_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss1_6Measurements,	\
-		ADCS_RAW_CSS_FILENAME_1_6,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
-		\
-		{TRUE_8BIT,	sizeof(cspace_adcs_rawcss7_10_t),	(AdcsTlmCollectFunc)cspaceADCS_getRawCss7_10Measurements,	\
-		ADCS_RAW_CSS_FILENAME_7_10,ADCS_TLM_DEFAULT_COLLECT_PERIOD,		(time_unix)0,FALSE_8BIT},					\
+		{TRUE_8BIT,	sizeof(cspace_adcs_pwtempms_t),	(AdcsTlmCollectFunc)cspaceADCS_getPowTempMeasTLM,				\
+		ADCS_POWER_TEMP_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		\
 		{TRUE_8BIT,	sizeof(cspace_adcs_misccurr_t),	(AdcsTlmCollectFunc)cspaceADCS_getMiscCurrentMeas,				\
 		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
@@ -310,6 +316,30 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 
 	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
 		TlmElements[i].ToSave = save_tlm_flag[i];
+	}
+	return 0;
+}
+
+int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM])
+{
+	if (NULL == periods) {
+		//TODO: log error
+		return (int) TRBL_NULL_DATA;
+	}
+	int err = 0;
+	for(unsigned int i = 0; i < NUM_OF_ADCS_TLM; i++ ){
+		if(0 == periods[i]){
+			periods[i] = ADCS_TLM_DEFAULT_COLLECT_PERIOD;
+		}
+	}
+	err = FRAM_write(periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
+			NUM_OF_ADCS_TLM * sizeof(*periods));
+	if (0 != err) {
+		return err;
+	}
+
+	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
+		TlmElements[i].SavePeriod = periods[i];
 	}
 	return 0;
 }
