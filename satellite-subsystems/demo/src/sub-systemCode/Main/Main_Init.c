@@ -147,6 +147,7 @@ void StartTIME()
 	{
 		printf("error in Time_start; err = %d\n",error);
 	}
+	vTaskDelay(100);
 	time_unix time_now;
 	error = Time_getUnixEpoch(&time_now);
 	check_int("StartTIME, Time_getUnixEpoch", error);
@@ -182,7 +183,6 @@ Boolean first_activation()
 	// 3. reset TRXVU FRAM adress
 	reset_FRAM_EPS();
 
-	reset_FRAM_ants();
 	reset_offline_TM_list();
 	// 3. cahnge the first activation to false
 	dataFRAM = FALSE_8BIT;
@@ -239,7 +239,7 @@ int InitSubsystems()
 	EPS_Init();
 
 #ifdef ANTS_ON
-	init_Ants();
+	init_Ants(activation);
 #endif
 
 	AdcsInit();

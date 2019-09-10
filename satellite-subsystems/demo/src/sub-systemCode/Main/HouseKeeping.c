@@ -210,10 +210,10 @@ int COMM_HK_collect(COMM_HK* hk_out)
 	hk_out->fields.tx_reflpwr = telemetry_Tx.fields.tx_reflpwr;
 #ifdef ANTS_ON
 	error_antA = IsisAntS_getTemperature(0, isisants_sideA, &(hk_out->fields.ant_A_temp));
-	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antA);
+	//check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antA);
 
 	error_antB = IsisAntS_getTemperature(0, isisants_sideB, &(hk_out->fields.ant_B_temp));
-	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antB);
+	//check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antB);
 #endif
 
 	set_GP_COMM(telemetry_Rx);

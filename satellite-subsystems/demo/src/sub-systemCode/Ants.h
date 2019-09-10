@@ -38,7 +38,7 @@ typedef union __attribute__ ((__packed__))
 int ARM_ants();
 int DISARM_ants();
 int deploye_ants(ISISantsSide side);
-void init_Ants();
+void init_Ants(Boolean activation);
 
 void reset_FRAM_ants();
 

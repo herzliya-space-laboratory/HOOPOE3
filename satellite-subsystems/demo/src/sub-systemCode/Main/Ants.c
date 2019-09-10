@@ -13,8 +13,15 @@
 
 static ISISantsSide nextDeploy;
 
-void init_Ants()
+void reset_deployStatusFRAM(int delayForNextAttempt);
+
+void init_Ants(Boolean activation)
 {
+	if (activation)
+	{
+		reset_FRAM_ants();
+	}
+
     int retValInt = 0;
 
 	ISISantsI2Caddress myAntennaAddress[2];
@@ -116,7 +123,7 @@ int checkDeployAttempt(int attemptNumber)
 		return -3;
 
 	deploy_attempt attempt;
-	unsigned int addres = OFFLINE_LIST_SETTINGS_ADDR + attemptNumber*SIZE_DEPLOY_ATTEMPT_UNION;
+	unsigned int addres = DEPLOY_ANTS_ATTEMPTS_ADDR + attemptNumber*SIZE_DEPLOY_ATTEMPT_UNION;
 	int i_error = FRAM_read((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
 	check_int("FRAM_read, checkDeployAttempt", i_error);
 
@@ -126,7 +133,7 @@ int checkDeployAttempt(int attemptNumber)
 	time_unix time;
 	i_error = Time_getUnixEpoch(&time);
 	check_int("Time_getUnixEpoch, checkDeployAttempt", i_error);
-	if (time > attempt.timeToDeploy)
+	if (time < attempt.timeToDeploy)
 		return -2;// there is time for the deploy
 
 	printf("\n\n\n       deploy ants!!!!!!!\n\n\n");
@@ -151,7 +158,7 @@ void reset_deployStatusFRAM(int delayForNextAttempt)
 	for (int i = 0 ; i < NUMBER_OF_ATTEMPTS; i++)
 	{
 		attempt.timeToDeploy = time + delayForNextAttempt + i * DELAY_BETWEEN_3_ATTEMPTS;
-		unsigned int addres = OFFLINE_LIST_SETTINGS_ADDR + i*SIZE_DEPLOY_ATTEMPT_UNION;
+		unsigned int addres = DEPLOY_ANTS_ATTEMPTS_ADDR + i*SIZE_DEPLOY_ATTEMPT_UNION;
 		i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
 		check_int("FRAM_write, reset_deployStatusFRAM", i_error);
 	}
@@ -170,7 +177,7 @@ void reset_FRAM_ants()
 	reset_deployStatusFRAM(START_MUTE_TIME_FIRST);
 
 	shut_ADCS(SWITCH_OFF);
-	set_mute_time(START_MUTE_TIME_FIRST + 2*60);
+	set_mute_time((unsigned short)((START_MUTE_TIME_FIRST + 2*60)/60));
 }
 
 
