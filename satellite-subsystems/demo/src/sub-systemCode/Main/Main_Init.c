@@ -255,6 +255,12 @@ int InitSubsystems()
 
 	return 0;
 }
+int charPToint(unsigned char* data)
+{
+	int res=0;
+	memcpy(&res,data,sizeof(int));
+	return res;
+}
 void LoggerTestTask(){
 	int i = 0;
 	time_unix current_time = 0;
@@ -304,18 +310,17 @@ void LoggerTestTask(){
 			Time_getUnixEpoch(&current_time);
 			c_fileRead(ERROR_LOG_FILENAME, buffer, sizeof(buffer), start_time, current_time, (int*)&read, &a);
 			printf("Error Log  Data:\n");
-			for(unsigned int k = 0; k < read * 12;k++ ){
-				printf("%d\t", buffer[k]);
-				if (k % 12 == 0)
-					printf("\n");
+			for(unsigned int k = 0; k < read*12;k += 12){
+				printf("time is: %u lognum is %d info is %d\n\t", charPToint(&buffer[k]),
+						charPToint(&buffer[k]+sizeof(int)),charPToint(&buffer[k]+sizeof(int)*2));
 			}
+			read=0;
 			c_fileRead(EVENT_LOG_FILENAME, buffer, sizeof(buffer), start_time, current_time, (int*)&read, &a);
 			printf("\n\nEvent Log Data:\n");
-			for(unsigned int k = 0; k < read * 12;k++ )
+			for(unsigned int k = 0; k < read*12;k += 12)
 			{
-				printf("%d\t", buffer[k]);
-				if (k % 12 == 0)
-					printf("\n");
+				printf("time is: %u lognum is %d info is %d\n\t", charPToint(&buffer[k]),
+						charPToint(&buffer[k]+sizeof(int)),charPToint(&buffer[k]+sizeof(int)*2));
 			}
 			start_time = current_time;
 			i=0;

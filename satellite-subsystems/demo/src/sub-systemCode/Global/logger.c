@@ -69,6 +69,6 @@ FileSystemResult WriteTransponderLog(log_activation log_num, int info)
 {
 	LogStruct log;
 	log.info = info;
-	log.log_num = log_num + EPS_LOG_OFFSET;
+	log.log_num = log_num + TRANSPONDER_LOG_OFFSET;
 	return WriteLog(&log, EVENT_LOG_FILENAME);
 }
