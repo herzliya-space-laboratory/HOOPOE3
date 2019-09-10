@@ -23,8 +23,11 @@ ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t ch
 	if (img_type == jpg)
 	{
 		pixel_t* temp_chunk = SimpleButcher(image, image_size, chunk_size, index);
+		CHECK_FOR_NULL(temp_chunk, BUTCHER_OUT_OF_BOUNDS);
+
 		memcpy(chunk, temp_chunk, chunk_size);
 		free(temp_chunk);
+
 		return BUTCHER_SUCCSESS;
 	}
 
@@ -38,7 +41,7 @@ ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t ch
 	uint32_t num_of_chunks_X = effective_im_width / chunk_width;
 
 	if ( effective_im_width % chunk_width != 0 )
-		return Butcher_Parameter_Value;
+		return BUTCHER_PARAMATER_VALUE;
 
 	uint32_t height_offset = (index / num_of_chunks_X) * chunk_height;
 	uint32_t width_offset = (index % num_of_chunks_X) * chunk_width;
@@ -53,6 +56,8 @@ ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t ch
 		pixel_t* reminder_section_strarting_point = (pixel_t*)image + reminder_section_offset;
 
 		pixel_t* buffer = SimpleButcher(reminder_section_strarting_point, effective_im_size, chunk_size, reminder_section_index);
+		CHECK_FOR_NULL(buffer, BUTCHER_OUT_OF_BOUNDS);
+
 		memcpy(chunk, buffer, chunk_size);
 	}
 	else

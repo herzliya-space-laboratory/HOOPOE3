@@ -130,14 +130,13 @@ typedef enum
 	Butcher_Success,
 	Butcher_Null_Pointer,
 	Butcher_Parameter_Value,
+	Butcher_Out_of_Bounds,
 	Butcher_Undefined_Error,
-
-	// BMP Error Messages:
 
 	// JPEG Error Messages:
 	JpegCompression_Success,
 	JpegCompression_Failure,
-	JpegCompression_qualityFactor_outOFRange,
+	JpegCompression_qualityFactor_outOfRange
 } ImageDataBaseResult;
 
 uint8_t imageBuffer[BMP_FILE_DATA_SIZE];

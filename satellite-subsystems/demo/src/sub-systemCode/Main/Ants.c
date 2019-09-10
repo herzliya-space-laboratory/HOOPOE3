@@ -98,7 +98,7 @@ int deploye_ants(ISISantsSide side)
 
 	return 0;
 #else
-	printf("Are you crazy, please do NOT try to deploy ants in the lab\n");
+	printf("Are you crazy, please do NOT try to deploy ants in the lab (%u (don't panic just wanted to get rid of an error...))\n", side);
 	return 666;
 #endif
 }

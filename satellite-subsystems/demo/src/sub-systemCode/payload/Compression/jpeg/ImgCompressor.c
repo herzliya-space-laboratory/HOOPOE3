@@ -79,7 +79,7 @@ ImageDataBaseResult CompressImage(imageid id, fileType reductionLevel, unsigned 
 	if ((quality_factor < 1) || (quality_factor > 100))
 	{
 		printf("Quality factor must range from 1-100!\n");
-		return JpegCompression_qualityFactor_outOFRange;
+		return JpegCompression_qualityFactor_outOfRange;
 	}
 
 	unsigned int compfact = (unsigned int)pow(2, (double)reductionLevel);

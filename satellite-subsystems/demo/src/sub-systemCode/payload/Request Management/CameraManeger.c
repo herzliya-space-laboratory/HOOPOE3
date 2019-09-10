@@ -185,14 +185,17 @@ void Take_pictures_with_time_in_between()
 	time_unix currentTime;
 	Time_getUnixEpoch(&currentTime);
 
-	if ( (lastPicture_time + timeBetweenPictures <= currentTime) && (numberOfPicturesLeftToBeTaken != 0)  && (get_system_state(cam_operational_param)) )
+	if ( (lastPicture_time + timeBetweenPictures <= currentTime) && (numberOfPicturesLeftToBeTaken != 0) )
 	{
 		lastPicture_time = currentTime;
 
-		Time_getUnixEpoch(&turnedOnCamera);
-		TurnOnGecko();
-
-		takePicture(imageDataBase, FALSE_8BIT);
+		if (get_system_state(cam_operational_param))
+		{
+			Time_getUnixEpoch(&turnedOnCamera);
+			TurnOnGecko();
+			ImageDataBaseResult error = takePicture(imageDataBase, FALSE_8BIT);
+			save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween);
+		}
 
 		numberOfPicturesLeftToBeTaken--;
 	}
@@ -225,16 +228,32 @@ void act_upon_request(Camera_Request request)
 	error = f_managed_enterFS();
 	// ToDo: log error
 
+	Boolean CouldNotExecute = FALSE;
+
 	switch (request.id)
 	{
 	case take_picture:
-		Time_getUnixEpoch(&turnedOnCamera);
-		error = TakePicture(imageDataBase, request.data);
+		if (get_system_state(cam_operational_param))
+		{
+			Time_getUnixEpoch(&turnedOnCamera);
+			error = TakePicture(imageDataBase, request.data);
+		}
+		else
+		{
+			CouldNotExecute = TRUE;
+		}
 		break;
 
 	case take_picture_with_special_values:
-		Time_getUnixEpoch(&turnedOnCamera);
-		error = TakeSpecialPicture(imageDataBase, request.data);
+		if (get_system_state(cam_operational_param))
+		{
+			Time_getUnixEpoch(&turnedOnCamera);
+			error = TakeSpecialPicture(imageDataBase, request.data);
+		}
+		else
+		{
+			CouldNotExecute = TRUE;
+		}
 		break;
 
 	case take_pictures_with_time_in_between:
@@ -257,13 +276,15 @@ void act_upon_request(Camera_Request request)
 		else
 		{
 			addRequestToQueue(request);
+			CouldNotExecute = TRUE;
 		}
 		break;
 
 	case transfer_image_to_OBC:
-		if (get_ground_conn() && !get_system_state(cam_operational_param))
+		if (get_ground_conn() || !get_system_state(cam_operational_param))
 		{
 			addRequestToQueue(request);
+			CouldNotExecute = TRUE;
 		}
 		else
 		{
@@ -304,6 +325,10 @@ void act_upon_request(Camera_Request request)
 			Time_getUnixEpoch(&turnedOnCamera);
 			TurnOnGecko();
 		}
+		else
+		{
+			CouldNotExecute = TRUE;
+		}
 		break;
 
 	case Turn_Off_Camera:
@@ -327,9 +352,8 @@ void act_upon_request(Camera_Request request)
 
 	Gecko_TroubleShooter(error);
 
-	if ( !(request.id == Handle_Mark || request.id == transfer_image_to_OBC) )
+	if ( request.id != Handle_Mark && !CouldNotExecute )
 	{
-		printf("\n\n\n\n\n\n\n\n\nDID CAMERA THINGI (%u)\n\n\n\n\n\n\n\n\n\n", error);
 		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 	}
 
