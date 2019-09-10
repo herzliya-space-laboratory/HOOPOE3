@@ -329,7 +329,6 @@ void act_upon_request(Camera_Request request)
 
 	if ( !(request.id == Handle_Mark || request.id == transfer_image_to_OBC) )
 	{
-		printf("\n\n\n\n\n\n\n\n\nDID CAMERA THINGI (%u)\n\n\n\n\n\n\n\n\n\n", error);
 		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 	}
 

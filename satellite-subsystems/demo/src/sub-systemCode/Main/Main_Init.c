@@ -237,7 +237,7 @@ AdcsComsnCmd_t InitialAngularRateEstimation[] =
 {
 		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 11,	.data = {0x05,0x01,0x00}, .length = 3, .delay_duration = 100},
+		{.subtype = 11,	.data = {0x05,0x04,0x00}, .length = 3, .delay_duration = 100},
 
 		{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 100},
 
@@ -254,7 +254,7 @@ AdcsComsnCmd_t Detumbling[] =
 {
 	{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-	{.subtype = 11,	.data = {0x05,0x01,0x00}, .length = 3,	.delay_duration = 100},
+	{.subtype = 11,	.data = {0x05,0x40,0x00}, .length = 3,	.delay_duration = 100},
 
 	{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 6000},
 
@@ -266,7 +266,10 @@ AdcsComsnCmd_t Detumbling[] =
 
 	{.subtype = 94,	.data =
 	{10,0,10,0,10,0,0,10,0,10,0,0,0,0,0,0,0,0},
-	.length = 18, .delay_duration = 100}
+	.length = 18, .delay_duration = 100},
+
+	{.subtype = 93,	.data = {0x00,0xE8,0x03,0x00,0x00},
+	.length = 5, .delay_duration = 100}
 
 };
 
@@ -345,7 +348,7 @@ AdcsComsnCmd_t AngularRateAndPitchAngleEstimation[] = {
 AdcsComsnCmd_t YWheelRampUpTest[] = {
 		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 11,	.data = {0x05,0x01,0x00}, .length = 3,	.delay_duration = 100},
+		{.subtype = 11,	.data = {0x05,0x04,0x00}, .length = 3,	.delay_duration = 100},
 
 		{.subtype = 14,	.data = {0x03},	.length = 1, .delay_duration = 6000},
 
@@ -400,7 +403,7 @@ void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 	TC_spl cmd;
 	for(unsigned int i = 0; i < length; i++){
 		printf("Continue to Next Command?\n(0 = Exit,1 = Continue; 2 = Costume Command)\n");
-		while(UTIL_DbguGetIntegerMinMax(&choice,0,1));
+		while(UTIL_DbguGetIntegerMinMax(&choice,0,1)==0);
 
 		switch(choice){
 		case 0:
@@ -415,7 +418,7 @@ void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 				printf("Insert Data:\n");
 				for(unsigned int i = 0; i< cmd.length; i++){
 					printf("data[%d]:",i);
-					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.data[i],0,255) ==0);
+					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.data[i],0,255) == 0);
 					printf("\n");
 				}
 				AdcsCmdQueueAdd(&cmd);
@@ -444,41 +447,51 @@ void TestAdcsCommissioningTask(){
 	unsigned int length = 0;
 	while(1){
 		printf("\nChoose Commissioning mode:\n");
+		printf("\t%d) %s\n",	coms_mode++,"Delay for 2 minute");
 		printf("\t%d) %s\n",	coms_mode++,"Initial Angular Rate Estimation");
 		printf("\t%d) %s\n",	coms_mode++,"Detumbling");
 		printf("\t%d) %s\n",	coms_mode++,"Magnetometer Deployment");
 		printf("\t%d) %s\n",	coms_mode++,"Magnetometer Calibration");
 		printf("\t%d) %s\n",	coms_mode++,"Angular Rate And Pitch Angle Estimation");
 		printf("\t%d) %s\n",	coms_mode++,"Y-Wheel Ramp-Up Test");
-		printf("\t%d) %s\n",	coms_mode++,"Y-Momentum Mode Commissioning");
+		printf("\t%d) %s\n",	coms_mode,	"Y-Momentum Mode Commissioning");
 		while(UTIL_DbguGetIntegerMinMax(&coms_mode,1,coms_mode)==0);
 
 		AdcsComsnCmd_t *mode = NULL;
 
 		switch(coms_mode){
+		case 0:
+			vTaskDelay(2*60*1000);
+			break;
 		case 1:
 			mode = InitialAngularRateEstimation;
+			length = (sizeof(InitialAngularRateEstimation)/sizeof(AdcsComsnCmd_t));
 			break;
 		case 2:
 			mode = Detumbling;
+			length = (sizeof(Detumbling)/sizeof(AdcsComsnCmd_t));
 			break;
 		case 3:
 			mode = MagnetometerDeployment;
+			length = (sizeof(MagnetometerDeployment)/sizeof(AdcsComsnCmd_t));
 			break;
 		case 4:
 			mode = MagnetometerCalibration;
+			length = (sizeof(MagnetometerCalibration)/sizeof(AdcsComsnCmd_t));
 			break;
 		case 5:
 			mode = AngularRateAndPitchAngleEstimation;
+			length = (sizeof(AngularRateAndPitchAngleEstimation)/sizeof(AdcsComsnCmd_t));
 			break;
 		case 6:
 			mode = YWheelRampUpTest;
+			length = (sizeof(YWheelRampUpTest)/sizeof(AdcsComsnCmd_t));
 			break;
 		case 7:
 			mode = YMomentumModeCommissioning;
+			length = (sizeof(YMomentumModeCommissioning)/sizeof(AdcsComsnCmd_t));
 			break;
 		}
-		length = (sizeof(*mode)/sizeof(AdcsComsnCmd_t));
 		CommissionAdcsMode(mode,length);
 	}
 }

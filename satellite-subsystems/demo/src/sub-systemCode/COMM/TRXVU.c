@@ -602,7 +602,6 @@ void Beacon_task()
 	voltage_t low_v_beacon;
 	while(1)
 	{
-		printf("\n         Beacon logic\n\n");
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
 			buildAndSend_beacon();

@@ -117,9 +117,16 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	tm.length = length;
 	memcpy(tm.data,info,tm.length);
 	byte rawData[SPL_TM_HEADER_SIZE + tm.length];
-	int rawDataLength = 0;
-	encode_TMpacket(rawData, &rawDataLength, tm);
+	unsigned int rawDataLength = 0;
+	encode_TMpacket(rawData, (int*)&rawDataLength, tm);
 	TRX_sendFrame(rawData, (unsigned char)rawDataLength);
+#ifdef TESTING
+	printf("\n[%d",rawData[0]);
+	for(unsigned int i = 1; i < rawDataLength;i++){
+		printf(",%X",rawData[i]);
+	}
+	printf("]\n");
+#endif
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
@@ -216,9 +223,9 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			printf("\nSet Current Power Control:\n");
 			printf("signal_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.signal_cubecontrol);
 			printf("motor_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.motor_cubecontrol);
-			printf("pwr_cubesen: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubesense);
-			printf("pwr_cubest: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubestar);
-			printf("pwr_cubewhee: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel1);
+			printf("pwr_cubesense: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubesense);
+			printf("pwr_cubestar: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubestar);
+			printf("pwr_cubewheel1: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel1);
 			printf("pwr_cubewheel2: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel2);
 			printf("pwr_cubewheel3: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel3);
 			printf("pwr_mot: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_motor);
@@ -661,6 +668,11 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 	}
 
+#ifdef TESTING
+	if(0 != err || 0!= i2c_cmd.ack){
+		printf("Error in Subtype %d: err = %d; I2C.ack = %d",(unsigned int)err,(unsigned int)i2c_cmd.ack);
+	}
+#endif
 	unsigned int error_codes[] = {sub_type,err,i2c_cmd.ack};
 	SendAdcsTlm((byte*)error_codes,sizeof(error_codes),ADCS_ACK_DATA_ST);
 //TODO: save ACK with 'err' value
