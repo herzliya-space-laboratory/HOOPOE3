@@ -266,9 +266,133 @@ AdcsComsnCmd_t Detumbling[] =
 
 	{.subtype = 94,	.data =
 	{10,0,10,0,10,0,0,10,0,10,0,0,0,0,0,0,0,0},
-	.length = 18, .delay_duration = 100},
+	.length = 18, .delay_duration = 100}
 
 };
+
+AdcsComsnCmd_t MagnetometerDeployment[] =
+{
+	{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+
+	{.subtype = 11,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+
+	{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 6000},
+
+	{.subtype = 13,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 100},
+
+	{.subtype = 89,	.data = {0},	.length = 0, .delay_duration = 100},
+
+	{.subtype = 33,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, .delay_duration = 100},
+
+	{.subtype = 95,	.data =
+	{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0xFF,0xFF,0x00,0x00,0x00,0x00},
+	.length = 18, .delay_duration = 100},
+
+	{.subtype = 94,	.data =
+	{1,0,1,0,1,0,0,1,0,0,0,0,1,1,0,0,0,0},
+	.length = 18, .delay_duration = 100},
+
+	{.subtype = 93,	.data = {0x00,0x64,0x00,0x00,0x00},
+	.length = 5, .delay_duration = 100}
+};
+
+AdcsComsnCmd_t MagnetometerCalibration[] =
+{
+		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+
+		{.subtype = 11,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+
+		{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 6000},
+
+		{.subtype = 13,	.data = {0x02,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
+
+		{.subtype = 34,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, .delay_duration = 100},
+
+		{.subtype = 35,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, 	.delay_duration = 100},
+
+		{.subtype = 95,	.data =
+		{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+		.length = 1, .delay_duration = 100},
+
+		{.subtype = 94,	.data =
+		{10,0,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
+		.length = 18, .delay_duration = 100},
+
+		{.subtype = 93,	.data = {0x00,0x64,0x00,0x00,0x00},
+		.length = 5, .delay_duration = 100}
+};
+
+AdcsComsnCmd_t AngularRateAndPitchAngleEstimation[] = {
+		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+
+		{.subtype = 11,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+
+		{.subtype = 14,	.data = {0x03},	.length = 1, .delay_duration = 6000},
+
+		{.subtype = 13,	.data = {0x02,0x00,0x00,0x00},	.length = 4, .delay_duration = 100},
+
+		{.subtype = 95,	.data =
+		{0xFF,0xFF,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+		.length = 1, .delay_duration = 100},
+
+		{.subtype = 94,	.data =
+		{10,10,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
+		.length = 18, .delay_duration = 100},
+
+		{.subtype = 93,	.data = {0x00,0xE8,0x03,0x00,0x00},
+		.length = 5, .delay_duration = 100},
+	};
+AdcsComsnCmd_t YWheelRampUpTest[] = {
+		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+
+		{.subtype = 11,	.data = {0x05,0x01,0x00}, .length = 3,	.delay_duration = 100},
+
+		{.subtype = 14,	.data = {0x03},	.length = 1, .delay_duration = 6000},
+
+		{.subtype = 13,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
+
+		{.subtype = 17,	.data = {0x00,0x00,0xD0,0xF8,0x00,0x00},	.length = 6, .delay_duration = 12000},
+
+		{.subtype = 95,	.data =
+		{0xFF,0xFF,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+		.length = 1, .delay_duration = 100},
+
+		{.subtype = 94,	.data =
+		{1,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0},
+		.length = 18, .delay_duration = 100},
+
+		{.subtype = 93,	.data = {0x00,0x64,0x00,0x00,0x00},
+		.length = 5, .delay_duration = 100},
+	};
+AdcsComsnCmd_t YMomentumModeCommissioning[] = {
+		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+
+		{.subtype = 2,	.data = {0x39,0x77,0x77,0x5D,0x00,0x00},	.length = 6, .delay_duration = 100},
+
+		{.subtype = 45,	.data = {0},	.length = 64, .delay_duration = 100},
+
+		{.subtype = 64,	.data = {0},	.length = 0, .delay_duration = 100},
+
+		{.subtype = 13,	.data = {0x03,0x00,0x02,0x80}, .length = 4,	.delay_duration = 100},
+
+		{.subtype = 14,	.data = {0x05},	.length = 1, .delay_duration = 6000},
+
+		{.subtype = 13,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
+
+		{.subtype = 17,	.data = {0x00,0x00,0xD0,0xF8,0x00,0x00},	.length = 6, .delay_duration = 12000},
+
+		{.subtype = 95,	.data =
+		{0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+		.length = 1, .delay_duration = 100},
+
+		{.subtype = 94,	.data =
+		{10,10,10,10,10,0,0,10,10,0,0,0,0,0,0,0,0,0},
+		.length = 18, .delay_duration = 100},
+
+		{.subtype = 93,	.data = {0x00,0xE8,0x03,0x00,0x00},
+		.length = 5, .delay_duration = 100},
+	};
+
 void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 
 	unsigned int choice = 0;
@@ -288,13 +412,13 @@ void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 			break;
 		case 2:
 				printf("subtype:(0 to 255)\n");
-				while(UTIL_DbguGetIntegerMinMax(&cmd.subType,0,255));
+				while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.subType,0,255)==0);
 				printf("cmd length:(0 to %d)\n",sizeof(cmd.data));
-				while(UTIL_DbguGetIntegerMinMax(&cmd.length,0,sizeof(cmd.data)));
+				while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.length,0,sizeof(cmd.data))==0);
 				printf("Insert Data:\n");
 				for(unsigned int i = 0; i< cmd.length; i++){
 					printf("data[%d]:",i);
-					while(UTIL_DbguGetIntegerMinMax(&cmd.data[i],0,255));
+					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.data[i],0,255) ==0);
 					printf("\n");
 				}
 				AdcsCmdQueueAdd(&cmd);
@@ -328,26 +452,31 @@ void TestAdcsCommissioningTask(){
 		printf("\t%d) %s\n",	coms_mode++,"Angular Rate And Pitch Angle Estimation");
 		printf("\t%d) %s\n",	coms_mode++,"Y-Wheel Ramp-Up Test");
 		printf("\t%d) %s\n",	coms_mode++,"Y-Momentum Mode Commissioning");
-		while(UTIL_DbguGetIntegerMinMax(&coms_mode,1,coms_mode));
+		while(UTIL_DbguGetIntegerMinMax(&coms_mode,1,coms_mode)==0);
 
 		AdcsComsnCmd_t *mode = NULL;
 
 		switch(coms_mode){
 		case 1:
-			mode = &InitialAngularRateEstimation;
+			mode = InitialAngularRateEstimation;
 			break;
 		case 2:
-			mode = &Detumbling;
+			mode = Detumbling;
 			break;
 		case 3:
+			mode = MagnetometerDeployment;
 			break;
 		case 4:
+			mode = MagnetometerCalibration;
 			break;
 		case 5:
+			mode = AngularRateAndPitchAngleEstimation;
 			break;
 		case 6:
+			mode = YWheelRampUpTest;
 			break;
 		case 7:
+			mode = YMomentumModeCommissioning;
 			break;
 		}
 		length = (sizeof(*mode)/sizeof(AdcsComsnCmd_t));
