@@ -170,6 +170,9 @@ void reset_FRAM_ants()
 	int i_error = FRAM_write(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
 	check_int("FRAM_write, DeployIfNeeded", i_error);
 
+	int i_error = FRAM_write(&stopDeploy, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+	check_int("FRAM_write, DeployIfNeeded", i_error);
+
 	Boolean8bit autoDeploy = FALSE;
 	int err = FRAM_write(&autoDeploy, FINISH_AUTO_DEPLOY_ADDR, 1);
 	check_int("reset_FRAM_MAIN, FRAM_write(FINISH_AUTO_DEPLOY_ADDR)", err);
@@ -183,10 +186,12 @@ void reset_FRAM_ants()
 
 Boolean DeployIfNeeded()
 {
-	Boolean8bit stopDeploy;
+	Boolean8bit stopDeploy, autoDeploy_finish;
 	int i_error = FRAM_read(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
 	check_int("FRAM_read, DeployIfNeeded", i_error);
-	if (stopDeploy)
+	i_error = FRAM_read(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+	check_int("FRAM_read, DeployIfNeeded", i_error);
+	if (stopDeploy && autoDeploy_finish)
 		return FALSE;
 
 	for (int i = 0; i < NUMBER_OF_ATTEMPTS; i++)
@@ -195,7 +200,15 @@ Boolean DeployIfNeeded()
 		if (deployRet == -2)
 			return FALSE;
 		if (deployRet == 0 && i == NUMBER_OF_ATTEMPTS-1)
+		{
 			reset_deployStatusFRAM(DELAY_BETWEEN_ATTEMPTS_NORMAL);
+			if (!autoDeploy_finish)
+			{
+				autoDeploy_finish = TRUE_8BIT;
+				i_error = FRAM_write(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+				check_int("FRAM_read, DeployIfNeeded", i_error);
+			}
+		}
 	}
 
 	return TRUE;
