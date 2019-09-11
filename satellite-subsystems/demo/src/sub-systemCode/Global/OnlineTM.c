@@ -196,10 +196,10 @@ void init_onlineParam()
 	strcpy(onlineTM_list[index].name, SP_HK_FILE_NAME);
 	index++;
 	//4
-	onlineTM_list[index].fn = (int (*)(unsigned char, void*))cspaceADCS_getPowTempMeasTLM;
-	onlineTM_list[index].TM_param_length = CSPACE_ADCS_POWTEMPMEAS_SIZE;
+	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_SP;
+	onlineTM_list[index].TM_param_length = SP_HK_SIZE;
 	onlineTM_list[index].TM_param = malloc(onlineTM_list[index].TM_param_length);
-	strcpy(onlineTM_list[index].name, ADCS_HK_FILE_NAME);
+	strcpy(onlineTM_list[index].name, SP_HK_FILE_NAME);
 	index++;
 	//5
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))GomEpsGetHkData_param;
@@ -334,7 +334,6 @@ void reset_offline_TM_list()
 
 	add_onlineTM_param_to_save_list(TM_EPS_HK, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_COMM_HK, 1, 4294967295u);
-	add_onlineTM_param_to_save_list(TM_ADCS_HK, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_CAM_HK, 1, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_SP_HK, 20, 4294967295u);
 	add_onlineTM_param_to_save_list(TM_FS_Space_A, 60*30, 4294967295u);
@@ -388,7 +387,7 @@ int save_onlineTM_param(TM_struct_types TMIndex)
 
 int add_onlineTM_param_to_save_list(TM_struct_types TM_index, uint period, time_unix stopTime)
 {
-	if (TM_index >= NUMBER_OF_ONLIME_TM_PACKETS)
+	if (TM_index >= NUMBER_OF_ONLIME_TM_PACKETS || TM_index == 4)
 		return -1;
 	if (period == 0)
 		return -1;

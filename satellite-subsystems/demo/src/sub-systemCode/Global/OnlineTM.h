@@ -24,7 +24,6 @@ typedef enum{
 	TM_COMM_HK = 1,
 	TM_CAM_HK = 2,
 	TM_SP_HK = 3,
-	TM_ADCS_HK = 4,
 	TM_GomEPS_HK_param = 5,
 	TM_GomEPS_HK_general = 6,
 	TM_GomEPS_HK_vi = 7,

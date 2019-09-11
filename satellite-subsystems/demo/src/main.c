@@ -103,7 +103,7 @@ void taskMain()
 
 		save_time();
 
-#ifndef ANTS_DO_NOT_DEPLOY
+#ifdef ANTS_ON
 		DeployIfNeeded();
 #endif
 

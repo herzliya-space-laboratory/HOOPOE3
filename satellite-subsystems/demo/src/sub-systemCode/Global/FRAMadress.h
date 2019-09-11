@@ -24,7 +24,6 @@
 #define ANTS_AUTO_DEPLOY_FINISH_ADDR 0x1101
 #define DEPLOY_ANTS_ATTEMPTS_ADDR	0x110F// <<3 * 4 = 12 byte >>, array of 3 variables - 3 attempts
 #define STOP_DEPLOY_ATTEMPTS_ADDR	0x111B// << 1 byte >>
-#define FINISH_AUTO_DEPLOY_ADDR		0x111C// << 1 byte >>
 
 
 //EPS

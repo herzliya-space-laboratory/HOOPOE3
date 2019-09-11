@@ -216,6 +216,31 @@ void reset_EPS_voltages()
 }
 
 
+void writeState_log(EPS_mode_t mode)
+{
+	f_managed_enterFS();
+	switch(mode)
+	{
+	case full_mode:
+		printf("Enter Full Mode\n");
+		WriteEpsLog(EPS_ENTER_FULL, 0);
+		break;
+	case cruise_mode:
+		printf("Enter Cruise Mode\n");
+		WriteEpsLog(EPS_ENTER_CRUISE, 0);
+		break;
+	case safe_mode:
+		printf("Enter Safe Mode\n");
+		WriteEpsLog(EPS_ENTER_SAFE, 0);
+		break;
+	case critical_mode:
+		printf("Enter Critical Mode\n");
+		WriteEpsLog(EPS_ENTER_CRITICAL, 0);
+		break;
+	}
+	f_releaseFS();
+}
+
 void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
@@ -224,9 +249,16 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 
 	printf(". downward ");
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
+	{
 		if (current_VBatt < voltage_table[0][i])
+		{
 			if (previuosVBatt > voltage_table[0][i])
-				enterMode[i].fun(&switches_states, &batteryLastMode);
+			{
+				batteryLastMode = enterMode[i].type;
+				writeState_log(batteryLastMode);
+			}
+		}
+	}
 }
 
 void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
@@ -238,11 +270,43 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 	printf(". upward ");
 
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
+	{
 		if (current_VBatt > voltage_table[1][i])
+		{
 			if (previuosVBatt < voltage_table[1][i])
-				enterMode[NUM_BATTERY_MODE - 1 - i].fun(&switches_states, &batteryLastMode);
+			{
+				batteryLastMode = enterMode[NUM_BATTERY_MODE - 1 - i].type;
+				writeState_log(batteryLastMode);
+			}
+		}
+	}
 }
 
+
+Boolean overRide_ADCS(gom_eps_channelstates_t* switches_states)
+{
+	if(get_shut_ADCS())
+	{
+		switches_states->raw = 0;
+		set_system_state(ADCS_param, SWITCH_OFF);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+Boolean overRide_Camera()
+{
+	if(get_shut_CAM())
+	{
+		set_system_state(cam_operational_param, SWITCH_OFF);
+
+		return FALSE;
+	}
+
+	return TRUE;
+}
 
 void EPS_Conditioning()
 {
@@ -275,65 +339,16 @@ void EPS_Conditioning()
 		battery_upward(VBatt_filtered, VBatt_previous);
 	}
 
+	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
+
 	update_powerLines(switches_states);
-	//printf("last state: %d\n", batteryLastMode);
-	//printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 	VBatt_previous = VBatt_filtered;
 }
 
-
-Boolean overRide_ADCS(gom_eps_channelstates_t* switches_states)
-{
-	if(get_shut_ADCS())
-	{
-		switches_states->raw = 0;
-		set_system_state(ADCS_param, SWITCH_OFF);
-
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-Boolean overRide_Camera()
-{
-	if(get_shut_CAM())
-	{
-		set_system_state(cam_operational_param, SWITCH_OFF);
-
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
-
-void writeState_log(EPS_mode_t mode)
-{
-	f_managed_enterFS();
-	switch(mode)
-	{
-	case full_mode:
-		WriteEpsLog(EPS_ENTER_FULL, 0);
-		break;
-	case cruise_mode:
-		WriteEpsLog(EPS_ENTER_CRUISE, 0);
-		break;
-	case safe_mode:
-		WriteEpsLog(EPS_ENTER_SAFE, 0);
-		break;
-	case critical_mode:
-		WriteEpsLog(EPS_ENTER_CRITICAL, 0);
-		break;
-	}
-	f_releaseFS();
-}
 //EPS modes
 void EnterFullMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Full Mode\n");
 	*mode = full_mode;
-	writeState_log(*mode);
 	set_system_state(Tx_param, SWITCH_ON);
 
 	if (overRide_ADCS(switches_states))
@@ -356,9 +371,7 @@ void EnterFullMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Cruise Mode\n");
 	*mode = cruise_mode;
-	writeState_log(*mode);
 	set_system_state(Tx_param, SWITCH_ON);
 
 	if (overRide_ADCS(switches_states))
@@ -380,9 +393,7 @@ void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Safe Mode\n");
 	*mode = safe_mode;
-	writeState_log(*mode);
 	set_system_state(Tx_param, SWITCH_OFF);
 
 	if (overRide_ADCS(switches_states))
@@ -404,9 +415,7 @@ void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Critical Mode\n");
 	*mode = critical_mode;
-	writeState_log(*mode);
 	switches_states->fields.quadbatSwitch = 0;
 	switches_states->fields.quadbatHeater = 0;
 	switches_states->fields.channel3V3_1 = 0;

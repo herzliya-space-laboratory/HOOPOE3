@@ -189,7 +189,7 @@ void cmd_allow_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	*type = ACK_EPS_ALPHA;
-	if (cmd.length != sizeof(double))
+	if (cmd.length != sizeof(float))
 	{
 		*err = ERR_PARAMETERS;
 		return;
