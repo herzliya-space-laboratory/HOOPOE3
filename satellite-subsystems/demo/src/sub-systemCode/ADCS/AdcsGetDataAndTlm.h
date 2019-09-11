@@ -18,23 +18,25 @@
 
 #define ADCS_MAX_TLM_SIZE 272
 
-#define ADCS_EST_ANGLES_FILENAME 		("EstAng")
-#define ADCS_EST_ANG_RATE_FILENAME 		("EAngRt")
-#define ADCS_SAT_POSITION_FILENAME 		("SatPos")
-#define ADCS_STATE_TLM_FILENAME 		("StTlm")
-#define ADCS_EST_META_DATA				("EstMtDt")
-#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVc")
-#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVc")
-#define ADCS_SENSOR_FILENAME			("Snsr")
-#define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")
-#define ADCS_CUBECTRL_CURRENTS_FILENAME	("CCCrnt")
-#define ADCS_RAW_MAG_FILENAME 			("RawMag")
-#define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldVc")
-#define ADCS_RAW_CSS_FILENAME_1_6 		("RCss16")
-#define ADCS_RAW_CSS_FILENAME_7_10		("RCss7A")// A =10
-#define ADCS_POWER_TEMP_FILENAME		("PowTemp")
-#define ADCS_MAG_CMD_FILENAME			("MagCmd")
-#define	ADCS_MISC_CURR_FILENAME 		("MscCurr")
+
+#define ADCS_UNIX_TIME_FILENAME 		("UnxTm")	//TLM ID 140
+#define ADCS_EST_ANGLES_FILENAME 		("EstAng")	//TLM ID 146
+#define ADCS_EST_ANG_RATE_FILENAME 		("EAngRt")	//TLM ID 147
+#define ADCS_SAT_POSITION_FILENAME 		("SatPos")	//TLM ID 150
+#define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldV")	//TLM ID 151
+#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnV")	//TLM ID 152
+#define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVc")	//TLM ID 153
+#define ADCS_RATE_SENSOR_FILENAME		("RtSnsr")	//TLM ID 155
+#define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")	//TLM ID 156
+#define ADCS_MAG_CMD_FILENAME			("MagCmd")	//TLM ID 157
+#define ADCS_RAW_CSS_FILENAME_1_6 		("RCss16")	//TLM ID 168
+#define ADCS_RAW_CSS_FILENAME_7_10		("RCss7A")	//TLM ID 169
+#define ADCS_RAW_MAG_FILENAME 			("RawMag")	//TLM ID 170
+#define ADCS_CUBECTRL_CURRENTS_FILENAME	("CCCrnt")	//TLM ID 172
+#define ADCS_STATE_TLM_FILENAME 		("StTlm")	//TLM ID 190
+#define ADCS_EST_META_DATA				("EstMtD")	//TLM ID 193
+#define ADCS_POWER_TEMP_FILENAME		("PowTmp")	//TLM ID 195 (includes 174 inside)
+#define	ADCS_MISC_CURR_FILENAME 		("MscCur")	//TLM ID 198
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
@@ -59,6 +61,15 @@ TroubleErrCode InitTlmElements();
  *	@return FALSE if error occured in file creation
  */
 Boolean CreateTlmElementFiles();
+
+/*!
+ * @brief returns the measured angular rates of the satellite.
+ * @param[out] sen_rates the angular rates of axis X, Y, Z
+ * @return 	TRBL_FAIL in case of error.
+ * 			TRBL_SUCCSESS in case of success.
+ * 			TRBL_NULL_DATA in case of NULL input data.
+ */
+TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates);
 
 /*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD
