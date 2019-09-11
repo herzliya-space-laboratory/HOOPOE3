@@ -274,6 +274,19 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 }
 
 
+
+TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates)
+{
+	if(NULL == sen_rates){
+		return TRBL_NULL_DATA;
+	}
+	if(0 != cspaceADCS_getSensorRates(0,sen_rates)){
+		return TRBL_FAIL;
+	}
+	return TRBL_SUCCESS;
+}
+
+
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 {
 	TroubleErrCode err = TRBL_SUCCESS;

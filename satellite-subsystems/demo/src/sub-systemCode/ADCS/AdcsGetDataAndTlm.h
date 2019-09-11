@@ -22,8 +22,8 @@
 #define ADCS_EST_ANGLES_FILENAME 		("EstAng")	//TLM ID 146
 #define ADCS_EST_ANG_RATE_FILENAME 		("EAngRt")	//TLM ID 147
 #define ADCS_SAT_POSITION_FILENAME 		("SatPos")	//TLM ID 150
-#define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldVc")	//TLM ID 151
-#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnVc")	//TLM ID 152
+#define ADCS_MAG_FIELD_VEC_FILENAME 	("MgFldV")	//TLM ID 151
+#define ADCS_COARSE_SUN_VEC_FILENAME	("CrsSnV")	//TLM ID 152
 #define ADCS_FINE_SUN_VEC_FILENAME		("FnSnVc")	//TLM ID 153
 #define ADCS_RATE_SENSOR_FILENAME		("RtSnsr")	//TLM ID 155
 #define ADCS_WHEEL_SPEED_FILENAME 		("WlSpd")	//TLM ID 156
@@ -33,9 +33,9 @@
 #define ADCS_RAW_MAG_FILENAME 			("RawMag")	//TLM ID 170
 #define ADCS_CUBECTRL_CURRENTS_FILENAME	("CCCrnt")	//TLM ID 172
 #define ADCS_STATE_TLM_FILENAME 		("StTlm")	//TLM ID 190
-#define ADCS_EST_META_DATA				("EstMtDt")	//TLM ID 193
-#define ADCS_POWER_TEMP_FILENAME		("PowTemp")	//TLM ID 195 (includes 174 inside)
-#define	ADCS_MISC_CURR_FILENAME 		("MscCurr")	//TLM ID 198
+#define ADCS_EST_META_DATA				("EstMtD")	//TLM ID 193
+#define ADCS_POWER_TEMP_FILENAME		("PowTmp")	//TLM ID 195 (includes 174 inside)
+#define	ADCS_MISC_CURR_FILENAME 		("MscCur")	//TLM ID 198
 
 typedef int(*AdcsTlmCollectFunc)(int,void*);
 
@@ -43,7 +43,7 @@ typedef struct __attribute__ ((__packed__)) AdcsTlmElement_t{
 	Boolean8bit ToSave;					//<! A flag stating whether to save this specific telemetry
 	unsigned char TlmElementeSize;		//<! size of the telemetry to be collected
 	AdcsTlmCollectFunc TlmCollectFunc;	//<! A function that collects the TLM (An ISIS driver function)
-	char TlmFileName[FN_MAXNAME];		//<! The filename in which the TLM will be saved
+	char TlmFileName[MAX_F_FILE_NAME_SIZE];		//<! The filename in which the TLM will be saved
 	char SavePeriod;					//<! Time period between two TLM save points in time. In units of 1[sec]
 	time_unix LastSaveTime;				//<! Last time the TLM was saved
 	Boolean8bit OperatingFlag;			//<! A flag stating if the TLM is working correctly and no errors occuredd in the file creation or TLM collection
@@ -54,6 +54,15 @@ typedef struct __attribute__ ((__packed__)) AdcsTlmElement_t{
  *	@return return errors according to TroubleErrCode enum
  */
 TroubleErrCode InitTlmElements();
+
+/*!
+ * @brief returns the measured angular rates of the satellite.
+ * @param[out] sen_rates the angular rates of axis X, Y, Z
+ * @return 	TRBL_FAIL in case of error.
+ * 			TRBL_SUCCSESS in case of success.
+ * 			TRBL_NULL_DATA in case of NULL input data.
+ */
+TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates);
 
 /*!
  * 	@brief Initializes the telemetry array.
