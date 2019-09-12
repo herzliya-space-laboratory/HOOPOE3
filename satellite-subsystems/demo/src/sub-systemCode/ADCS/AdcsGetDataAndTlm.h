@@ -2,11 +2,12 @@
 #define ADCSGETDATAANDTLM_H_
 
 #include <hcc/api_fat.h>
+#include <satellite-subsystems/cspaceADCS_types.h>
 #include "sub-systemCode/Global/Global.h"
 #include "AdcsTroubleShooting.h"
 
 //TODO: update this number to the correct number of telemetries
-#define NUM_OF_ADCS_TLM 17						//<! states the maximum number of telemetries the ADCS can save
+#define NUM_OF_ADCS_TLM 18						//<! states the maximum number of telemetries the ADCS can save
 
 #ifndef TLM_SAVE_VECTOR_START_ADDR
 	#define TLM_SAVE_VECTOR_START_ADDR (0x6242)

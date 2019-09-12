@@ -236,38 +236,56 @@ void HK_find_ADCSTM_fileName(HK_AdcsTlmTypes type, char* fileName)
 	}
 
 	switch(type){
-	case AdcsTlm_State:
-		strcpy(fileName,ADCS_STATE_TLM_FILENAME );
+	case AdcsTlm_UnixTime:
+		strcpy(fileName,ADCS_UNIX_TIME_FILENAME);
 		break;
-	case AdcsTlm_MetaData:
-		strcpy(fileName,ADCS_EST_META_DATA );
+	case AdcsTlm_EstimatedAngles:
+		strcpy(fileName,ADCS_EST_ANGLES_FILENAME);
 		break;
-	case AdcsTlm_CSSVec:
-		strcpy(fileName,ADCS_COARSE_SUN_VEC_FILENAME );
+	case AdcsTlm_EstimatedRates:
+		strcpy(fileName,ADCS_EST_ANG_RATE_FILENAME);
+		break;
+	case AdcsTlm_SatellitePosition:
+		strcpy(fileName,ADCS_SAT_POSITION_FILENAME);
+		break;
+	case AdcsTlm_MagneticField:
+		strcpy(fileName,ADCS_MAG_FIELD_VEC_FILENAME);
+		break;
+	case AdcsTlm_CoarseSunVec:
+		strcpy(fileName,ADCS_COARSE_SUN_VEC_FILENAME);
 		break;
 	case AdcsTlm_FineSunVec:
 		strcpy(fileName,ADCS_FINE_SUN_VEC_FILENAME);
 		break;
-	case AdcsTlm_Sensor:
-		strcpy(fileName,ADCS_SENSOR_FILENAME);
+	case AdcsTlm_RateSensor:
+		strcpy(fileName,ADCS_RATE_SENSOR_FILENAME);
 		break;
-	case AdcsTlm_SheelSpeed:
-		strcpy(fileName,ADCS_WHEEL_SPEED_FILENAME );
+	case AdcsTlm_WheelSpeed:
+		strcpy(fileName,ADCS_WHEEL_SPEED_FILENAME);
 		break;
-	case AdcsTlm_RawMag:
-		strcpy(fileName,ADCS_RAW_MAG_FILENAME );
+	case AdcsTlm_MagnetorquerCommand:
+		strcpy(fileName,ADCS_MAG_CMD_FILENAME);
 		break;
-	case AdcsTlm_MagFieldVec:
-		strcpy(fileName,ADCS_MAG_FIELD_VEC_FILENAME );
+	case AdcsTlm_RawCss1_6:
+		strcpy(fileName,ADCS_RAW_CSS_FILENAME_1_6);
 		break;
-	case AdcsTlm_Css1_6:
-		strcpy(fileName,ADCS_RAW_CSS_FILENAME_1_6 );
+	case AdcsTlm_RawCss7_10:
+		strcpy(fileName,ADCS_RAW_CSS_FILENAME_7_10);
 		break;
-	case AdcsTlm_Css7_10:
-		strcpy(fileName,ADCS_RAW_CSS_FILENAME_7_10 );
+	case AdcsTlm_RawMagnetic:
+		strcpy(fileName,ADCS_RAW_MAG_FILENAME);
 		break;
-	case AdcsTlm_PowerTemp:
-		strcpy(fileName,ADCS_POWER_TEMP_FILENAME );
+	case AdcsTlm_CubeCtrlCurrents:
+		strcpy(fileName,ADCS_CUBECTRL_CURRENTS_FILENAME);
+		break;
+	case AdcsTlm_AdcsState:
+		strcpy(fileName,ADCS_STATE_TLM_FILENAME);
+		break;
+	case AdcsTlm_EstimatedMetaData:
+		strcpy(fileName,ADCS_EST_META_DATA);
+		break;
+	case AdcsTlm_PowerTemperature:
+		strcpy(fileName,ADCS_POWER_TEMP_FILENAME);
 		break;
 	case AdcsTlm_MiscCurrents:
 		strcpy(fileName,ADCS_MISC_CURR_FILENAME);
@@ -298,30 +316,60 @@ int HK_find_fileName(HK_types type, char* fileName)
 int HK_find_ADCSTM_ElementSize(HK_AdcsTlmTypes type)
 {
 	switch(type){
-	case AdcsTlm_State:
-		return 48;
-	case AdcsTlm_MetaData:
-		return 42;
-	case AdcsTlm_CSSVec:
-		return 6;
+	case AdcsTlm_UnixTime:
+		return	6;
+		break;
+	case AdcsTlm_EstimatedAngles:
+		return	6;
+		break;
+	case AdcsTlm_EstimatedRates:
+		return	6;
+		break;
+	case AdcsTlm_SatellitePosition:
+		return	6;
+		break;
+	case AdcsTlm_MagneticField:
+		return	6;
+		break;
+	case AdcsTlm_CoarseSunVec:
+		return	6;
+		break;
 	case AdcsTlm_FineSunVec:
-		return 6;
-	case AdcsTlm_Sensor:
-		return 6;
-	case AdcsTlm_SheelSpeed:
-		return 6;
-	case AdcsTlm_RawMag:
-		return 6;
-	case AdcsTlm_MagFieldVec:
-		return 6;
-	case AdcsTlm_Css1_6:
-		return 6;
-	case AdcsTlm_Css7_10:
-		return 4;
-	case AdcsTlm_PowerTemp:
-		return 34;
+		return	6;
+		break;
+	case AdcsTlm_RateSensor:
+		return	6;
+		break;
+	case AdcsTlm_WheelSpeed:
+		return	6;
+		break;
+	case AdcsTlm_MagnetorquerCommand:
+		return	6;
+		break;
+	case AdcsTlm_RawCss1_6:
+		return	6;
+		break;
+	case AdcsTlm_RawCss7_10:
+		return	4;
+		break;
+	case AdcsTlm_RawMagnetic:
+		return	6;
+		break;
+	case AdcsTlm_CubeCtrlCurrents:
+		return	6;
+		break;
+	case AdcsTlm_AdcsState:
+		return	48;
+		break;
+	case AdcsTlm_EstimatedMetaData:
+		return	42;
+		break;
+	case AdcsTlm_PowerTemperature:
+		return	34;
+		break;
 	case AdcsTlm_MiscCurrents:
-		return 4;
+		return	4;
+		break;
 	default:
 		return -13;
 	}
