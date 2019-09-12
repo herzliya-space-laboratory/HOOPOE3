@@ -17,11 +17,13 @@
 #define STOP_TELEMETRY_ADDR 0x10C// << 1 byte >>
 #define SHUT_ADCS_ADDR		0x10D// << 1 byte >>
 #define SHUT_CAM_ADDR		0x10E// << 1 byte >>
-#define DEPLOY_ANTS_ATTEMPTS_ADDR	0x10F// << 3 byte >>, array of 3 variables - 3 attempts
-#define OFFLINE_LIST_SETTINGS_ADDR	0x600// << OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST = 9 * 20 = 180 >>
+#define OFFLINE_LIST_SETTINGS_ADDR	0x200// << OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST = 9 * 20 = 180 >>
 //ANTS
+
 #define ARM_DEPLOY_ADDR 0x1100// << 1 byte >> , can be 0 or 255
-#define ANTS_FRAM_ADDR 0x1101
+#define ANTS_AUTO_DEPLOY_FINISH_ADDR 0x1101
+#define DEPLOY_ANTS_ATTEMPTS_ADDR	0x110F// <<3 * 4 = 12 byte >>, array of 3 variables - 3 attempts
+#define STOP_DEPLOY_ATTEMPTS_ADDR	0x111B// << 1 byte >>
 
 
 //EPS

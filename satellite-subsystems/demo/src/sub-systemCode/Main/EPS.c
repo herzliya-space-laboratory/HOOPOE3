@@ -27,6 +27,7 @@
 
 #include <string.h>
 #include "../Global/Global.h"
+#include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
 #include "../EPS.h"
 
@@ -155,7 +156,7 @@ void EPS_Init()
 	init_enterMode();
 
 	Boolean changeMode = FALSE;
-	printf("EPS valtage: %u\n", current_vbatt);
+
 	for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
 	{
 		if (current_vbatt < voltage_table[0][i])
@@ -215,17 +216,49 @@ void reset_EPS_voltages()
 }
 
 
+void writeState_log(EPS_mode_t mode)
+{
+	f_managed_enterFS();
+	switch(mode)
+	{
+	case full_mode:
+		printf("Enter Full Mode\n");
+		WriteEpsLog(EPS_ENTER_FULL, 0);
+		break;
+	case cruise_mode:
+		printf("Enter Cruise Mode\n");
+		WriteEpsLog(EPS_ENTER_CRUISE, 0);
+		break;
+	case safe_mode:
+		printf("Enter Safe Mode\n");
+		WriteEpsLog(EPS_ENTER_SAFE, 0);
+		break;
+	case critical_mode:
+		printf("Enter Critical Mode\n");
+		WriteEpsLog(EPS_ENTER_CRITICAL, 0);
+		break;
+	}
+	f_releaseFS();
+}
+
 void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("FRAM_read, EPS_Init", i_error);
 
-	printf(". downward ");
+
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
+	{
 		if (current_VBatt < voltage_table[0][i])
+		{
 			if (previuosVBatt > voltage_table[0][i])
-				enterMode[i].fun(&switches_states, &batteryLastMode);
+			{
+				batteryLastMode = enterMode[i].type;
+				writeState_log(batteryLastMode);
+			}
+		}
+	}
 }
 
 void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
@@ -234,50 +267,18 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("FRAM_read, EPS_Init", i_error);
 
-	printf(". upward ");
 
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
+	{
 		if (current_VBatt > voltage_table[1][i])
+		{
 			if (previuosVBatt < voltage_table[1][i])
-				enterMode[NUM_BATTERY_MODE - 1 - i].fun(&switches_states, &batteryLastMode);
-}
-
-
-void EPS_Conditioning()
-{
-	gom_eps_hk_t eps_tlm;
-	int i_error = GomEpsGetHkData_general(0, &eps_tlm);
-	check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
-	if (i_error != 0)
-		return;
-	set_Vbatt(eps_tlm.fields.vbatt);
-
-	i_error = FRAM_read((byte*)&alpha, EPS_ALPHA_ADDR, 4);
-	check_int("can't FRAM_read(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
-	if (!CHECK_EPS_ALPHA_VALUE(alpha))
-	{
-		alpha = EPS_ALPHA_DEFFAULT_VALUE;
+			{
+				batteryLastMode = enterMode[NUM_BATTERY_MODE - 1 - i].type;
+				writeState_log(batteryLastMode);
+			}
+		}
 	}
-
-	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
-	voltage_t VBatt_filtered = (voltage_t)((float)current_VBatt * alpha + (1 - alpha) * (float)VBatt_previous);
-
-	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
-	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
-	printf("\n       EPS valtage: %u\n\n", current_VBatt);
-	if (VBatt_filtered < VBatt_previous)
-	{
-		battery_downward(VBatt_filtered, VBatt_previous);
-	}
-	else if (VBatt_filtered > VBatt_previous)
-	{
-		battery_upward(VBatt_filtered, VBatt_previous);
-	}
-
-	update_powerLines(switches_states);
-	//printf("last state: %d\n", batteryLastMode);
-	//printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
-	VBatt_previous = VBatt_filtered;
 }
 
 
@@ -306,10 +307,46 @@ Boolean overRide_Camera()
 	return TRUE;
 }
 
+void EPS_Conditioning()
+{
+	gom_eps_hk_t eps_tlm;
+	int i_error = GomEpsGetHkData_general(0, &eps_tlm);
+	check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
+	if (i_error != 0)
+		return;
+	set_Vbatt(eps_tlm.fields.vbatt);
+
+	i_error = FRAM_read((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+	check_int("can't FRAM_read(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
+	if (!CHECK_EPS_ALPHA_VALUE(alpha))
+	{
+		alpha = EPS_ALPHA_DEFFAULT_VALUE;
+	}
+
+	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
+	voltage_t VBatt_filtered = (voltage_t)((float)current_VBatt * alpha + (1 - alpha) * (float)VBatt_previous);
+
+	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
+	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+
+	if (VBatt_filtered < VBatt_previous)
+	{
+		battery_downward(VBatt_filtered, VBatt_previous);
+	}
+	else if (VBatt_filtered > VBatt_previous)
+	{
+		battery_upward(VBatt_filtered, VBatt_previous);
+	}
+
+	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
+
+	update_powerLines(switches_states);
+	VBatt_previous = VBatt_filtered;
+}
+
 //EPS modes
 void EnterFullMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Full Mode\n");
 	*mode = full_mode;
 	set_system_state(Tx_param, SWITCH_ON);
 
@@ -333,7 +370,6 @@ void EnterFullMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Cruise Mode\n");
 	*mode = cruise_mode;
 	set_system_state(Tx_param, SWITCH_ON);
 
@@ -356,7 +392,6 @@ void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Safe Mode\n");
 	*mode = safe_mode;
 	set_system_state(Tx_param, SWITCH_OFF);
 
@@ -379,7 +414,6 @@ void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 {
-	printf("Enter Critical Mode\n");
 	*mode = critical_mode;
 	switches_states->fields.quadbatSwitch = 0;
 	switches_states->fields.quadbatHeater = 0;

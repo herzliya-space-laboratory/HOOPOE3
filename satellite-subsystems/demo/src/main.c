@@ -40,6 +40,7 @@
 #include "sub-systemCode/ADCS/AdcsMain.h"
 #include "sub-systemCode/ADCS/AdcsCommands.h"
 #include "sub-systemCode/Global/OnlineTM.h"
+#include "sub-systemCode/Ants.h"
 
 #define DEBUGMODE
 
@@ -101,6 +102,10 @@ void taskMain()
 		Command_logic();
 
 		save_time();
+
+#ifdef ANTS_ON
+		DeployIfNeeded();
+#endif
 
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}

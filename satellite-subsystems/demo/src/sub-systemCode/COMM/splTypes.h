@@ -9,9 +9,11 @@
 #define SPLTYPES_H_
 
 //Types (TM)
+#define TM_GENERAL_T						13
 #define BEACON_T							3
 #define APRS								20
-#define ACK_TYPE							13
+#define ACK_TYPE							TM_GENERAL_T
+#define LOG_T								TM_GENERAL_T
 #define DUMP_T								173
 #define IMAGE_DUMP_T						11
 #define IMAGE_DATABASE_DUMP_T				12
@@ -33,6 +35,8 @@
 //SubType (TM)
 #define BEACON_ST 							25
 #define APRS_PACKET_FRAM 					33
+#define LOG_EVENTS_ST						49
+#define LOG_ERROR_ST						50
 #define OFFLINE_SETTING_ST					255
 
 //Payload dump subTypes:

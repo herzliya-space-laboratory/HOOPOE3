@@ -40,7 +40,8 @@
 
 typedef enum HK_dump_types{
 	ACK_T = 0,
-	log_files_T = 1,
+	log_files_events_T = 1,
+	log_files_erorrs_T = 2,
 	this_is_not_the_file_you_are_looking_for = 18,
 	offlineTM_T = 50,
 	ADCS_science_T = 128,

@@ -40,6 +40,7 @@
 #include "../Global/sizes.h"
 #include "../Global/FRAMadress.h"
 #include "../Global/GlobalParam.h"
+#include "../Global/logger.h"
 #include "../Global/OnlineTM.h"
 
 
@@ -146,7 +147,10 @@ int EPS_HK_collect(EPS_HK* hk_out)
 	hk_out->fields.channelStatus = 0;
 	for (i = 0; i < 8; i++)
 	{
-		hk_out->fields.channelStatus += (byte)(1 >> gom_hk.fields.output[i]);
+		if (gom_hk.fields.output[i])
+		{
+			hk_out->fields.channelStatus |= 1 << i;
+		}
 	}
 	hk_out->fields.EPSSateNumber = (byte)get_EPS_mode_t();
 	hk_out->fields.systemState = get_systems_state_param();
@@ -301,6 +305,16 @@ int HK_find_fileName(HK_types type, char* fileName)
 		return 0;
 	}
 
+	if (type == log_files_erorrs_T){
+		strcpy(fileName, ERROR_LOG_FILENAME);
+		return 0;
+	}
+
+	if (type == log_files_events_T){
+		strcpy(fileName, EVENT_LOG_FILENAME);
+		return 0;
+	}
+
 	if (offlineTM_T <= type && type < ADCS_science_T){
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		strcpy(fileName, OnlineTM_type.name);
@@ -381,7 +395,13 @@ int HK_findElementSize(HK_types type)
 	{
 		return ACK_DATA_LENGTH;
 	}
+	if (type == log_files_erorrs_T){
+		return LOG_STRUCT_ELEMENT_SIZE;
+	}
 
+	if (type == log_files_events_T){
+		return LOG_STRUCT_ELEMENT_SIZE;
+	}
 	if (offlineTM_T <= type && type < ADCS_science_T)
 	{
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
@@ -408,8 +428,22 @@ int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 		return 0;
 	}
 
-	if(type == ADCS_science_T){
-		//TODO: finish build adcs spl packet
+	if(type == log_files_events_T)
+	{
+		packet->type = LOG_T;
+		packet->subType = LOG_EVENTS_ST;
+		packet->length = LOG_STRUCT_ELEMENT_SIZE;
+		memcpy(packet->data, raw_data + TIME_SIZE, ACK_DATA_LENGTH);
+		return 0;
+	}
+
+	if(type == log_files_erorrs_T)
+	{
+		packet->type = LOG_T;
+		packet->subType = LOG_ERROR_ST;
+		packet->length = LOG_STRUCT_ELEMENT_SIZE;
+		memcpy(packet->data, raw_data + TIME_SIZE, ACK_DATA_LENGTH);
+		return 0;
 	}
 
 	if (offlineTM_T <= type && type < ADCS_science_T){

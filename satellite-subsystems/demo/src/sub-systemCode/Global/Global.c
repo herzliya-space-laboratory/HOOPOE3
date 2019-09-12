@@ -37,9 +37,10 @@ int not_first_activation;
 //check errors in driverse:
 void check_int(char *string_output, int error)
 {
-	if (error != 0)
-	{
+	if (error != 0){
+#if (1 == PRINT_IN_CHECK_FUNCTION)
 		printf("%s.\nresult: %d\n", string_output, error);
+#endif
 	}
 }
 
@@ -47,18 +48,22 @@ void check_portBASE_TYPE(char *string_output, long error)
 {
 	if (error != pdTRUE)
 	{
+#if (1 == PRINT_IN_CHECK_FUNCTION)
 		printf("%s.\nresult: %lu\n", string_output, error);
+#endif
 	}
 }
 
 void print_array(unsigned char *arr, int length)
 {
+#if (1 == PRINT_IN_CHECK_FUNCTION)
 	int i;
 	for (i=0;i<length;i++)
 	{
 		printf("%x ",arr[i]);
 	}
 	printf("END\n");
+#endif
 }
 
 void switch_endian(unsigned char *in, unsigned char *out, int len)
@@ -265,12 +270,6 @@ void reset_FRAM_MAIN()
 	Boolean8bit bool = FALSE_8BIT;
 	err = FRAM_write(&bool, STOP_TELEMETRY_ADDR, 1);
 	check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
-	for (int i = 0; i < 3; i++)
-	{
-		bool = FALSE_8BIT;
-		err = FRAM_write(&bool, DEPLOY_ANTS_ATTEMPTS_ADDR + i, 1);
-		check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
-	}
 }
 
 Boolean getBitValueByIndex(byte* data, int length, int index)

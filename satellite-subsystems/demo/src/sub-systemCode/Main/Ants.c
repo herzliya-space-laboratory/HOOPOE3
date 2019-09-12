@@ -8,9 +8,20 @@
 #include <stdio.h>
 
 #include <satellite-subsystems/GomEPS.h>
+#include "../TRXVU.h"
+#include "../EPS.h"
 
-void init_Ants()
+static ISISantsSide nextDeploy;
+
+void reset_deployStatusFRAM(int delayForNextAttempt);
+
+void init_Ants(Boolean activation)
 {
+	if (activation)
+	{
+		reset_FRAM_ants();
+	}
+
     int retValInt = 0;
 
 	ISISantsI2Caddress myAntennaAddress[2];
@@ -20,6 +31,8 @@ void init_Ants()
 	//Initialize the AntS system
 	retValInt = IsisAntS_initialize(myAntennaAddress, 1);
 	check_int("init_Ants, IsisAntS_initialize", retValInt);
+
+	nextDeploy = FIRST_DEPLOY_SIDE;
 }
 
 int ARM_ants()
@@ -93,7 +106,7 @@ int deploye_ants(ISISantsSide side)
 		return error;
 	}
 
-	error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
+	//error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
 	check_int("IsisAntS_autoDeployment, side A", error);
 
 	return 0;
@@ -103,75 +116,105 @@ int deploye_ants(ISISantsSide side)
 #endif
 }
 
-int time_out_before_deploy(int attempt_number)
+
+int checkDeployAttempt(int attemptNumber)
 {
-	if (attempt_number > 2)
-		return -1;
+	if (attemptNumber >= NUMBER_OF_ATTEMPTS)
+		return -3;
 
-	int i_error;
-	deploy_attempt deploy_status;
-	i_error = FRAM_read((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
-	check_int("FRAM_read(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-	if (deploy_status.isAtemptDone)
-		return 1;
+	deploy_attempt attempt;
+	unsigned int addres = DEPLOY_ANTS_ATTEMPTS_ADDR + attemptNumber*SIZE_DEPLOY_ATTEMPT_UNION;
+	int i_error = FRAM_read((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+	check_int("FRAM_read, checkDeployAttempt", i_error);
 
-	gom_eps_hk_t eps_tlm;
-	portTickType xLastWakeTime = xTaskGetTickCount();
-	const portTickType xFrequency = ONE_MINUTE;
+	if (attempt.isAtemptDone == ATTEMPT_DONE)
+		return -1;//the deploy been done
 
-	while (deploy_status.minutesToAttempt < START_MUTE_TIME_MIN)
-	{
-		i_error = GomEpsGetHkData_general(0, &eps_tlm);
-		check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
+	time_unix time;
+	i_error = Time_getUnixEpoch(&time);
+	check_int("Time_getUnixEpoch, checkDeployAttempt", i_error);
+	if (time < attempt.timeToDeploy)
+		return -2;// there is time for the deploy
 
-		deploy_status.minutesToAttempt++;
-		i_error = FRAM_write((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + attempt_number, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-		printf("%d minutes to deploy!\n", START_MUTE_TIME_MIN - deploy_status.minutesToAttempt);
-	}
+	printf("\n\n\n       deploy ants!!!!!!!\n\n\n");
+	//deploye_ants(nextDeploy);
+	attempt.isAtemptDone = ATTEMPT_DONE;
+	i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+	check_int("FRAM_write, checkDeployAttempt", i_error);
+	if (nextDeploy == isisants_sideA)
+		nextDeploy = isisants_sideB;
+	else
+		nextDeploy = isisants_sideA;
 
 	return 0;
 }
 
-void Auto_Deploy()
+void reset_deployStatusFRAM(int delayForNextAttempt)
 {
-	deploy_attempt deploy_status;
-	int i_error;
-
-	if (time_out_before_deploy(DEPLOY_ATTEMPT_NUMBER_1) == 0)
+	time_unix time;
+	deploy_attempt attempt;
+	int i_error = Time_getUnixEpoch(&time);
+	check_int("Time_getUnixEpoch, reset_deployStatusFRAM", i_error);
+	for (int i = 0 ; i < NUMBER_OF_ATTEMPTS; i++)
 	{
-		printf("starts deployment 1, side A\n");
-		deploye_ants(isisants_sideA);
-		deploy_status.isAtemptDone = 1;
-		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
-		i_error = FRAM_write((byte*)&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_1, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-		printf("ended attempt 1 to deploy ants, side A\n");
+		attempt.timeToDeploy = time + delayForNextAttempt + i * DELAY_BETWEEN_3_ATTEMPTS;
+		unsigned int addres = DEPLOY_ANTS_ATTEMPTS_ADDR + i*SIZE_DEPLOY_ATTEMPT_UNION;
+		i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+		check_int("FRAM_write, reset_deployStatusFRAM", i_error);
+	}
+}
+
+void reset_FRAM_ants()
+{
+	Boolean8bit stopDeploy = FALSE;
+	int i_error = FRAM_write(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	check_int("FRAM_write, DeployIfNeeded", i_error);
+
+	i_error = FRAM_write(&stopDeploy, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+	check_int("FRAM_write, DeployIfNeeded", i_error);
+
+	reset_deployStatusFRAM(START_MUTE_TIME_FIRST);
+
+	shut_ADCS(SWITCH_ON);
+	set_mute_time((unsigned short)((START_MUTE_TIME_FIRST + 2*60)/60));
+}
+
+
+Boolean DeployIfNeeded()
+{
+	Boolean8bit stopDeploy, autoDeploy_finish;
+	int i_error = FRAM_read(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	check_int("FRAM_read, DeployIfNeeded", i_error);
+	i_error = FRAM_read(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+	check_int("FRAM_read, DeployIfNeeded", i_error);
+	if (stopDeploy && autoDeploy_finish)
+		return FALSE;
+
+	for (int i = 0; i < NUMBER_OF_ATTEMPTS; i++)
+	{
+		int deployRet = checkDeployAttempt(i);
+		if (deployRet == -2)
+			return FALSE;
+		if (deployRet == 0 && i == NUMBER_OF_ATTEMPTS-1)
+		{
+			reset_deployStatusFRAM(DELAY_BETWEEN_ATTEMPTS_NORMAL);
+			if (!autoDeploy_finish)
+			{
+				shut_ADCS(SWITCH_OFF);
+				autoDeploy_finish = TRUE_8BIT;
+				i_error = FRAM_write(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+				check_int("FRAM_read, DeployIfNeeded", i_error);
+			}
+		}
 	}
 
-	/*if (time_out_before_deploy(DEPLOY_ATTEMPT_NUMBER_1) == 0)
-	{
-		printf("starts deployment 2, side B\n");
-		deploye_ants(isisants_sideB);
+	return TRUE;
+}
 
-		deploy_status.isAtemptDone = TRUE;
-		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
-		i_error = FRAM_write(&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_2, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-		printf("ended attempt 2 to deploy ants, side B\n");
-	}
 
-	if (time_out_before_deploy(DEPLOY_ATTEMPT_NUMBER_1) == 0)
-	{
-		printf("starts deployment 3, side A\n");
-		deploye_ants(isisants_sideA);
-
-		deploy_status.isAtemptDone = TRUE;
-		deploy_status.minutesToAttempt = START_MUTE_TIME_MIN;
-		i_error = FRAM_write(&deploy_status, DEPLOY_ANTS_ATTEMPTS_ADDR + DEPLOY_ATTEMPT_NUMBER_3, 1);
-		check_int("FRAM_write(DEPLOY_ANTS_ATTEMPTS_ADDR), time_out_before_deploy", i_error);
-		printf("ended attempt 3 to deploy ants, side A\n");
-	}*/
+void update_stopDeploy_FRAM()
+{
+	Boolean8bit stopDeploy = TRUE_8BIT;
+	int i_error = FRAM_write(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	check_int("FRAM_write, update_stopDeploy_FRAM", i_error);
 }
