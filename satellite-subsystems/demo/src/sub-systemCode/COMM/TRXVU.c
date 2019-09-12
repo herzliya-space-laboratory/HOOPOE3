@@ -232,8 +232,6 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 							err = ERR_FAIL;
 							break;
 						}
-
-						vTaskDelay(SYSTEM_DEALY);
 					}
 					lookForRequestToDelete_dump(cmdID);
 				}
@@ -432,6 +430,7 @@ void lookForRequestToDelete_dump(command_id cmdID)
 	{
 		if (queueParameter == deleteTask)
 		{
+			vTaskDelay(100);
 			save_ACK(ACK_DUMP, ERR_STOP_TASK, cmdID);
 			set_system_state(dump_param, SWITCH_OFF);
 			terminateTask();
