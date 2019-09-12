@@ -134,11 +134,8 @@ void EPS_Init()
 {
 	unsigned char eps_i2c_address = EPS_I2C_ADDR;
 	int error = GomEpsInitialize(&eps_i2c_address, 1);
-	if(0 != error)
-	{
-		printf("error in GomEpsInitialize = %d\n",error);
-	}
 
+	check_int("error in GomEpsInitialize\n",error);
 	error = IsisSolarPanelv2_initialize(slave0_spi);
 	check_int("EPS_Init, IsisSolarPanelv2_initialize", error);
 	IsisSolarPanelv2_sleep();
@@ -155,7 +152,7 @@ void EPS_Init()
 	init_enterMode();
 
 	Boolean changeMode = FALSE;
-	printf("EPS valtage: %u\n", current_vbatt);
+
 	for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
 	{
 		if (current_vbatt < voltage_table[0][i])
@@ -259,8 +256,6 @@ void EPS_Conditioning()
 	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
 	voltage_t VBatt_filtered = (voltage_t)((float)current_VBatt * alpha + (1 - alpha) * (float)VBatt_previous);
 
-	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
-	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
 
 	if (VBatt_filtered < VBatt_previous)
 	{
@@ -272,8 +267,7 @@ void EPS_Conditioning()
 	}
 
 	update_powerLines(switches_states);
-	//printf("last state: %d\n", batteryLastMode);
-	//printf("channels state-> 3v3_0:%d 5v_0:%d\n\n", eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+
 	VBatt_previous = VBatt_filtered;
 }
 

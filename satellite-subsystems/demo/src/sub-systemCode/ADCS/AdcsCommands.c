@@ -673,7 +673,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 #ifdef TESTING
 	if(0 != err || 0!= i2c_cmd.ack){
-		printf("Error in Subtype %d: err = %d; I2C.ack = %d",(unsigned int)err,(unsigned int)i2c_cmd.ack);
+		printf("Error in Subtype %d: err = %d; I2C.ack = %d",sub_type,(unsigned int)err,(unsigned int)i2c_cmd.ack);
 	}
 #endif
 	unsigned int error_codes[] = {sub_type,err,i2c_cmd.ack};

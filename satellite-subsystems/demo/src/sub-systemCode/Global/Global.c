@@ -39,7 +39,9 @@ void check_int(char *string_output, int error)
 {
 	if (error != 0)
 	{
+#if (1 == PRINT_IN_CHECK)
 		printf("%s.\nresult: %d\n", string_output, error);
+#endif
 	}
 }
 
@@ -47,18 +49,22 @@ void check_portBASE_TYPE(char *string_output, long error)
 {
 	if (error != pdTRUE)
 	{
+#if (1 == PRINT_IN_CHECK)
 		printf("%s.\nresult: %lu\n", string_output, error);
+#endif
 	}
 }
 
 void print_array(unsigned char *arr, int length)
 {
 	int i;
+#if (1 == PRINT_IN_CHECK)
 	for (i=0;i<length;i++)
 	{
 		printf("%x ",arr[i]);
 	}
 	printf("END\n");
+#endif
 }
 
 void switch_endian(unsigned char *in, unsigned char *out, int len)

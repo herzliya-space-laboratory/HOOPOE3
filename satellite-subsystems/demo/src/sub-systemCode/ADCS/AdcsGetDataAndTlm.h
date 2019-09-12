@@ -1,7 +1,7 @@
 #ifndef ADCSGETDATAANDTLM_H_
 #define ADCSGETDATAANDTLM_H_
 
-#include <hcc/api_fat.h>
+#include <satellite-subsystems/cspaceADCS.h>
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/Global/TLM_management.h"
 #include <satellite-subsystems/cspaceADCS_types.h>
