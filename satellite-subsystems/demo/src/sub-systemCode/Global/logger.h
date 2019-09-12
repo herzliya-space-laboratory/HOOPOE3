@@ -13,6 +13,7 @@
 #define PAYLOAD_LOG_OFFSET 50
 #define TRANSPONDER_LOG_OFFSET 100
 #define RESETS_LOG_OFFSET 150
+#define ADCS_LOG_OFFSET 200
 
 #define ERROR_LOG_FILENAME "error"
 #define EVENT_LOG_FILENAME "event"
@@ -127,14 +128,6 @@ typedef enum {
 	TRANSPONDER_DEACTIVATION
 } log_transponder;
 
-typedef enum {
-	EPS_DUMMY
-} log_states;
-
-typedef enum {
-	TRANSPONDER_DUMMY
-} log_activation;
-
 /*
  * @brief writes an error in the error log
  * @param error number from enum
@@ -162,13 +155,20 @@ FileSystemResult WritePayloadLog(log_payload log_num, int info);
  * @param number of event from enum
  * @param description of error
  */
-FileSystemResult WriteEpsLog(log_states log_num, int info);
+FileSystemResult WriteEpsLog(log_eps log_num, int info);
 
 /*
  * @brief writes a transponder event in the event log
  * @param number of event from enum
  * @param description of error
  */
-FileSystemResult WriteTransponderLog(log_activation log_num, int info);
+FileSystemResult WriteTransponderLog(log_transponder log_num, int info);
+
+/*
+ * @brief writes an adcs event in the event log
+ * @param number of event from enum
+ * @param description of error
+ */
+FileSystemResult WriteAdcsLog(log_adcs log_num, int info);
 
 #endif /* LOGGER_H_ */
