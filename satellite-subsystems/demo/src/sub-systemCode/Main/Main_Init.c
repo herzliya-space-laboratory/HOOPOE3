@@ -61,43 +61,6 @@
 #define RESET_COUNT_FRAM_ID 666
 // will Boot- deploy all  appropriate subsytems
 
-//extern unsigned short* Vbat_Prv;
-
-
-#ifdef TESTING
-void reset_FIRST_activation(Boolean8bit dataFRAM)
-{
-	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
-}
-
-void test_menu()
-{
-	reset_FIRST_activation(FALSE_8BIT);
-
-	Boolean exit = FALSE;
-	unsigned int selection;
-	while (!exit)
-	{
-		printf( "\n\r Select a test to perform: \n\r");
-		printf("\t 0) continue to code\n\r");
-		printf("\t 1) set first activation flag to TRUE\n\r");
-
-		exit = FALSE;
-		while(UTIL_DbguGetIntegerMinMax(&selection, 0, 1) == 0);
-
-		switch(selection)
-		{
-		case 0:
-			exit = TRUE;
-			break;
-		case 1:
-			reset_FIRST_activation(TRUE_8BIT);
-			break;
-		}
-	}
-}
-#endif
-
 void numberOfRestarts()
 {
 	byte raw[4];
@@ -219,10 +182,6 @@ int InitSubsystems()
 	StartSPI();
 
 	StartFRAM();
-
-#ifdef TESTING
-	test_menu();
-#endif
 
 	init_onlineParam();
 

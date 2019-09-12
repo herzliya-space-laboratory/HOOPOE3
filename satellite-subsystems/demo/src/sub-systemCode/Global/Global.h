@@ -8,15 +8,7 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-#define TESTING
-#define PRINTTLM
-#define ANTS_ON
-#define ANTS_DO_NOT_DEPLOY
 #include <hal/boolean.h>
-
-#ifndef BOOLEAN_H_
-typedef unsigned int  Boolean;
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,15 +19,13 @@ typedef unsigned int  Boolean;
 #include <hal/Timing/Time.h>
 #include <hal/Storage/FRAM.h>
 
+
+#include "sub-systemCode/HoopoeTestingConfigurations.h"
+
+
 #include "FRAMadress.h"
 #include "sizes.h"
 
-//for tests
-//#define NOT_USE_ACK_HK
-#define TESTS
-#define FILE_SYSTEM_NOT_TESTED
-//#define TESTING_BRONFELD
-//for tests
 
 #define I2C_BUS_ADDR 0
 #define I2C_TRXVU_TC_ADDR 0x61
