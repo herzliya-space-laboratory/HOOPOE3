@@ -1,7 +1,7 @@
 /*
  * logger.c
  *
- *  Created on: 8 баев 2019
+ *  Created on: 8 пїЅпїЅпїЅпїЅ 2019
  *      Author: USER1
  */
 
@@ -51,7 +51,7 @@ FileSystemResult WritePayloadLog(log_payload log_num, int info)
 	return WriteLog(&log, EVENT_LOG_FILENAME);
 }
 
-FileSystemResult WriteEpsLog(log_states log_num, int info)
+FileSystemResult WriteEpsLog(log_eps log_num, int info)
 {
 	LogStruct log;
 	log.info = info;
@@ -59,10 +59,18 @@ FileSystemResult WriteEpsLog(log_states log_num, int info)
 	return WriteLog(&log, EVENT_LOG_FILENAME);
 }
 
-FileSystemResult WriteTransponderLog(log_activation log_num, int info)
+FileSystemResult WriteTransponderLog(log_transponder log_num, int info)
 {
 	LogStruct log;
 	log.info = info;
-	log.log_num = log_num + EPS_LOG_OFFSET;
+	log.log_num = log_num + TRANSPONDER_LOG_OFFSET;
+	return WriteLog(&log, EVENT_LOG_FILENAME);
+}
+
+FileSystemResult WriteAdcsLog(log_adcs log_num, int info)
+{
+	LogStruct log;
+	log.info = info;
+	log.log_num = log_num + ADCS_LOG_OFFSET;
 	return WriteLog(&log, EVENT_LOG_FILENAME);
 }

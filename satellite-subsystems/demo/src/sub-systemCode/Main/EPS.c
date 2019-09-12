@@ -223,19 +223,19 @@ void writeState_log(EPS_mode_t mode)
 	{
 	case full_mode:
 		printf("Enter Full Mode\n");
-		WriteEpsLog(EPS_ENTER_FULL, 0);
+		WriteEpsLog(EPS_ENTER_FULL_MODE, 0);
 		break;
 	case cruise_mode:
 		printf("Enter Cruise Mode\n");
-		WriteEpsLog(EPS_ENTER_CRUISE, 0);
+		WriteEpsLog(EPS_ENTER_CRUISE_MODE, 0);
 		break;
 	case safe_mode:
 		printf("Enter Safe Mode\n");
-		WriteEpsLog(EPS_ENTER_SAFE, 0);
+		WriteEpsLog(EPS_ENTER_SAFE_MODE, 0);
 		break;
 	case critical_mode:
 		printf("Enter Critical Mode\n");
-		WriteEpsLog(EPS_ENTER_CRITICAL, 0);
+		WriteEpsLog(EPS_ENTER_CRITICAL_MODE, 0);
 		break;
 	}
 	f_releaseFS();

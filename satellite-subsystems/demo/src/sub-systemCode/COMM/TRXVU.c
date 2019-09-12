@@ -297,7 +297,7 @@ void Dump_task(void *arg)
 void transponder_logic(time_unix time, command_id cmdID)
 {
 	f_managed_enterFS();
-	WriteTransponderLog(TRANSPONDER_ACTIVE, 0);
+	WriteTransponderLog(TRANSPONDER_ACTIVATION, 0);
 	f_managed_releaseFS();
 
 	time_unix time_now;
@@ -330,7 +330,7 @@ void transponder_logic(time_unix time, command_id cmdID)
 	}
 
 	f_managed_enterFS();
-	WriteTransponderLog(TRANSPONDER_SHUT_DOWN, stopInfo);
+	WriteTransponderLog(TRANSPONDER_DEACTIVATION, stopInfo);
 	f_managed_releaseFS();
 }
 
@@ -412,7 +412,7 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 			int i_error = f_managed_enterFS();
 			check_int("f_managed_enterFS in Transponder task", i_error);
 			save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
-			WriteTransponderLog(TRANSPONDER_SHUT_DOWN, TRANSPONDER_STOP_CMD_INFO);
+			WriteTransponderLog(TRANSPONDER_DEACTIVATION, TRANSPONDER_STOP_CMD_INFO);
 			change_TRXVU_state(NOMINAL_MODE);
 			portBASE_TYPE lu_error = xSemaphoreGive_extended(xIsTransmitting);
 			check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);

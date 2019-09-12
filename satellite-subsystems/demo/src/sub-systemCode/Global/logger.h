@@ -1,7 +1,7 @@
 /*
  * logger.h
  *
- *  Created on: 8 баев 2019
+ *  Created on: 8 пїЅпїЅпїЅпїЅ 2019
  *      Author: USER1
  */
 
@@ -17,6 +17,11 @@
 #define PAYLOAD_LOG_OFFSET 50
 #define TRANSPONDER_LOG_OFFSET 100
 #define RESETS_LOG_OFFSET 150
+#define ADCS_LOG_OFFSET 200
+
+#define ERROR_LOG_FILENAME "error"
+#define EVENT_LOG_FILENAME "event"
+
 
 #define LOG_STRUCT_ELEMENT_SIZE sizeof(LogStruct)
 
@@ -102,7 +107,11 @@ typedef enum {
 } log_errors;
 
 typedef enum {
-	SYSTEM_TRXVU, SYSTEM_EPS, SYSTEM_PAYLOAD, SYSTEM_OBC, SYSTEM_ADCS,
+	SYSTEM_TRXVU,
+	SYSTEM_EPS,
+	SYSTEM_PAYLOAD,
+	SYSTEM_OBC,
+	SYSTEM_ADCS,
 } log_systems;
 
 typedef enum {
@@ -117,7 +126,8 @@ typedef enum {
 typedef enum {
 	EPS_ENTER_FULL_MODE,
 	EPS_ENTER_CRUISE_MODE,
-	EPS_ENTER_SAFE_MODE
+	EPS_ENTER_SAFE_MODE,
+	EPS_ENTER_CRITICAL_MODE
 } log_eps;
 
 typedef enum {
@@ -131,19 +141,6 @@ typedef enum {
 	TRANSPONDER_ACTIVATION,
 	TRANSPONDER_DEACTIVATION
 } log_transponder;
-
-typedef enum {
-	EPS_DUMMY,
-	EPS_ENTER_FULL,
-	EPS_ENTER_CRUISE,
-	EPS_ENTER_SAFE,
-	EPS_ENTER_CRITICAL
-} log_states;
-
-typedef enum {
-	TRANSPONDER_ACTIVE,
-	TRANSPONDER_SHUT_DOWN
-} log_activation;
 
 /*
  * @brief writes an error in the error log
@@ -172,13 +169,20 @@ FileSystemResult WritePayloadLog(log_payload log_num, int info);
  * @param number of event from enum
  * @param description of error
  */
-FileSystemResult WriteEpsLog(log_states log_num, int info);
+FileSystemResult WriteEpsLog(log_eps log_num, int info);
 
 /*
  * @brief writes a transponder event in the event log
  * @param number of event from enum
  * @param description of error
  */
-FileSystemResult WriteTransponderLog(log_activation log_num, int info);
+FileSystemResult WriteTransponderLog(log_transponder log_num, int info);
+
+/*
+ * @brief writes an adcs event in the event log
+ * @param number of event from enum
+ * @param description of error
+ */
+FileSystemResult WriteAdcsLog(log_adcs log_num, int info);
 
 #endif /* LOGGER_H_ */
