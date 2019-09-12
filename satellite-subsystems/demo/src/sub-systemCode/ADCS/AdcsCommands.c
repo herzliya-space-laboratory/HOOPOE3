@@ -643,9 +643,10 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_GET_ADCS_CONFIG_PARAM_ST:
 			i2c_cmd.id = GET_ADCS_FULL_CONFIG_CMD_ID;
-			i2c_cmd.length = ADCS_FULL_CONFIG_DATA_LENGTH;
+			i2c_cmd.length = GET_ADCS_FULL_CONFIG_DATA_LENGTH;
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			SendAdcsTlm(&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2],ADCS_GET_ADCS_CONFIG_PARAM_ST);
+			memcpy(&data,&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2]);
+			SendAdcsTlm(data,ADCS_MAX_GET_CONFIG_PARAM_LENGTH,ADCS_GET_ADCS_CONFIG_PARAM_ST);
 			break;
 		case ADCS_GET_TLM_OVERRIDE_FLAG_ST:
 			err = AdcsGetTlmOverrideFlag((Boolean*)&temp);
