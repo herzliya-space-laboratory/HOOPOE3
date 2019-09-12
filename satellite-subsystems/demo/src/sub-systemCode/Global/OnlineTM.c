@@ -473,10 +473,12 @@ void save_onlineTM_logic()
 		else if (offline_TM_list[i].period + offline_TM_list[i].lastSave <= time_now)
 		{
 			i_error = save_onlineTM_param(offline_TM_list[i].type);
-			if (i_error)
-				printf("error in collecting TM: %d, ERROR: %d\n", offline_TM_list[i].type, i_error);
-			else
+			if (i_error){
+				//printf("error in collecting TM: %d, ERROR: %d\n", offline_TM_list[i].type, i_error);
+				}
+			else{
 				offline_TM_list[i].lastSave = time_now;
+			}
 		}
 	}
 }

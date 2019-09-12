@@ -218,7 +218,7 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 		return TRBL_INPUT_PARAM_ERR;
 	}
 
-	TroubleErrCode err = 0;
+	int err = 0;
 	FileSystemResult res = 0;
 	unsigned char adcs_tlm[ADCS_MAX_TLM_SIZE] = { 0 };
 
@@ -240,7 +240,7 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 	}
 	if((curr_time - TlmElements[index].LastSaveTime) >= TlmElements[index].SavePeriod ){
 		err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
-		if (0 != err) {
+		if (0 != err && E_COMMAND_NACKED != err) {
 			// TODO: log error
 			return err;
 		}
