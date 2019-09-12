@@ -235,196 +235,205 @@ typedef struct __attribute__ ((__packed__))
 
 AdcsComsnCmd_t InitialAngularRateEstimation[] =
 {
-		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 11,	.data = {0x05,0x04,0x00}, .length = 3, .delay_duration = 100},
+		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x04,0x00}, .length = 3, .delay_duration = 100},
 
-		{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 100},
+		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 95,	.data =
+		{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
 		{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 		.length = 18, .delay_duration = 100},
 
-		{.subtype = 94,	.data =
+		{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
 		{10,0,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
 		.length = 18, .delay_duration = 100},
+
+		{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0xE8,0x03,0x00,0x00},
+		.length = 5, .delay_duration = 100}
 };
 
 AdcsComsnCmd_t Detumbling[] =
 {
-	{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+	{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-	{.subtype = 11,	.data = {0x05,0x40,0x00}, .length = 3,	.delay_duration = 100},
+	{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x40,0x00}, .length = 3,	.delay_duration = 100},
 
-	{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 6000},
+	{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 6000},
 
-	{.subtype = 13,	.data = {0x01,0x00,0x58,0x02},	.length = 4, .delay_duration = 100},
+	{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x01,0x00,0x58,0x02},	.length = 4, .delay_duration = 100},
 
-	{.subtype = 95,	.data =
+	{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
 	{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 	.length = 1, .delay_duration = 100},
 
-	{.subtype = 94,	.data =
+	{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
 	{10,0,10,0,10,0,0,10,0,10,0,0,0,0,0,0,0,0},
 	.length = 18, .delay_duration = 100},
 
-	{.subtype = 93,	.data = {0x00,0xE8,0x03,0x00,0x00},
+	{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0xE8,0x03,0x00,0x00},
 	.length = 5, .delay_duration = 100}
 
 };
 
 AdcsComsnCmd_t MagnetometerDeployment[] =
 {
-	{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+	{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-	{.subtype = 11,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+	{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
 
-	{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 6000},
+	{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 6000},
 
-	{.subtype = 13,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 100},
+	{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 100},
 
-	{.subtype = 89,	.data = {0},	.length = 0, .delay_duration = 100},
+	{.subtype = ADCS_NOP_ST,	.data = {0},	.length = 0, .delay_duration = 100},
 
-	{.subtype = 33,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, .delay_duration = 100},
+	{.subtype = ADCS_SET_MAGNETMTR_MOUNT_ST,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, .delay_duration = 100},
 
-	{.subtype = 95,	.data =
+	{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
 	{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0xFF,0xFF,0x00,0x00,0x00,0x00},
 	.length = 18, .delay_duration = 100},
 
-	{.subtype = 94,	.data =
+	{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
 	{1,0,1,0,1,0,0,1,0,0,0,0,1,1,0,0,0,0},
 	.length = 18, .delay_duration = 100},
 
-	{.subtype = 93,	.data = {0x00,0x64,0x00,0x00,0x00},
+	{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0x64,0x00,0x00,0x00},
 	.length = 5, .delay_duration = 100}
 };
 
 AdcsComsnCmd_t MagnetometerCalibration[] =
 {
-		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 11,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
 
-		{.subtype = 14,	.data = {0x02},	.length = 1, .delay_duration = 6000},
+		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 6000},
 
-		{.subtype = 13,	.data = {0x02,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
+		{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x02,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
 
-		{.subtype = 34,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, .delay_duration = 100},
+		{.subtype = ADCS_SET_MAGNETMTR_OFFSET_ST,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, .delay_duration = 100},
 
-		{.subtype = 35,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, 	.delay_duration = 100},
+		{.subtype = ADCS_SET_MAGNETMTR_SENSTVTY_ST,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, 	.delay_duration = 100},
 
-		{.subtype = 95,	.data =
+		{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
 		{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 		.length = 1, .delay_duration = 100},
 
-		{.subtype = 94,	.data =
+		{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
 		{10,0,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
 		.length = 18, .delay_duration = 100},
 
-		{.subtype = 93,	.data = {0x00,0x64,0x00,0x00,0x00},
+		{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0x64,0x00,0x00,0x00},
 		.length = 5, .delay_duration = 100}
 };
 
 AdcsComsnCmd_t AngularRateAndPitchAngleEstimation[] = {
-		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 11,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
 
-		{.subtype = 14,	.data = {0x03},	.length = 1, .delay_duration = 6000},
+		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x03},	.length = 1, .delay_duration = 6000},
 
-		{.subtype = 13,	.data = {0x02,0x00,0x00,0x00},	.length = 4, .delay_duration = 100},
+		{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x02,0x00,0x00,0x00},	.length = 4, .delay_duration = 100},
 
-		{.subtype = 95,	.data =
+		{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
 		{0xFF,0xFF,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 		.length = 1, .delay_duration = 100},
 
-		{.subtype = 94,	.data =
+		{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
 		{10,10,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
 		.length = 18, .delay_duration = 100},
 
-		{.subtype = 93,	.data = {0x00,0xE8,0x03,0x00,0x00},
+		{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0xE8,0x03,0x00,0x00},
 		.length = 5, .delay_duration = 100},
 	};
 AdcsComsnCmd_t YWheelRampUpTest[] = {
-		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 11,	.data = {0x05,0x04,0x00}, .length = 3,	.delay_duration = 100},
+		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x04,0x00}, .length = 3,	.delay_duration = 100},
 
-		{.subtype = 14,	.data = {0x03},	.length = 1, .delay_duration = 6000},
+		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x03},	.length = 1, .delay_duration = 6000},
 
-		{.subtype = 13,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
+		{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
 
-		{.subtype = 17,	.data = {0x00,0x00,0xD0,0xF8,0x00,0x00},	.length = 6, .delay_duration = 12000},
+		{.subtype = ADCS_SET_WHEEL_SPEED_ST,	.data = {0x00,0x00,0xD0,0xF8,0x00,0x00},	.length = 6, .delay_duration = 12000},
 
-		{.subtype = 95,	.data =
+		{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
 		{0xFF,0xFF,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 		.length = 1, .delay_duration = 100},
 
-		{.subtype = 94,	.data =
+		{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
 		{1,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0},
 		.length = 18, .delay_duration = 100},
 
-		{.subtype = 93,	.data = {0x00,0x64,0x00,0x00,0x00},
+		{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0x64,0x00,0x00,0x00},
 		.length = 5, .delay_duration = 100},
 	};
 AdcsComsnCmd_t YMomentumModeCommissioning[] = {
-		{.subtype = 10,	.data = {0x01},	.length = 1, .delay_duration = 100},
+		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = 2,	.data = {0x39,0x77,0x77,0x5D,0x00,0x00},	.length = 6, .delay_duration = 100},
+		{.subtype = ADCS_SET_CURR_UNIX_TIME_ST,	.data = {0x39,0x77,0x77,0x5D,0x00,0x00},	.length = 6, .delay_duration = 100},
 
-		{.subtype = 45,	.data = {0},	.length = 64, .delay_duration = 100},
+		{.subtype = ADCS_SET_SGP4_ORBIT_PARAMS_ST,	.data = {0},	.length = 64, .delay_duration = 100},
 
-		{.subtype = 64,	.data = {0},	.length = 0, .delay_duration = 100},
+		{.subtype = ADCS_SAVE_ORBIT_PARAM_ST,	.data = {0},	.length = 0, .delay_duration = 100},
 
-		{.subtype = 13,	.data = {0x03,0x00,0x02,0x80}, .length = 4,	.delay_duration = 100},
+		{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x03,0x00,0x02,0x80}, .length = 4,	.delay_duration = 100},
 
-		{.subtype = 14,	.data = {0x05},	.length = 1, .delay_duration = 6000},
+		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x05},	.length = 1, .delay_duration = 6000},
 
-		{.subtype = 13,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
+		{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 6000},
 
-		{.subtype = 17,	.data = {0x00,0x00,0xD0,0xF8,0x00,0x00},	.length = 6, .delay_duration = 12000},
+		{.subtype = ADCS_SET_WHEEL_SPEED_ST,	.data = {0x00,0x00,0xD0,0xF8,0x00,0x00},	.length = 6, .delay_duration = 12000},
 
-		{.subtype = 95,	.data =
+		{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
 		{0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 		.length = 1, .delay_duration = 100},
 
-		{.subtype = 94,	.data =
+		{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
 		{10,10,10,10,10,0,0,10,10,0,0,0,0,0,0,0,0,0},
 		.length = 18, .delay_duration = 100},
 
-		{.subtype = 93,	.data = {0x00,0xE8,0x03,0x00,0x00},
+		{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0xE8,0x03,0x00,0x00},
 		.length = 5, .delay_duration = 100},
 	};
 
 void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 
 	unsigned int choice = 0;
-
 	TC_spl cmd;
-	for(unsigned int i = 0; i < length; i++){
-		printf("Continue to Next Command?\n(0 = Exit,1 = Continue; 2 = Costume Command)\n");
-		while(UTIL_DbguGetIntegerMinMax(&choice,0,1)==0);
 
-		switch(choice){
-		case 0:
-			return;
-		case 1:
-			break;
-		case 2:
-				printf("subtype:(0 to 255)\n");
-				while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.subType,0,255)==0);
-				printf("cmd length:(0 to %d)\n",sizeof(cmd.data));
-				while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.length,0,sizeof(cmd.data))==0);
-				printf("Insert Data:\n");
-				for(unsigned int i = 0; i< cmd.length; i++){
-					printf("data[%d]:",i);
-					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.data[i],0,255) == 0);
-					printf("\n");
-				}
-				AdcsCmdQueueAdd(&cmd);
-				i--;
-				continue;
-			break;
+	printf("Continuous testing - no stop between commands?(1 = Yes\t 0 = No)\n");
+	while(UTIL_DbguGetIntegerMinMax(&choice,0,1)==0);
+
+	for(unsigned int i = 0; i < length; i++){
+
+		if(0 == choice){// Discrete Testing
+			printf("Continue to Next Command?\n0 = Exit\n1 = Continue\n 2 = Costume Command\n");
+			while(UTIL_DbguGetIntegerMinMax(&choice,0,2)==0);
+
+			switch(choice){
+			case 0:
+				return;
+			case 1:
+				break;
+			case 2:
+					printf("subtype:(0 to 255)\n");
+					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.subType,0,255)==0);
+					printf("cmd length:(0 to %d)\n",sizeof(cmd.data));
+					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.length,0,sizeof(cmd.data))==0);
+					printf("Insert Data:\n");
+					for(unsigned int i = 0; i< cmd.length; i++){
+						printf("data[%d]:",i);
+						while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.data[i],0,255) == 0);
+						printf("\n");
+					}
+					AdcsCmdQueueAdd(&cmd);
+					i--;
+					continue;
+				break;
+			}
 		}
 		cmd.id = i;
 		cmd.type = TC_ADCS_T;
@@ -434,15 +443,14 @@ void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 		memcpy(cmd.data,modeCmd[i].data,modeCmd[i].length);
 		printf("Sending command to execution.\t\t---subtype = %d",cmd.subType);
 		AdcsCmdQueueAdd(&cmd);
+		vTaskDelay(modeCmd[i].delay_duration);
 		vTaskDelay(1000);
 	}
-
-
 }
 
 void TestAdcsCommissioningTask(){
 
-	unsigned int coms_mode = 1;
+	unsigned int coms_mode = 0;
 	vTaskDelay(10000);
 	unsigned int length = 0;
 	while(1){
@@ -455,10 +463,10 @@ void TestAdcsCommissioningTask(){
 		printf("\t%d) %s\n",	coms_mode++,"Angular Rate And Pitch Angle Estimation");
 		printf("\t%d) %s\n",	coms_mode++,"Y-Wheel Ramp-Up Test");
 		printf("\t%d) %s\n",	coms_mode,	"Y-Momentum Mode Commissioning");
-		while(UTIL_DbguGetIntegerMinMax(&coms_mode,1,coms_mode)==0);
+		while(UTIL_DbguGetIntegerMinMax(&coms_mode,0,coms_mode)==0);
 
 		AdcsComsnCmd_t *mode = NULL;
-
+		printf("-------");
 		switch(coms_mode){
 		case 0:
 			vTaskDelay(2*60*1000);
@@ -466,30 +474,37 @@ void TestAdcsCommissioningTask(){
 		case 1:
 			mode = InitialAngularRateEstimation;
 			length = (sizeof(InitialAngularRateEstimation)/sizeof(AdcsComsnCmd_t));
+			printf("\tInitial Angular Rate Estimation\n");
 			break;
 		case 2:
 			mode = Detumbling;
 			length = (sizeof(Detumbling)/sizeof(AdcsComsnCmd_t));
+			printf("\tDetumbling\n");
 			break;
 		case 3:
 			mode = MagnetometerDeployment;
 			length = (sizeof(MagnetometerDeployment)/sizeof(AdcsComsnCmd_t));
+			printf("\tY-Magnetometer Deployment\n");
 			break;
 		case 4:
 			mode = MagnetometerCalibration;
 			length = (sizeof(MagnetometerCalibration)/sizeof(AdcsComsnCmd_t));
+			printf("\tMagnetometer Calibration\n");
 			break;
 		case 5:
 			mode = AngularRateAndPitchAngleEstimation;
 			length = (sizeof(AngularRateAndPitchAngleEstimation)/sizeof(AdcsComsnCmd_t));
+			printf("\tAngular Rate And Pitch Angle Estimation\n");
 			break;
 		case 6:
 			mode = YWheelRampUpTest;
 			length = (sizeof(YWheelRampUpTest)/sizeof(AdcsComsnCmd_t));
+			printf("\tY-Wheel Ramp Up Test\n");
 			break;
 		case 7:
 			mode = YMomentumModeCommissioning;
 			length = (sizeof(YMomentumModeCommissioning)/sizeof(AdcsComsnCmd_t));
+			printf("\tY-Momentum Mode Commissioning\n");
 			break;
 		}
 		CommissionAdcsMode(mode,length);

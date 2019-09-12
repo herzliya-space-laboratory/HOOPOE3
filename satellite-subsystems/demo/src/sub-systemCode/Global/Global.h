@@ -14,10 +14,6 @@
 #define ANTS_DO_NOT_DEPLOY
 #include <hal/boolean.h>
 
-#ifndef BOOLEAN_H_
-typedef unsigned int  Boolean;
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

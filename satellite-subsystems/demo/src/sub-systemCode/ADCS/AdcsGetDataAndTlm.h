@@ -3,6 +3,8 @@
 
 #include <hcc/api_fat.h>
 #include "sub-systemCode/Global/Global.h"
+#include "sub-systemCode/Global/TLM_management.h"
+#include <satellite-subsystems/cspaceADCS_types.h>
 #include "AdcsTroubleShooting.h"
 
 //TODO: update this number to the correct number of telemetries

@@ -174,7 +174,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 				err = AdcsGenericI2cCmd(&i2c_cmd);
 
 				if (i2c_cmd.id >= 128){// is TLM
-				{
 					if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
 						SendAdcsTlm(i2c_cmd.data, ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send first half
 						SendAdcsTlm(&(i2c_cmd.data[ADCS_CMD_MAX_DATA_LENGTH/2]), ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);//send second half
