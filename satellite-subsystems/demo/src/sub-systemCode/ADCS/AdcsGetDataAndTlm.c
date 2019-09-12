@@ -12,10 +12,7 @@
 #include "AdcsCommands.h"
 #include "AdcsGetDataAndTlm.h"
 
-#define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1) //TODO: check if needed
-
 Boolean OverrideSaveTLM = TRUE;
-
 AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 
 #define ADCS_TLM_DEFAULT_COLLECT_PERIOD 10	// (1/10) Hz - once every 10 seconds
@@ -154,7 +151,6 @@ int cspaceADCS_getSatellitePosition(int adcs_id, cspace_adcs_satellitePosition_t
 		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		};
 
-
 TroubleErrCode InitTlmElements()
 {
 	TroubleErrCode err = TRBL_SUCCESS;
@@ -215,9 +211,7 @@ Boolean CreateTlmElementFiles()
 	return err;
 }
 
-
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
-
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 {
 	if (index >= NUM_OF_ADCS_TLM) {
@@ -257,23 +251,19 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 		}
 		TlmElements[index].LastSaveTime = curr_time;
 #ifdef TESTING
-			printf("Collected Tlm \t\"%s\"\n",TlmElements[index].TlmFileName);
+			printf("Collected Tlm \t\"%s\"\tat time:%d\n",TlmElements[index].TlmFileName,curr_time);
 #ifdef PRINTTLM
-			if(index == 7){	// magnetic field vector
 				printf("\n[");
-				for(int i = 0; i< TlmElements[index].TlmElementeSize - 1;i++){
+				for(int i = 0; i < TlmElements[index].TlmElementeSize - 1;i++){
 					printf("%X,",adcs_tlm[i]);
 				}
 				printf("%X]\n",adcs_tlm[TlmElements[index].TlmElementeSize-1]);
-			}
 #endif
 #endif
 		}
 
 	return TRBL_SUCCESS;
 }
-
-
 
 TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates)
 {
@@ -285,7 +275,6 @@ TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates)
 	}
 	return TRBL_SUCCESS;
 }
-
 
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 {
@@ -414,14 +403,12 @@ TroubleErrCode RestoreDefaultTlmElement(){
 	return TRBL_SUCCESS;
 }
 
-
 void GetTlmElementAtIndex(AdcsTlmElement_t *elem,unsigned int index){
 	if(NULL == elem || index >= NUM_OF_ADCS_TLM){
 		return;
 	}
 	memcpy(elem,&TlmElements[index],sizeof(*elem));
 }
-
 
 TroubleErrCode GatherTlmAndData()
 {
