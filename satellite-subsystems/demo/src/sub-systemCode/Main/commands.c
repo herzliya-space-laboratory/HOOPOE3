@@ -43,6 +43,7 @@
 #include "../ADCS.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
+#include "../CUF/uploadCodeTelemetry.h"
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
@@ -406,6 +407,36 @@ void AUC_SW(TC_spl decode)
 
 	switch (decode.subType)
 	{
+	case 0:
+		headerHandle(decode);
+		break;
+	case 1:
+		addToArray(decode, (int) decode.data[0]);
+		break;
+	case 2:
+		startCUFintegration();
+		break;
+	case 3:
+		ExecuteCUF(decode.data);
+		break;
+	case 4:
+		saveBackup();
+		break;
+	case 5:
+		loadBackup();
+		break;
+	case 6:
+		removeFiles();
+		break;
+	case 7:
+		RemoveCUF(decode.data);
+		break;
+	case 8:
+		DisableCUF(decode.data);
+		break;
+	case 9:
+		EnableCUF(decode.data);
+		break;
 	case (RESET_APRS_LIST_ST):
 		cmd_reset_APRS_list(&type, &err);
 		break;
