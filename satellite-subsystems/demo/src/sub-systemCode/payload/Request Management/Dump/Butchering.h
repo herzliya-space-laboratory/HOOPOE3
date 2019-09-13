@@ -48,16 +48,6 @@ typedef unsigned char pixel_t;	///< declare pixel type. each pixel is only one c
 
 ButcherError GetChunkFromImage(pixel_t* chunk, uint16_t chunk_width, uint16_t chunk_height, uint16_t index, pixel_t* image, fileType img_type, uint32_t image_size);
 
-/*!
- * @brief gets a chunk specified by index from image
- * @param[out] chunk the chunk from the image
- * @param[in] index the chunks index
- * @param[in] image the image from which to read data and copy to chunk
- * @param[in] fileType the type of the image
- * @return	BUTCHER_SUCCSESS at succsess
- *			BUTCHER_NULL_POINTER is one or more parameters are NULL
- *			BUTHCER_PARAMATER_VALUE if indexes are out of bound
- */
-pixel_t* SimpleButcher(pixel_t* data, uint32_t size_of_Data, uint32_t size_of_chunk, uint16_t index);
+ButcherError SimpleButcher(pixel_t* data, pixel_t* chunk, uint32_t sizeofData, uint32_t size, uint16_t index);
 
 #endif

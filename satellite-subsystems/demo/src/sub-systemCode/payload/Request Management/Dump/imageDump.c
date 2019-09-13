@@ -29,6 +29,8 @@
 uint16_t chunk_width;
 uint16_t chunk_height;
 
+static byte chunk[MAX_CHUNK_SIZE];
+
 ImageDataBaseResult readChunkDimentionsFromFRAM(void)
 {
 	int error = 0;
@@ -195,7 +197,6 @@ ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType
 	error = f_managed_close(&file);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	pixel_t chunk[CHUNK_SIZE(chunk_height, chunk_width)];
 	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
 	{
 		if (getBitValueByIndex(packetsToSend, BIT_FIELD_SIZE, i))
@@ -220,16 +221,13 @@ ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], ui
 
 	uint32_t image_packet_data_field_size = CHUNK_SIZE(chunk_height, chunk_width);
 
-	byte* chunk;
 	for (unsigned short j = 0; (unsigned int)(j*image_packet_data_field_size) < size; j++)
 	{
-		chunk = SimpleButcher(buffer, size, image_packet_data_field_size, (unsigned int)j);
-		CHECK_FOR_NULL(chunk, Butcher_Null_Pointer);
+		error = SimpleButcher(buffer, chunk, size, image_packet_data_field_size, (unsigned int)j);
+		CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
 
 		error = buildAndSend_chunck(chunk, j, 0, 0, size, FALSE_8BIT);
 		CMP_AND_RETURN(error, 0, -1);
-
-		free(chunk);
 
 		lookForRequestToDelete_dump(request.cmd_id);
 	}
@@ -296,6 +294,7 @@ void imageDump_task(void* param)
 	xQueueReset(xDumpQueue);
 
 	int error = readChunkDimentionsFromFRAM();
+	memset(chunk, 0, MAX_CHUNK_SIZE);
 
 	if (request.id == Image_Dump_bitField)
 	{

@@ -227,9 +227,9 @@ void startDumpTask(Camera_Request request)
 void act_upon_request(Camera_Request request)
 {
 	ImageDataBaseResult error = DataBaseSuccess;
-	error = f_managed_enterFS();
-	if (error)
-		WriteErrorLog(error, SYSTEM_OBC, 0);
+	int FSerror = f_managed_enterFS();
+	if (FSerror)
+		WriteErrorLog(FSerror, SYSTEM_OBC, 0);
 
 	Boolean CouldNotExecute = FALSE;
 
@@ -364,11 +364,11 @@ void act_upon_request(Camera_Request request)
 			imageid id = getLatestID(imageDataBase);
 			if (request.id == take_picture)
 				id++;
-			WriteErrorLog(error, SYSTEM_PAYLOAD, id);
+			WriteErrorLog(error, SYSTEM_PAYLOAD, (uint32_t)id);
 		}
 	}
 
-	error = f_managed_releaseFS();
-	if (error)
-		WriteErrorLog(error, SYSTEM_OBC, 0);
+	FSerror = f_managed_releaseFS();
+	if (FSerror)
+		WriteErrorLog(FSerror, SYSTEM_OBC, 0);
 }
