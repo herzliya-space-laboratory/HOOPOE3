@@ -200,8 +200,16 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 			do
 			{
 				numberOfParameters = 0;
-				FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
-						&numberOfParameters, &last_read);
+				if (HK[i] == ACK_T || HK[i] == log_files_erorrs_T || HK[i] == log_files_events_T)
+				{
+					FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
+							&numberOfParameters, &last_read, (uint)1);
+				}
+				else
+				{
+					FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
+							&numberOfParameters, &last_read, (uint)resulotion);
+				}
 				last_read++;
 
 				if (FS_result != FS_SUCCSESS && FS_result != FS_BUFFER_OVERFLOW)
@@ -214,25 +222,22 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 					build_HK_spl_packet(HK[i], Dump_buffer + l * parameterSize, &packet);
 					encode_TMpacket(raw_packet, &length_raw_packet, packet);
 
-					if (last_send + (time_unix)resulotion <= packet.time || HK[i] == ACK_T ||
-							HK[i] == log_files_erorrs_T || HK[i] == log_files_events_T)
-					{
-						last_send = packet.time;
-						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
-						check_int("TRX_sendFrame, dump_logic", i_error);
-						printf("number of packets: %d\n", numberOfPackets++);
+					last_send = packet.time;
+					i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
+					check_int("TRX_sendFrame, dump_logic", i_error);
+					printf("number of packets: %d\n", numberOfPackets++);
 
-						if (i_error == 4)
-						{
-							err = ERR_SYSTEM_OFF;
-							break;
-						}
-						else if (i_error == 5)
-						{
-							err = ERR_FAIL;
-							break;
-						}
+					if (i_error == 4)
+					{
+						err = ERR_SYSTEM_OFF;
+						break;
 					}
+					else if (i_error == 5)
+					{
+						err = ERR_FAIL;
+						break;
+					}
+
 					lookForRequestToDelete_dump(cmdID);
 				}
 			}

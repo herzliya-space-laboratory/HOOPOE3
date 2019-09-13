@@ -90,7 +90,6 @@ void taskMain()
 	vTaskDelay(100);
 
 	SubSystemTaskStart();
-	printf("Task Main start: ADCS test mode\n");
 
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;

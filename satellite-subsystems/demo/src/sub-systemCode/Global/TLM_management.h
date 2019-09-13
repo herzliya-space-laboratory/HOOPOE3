@@ -119,7 +119,7 @@ int c_fileGetNumOfElements(char* c_file_name,time_unix from_time
  * FS_SUCCSESS on success.
  */
 FileSystemResult c_fileRead(char* c_file_name, byte* buffer, int size_of_buffer,
-		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time);
+		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time, unsigned int resolution);
 
 //print c_file for testing
 void print_file(char* c_file_name);

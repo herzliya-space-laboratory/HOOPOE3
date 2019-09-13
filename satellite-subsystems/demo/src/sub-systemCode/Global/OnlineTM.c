@@ -464,7 +464,7 @@ void save_onlineTM_logic()
 	time_unix time_now;
 	i_error = Time_getUnixEpoch(&time_now);
 	check_int("Time_getUnixEpoch, save_onlineTM_logic", i_error);
-
+	printf("\n\n\n\n         time now: %u\n\n\n\n", time_now);
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
 		if (offline_TM_list[i].type == TM_emptySpace)

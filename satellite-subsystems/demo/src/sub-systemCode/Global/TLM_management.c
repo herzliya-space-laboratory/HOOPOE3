@@ -219,7 +219,10 @@ FileSystemResult InitializeFS(Boolean first_time)
 
 	if( F_ERR_NOTFORMATTED == ret )
 	{
-		TRACE_ERROR("Filesystem not formated!\n\r");
+		TRACE_ERROR("\n\nFilesystem not formated!\n\r\n\n");
+		DeInitializeFS();
+		vTaskDelay(1000);
+		InitializeFS(first_time);
 		return FS_FAT_API_FAIL;
 	}
 	else if( F_NO_ERROR != ret)
@@ -540,8 +543,9 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	return FS_SUCCSESS;
 }
 FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
-		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time)
+		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time, unsigned int resolution)
 {
+	time_unix lastCopy_time = 0;
 	C_FILE c_file;
 	unsigned int addr;//FRAM ADDRESS
 	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
@@ -593,9 +597,14 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 						return FS_COULD_NOT_GIVE_SEMAPHORE;
 					return FS_BUFFER_OVERFLOW;
 				}
-				(*read)++;
-				memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
-				buffer_index += size_elementWithTimeStamp;
+
+				if (element_time > (time_unix)resolution + lastCopy_time)
+				{
+					(*read)++;
+					memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
+					buffer_index += size_elementWithTimeStamp;
+					lastCopy_time = element_time;
+				}
 			}
 		}
 		error = f_managed_close(&current_file);
