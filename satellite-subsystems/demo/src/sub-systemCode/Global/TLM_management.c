@@ -110,13 +110,68 @@ static int setNumOfFilesInFS(int new_num_of_files)
 	return 0;
 }
 
+char taskName[FAT_MAXTASK][20];
+void printSem()
+{
+	printf("\nThis is Sem, here you go:\n");
+	for (int i = 0; i < FAT_MAXTASK; i++)
+	{
+		printf("%s\n", taskName[i]);
+	}
+}
+void updateVectorSem(xTaskHandle taskHandle, Boolean take)
+{
+	char* currentName = pcTaskGetTaskName(taskHandle);
+	if (take)
+	{
+		for (int i = 0; i < FAT_MAXTASK; i++)
+		{
+			for (int i = 0; i < FAT_MAXTASK; i++)
+			{
+				if (strcasecmp(taskName[i], currentName))
+				{
+					printf("updateVectorSem(), You are already on the list\n");
+					printSem();
+				}
+			}
+			if (taskName[i][0] == 0)
+			{
+				strcpy(taskName[i], currentName);
+			}
+			else
+			{
+				printf("updateVectorSem(), Sem nooooooo\n");
+				printSem();
+			}
+		}
+	}
+	else
+	{
+		for (int i = 0; i < FAT_MAXTASK; i++)
+		{
+			if (strcasecmp(taskName[i], currentName))
+			{
+				memset(taskName[i], 0, 20);
+			}
+			else
+			{
+				printf("updateVectorSem(), Sem yesssssssss\n");
+				printSem();
+			}
+		}
+	}
+}
+
 int f_managed_enterFS()
 {
 	if (xSemaphoreTake_extended(xEnterTaskFS, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
+		updateVectorSem(xTaskGetCurrentTaskHandle(), TRUE);
+
 		int error = f_enterFS();
 		if (error != 0)
 		{
+			updateVectorSem(xTaskGetCurrentTaskHandle(), FALSE);
 			portBASE_TYPE portRet = xSemaphoreGive_extended(xEnterTaskFS);
 			check_portBASE_TYPE("could not return the xEnterTaskFS", portRet);
 			return error;
@@ -127,12 +182,13 @@ int f_managed_enterFS()
 	else
 	{
 		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xEnterTaskFS!!!!!!\n");
-		return f_enterFS();
+		return COULD_NOT_TAKE_SEMAPHORE_ERROR;
 	}
 }
 int f_managed_releaseFS()
 {
 	f_releaseFS();
+	updateVectorSem(xTaskGetCurrentTaskHandle(), FALSE);
 	if (xSemaphoreGive_extended(xEnterTaskFS) == pdTRUE)
 		return 0;
 
@@ -159,10 +215,9 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 	}
 	else
 	{
-		*fileHandler = f_open(file_name, config);
 		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xFileOpenHandler!!!!!!\n");
-		lastError = f_getlasterror();
 		printf("FS last error: %d\n", lastError);
+		return COULD_NOT_TAKE_SEMAPHORE_ERROR;
 	}
 	return lastError;
 }
@@ -192,6 +247,11 @@ FileSystemResult createSemahores_FS()
 }
 FileSystemResult InitializeFS(Boolean first_time)
 {
+	for (int i = 0; i < FAT_MAXTASK; i++)
+	{
+		memset(taskName[i], 0, 20);
+	}
+
 	FileSystemResult FS_result = createSemahores_FS();
 	if (FS_result == FS_COULD_NOT_CREATE_SEMAPHORE)
 		return FS_result;

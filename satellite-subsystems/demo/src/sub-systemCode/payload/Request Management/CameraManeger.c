@@ -225,7 +225,7 @@ void startDumpTask(Camera_Request request)
 void act_upon_request(Camera_Request request)
 {
 	ImageDataBaseResult error = DataBaseSuccess;
-	error = f_managed_enterFS();
+	int errorFS = f_managed_enterFS();
 	// ToDo: log error
 
 	Boolean CouldNotExecute = FALSE;
@@ -357,6 +357,7 @@ void act_upon_request(Camera_Request request)
 		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 	}
 
-	error = f_managed_releaseFS();
+	if (errorFS == 0)
+		f_managed_releaseFS();
 	// ToDo: log error
 }

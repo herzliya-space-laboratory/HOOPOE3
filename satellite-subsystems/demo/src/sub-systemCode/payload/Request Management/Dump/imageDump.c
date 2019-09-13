@@ -276,8 +276,21 @@ void imageDump_task(void* param)
 {
 	Camera_Request request;
 	memcpy(&request, param, sizeof(Camera_Request));
+
 	int f_error = f_managed_enterFS();
 	check_int("error in Dump_task, f_managed_enterFS - data abort exeption\n", f_error);
+	if (f_error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+	{
+		f_error = f_managed_enterFS();
+		if (f_error != 0)
+		{
+			vTaskDelete(NULL);
+		}
+	}
+	else
+	{
+		vTaskDelete(NULL);
+	}
 
 	if (get_system_state(dump_param))
 	{

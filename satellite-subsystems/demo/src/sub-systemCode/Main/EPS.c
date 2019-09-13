@@ -218,27 +218,29 @@ void reset_EPS_voltages()
 
 void writeState_log(EPS_mode_t mode)
 {
-	f_managed_enterFS();
-	switch(mode)
+	if (f_managed_enterFS() == 0)
 	{
-	case full_mode:
-		printf("Enter Full Mode\n");
-		WriteEpsLog(EPS_ENTER_FULL_MODE, 0);
-		break;
-	case cruise_mode:
-		printf("Enter Cruise Mode\n");
-		WriteEpsLog(EPS_ENTER_CRUISE_MODE, 0);
-		break;
-	case safe_mode:
-		printf("Enter Safe Mode\n");
-		WriteEpsLog(EPS_ENTER_SAFE_MODE, 0);
-		break;
-	case critical_mode:
-		printf("Enter Critical Mode\n");
-		WriteEpsLog(EPS_ENTER_CRITICAL_MODE, 0);
-		break;
+		switch(mode)
+		{
+		case full_mode:
+			printf("Enter Full Mode\n");
+			WriteEpsLog(EPS_ENTER_FULL_MODE, 0);
+			break;
+		case cruise_mode:
+			printf("Enter Cruise Mode\n");
+			WriteEpsLog(EPS_ENTER_CRUISE_MODE, 0);
+			break;
+		case safe_mode:
+			printf("Enter Safe Mode\n");
+			WriteEpsLog(EPS_ENTER_SAFE_MODE, 0);
+			break;
+		case critical_mode:
+			printf("Enter Critical Mode\n");
+			WriteEpsLog(EPS_ENTER_CRITICAL_MODE, 0);
+			break;
+		}
+		f_managed_releaseFS();
 	}
-	f_releaseFS();
 }
 
 void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)

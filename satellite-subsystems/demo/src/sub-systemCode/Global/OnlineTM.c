@@ -6,13 +6,20 @@
  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/semphr.h>
 
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/IsisTRXVU.h>
 #include <satellite-subsystems/IsisAntS.h>
 #include <satellite-subsystems/cspaceADCS.h>
 #include <satellite-subsystems/cspaceADCS_types.h>
+
+#include "freertosExtended.h"
 #include "OnlineTM.h"
+
+xSemaphoreHandle xSD_state;
+FS_HK SD_A;
+FS_HK SD_B;
 
 #define CHECK_TM_INDEX_RANGE(index) ((index >= 0) && (index < NUMBER_OF_ONLIME_TM_PACKETS))
 
@@ -64,12 +71,24 @@ int HK_collect_SP(unsigned char index, void* param)
 int HK_collect_FS_A(unsigned char index, void* param)
 {
 	(void)index;
-	return FS_HK_collect(param, 0);
+	if (xSemaphoreTake_extended(xSD_state, 100) == pdTRUE)
+	{
+		memcpy(param, SD_A.raw, FS_HK_SIZE);
+		xSemaphoreGive_extended(xSD_state);
+		return 0;
+	}
+	return -1;
 }
 int HK_collect_FS_B(unsigned char index, void* param)
 {
 	(void)index;
-	return FS_HK_collect(param, 1);
+	if (xSemaphoreTake_extended(xSD_state, 100) == pdTRUE)
+	{
+		memcpy(param, SD_B.raw, FS_HK_SIZE);
+		xSemaphoreGive_extended(xSD_state);
+		return 0;
+	}
+	return -1;
 }
 
 onlineTM_param onlineTM_list[NUMBER_OF_ONLIME_TM_PACKETS];
@@ -170,6 +189,12 @@ onlineTM_param* get_pointer_item_by_index(TM_struct_types TMIndex)
 
 void init_onlineParam()
 {
+	vSemaphoreCreateBinary(xSD_state);
+	if (xSD_state == NULL)
+	{
+		printf("xSD_state could not be created\n");
+	}
+
 	int index = 0;
 	//0
 	onlineTM_list[index].fn = (int (*)(unsigned char, void*))HK_collect_EPS;
@@ -348,11 +373,7 @@ int get_online_packet(int TM_index, TM_spl* packet)
 		return -1;
 	if (packet == NULL)
 		return -2;
-	if (TM_index == 23 || TM_index == 24)
-		f_managed_enterFS();
 	int error = onlineTM_list[TM_index].fn(DEFULT_INDEX, onlineTM_list[TM_index].TM_param);
-	if (TM_index == 23 || TM_index == 24)
-		f_managed_releaseFS();
 	if (error != 0)
 		return error;
 
@@ -483,6 +504,30 @@ void save_onlineTM_logic()
 		}
 	}
 }
+
+void updateSD_state()
+{
+	if (xSemaphoreTake_extended(xSD_state, 100) == pdTRUE)
+	{
+		F_SPACE parameter;
+		int error = f_getfreespace(0, &parameter);
+		if (error != 0)
+			printf("fuck, just fuck\n");
+		SD_A.fields.bad = parameter.bad;
+		SD_A.fields.free = parameter.free;
+		SD_A.fields.total = parameter.total;
+		SD_A.fields.used = parameter.used;
+		error = f_getfreespace(1, &parameter);
+		if (error != 0)
+			printf("fuck, just fuck\n");
+		SD_B.fields.bad = parameter.bad;
+		SD_B.fields.free = parameter.free;
+		SD_B.fields.total = parameter.total;
+		SD_B.fields.used = parameter.used;
+		xSemaphoreGive_extended(xSD_state);
+	}
+}
+
 void save_onlineTM_task()
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
@@ -498,6 +543,7 @@ void save_onlineTM_task()
 	check_int("save_onlineTM_task, f_managed_enterFS", i_error);
 	while(TRUE)
 	{
+		updateSD_state();
 		save_onlineTM_logic();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
