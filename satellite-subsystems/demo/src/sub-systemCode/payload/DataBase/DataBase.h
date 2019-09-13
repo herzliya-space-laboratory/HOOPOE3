@@ -26,13 +26,21 @@
 
 #define MAX_NUMBER_OF_PICTURES 1000	///< The maximum number of pictures the database supports
 
-#define DEFALT_FRAME_RATE 1		///< The frame rate that will be used when taking a picture if the value wasn't updated with an command from the ground
-#define DEFALT_FRAME_AMOUNT 1	///< The amount of frames that will be taken when taking a picture if the value wasn't updated with an command from the ground
-#define DEFALT_ADC_GAIN 53		///< The ADC gain register value that will be used when taking a picture if the value wasn't updated with an command from the ground
-#define DEFALT_PGA_GAIN 3		///< The PGA gain register value that will be used when taking a picture if the value wasn't updated with an command from the ground
-#define DEFALT_EXPOSURE 2048	///< The exposure register value that will be used when taking a picture if the value wasn't updated with an command from the ground
+#define DEFAULT_FRAME_RATE 1	///< The frame rate that will be used when taking a picture if the value wasn't updated with an command from the ground
+#define DEFAULT_FRAME_AMOUNT 1	///< The amount of frames that will be taken when taking a picture if the value wasn't updated with an command from the ground
+#define DEFAULT_ADC_GAIN 53		///< The ADC gain register value that will be used when taking a picture if the value wasn't updated with an command from the ground
+#define DEFAULT_PGA_GAIN 1		///< The PGA gain register value that will be used when taking a picture if the value wasn't updated with an command from the ground
+/*
+ * Default Sensor Offset:
+ * All info taken from datasheet v1.4
+ * Contained in register 0x0D in bits 16 to 31,
+ * during tests with ISIS's function for taking pictures we checked the registers' values, 0x0D value was 0x3FC30335
+ * hence the number 0x3FC3
+ */
+#define DEFAULT_SENSOR_OFFSET 0x3FC3
+#define DEFAULT_EXPOSURE 38	///< The exposure register value that will be used when taking a picture if the value wasn't updated with an command from the ground
 
-#define DEFALT_REDUCTION_LEVEL 5	///< After taking an image an thumbnail of that level will be created automatically
+#define DEFAULT_REDUCTION_LEVEL 4	///< After taking an image an thumbnail of that level will be created automatically
 
 // Macros:
 // ToDo: Add error log
@@ -177,11 +185,11 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 /*
  * takePicture_withSpecialParameters
  */
-ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, Boolean8bit testPattern);
+ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure, Boolean8bit testPattern);
 /*
  * updateCameraParameters
  */
-void setCameraPhotographyValues(ImageDataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount);
+void setCameraPhotographyValues(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure);
 
 /*!
  * transfer image from payload SD To OBC SD

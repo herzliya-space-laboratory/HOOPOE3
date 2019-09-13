@@ -28,6 +28,7 @@ ImageDataBaseResult TakeSpecialPicture(ImageDataBase database, unsigned char* da
 	uint32_t frameRate = 0;
 	byte adcGain = 0;
 	byte pgaGain = 0;
+	uint16_t sensorOffset = 0;
 	uint32_t exposure = 0;
 
 	memcpy(&isTestPattern, data, sizeof(Boolean8bit));
@@ -35,11 +36,12 @@ ImageDataBaseResult TakeSpecialPicture(ImageDataBase database, unsigned char* da
 	memcpy(&frameRate, data + 5, sizeof(uint32_t));
 	memcpy(&adcGain, data + 9, sizeof(byte));
 	memcpy(&pgaGain, data + 10, sizeof(byte));
-	memcpy(&exposure, data + 11, sizeof(uint32_t));
+	memcpy(&sensorOffset, data + 11, sizeof(uint16_t));
+	memcpy(&exposure, data + 13, sizeof(uint32_t));
 
 	TurnOnGecko();
 
-	return takePicture_withSpecialParameters(database, frameAmount, frameRate, adcGain, pgaGain, exposure, isTestPattern);
+	return takePicture_withSpecialParameters(database, frameAmount, frameRate, adcGain, pgaGain, sensorOffset, exposure, isTestPattern);
 }
 ImageDataBaseResult DeletePictureFile(ImageDataBase database, unsigned char* data)
 {
@@ -107,15 +109,17 @@ ImageDataBaseResult UpdatePhotographyValues(ImageDataBase database, unsigned cha
 	unsigned int frameRate;
 	unsigned char adcGain;
 	unsigned char pgaGain;
+	unsigned short sensorOffset;
 	unsigned int exposure;
 
 	memcpy(&frameAmount, data, sizeof(int));
 	memcpy(&frameRate, data + 4, sizeof(int));
 	memcpy(&adcGain, data + 8, sizeof(char));
 	memcpy(&pgaGain, data + 9, sizeof(char));
-	memcpy(&exposure, data + 10, sizeof(int));
+	memcpy(&sensorOffset, data + 10, sizeof(short));
+	memcpy(&exposure, data + 12, sizeof(int));
 
-	setCameraPhotographyValues(database, frameRate, adcGain, pgaGain, exposure, frameAmount);
+	setCameraPhotographyValues(database, frameAmount, frameRate, adcGain, pgaGain, sensorOffset, exposure);
 
 	return DataBaseSuccess;
 }

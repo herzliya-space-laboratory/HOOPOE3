@@ -69,7 +69,7 @@ int initGecko();
  *  -17 = could not clear sample flag
  *  -18 = could not set sensor offset
  */
-int GECKO_TakeImage(uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern);
+int GECKO_TakeImage(uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern);
 
 /*!
  * @brief Higher level function for reading an image.

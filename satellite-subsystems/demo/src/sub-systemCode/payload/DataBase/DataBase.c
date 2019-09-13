@@ -37,6 +37,7 @@ typedef struct __attribute__ ((__packed__))
 	uint32_t frameRate;
 	uint8_t adcGain;
 	uint8_t pgaGain;
+	uint16_t sensorOffset;
 	uint32_t exposure;
 } CameraPhotographyValues;
 
@@ -307,16 +308,16 @@ ImageDataBaseResult setDataBaseValues(ImageDataBase database)
 	database->numberOfPictures = 0;
 	database->nextId = 1;
 	database->AutoThumbnailCreation = TRUE_8BIT;
-	setCameraPhotographyValues(database, DEFALT_FRAME_RATE, DEFALT_ADC_GAIN, DEFALT_PGA_GAIN, DEFALT_EXPOSURE, DEFALT_FRAME_AMOUNT);
+	setCameraPhotographyValues(database, DEFAULT_FRAME_AMOUNT, DEFAULT_FRAME_RATE, DEFAULT_ADC_GAIN, DEFAULT_PGA_GAIN, DEFAULT_SENSOR_OFFSET, DEFAULT_EXPOSURE);
 
 	ImageDataBaseResult result = updateGeneralDataBaseParameters(database);
 	DB_RETURN_ERROR(result);
 
 	printf("\nRe: database->numberOfPictures = %u, database->nextId = %u; CameraParameters: frameAmount = %lu,"
-			" frameRate = %lu, adcGain = %u, pgaGain = %u, exposure = %lu\n", database->numberOfPictures,
+			" frameRate = %lu, adcGain = %u, pgaGain = %u, sensor offset = %u, exposure = %lu\n", database->numberOfPictures,
 			database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate,
 			database->cameraParameters.adcGain, database->cameraParameters.pgaGain,
-			database->cameraParameters.exposure);
+			database->cameraParameters.sensorOffset, database->cameraParameters.exposure);
 
 	return DataBaseSuccess;
 }
@@ -332,7 +333,7 @@ ImageDataBase initImageDataBase(Boolean first_activation)
 		return NULL;
 	}
 
-	printf("numberOfPictures = %u, nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure);
+	printf("numberOfPictures = %u, nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, sensor offset = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure);
 
 	ImageDataBaseResult error;
 
@@ -365,12 +366,13 @@ ImageDataBaseResult resetImageDataBase(ImageDataBase database)
 
 //---------------------------------------------------------------
 
-void setCameraPhotographyValues(ImageDataBase database, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount)
+void setCameraPhotographyValues(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure)
 {
 	database->cameraParameters.frameAmount = frameAmount;
 	database->cameraParameters.frameRate = frameRate;
 	database->cameraParameters.adcGain = adcGain;
 	database->cameraParameters.pgaGain = pgaGain;
+	database->cameraParameters.sensorOffset = sensorOffset;
 	database->cameraParameters.exposure = exposure;
 }
 
@@ -652,7 +654,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 		Attitude[i] = get_Attitude(i);
 	}
 
-	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
+	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
 	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);
 
 	vTaskDelay(CAMERA_DELAY);
@@ -678,16 +680,16 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	return DataBaseSuccess;
 }
 
-ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, Boolean8bit testPattern)
+ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, uint32_t frameAmount, uint32_t frameRate, uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure, Boolean8bit testPattern)
 {
 	CameraPhotographyValues regularParameters;
 	memcpy(&regularParameters, &database->cameraParameters, sizeof(CameraPhotographyValues));
 
-	setCameraPhotographyValues(database, frameRate, adcGain, pgaGain, exposure, frameAmount);
+	setCameraPhotographyValues(database, frameAmount, frameRate, adcGain, pgaGain, sensorOffset, exposure);
 
 	ImageDataBaseResult DB_result = takePicture(database, testPattern);
 
-	setCameraPhotographyValues(database, regularParameters.frameRate, regularParameters.adcGain, regularParameters.pgaGain, regularParameters.exposure, regularParameters.frameAmount);
+	setCameraPhotographyValues(database, regularParameters.frameAmount, regularParameters.frameRate, regularParameters.adcGain, regularParameters.pgaGain, regularParameters.sensorOffset, regularParameters.exposure);
 
 	return DB_result;
 }

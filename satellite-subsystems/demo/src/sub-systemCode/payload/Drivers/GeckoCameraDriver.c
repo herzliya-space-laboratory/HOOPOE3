@@ -107,7 +107,7 @@ int initGecko()
 	return GECKO_Init( (SPIslaveParameters){ bus1_spi, mode0_spi, slave1_spi, 100, 1, _SPI_GECKO_BUS_SPEED, 0 } );
 }
 
-int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
+int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
 {
 	unsigned char somebyte = 0;
 	GomEpsPing(0, 0, &somebyte);
@@ -123,13 +123,7 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint32_t exposure, uint32
 	Result(result, -2);
 
 	// Setting sensor offset:
-	/*
-	 * All info taken from datasheet v1.4
-	 * Contained in register 0x0D in bits 16 to 31,
-	 * during tests with ISIS's function for taking pictures we checked the registers' values, 0x0D value was 0x3FC30335
-	 * hence the number 0x3FC3
-	 */
-	result = GECKO_SetOffset(0x3FC3);
+	result = GECKO_SetOffset(sensorOffset);
 	Result( result, -18);
 
 	// Setting exposure time:
