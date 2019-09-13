@@ -59,7 +59,8 @@ typedef struct __attribute__ ((__packed__))
 	imageid cameraId;
 	time_unix timestamp;
 	char fileTypes;
-	unsigned short angles[3];
+	uint16_t angle_rates[3];
+	byte raw_css[10];
 	Boolean8bit markedFor_TumbnailCreation;
 } ImageMetadata;
 
@@ -95,6 +96,9 @@ typedef enum
 	DataBaseFramFail,
 	DataBaseFileSystemError,
 	DataBaseFail,
+
+	DataBaseAdcsError_gettingAngleRates,
+	DataBaseAdcsError_gettingCssVector,
 
 	// Gecko Drivers Image Taking Error Messages:
 	GECKO_Take_Success,						///< (0) completed successfully

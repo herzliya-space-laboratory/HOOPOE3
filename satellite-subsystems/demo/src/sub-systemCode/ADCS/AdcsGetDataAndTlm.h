@@ -134,5 +134,12 @@ void GetTlmElementAtIndex(AdcsTlmElement_t * elem,unsigned int index);
  */
 TroubleErrCode GatherTlmAndData();
 
+/*!
+ * @brief	returns the measured CSS values
+ * @return 	TRBL_FAIL in case of error.
+ * 			TRBL_SUCCSESS in case of success.
+ * 			TRBL_NULL_DATA in case of NULL input data.
+ */
+TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]);
 
 #endif /* ADCSGETDATAANDTLM_H_ */

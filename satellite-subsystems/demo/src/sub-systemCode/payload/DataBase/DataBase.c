@@ -21,6 +21,8 @@
 
 #include <satellite-subsystems/GomEPS.h>
 
+#include "../../ADCS/AdcsGetDataAndTlm.h"
+
 #include "../../Global/GlobalParam.h"
 #include "../../Global/logger.h"
 
@@ -157,7 +159,7 @@ ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadat
 			printf(" %u", fileTypes[j].value);
 		}
 		printf(", angles: %u %u %u, marked = %u\n",
-				image_metadata->angles[0], image_metadata->angles[1], image_metadata->angles[2], image_metadata->markedFor_TumbnailCreation);
+				image_metadata->angle_rates[0], image_metadata->angle_rates[1], image_metadata->angle_rates[2], image_metadata->markedFor_TumbnailCreation);
 
 		if (image_metadata->cameraId == id)
 		{
@@ -596,7 +598,7 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 
 //---------------------------------------------------------------
 
-ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_unix time_image_taken, short Attitude[3])
+ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_unix time_image_taken, uint16_t angle_rates[3], byte raw_css[10])
 {
 	ImageMetadata image_metadata;
 	uint32_t image_address;
@@ -607,7 +609,8 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 
 	image_metadata.cameraId = database->nextId;
 	image_metadata.timestamp = time_image_taken;
-	memcpy(&image_metadata.angles, Attitude, sizeof(short) * 3);
+	memcpy(&image_metadata.angle_rates, angle_rates, sizeof(uint16_t) * 3);
+	memcpy(&image_metadata.raw_css, raw_css, sizeof(byte) * 10);
 
 	if (database->AutoThumbnailCreation)
 		image_metadata.markedFor_TumbnailCreation = TRUE_8BIT;
@@ -649,10 +652,18 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	unsigned int currentDate = 0;
 	Time_getUnixEpoch(&currentDate);
 
-	short Attitude[3];
-	for (int i = 0; i < 3; i++) {
-		Attitude[i] = get_Attitude(i);
-	}
+	// Getting Sat Angles:
+	cspace_adcs_angrate_t sen_rates;
+	TroubleErrCode ADCS_error = AdcsGetMeasAngSpeed(&sen_rates);
+	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingAngleRates);
+
+	uint16_t angle_rates[3];
+	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
+
+	// Getting Course-Sun-Sensor Values:
+	byte raw_css[10];
+	ADCS_error = AdcsGetCssVector(raw_css);
+	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingCssVector);
 
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
 	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);
@@ -667,7 +678,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	{
 		vTaskDelay(DELAY);
 
-		result = writeNewImageMetaDataToFRAM(database, currentDate, Attitude);
+		result = writeNewImageMetaDataToFRAM(database, currentDate, angle_rates, raw_css);
 		DB_RETURN_ERROR(result);
 
 		currentDate += database->cameraParameters.frameRate;
@@ -752,7 +763,7 @@ ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buff
 				printf(" %u", fileTypes[j].value);
 			}
 			printf(", angles: %u %u %u, markedFor_4thTumbnailCreation = %u\n",
-					image_metadata.angles[0], image_metadata.angles[1], image_metadata.angles[2], image_metadata.markedFor_TumbnailCreation);
+					image_metadata.angle_rates[0], image_metadata.angle_rates[1], image_metadata.angle_rates[2], image_metadata.markedFor_TumbnailCreation);
 		}
 		else
 		{

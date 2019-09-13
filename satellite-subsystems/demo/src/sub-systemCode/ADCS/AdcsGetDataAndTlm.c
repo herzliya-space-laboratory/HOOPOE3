@@ -443,3 +443,28 @@ TroubleErrCode GatherTlmAndData()
 	f_managed_releaseFS();
 	return err_occured;
 }
+
+TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10])
+{
+	if (raw_css == NULL)
+	{
+		return TRBL_NULL_DATA;
+	}
+
+	cspace_adcs_rawcss1_6_t css_1to6;
+	cspace_adcs_rawcss7_10_t css_7to10;
+
+	if (cspaceADCS_getRawCss1_6Measurements(0, &css_1to6) != 0)
+	{
+		return TRBL_FAIL;
+	}
+	if (cspaceADCS_getRawCss7_10Measurements(0, &css_7to10) != 0)
+	{
+		return TRBL_FAIL;
+	}
+
+	memcpy(raw_css, css_1to6.raw, 6);
+	memcpy(&raw_css[6], css_7to10.raw, 4);
+
+	return TRBL_SUCCESS;
+}
