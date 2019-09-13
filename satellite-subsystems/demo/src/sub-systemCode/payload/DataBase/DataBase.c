@@ -334,10 +334,14 @@ ImageDataBase initImageDataBase(Boolean first_activation)
 
 	printf("numberOfPictures = %u, nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.exposure);
 
+	ImageDataBaseResult error;
+
 	if (database->nextId == 0 || first_activation)	// The FRAM is empty and the ImageDataBase wasn't initialized beforehand
 	{
-		zeroImageDataBase();
-		setDataBaseValues(database);
+		error = zeroImageDataBase();
+		CMP_AND_RETURN(error, DataBaseSuccess, NULL);
+		error = setDataBaseValues(database);
+		CMP_AND_RETURN(error, DataBaseSuccess, NULL);
 	}
 
 	return database;
