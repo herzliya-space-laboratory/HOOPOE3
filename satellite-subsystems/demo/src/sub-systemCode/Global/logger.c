@@ -31,7 +31,7 @@ FileSystemResult WriteErrorLog(log_errors log_num, log_systems system, int info)
 {
 	LogStruct log;
 	log.info = info;
-	log.log_num = log_num + system * 50;
+	log.log_num = log_num + system * 500;
 	return WriteLog(&log, ERROR_LOG_FILENAME);
 }
 
