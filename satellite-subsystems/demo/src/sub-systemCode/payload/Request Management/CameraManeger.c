@@ -22,6 +22,8 @@
 #include "DB_RequestHandling.h"
 #include "Dump/imageDump.h"
 
+#include "../../Global/logger.h"
+
 #include "../../Global/TLM_management.h"
 
 #include "../../Global/GlobalParam.h"
@@ -226,7 +228,8 @@ void act_upon_request(Camera_Request request)
 {
 	ImageDataBaseResult error = DataBaseSuccess;
 	error = f_managed_enterFS();
-	// ToDo: log error
+	if (error)
+		WriteErrorLog(error, SYSTEM_OBC, 0);
 
 	Boolean CouldNotExecute = FALSE;
 
@@ -355,8 +358,17 @@ void act_upon_request(Camera_Request request)
 	if ( request.id != Handle_Mark && !CouldNotExecute )
 	{
 		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
+
+		if (error != DataBaseSuccess && error != 0)
+		{
+			imageid id = getLatestID(imageDataBase);
+			if (request.id == take_picture)
+				id++;
+			WriteErrorLog(error, SYSTEM_PAYLOAD, id);
+		}
 	}
 
 	error = f_managed_releaseFS();
-	// ToDo: log error
+	if (error)
+		WriteErrorLog(error, SYSTEM_OBC, 0);
 }
