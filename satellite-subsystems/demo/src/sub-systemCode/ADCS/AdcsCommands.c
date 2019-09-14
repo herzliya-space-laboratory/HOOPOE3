@@ -218,8 +218,8 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 #ifdef TESTING
 			printf("\nSet Current Power Control:\n");
-			printf("signal_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.signal_cubecontrol);
-			printf("motor_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.motor_cubecontrol);
+			printf("signal_cubecontrol: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.signal_cubecontrol);
+			printf("motor_cubecontrol: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.motor_cubecontrol);
 			printf("pwr_cubesense: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubesense);
 			printf("pwr_cubestar: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubestar);
 			printf("pwr_cubewheel1: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel1);
