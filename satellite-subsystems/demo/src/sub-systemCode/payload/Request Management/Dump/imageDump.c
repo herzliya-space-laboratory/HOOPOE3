@@ -287,10 +287,6 @@ void imageDump_task(void* param)
 			vTaskDelete(NULL);
 		}
 	}
-	else
-	{
-		vTaskDelete(NULL);
-	}
 
 	if (get_system_state(dump_param))
 	{
