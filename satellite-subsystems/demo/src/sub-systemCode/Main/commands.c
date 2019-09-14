@@ -45,6 +45,9 @@
 #include "../EPS.h"
 #include "../payload/Request Management/CameraManeger.h"
 #include "../payload/DataBase/DataBase.h"
+#include "../CUF/uploadCodeTelemetry.h"
+
+#include "hcc/api_fat.h"
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
@@ -186,8 +189,8 @@ void act_upon_command(TC_spl decode)
 	case (SOFTWARE_T):
 		AUC_SW(decode);
 		break;
-	case (SPECIAL_OPERATIONS_T):
-		AUC_special_operation(decode);
+	case (CUF_T):
+		AUC_CUF(decode);
 		break;
 	case (TC_ONLINE_TM_T):
 		AUC_onlineTM(decode);
@@ -453,9 +456,11 @@ void AUC_onlineTM(TC_spl decode)
 {
 	Ack_type type;
 	ERR_type err;
-
 	switch (decode.subType)
 	{
+	case (RESET_APRS_LIST_ST):
+		cmd_reset_APRS_list(&type, &err);
+		break;
 	case (GET_ONLINE_TM_INDEX_ST):
 		cmd_get_onlineTM(&type, &err, decode);
 		break;
@@ -481,24 +486,42 @@ void AUC_onlineTM(TC_spl decode)
 #endif
 }
 
-void AUC_special_operation(TC_spl decode)
+void AUC_CUF(TC_spl decode)
 {
 	Ack_type type;
 	ERR_type err;
 
 	switch (decode.subType)
 	{
-	case DELETE_UNF_CUF_ST:
+	case 0:
+		headerHandle(decode);
 		break;
-	case UPLOAD_CUF_ST:
+	case 1:
+		addToArray(decode, (int) decode.data[0]);
 		break;
-	case CON_UNF_CUF_ST:
+	case 2:
+		startCUFintegration();
 		break;
-	case PAUSE_UP_CUF_ST:
+	case 3:
+		ExecuteCUF(decode.data);
 		break;
-	case EXECUTE_CUF:
+	case 4:
+		saveBackup();
 		break;
-	case REVERT_CUF:
+	case 5:
+		loadBackup();
+		break;
+	case 6:
+		removeFiles();
+		break;
+	case 7:
+		RemoveCUF(decode.data);
+		break;
+	case 8:
+		DisableCUF(decode.data);
+		break;
+	case 9:
+		EnableCUF(decode.data);
 		break;
 	default:
 		cmd_error(&type, &err);

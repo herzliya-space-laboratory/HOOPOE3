@@ -29,8 +29,8 @@
 #define PAYLOAD_T							251
 #define EPS_T								6
 #define SOFTWARE_T 							42
+#define CUF_T								69
 #define TC_ONLINE_TM_T				    TM_ONLINE_TM_T
-#define SPECIAL_OPERATIONS_T				69
 
 //SubType (TM)
 #define BEACON_ST 							25
@@ -233,11 +233,12 @@
 #define	DELETE_ITEM_OFF_LINE_LIST_ST		3
 #define GET_OFFLINE_LIST_SETTING_ST			4
 
-//special operations
+//CUF operations
 #define DELETE_UNF_CUF_ST					156
 #define UPLOAD_CUF_ST						157
 #define CON_UNF_CUF_ST						158
 #define PAUSE_UP_CUF_ST						159
 #define EXECUTE_CUF							160
 #define REVERT_CUF							161
+
 #endif /* SPLTYPES_H_ */
