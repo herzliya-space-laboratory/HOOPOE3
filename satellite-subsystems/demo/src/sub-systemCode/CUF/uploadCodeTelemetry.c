@@ -118,6 +118,8 @@ void startCUFintegration()
 		f_read(settings, 19, 1, fp);
 	else
 		saveAck("File wont open launch header");
+	int error = f_getlasterror();
+	printf("%d", error);
 	f_close(fp);
 	settings[19] = 0;
 	printf("Setting: %s\n", settings);

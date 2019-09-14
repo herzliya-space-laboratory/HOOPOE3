@@ -115,9 +115,14 @@ int CUFManageRestart()
 
 int InitCUF(Boolean isFirstRun)
 {
-	CUFArr[0] = vTaskDelay;
+	CUFArr[0] = (void*)vTaskDelay;
 	//reset the CUF slot array if first run
 	int i = 0;
+	for (i = 0; i < PERMINANTCUFLENGTH; ++i)
+	{
+		PerminantCUF[i] = malloc(sizeof(CUF));
+		TempCUF[i] = malloc(sizeof(CUF));
+	}
 	if (isFirstRun == TRUE)
 	{
 		for (i = 0; i < PERMINANTCUFLENGTH; ++i)

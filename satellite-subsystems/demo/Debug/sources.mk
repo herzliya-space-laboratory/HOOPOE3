@@ -20,6 +20,7 @@ SUBDIRS := \
 src/sub-systemCode/Main \
 src/sub-systemCode/Main/CMD \
 src/sub-systemCode/Global \
+src/sub-systemCode/CUF \
 src/sub-systemCode/COMM \
 src/sub-systemCode/ADCS \
 src \

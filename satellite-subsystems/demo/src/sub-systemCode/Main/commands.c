@@ -45,6 +45,8 @@
 #include "../EPS.h"
 #include "../CUF/uploadCodeTelemetry.h"
 
+#include "hcc/api_fat.h"
+
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
 /*TODO:
@@ -404,7 +406,7 @@ void AUC_SW(TC_spl decode)
 {
 	Ack_type type;
 	ERR_type err;
-
+	f_enterFS(); //temporary workaround!!!!
 	switch (decode.subType)
 	{
 	case 0:
@@ -450,6 +452,7 @@ void AUC_SW(TC_spl decode)
 		cmd_error(&type, &err);
 		break;
 	}
+	f_releaseFS(); //temporary workaround!!!!
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
 	save_ACK(type, err, decode.id);

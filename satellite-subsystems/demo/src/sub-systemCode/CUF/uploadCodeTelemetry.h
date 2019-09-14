@@ -1,9 +1,9 @@
 #include "../COMM/GSC.h"
 #include "CUF.h"
 
-#define fbackupName "CUFbackup"
-#define fboolBackupName "boolArraybackup"
-#define fheaderName "headerCUF"
+#define fbackupName "CUFback"
+#define fboolBackupName "BAback"
+#define fheaderName "headCUF"
 
 #define uploadNameLength 10
 #define uploadName "UPLOAD"
