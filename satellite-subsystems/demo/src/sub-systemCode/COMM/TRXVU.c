@@ -275,10 +275,7 @@ void Dump_task(void *arg)
 			vTaskDelete(NULL);
 		}
 	}
-	else
-	{
-		vTaskDelete(NULL);
-	}
+
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
@@ -650,6 +647,8 @@ void Beacon_task()
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
 			buildAndSend_beacon();
+		else
+			printf("skip beacon\n");
 
 		i_error = FRAM_read(&delayBaecon, BEACON_TIME_ADDR, 1);
 		check_int("beacon_task, FRAM_write(BEACON_TIME_ADDR)", i_error);

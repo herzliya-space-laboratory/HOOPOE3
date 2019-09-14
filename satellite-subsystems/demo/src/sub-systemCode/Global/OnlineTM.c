@@ -485,7 +485,7 @@ void save_onlineTM_logic()
 	time_unix time_now;
 	i_error = Time_getUnixEpoch(&time_now);
 	check_int("Time_getUnixEpoch, save_onlineTM_logic", i_error);
-	printf("\n\n\n\n         time now: %u\n\n\n\n", time_now);
+	printf("       time now: %u\n", time_now);
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 	{
 		if (offline_TM_list[i].type == TM_emptySpace)
@@ -517,13 +517,13 @@ void updateSD_state()
 		SD_A.fields.free = parameter.free;
 		SD_A.fields.total = parameter.total;
 		SD_A.fields.used = parameter.used;
-		error = f_getfreespace(1, &parameter);
+		/*error = f_getfreespace(1, &parameter);
 		if (error != 0)
 			printf("fuck, just fuck\n");
 		SD_B.fields.bad = parameter.bad;
 		SD_B.fields.free = parameter.free;
 		SD_B.fields.total = parameter.total;
-		SD_B.fields.used = parameter.used;
+		SD_B.fields.used = parameter.used;*/
 		xSemaphoreGive_extended(xSD_state);
 	}
 }

@@ -126,39 +126,37 @@ void updateVectorSem(xTaskHandle taskHandle, Boolean take)
 	{
 		for (int i = 0; i < FAT_MAXTASK; i++)
 		{
-			for (int i = 0; i < FAT_MAXTASK; i++)
+			if (strcmp(taskName[i], currentName) == 0)
 			{
-				if (strcasecmp(taskName[i], currentName))
-				{
-					printf("updateVectorSem(), You are already on the list\n");
-					printSem();
-				}
+				printf("updateVectorSem(), You are already on the list\n");
+				printSem();
+				return;
 			}
+		}
+
+		for (int i = 0; i < FAT_MAXTASK; i++)
+		{
 			if (taskName[i][0] == 0)
 			{
 				strcpy(taskName[i], currentName);
-			}
-			else
-			{
-				printf("updateVectorSem(), Sem nooooooo\n");
-				printSem();
+				return;
 			}
 		}
+		printf("updateVectorSem(), Sem nooooooo\n");
+		printSem();
 	}
 	else
 	{
 		for (int i = 0; i < FAT_MAXTASK; i++)
 		{
-			if (strcasecmp(taskName[i], currentName))
+			if (strcmp(taskName[i], currentName) == 0)
 			{
 				memset(taskName[i], 0, 20);
-			}
-			else
-			{
-				printf("updateVectorSem(), Sem yesssssssss\n");
-				printSem();
+				return;
 			}
 		}
+		printf("updateVectorSem(), Sem yesssssssss\n");
+		printSem();
 	}
 }
 
@@ -314,6 +312,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 	printf("\nError %d reading drive\n", ret);
 	}
 
+	f_managed_releaseFS();
 	return FS_SUCCSESS;
 }
 
