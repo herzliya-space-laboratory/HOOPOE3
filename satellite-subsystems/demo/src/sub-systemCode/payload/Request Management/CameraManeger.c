@@ -368,7 +368,10 @@ void act_upon_request(Camera_Request request)
 		}
 	}
 
-	FSerror = f_managed_releaseFS();
-	if (FSerror)
-		WriteErrorLog(FSerror, SYSTEM_OBC, 0);
+	if (FSerror == 0)
+	{
+		FSerror = f_managed_releaseFS();
+		if (FSerror)
+			WriteErrorLog(FSerror, SYSTEM_OBC, 0);
+	}
 }
