@@ -375,6 +375,12 @@ void AUC_payload(TC_spl decode)
 		case (SET_CHUNK_SIZE):
 			request.id = Set_Chunk_Size;
 			break;
+		case (ON_AUTO_THUMB):
+			request.id = Turn_On_AutoThumbnailCreation;
+			break;
+		case (OFF_AUTO_THUMB):
+			request.id = Turn_Off_AutoThumbnailCreation;
+			break;
 		default:
 			cmd_error(&type, &err);
 			break;

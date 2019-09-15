@@ -254,5 +254,6 @@ ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadat
 void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
 uint32_t GetImageFactor(fileType image_type);
 uint32_t getDataBaseSize();
+void setAutoThumbnailCreation(ImageDataBase database, Boolean8bit new_AutoThumbnailCreation);
 
 #endif /* ImageDataBase_H_ */

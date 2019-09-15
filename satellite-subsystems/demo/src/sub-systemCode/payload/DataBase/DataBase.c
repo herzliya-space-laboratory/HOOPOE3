@@ -566,21 +566,27 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 
 		if ( DB_result == 0 )
 		{
-			TurnOnGecko();
+			if (checkForFileType(image_metadata, raw) == DataBaseNotInSD)
+			{
+				TurnOnGecko();
 
-			DB_result = transferImageToSD_withoutSearch(image_metadata.cameraId, image_address, image_metadata);
-			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
-				return DB_result;
+				DB_result = transferImageToSD_withoutSearch(image_metadata.cameraId, image_address, image_metadata);
+				if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
+					return DB_result;
 
-			TurnOffGecko();
+				TurnOffGecko();
 
-			vTaskDelay(DELAY);
+				vTaskDelay(DELAY);
+			}
 
-			DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, 4, TRUE, image_address, image_metadata);
-			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
-				return DB_result;
+			if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
+			{
+				DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, 4, TRUE, image_address, image_metadata);
+				if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
+					return DB_result;
 
-			vTaskDelay(DELAY);
+				vTaskDelay(DELAY);
+			}
 
 			DB_result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, raw, image_address, image_metadata);
 			DB_RETURN_ERROR(DB_result);
@@ -651,20 +657,20 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 
 	unsigned int currentDate = 0;
 	Time_getUnixEpoch(&currentDate);
-
+/*
 	// Getting Sat Angles:
 	cspace_adcs_angrate_t sen_rates;
 	TroubleErrCode ADCS_error = AdcsGetMeasAngSpeed(&sen_rates);
 	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingAngleRates);
-
+*/
 	uint16_t angle_rates[3];
-	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
+	//memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
 
 	// Getting Course-Sun-Sensor Values:
-	byte raw_css[10];
+	byte raw_css[10];/*
 	ADCS_error = AdcsGetCssVector(raw_css);
 	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingCssVector);
-
+*/
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
 	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);
 
@@ -781,4 +787,11 @@ ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buff
 	memcpy(size, &database_size, sizeof(uint32_t));
 
 	return DataBaseSuccess;
+}
+
+//---------------------------------------------------------------
+
+void setAutoThumbnailCreation(ImageDataBase database, Boolean8bit new_AutoThumbnailCreation)
+{
+	database->AutoThumbnailCreation = new_AutoThumbnailCreation;
 }

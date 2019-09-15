@@ -214,7 +214,6 @@ void Gecko_TroubleShooter(ImageDataBaseResult error)
 	if (should_reset)
 	{
 		TurnOffGecko();
-		TurnOnGecko();
 	}
 }
 
@@ -341,6 +340,14 @@ void act_upon_request(Camera_Request request)
 
 	case Set_Chunk_Size:
 		error = setChunkDimensions(request.data);
+		break;
+
+	case Turn_Off_AutoThumbnailCreation:
+		setAutoThumbnailCreation(imageDataBase, FALSE_8BIT);
+		break;
+
+	case Turn_On_AutoThumbnailCreation:
+		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
 		break;
 
 	case Handle_Mark:

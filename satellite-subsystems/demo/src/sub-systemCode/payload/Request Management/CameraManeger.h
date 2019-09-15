@@ -46,6 +46,8 @@ typedef enum{
 	Turn_Off_Camera,
 	Turn_On_Camera,
 	Set_Chunk_Size,
+	Turn_Off_AutoThumbnailCreation,
+	Turn_On_AutoThumbnailCreation,
 	number_of_request_types,
 	Handle_Mark
 }cam_Request_id_t;

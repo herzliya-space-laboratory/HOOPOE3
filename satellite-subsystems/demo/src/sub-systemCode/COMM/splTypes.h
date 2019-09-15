@@ -98,6 +98,8 @@
 #define	OFF_CAM_ST							15
 #define ON_CAM_ST							16
 #define SET_CHUNK_SIZE						17
+#define OFF_AUTO_THUMB						18
+#define ON_AUTO_THUMB						19
 
 //eps
 #define ALLOW_ADCS_ST						99
