@@ -20,6 +20,8 @@
 #include "../../../Main/HouseKeeping.h"
 #include "../../../Global/TLM_management.h"
 
+#include "../../../Global/logger.h"
+
 #include "Butchering.h"
 #include "../../Misc/Macros.h"
 #include "../../Misc/FileSystem.h"
@@ -275,13 +277,13 @@ void imageDump_task(void* param)
 	Camera_Request request;
 	memcpy(&request, param, sizeof(Camera_Request));
 
-	int f_error = f_managed_enterFS();
-	check_int("error in Dump_task, f_managed_enterFS - data abort exeption\n", f_error);
-	if (f_error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+	int error = f_managed_enterFS();
+	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 	{
-		f_error = f_managed_enterFS();
-		if (f_error != 0)
+		error = f_managed_enterFS();
+		if (error != 0)
 		{
+			WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 			vTaskDelete(NULL);
 		}
 	}
@@ -296,13 +298,18 @@ void imageDump_task(void* param)
 	{
 		set_system_state(dump_param, SWITCH_ON);
 	}
-	// ToDo: error log
 
 	vTaskDelay(SYSTEM_DEALY);
 
 	xQueueReset(xDumpQueue);
 
-	int error = readChunkDimentionsFromFRAM();
+	error = readChunkDimentionsFromFRAM();
+	if (error != DataBaseSuccess)
+	{
+		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
+		terminateTask();
+	}
+
 	memset(chunk, 0, MAX_CHUNK_SIZE);
 
 	if (request.id == Image_Dump_bitField)
@@ -358,12 +365,11 @@ void imageDump_task(void* param)
 		else
 		{
 			error = DataBaseNullPointer;
-			// ToDo: log error!
 		}
 	}
 
-	// ToDo: error log!
-	printf("\n-IMAGE DUMP- ERROR (%u), type (%u)\n\n", error, request.id);
+	if (error != DataBaseSuccess)
+		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 
 	set_system_state(dump_param, SWITCH_OFF);
 	terminateTask();

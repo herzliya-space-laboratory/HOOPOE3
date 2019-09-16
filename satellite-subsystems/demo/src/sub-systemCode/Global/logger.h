@@ -25,13 +25,13 @@
 
 #define LOG_STRUCT_ELEMENT_SIZE sizeof(LogStruct)
 
-typedef struct
+typedef struct __attribute__((__packed__))	_LogStruct
 {
 	int log_num;
 	int info;
 }LogStruct;
 
-typedef enum {
+typedef enum _log_errors{
 	/*
 	 * --------Payload Errors--------
 	 *
@@ -106,7 +106,7 @@ typedef enum {
 	LOG_ERR_GECKO_Erase_Error_ClearEraseDoneFlag = 164,
 } log_errors;
 
-typedef enum {
+typedef enum _log_systems{
 	SYSTEM_TRXVU,
 	SYSTEM_EPS,
 	SYSTEM_PAYLOAD,
@@ -114,7 +114,7 @@ typedef enum {
 	SYSTEM_ADCS,
 } log_systems;
 
-typedef enum {
+typedef enum _log_payload{
 	PAYLOAD_TOOK_IMAGE,
 	PAYLOAD_TRANSFERRED_IMAGE,
 	PAYLOAD_COMPRESSED_IMAGE,
@@ -123,21 +123,37 @@ typedef enum {
 	PAYLOAD_TURNED_GECKO_OFF
 } log_payload;
 
-typedef enum {
+typedef enum _log_eps{
 	EPS_ENTER_FULL_MODE,
 	EPS_ENTER_CRUISE_MODE,
 	EPS_ENTER_SAFE_MODE,
 	EPS_ENTER_CRITICAL_MODE
 } log_eps;
 
-typedef enum {
-	GET_FROM_QUEUE,
-	ADCS_EXECUTE_COMMAND,
-	GATHER_TLM_AND_DATA,
-	DEPLOYED_BOOM
+typedef enum _log_adcs{
+	LOG_ADCS_SUCCESS,
+	LOG_ADCS_FAIL,
+	LOG_ADCS_ADCS_INIT_ERR,
+	LOG_ADCS_BOOT_ERROR,
+	LOG_ADCS_CHANNEL_OFF,
+	LOG_ADCS_CMD_ERR,
+	LOG_ADCS_WRONG_SUB_TYPE,
+	LOG_ADCS_WRONG_TYPE,
+	LOG_ADCS_NULL_DATA,
+	LOG_ADCS_FS_INIT_ERR,
+	LOG_ADCS_FS_WRITE_ERR,
+	LOG_ADCS_FS_READ_ERR,
+	LOG_ADCS_FRAM_WRITE_ERR,
+	LOG_ADCS_FRAM_READ_ERR,
+	LOG_ADCS_INPUT_PARAM_ERR,
+	LOG_ADCS_QUEUE_CREATE_ERR,
+	LOG_ADCS_SEMAPHORE_CREATE_ERR,
+	LOG_ADCS_TLM_ERR,
+	LOG_ADCS_QUEUE_EMPTY,
+	LOG_ADCS_MALLOC_ERR
 } log_adcs;
 
-typedef enum {
+typedef enum _log_transponder{
 	TRANSPONDER_ACTIVATION,
 	TRANSPONDER_DEACTIVATION
 } log_transponder;

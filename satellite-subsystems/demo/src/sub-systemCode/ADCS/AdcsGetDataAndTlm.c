@@ -250,40 +250,7 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 			return TRBL_FS_WRITE_ERR;
 		}
 		TlmElements[index].LastSaveTime = curr_time;
-#ifdef TESTING
-			printf("Collected Tlm \t\"%s\"\tat time:%d\n",TlmElements[index].TlmFileName,curr_time);
-	#ifdef PRINTTLM
-			printf("\n[");
-			for(int i = 0; i < TlmElements[index].TlmElementeSize - 1;i++){
-				printf("%X,",adcs_tlm[i]);
-			}
-			printf("%X]\n",adcs_tlm[TlmElements[index].TlmElementeSize-1]);
-	#endif
-
-	#ifdef PRINT_MAG_TLM
-			if(4 == index){
-				printf("Mag Field X = %d\n",((cspace_adcs_magfieldvec_t*)(adcs_tlm))->fields.magfield_x);
-				printf("Mag Field Y = %d\n",((cspace_adcs_magfieldvec_t*)(adcs_tlm))->fields.magfield_y);
-				printf("Mag Field Z = %d\n",((cspace_adcs_magfieldvec_t*)(adcs_tlm))->fields.magfield_z);
-			}
-	#endif
-	#ifdef PRINT_ANG_RATE_TLM
-			if(7 == index){
-				printf("Ang Rate X = %d\n",((cspace_adcs_angrate_t*)(adcs_tlm))->fields.angrate_x);
-				printf("Ang Rate Y = %d\n",((cspace_adcs_angrate_t*)(adcs_tlm))->fields.angrate_y);
-				printf("Ang Rate Z = %d\n",((cspace_adcs_angrate_t*)(adcs_tlm))->fields.angrate_z);
-			}
-	#endif
-	#ifdef PRINT_WHEEL_SPEED_TLM
-			if(8 == index){
-				printf("Wheel Speed X = %d\n",((cspace_adcs_wspeed_t*)(adcs_tlm))->fields.speed_x);
-				printf("Wheel Speed Y = %d\n",((cspace_adcs_wspeed_t*)(adcs_tlm))->fields.speed_y);
-				printf("Wheel Speed Z = %d\n",((cspace_adcs_wspeed_t*)(adcs_tlm))->fields.speed_z);
-			}
-	#endif
-#endif
-		}
-
+	}
 	return TRBL_SUCCESS;
 }
 

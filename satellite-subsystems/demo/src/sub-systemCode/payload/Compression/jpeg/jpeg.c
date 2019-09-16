@@ -9,7 +9,7 @@
 #include "output_stream.h"
 #include "jpeg_encoder.h"
 
-#include "../../Misc/FileSystem.h"	// for enter and release of the file system, ToDo: replace all actions with you own.
+#include "../../Misc/FileSystem.h"
 
 // Writes JPEG image to file.
 BooleanJpeg compress_image_to_jpeg_file(char *pFilename, int width, int height, int num_channels, const uint8_t *pImage_data, const jpeg_params_t * comp_params)
