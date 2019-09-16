@@ -3,7 +3,7 @@
 #define HOOPOETESTINGCONFIGURATION_H_
 
 #define TESTING
-#define PRINTTLM
+
 //#define ANTS_ON
 #define ANTS_DO_NOT_DEPLOY
 
@@ -14,5 +14,12 @@
 #define FILE_SYSTEM_NOT_TESTED
 //#define TESTING_BRONFELD
 //for tests
+
+
+// ADCS TESTS
+#define PRINTTLM
+#define PRINT_MAG_TLM
+#define PRINT_ANG_RATE_TLM
+#define PRINT_WHEEL_SPEED_TLM
 
 #endif /* HOOPOETESTINGCONFIGURATION_H_ */

@@ -108,7 +108,9 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	tm.subType = subType;
 
 	tm.length = length;
+	//memset(tm.data,0xFF,sizeof(tm.data));
 	memcpy(tm.data,info,tm.length);
+
 	byte rawData[SPL_TM_HEADER_SIZE + tm.length];
 	unsigned int rawDataLength = 0;
 	encode_TMpacket(rawData, (int*)&rawDataLength, tm);

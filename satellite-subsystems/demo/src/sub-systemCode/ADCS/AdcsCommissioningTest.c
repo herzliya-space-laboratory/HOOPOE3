@@ -81,7 +81,7 @@ AdcsComsnCmd_t MagnetometerDeployment[] =
 
 	{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x00,0x00,0x00,0x00},	.length = 4, .delay_duration = 100},
 
-	{.subtype = ADCS_NOP_ST,	.data = {0},	.length = 0, .delay_duration = 100},
+	{.subtype = ADCS_NOP_ST, .data = {0},	.length = 0, .delay_duration = 100},
 
 	{.subtype = ADCS_SET_MAGNETMTR_MOUNT_ST,	.data = {0x28,0x23,0xDC,0xD8,0x00,0x00}, .length = 6, .delay_duration = 100}
 
@@ -228,7 +228,7 @@ void TestAdcsCommissioningTask(){
 	unsigned int coms_mode = 0;
 	unsigned int length = 0;
 	unsigned int temp = 0;
-	TC_spl cmd={0};
+	TC_spl cmd = {0};
 	vTaskDelay(10000);
 	while(1){
 		printf("\nChoose Commissioning mode:\n");

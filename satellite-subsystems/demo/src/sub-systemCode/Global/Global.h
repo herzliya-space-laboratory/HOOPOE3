@@ -16,9 +16,10 @@
 #include <stdint.h>
 #include <strings.h>
 #include <string.h>
-#include "sub-systemCode/HoopoeTestingConfiguration.h"
 #include <hal/Timing/Time.h>
 #include <hal/Storage/FRAM.h>
+
+#include "sub-systemCode/HoopoeTestingConfiguration.h"
 
 #include "FRAMadress.h"
 #include "sizes.h"
