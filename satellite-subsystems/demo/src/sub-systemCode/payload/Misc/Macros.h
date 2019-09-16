@@ -8,8 +8,6 @@
 #ifndef MACROS_H_
 #define MACROS_H_
 
-// ToDo: add error log!
-
 #define CMP_AND_RETURN(value1, value2, return_value)	\
 		if (value1 != value2)							\
 			return return_value;

@@ -2,7 +2,6 @@
  * @file ImageConversion.h
  * @brief This module contains all image conversions integrated into the Image DataBase
  * @date 25 July 2012
- * @see ToDo: add Camra document
  * @author Roy Harel
  */
 

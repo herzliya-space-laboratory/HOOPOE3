@@ -1,10 +1,6 @@
 /*!
  * @file ImageDataBase.h
- * @brief ToDo: brief for database.h
  * @date 8 May 2019
- * ToDo: explain database.h
- *
- * @see ToDo DB capabilities file
  * @author Roy Harel
  */
 
@@ -43,7 +39,6 @@
 #define DEFAULT_REDUCTION_LEVEL 4	///< After taking an image an thumbnail of that level will be created automatically
 
 // Macros:
-// ToDo: Add error log
 #define DB_RETURN_ERROR(error)			\
 		if (error != DataBaseSuccess)	\
 		{								\

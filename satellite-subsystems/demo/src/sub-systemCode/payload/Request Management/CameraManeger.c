@@ -228,7 +228,7 @@ void act_upon_request(Camera_Request request)
 	ImageDataBaseResult error = DataBaseSuccess;
 	int FSerror = f_managed_enterFS();
 	if (FSerror)
-		WriteErrorLog(FSerror, SYSTEM_OBC, 0);
+		WriteErrorLog(FSerror, SYSTEM_OBC, (int)0);
 
 	Boolean CouldNotExecute = FALSE;
 
@@ -366,12 +366,9 @@ void act_upon_request(Camera_Request request)
 	{
 		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 
-		if (error != DataBaseSuccess && error != 0)
+		if (error != DataBaseSuccess)
 		{
-			imageid id = getLatestID(imageDataBase);
-			if (request.id == take_picture)
-				id++;
-			WriteErrorLog(error, SYSTEM_PAYLOAD, (uint32_t)id);
+			WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 		}
 	}
 
@@ -379,6 +376,6 @@ void act_upon_request(Camera_Request request)
 	{
 		FSerror = f_managed_releaseFS();
 		if (FSerror)
-			WriteErrorLog(FSerror, SYSTEM_OBC, 0);
+			WriteErrorLog(FSerror, SYSTEM_OBC, (int)0);
 	}
 }
