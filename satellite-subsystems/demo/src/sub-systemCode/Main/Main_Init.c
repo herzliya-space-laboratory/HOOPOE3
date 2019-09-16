@@ -235,22 +235,22 @@ typedef struct __attribute__ ((__packed__))
 
 AdcsComsnCmd_t InitialAngularRateEstimation[] =
 {
-		{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
-		{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
-		.length = 18, .delay_duration = 100},
+	{.subtype = ADCS_UPDATE_TLM_SAVE_VEC,	.data =
+	{0xFF,0x00,0xFF,0x00,0xFF,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+	.length = 18, .delay_duration = 100},
 
-		{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
-		{10,0,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
-		.length = 18, .delay_duration = 100},
+	{.subtype = ADCS_UPDATE_TLM_PERIOD_VEC,	.data =
+	{10,0,10,0,10,0,0,10,0,0,0,0,0,0,0,0,0,0},
+	.length = 18, .delay_duration = 100},
 
-		{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0xE8,0x03,0x00,0x00},
-		.length = 5, .delay_duration = 100},
+	{.subtype = ADCS_SET_ADCS_LOOP_PARAMETERS,	.data = {0x00,0xE8,0x03,0x00,0x00},
+	.length = 5, .delay_duration = 100},
 
-		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
+	{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x04,0x00}, .length = 3, .delay_duration = 100},
+	{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x40,0x00}, .length = 3, .delay_duration = 100},
 
-		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 100}
+	{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 100}
 
 };
 
@@ -273,9 +273,9 @@ AdcsComsnCmd_t Detumbling[] =
 
 	{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 6000},
 
-	{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x01,0x00,0x58,0x02},	.length = 4, .delay_duration = 100}
-
-
+	{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x01,0x00,0x58,0x02},	.length = 4, .delay_duration = (5*60*1000)}		// 1'st activation
+	//	{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x02,0x00,0x58,0x02},	.length = 4, .delay_duration = (6*60*1000)}	// 2'nd activation
+	//	{.subtype = ADCS_SET_ATT_CTRL_MODE_ST,	.data = {0x02,0x00,0x00,0x00},	.length = 4, .delay_duration = 100)}		// final activation
 };
 
 AdcsComsnCmd_t MagnetometerDeployment[] =
@@ -293,7 +293,7 @@ AdcsComsnCmd_t MagnetometerDeployment[] =
 
 	{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-	{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+	{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x40,0x00}, .length = 3,	.delay_duration = 100},
 
 	{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 6000},
 
@@ -320,7 +320,7 @@ AdcsComsnCmd_t MagnetometerCalibration[] =
 
 		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x40,0x00}, .length = 3,	.delay_duration = 100},
 
 		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x02},	.length = 1, .delay_duration = 6000},
 
@@ -346,7 +346,7 @@ AdcsComsnCmd_t AngularRateAndPitchAngleEstimation[] = {
 
 		{.subtype = ADCS_RUN_MODE_ST,	.data = {0x01},	.length = 1, .delay_duration = 100},
 
-		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x00,0x00}, .length = 3,	.delay_duration = 100},
+		{.subtype = ADCS_SET_PWR_CTRL_DEVICE_ST,	.data = {0x05,0x40,0x00}, .length = 3,	.delay_duration = 100},
 
 		{.subtype = ADCS_SET_EST_MODE_ST,	.data = {0x03},	.length = 1, .delay_duration = 6000},
 
