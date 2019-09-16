@@ -58,6 +58,8 @@ void update_FRAM_bitRate()
 	byte dat;
 	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
 	check_int("TRXVU_init_softWare, FRAM_read", error);
+	if (error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, error);
 	ISIStrxvuBitrate newParam = DEFAULT_BIT_RATE;
 	for (uint8_t i = 1; i < 9; i *= 2)
 	{
@@ -70,6 +72,8 @@ void update_FRAM_bitRate()
 	vTaskDelay(2000);
 	printf("new bit rate value: %d\n", newParam);
 	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
+	if (error != 0)
+		WriteErrorLog(LOG_ERR_TRXVU_SET_BITRATE, SYSTEM_TRXVU, error);
 	vTaskDelay(1000);
 	check_int("IsisTrxvu_tcSetAx25Bitrate, update_FRAM_bitRate", error);
 }
@@ -80,9 +84,13 @@ void toggle_idle_state()
 		vTaskDelay(500);
 		int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
 		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
+		if (retValInt != 0)
+			WriteErrorLog(LOG_ERR_TRXVU_IDLE_STATE, SYSTEM_TRXVU, retValInt);
 		vTaskDelay(1000);
 		retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
 		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
+		if (retValInt != 0)
+			WriteErrorLog(LOG_ERR_TRXVU_IDLE_STATE, SYSTEM_TRXVU, retValInt);
 		vTaskDelay(1500);
 	}
 }
@@ -108,6 +116,8 @@ void TRXVU_init_hardWare()
 	myTRXVUBitrates[0] = trxvu_bitrate_9600;
 	retValInt = IsisTrxvu_initialize(myTRXVUAddress, myTRXVUBuffers, myTRXVUBitrates, 1);
 	check_int("init_trxvu, IsisTrxvu_initialize", retValInt);
+	if (retValInt != 0)
+		WriteErrorLog(LOG_ERR_TRXVU_INITIALIZE, SYSTEM_TRXVU, retValInt);
 
 	if (!get_system_state(mute_param))
 	{
@@ -267,6 +277,8 @@ void Dump_task(void *arg)
 
 	int f_error = f_managed_enterFS();
 	check_int("error in Dump_task, f_managed_enterFS - data abort exeption\n", f_error);
+	if (f_error != 0)
+		WriteErrorLog(LOG_ERR_ENTER_FS, SYSTEM_TRXVU, f_error);
 	if (f_error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 	{
 		f_error = f_managed_enterFS();
@@ -322,6 +334,8 @@ void transponder_logic(time_unix time, command_id cmdID)
 		//checks if time to return to nominal mode
 		i_error = Time_getUnixEpoch(&time_now);
 		check_int("error from Transponder Task, get_time", i_error);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 		if (time < time_now)
 		{
 			stopInfo = TRANSPONDER_STOP_TIMER_INFO;
@@ -332,6 +346,8 @@ void transponder_logic(time_unix time, command_id cmdID)
 
 		// 7. check if we are under right voltage
 		i_error = FRAM_read((byte*)&low_shut_vol, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, i_error);
 		check_int("Transponder Task ,FRAM_read(TRANS_LOW_BATTERY_STATE_ADDR)", i_error);
 		if (low_shut_vol > get_Vbatt())
 		{
@@ -363,6 +379,8 @@ void Transponder_task(void *arg)
 	{
 		i_error = f_managed_enterFS();
 		check_int("f_managed_enterFS in Transponder task", i_error);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_ENTER_FS, SYSTEM_TRXVU, i_error);
 		save_ACK(ACK_TRANSPONDER, ERR_TASK_EXISTS, cmdId);
 		terminateTask();
 	}
@@ -376,6 +394,8 @@ void Transponder_task(void *arg)
 	{
 		// not default time, time sent from ground
 		i_error = Time_getUnixEpoch(&time_now);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 		check_int("error from Transponder Task, get_time", i_error);
 		time += time_now;
 	}
@@ -383,6 +403,8 @@ void Transponder_task(void *arg)
 	{
 		// default time
 		i_error = Time_getUnixEpoch(&time_now);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 		check_int("error from Transponder Task, get_time", i_error);
 		time = time_now + DEFAULT_TIME_TRANSMITTER;
 	}
@@ -395,10 +417,14 @@ void Transponder_task(void *arg)
 		i_error = f_managed_enterFS();
 		if (i_error == 0)
 		{
-			check_int("f_managed_enterFS in Transponder task", i_error);
 			save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
 
 			terminateTask();
+		}
+		else
+		{
+			WriteErrorLog(LOG_ERR_ENTER_FS, SYSTEM_TRXVU, i_error);
+			check_int("f_managed_enterFS in Transponder task", i_error);
 		}
 	}
 	else
@@ -432,10 +458,14 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 			int i_error = f_managed_enterFS();
 			if (i_error == 0)
 			{
-				check_int("f_managed_enterFS in Transponder task", i_error);
 				save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
 				WriteTransponderLog(TRANSPONDER_DEACTIVATION, TRANSPONDER_STOP_CMD_INFO);
 				f_managed_releaseFS();
+			}
+			else
+			{
+				check_int("f_managed_enterFS in Transponder task", i_error);
+				WriteErrorLog(LOG_ERR_ENTER_FS, SYSTEM_TRXVU, i_error);
 			}
 			change_TRXVU_state(NOMINAL_MODE);
 			vTaskDelete(NULL);
@@ -510,6 +540,8 @@ void Rx_logic()
 
 	i_error = IsisTrxvu_rcGetFrameCount(I2C_BUS_ADDR, &RxCounter);
 	check_int("IsisTrxvu_rcGetFrameCount, trxvu_logic", i_error);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_TRXVU_GET_FRAME_COUNT, SYSTEM_TRXVU, i_error);
 	if (RxCounter > 0)
 	{
 		//	1.1. gets data from Rx buffer
@@ -530,6 +562,8 @@ void Rx_logic()
 				TRX_sendFrame(rawACK, ACK_RAW_SIZE);
 
 				i_error = Time_getUnixEpoch(&time_now);
+				if (i_error != 0)
+					WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 				check_int("trxvu_logic, Time_getUnixEpoch", i_error);
 				// 1.4. checks if command is delayed command
 				if (packet.time <= time_now)
@@ -562,6 +596,8 @@ void pass_above_Ground()
 	{
 		groundConnectionStarted = TRUE;
 		int i_error = Time_getUnixEpoch(&started_time);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 		check_int("connection_toGround, Time_getUnixEpoch", i_error);
 
 		return;
@@ -571,6 +607,8 @@ void pass_above_Ground()
 	{
 		time_unix currentTime;
 		int i_error = Time_getUnixEpoch(&currentTime);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 		check_int("connection_toGround, Time_getUnixEpoch", i_error);
 		if (currentTime > started_time + GROUND_PASSING_TIME)
 		{
@@ -592,6 +630,8 @@ void check_TRXVUState()
 {
 	byte dat;
 	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
+	if (error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, error);
 	check_int("TRXVU_init_softWare, FRAM_read", error);
 
 	ISIStrxvuBitrateStatus FRAMBitRate;
@@ -651,6 +691,8 @@ void Beacon_task()
 			printf("skip beacon\n");
 
 		i_error = FRAM_read(&delayBaecon, BEACON_TIME_ADDR, 1);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, i_error);
 		check_int("beacon_task, FRAM_write(BEACON_TIME_ADDR)", i_error);
 		// 6. check if value in range
 		if (!(10 <= delayBaecon || delayBaecon <= 40))
@@ -660,6 +702,8 @@ void Beacon_task()
 
 		//reading low_v_vbat from FRAM
 		i_error = FRAM_read((byte*)&low_v_beacon, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, i_error);
 		check_int("beacon_task, FRAM_write(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 
 #ifdef TESTING
@@ -790,25 +834,37 @@ void reset_FRAM_TRXVU()
 	//BEACON_LOW_BATTERY_STATE_ADDR reset
 	voltage_t voltage = DEFULT_COMM_VOL;
 	i_error = FRAM_write((byte*)&voltage, BEACON_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, i_error);
 	check_int("reset_FRAM_TRXVU, FRAM_write", i_error);
 
 	i_error = FRAM_write((byte*)&voltage, TRANS_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, i_error);
 	check_int("reset_FRAM_TRXVU, FRAM_write", i_error);
 
 	data[0] = DEFULT_BEACON_DELAY;
 	i_error = FRAM_write(data, BEACON_TIME_ADDR, 1);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, i_error);
 	check_int("reset_FRAM_TRXVU,, FRAM_write(BEACON_TIME_ADDR)", i_error);
 
 	data[0] = DEFAULT_BIT_RATE;
 	i_error = FRAM_write(data, BIT_RATE_ADDR, 1);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, i_error);
 	check_int("reset_FRAM_TRXVU,, FRAM_write(BIT_RATE_ADDR)", i_error);
 
 	time_unix mute_time = 0;
 	i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, i_error);
 	check_int("reset_FRAM_TRXVU, FRAM_read(MUTE_TIME_ADDR)", i_error);
 
 	unsigned short trans_rssi = DEFAULT_TRANS_RSSI;
 	i_error = FRAM_write((byte*)&trans_rssi, TRANSPONDER_RSSI_ADDR, sizeof(unsigned short));
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, i_error);
 	check_int("TRANSPONDER_RSSI_ADDR, FRAM_write", i_error);
 }
 
@@ -842,6 +898,8 @@ int TRX_sendFrame(byte* data, uint8_t length)
 		{
 			i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
 			check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
+			if (i_error != 0)
+				WriteErrorLog(LOG_ERR_TRXVU_SEND_FRAM, SYSTEM_TRXVU, i_error);
 			retVal = 0;
 			if (count > 0)
 				vTaskDelay(200);
@@ -878,6 +936,8 @@ int TRX_getFrameData(unsigned int *length, byte* data_out)
 	byte receive_frm[SIZE_RXFRAME]; //raw data from the Rx buffer
 	unsigned short RxCounter = 0;
 	i_error = IsisTrxvu_rcGetFrameCount(I2C_BUS_ADDR, &RxCounter);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_TRXVU_GET_FRAME_COUNT, SYSTEM_TRXVU, i_error);
 	check_int("TRX_getFrameData, IsisTrxvu_rcGetFrameCount", i_error);
 	ISIStrxvuRxFrame rxFrameCmd = { 0, 0, 0, receive_frm }; // for getting raw data from Rx, nullify values
 
@@ -887,6 +947,8 @@ int TRX_getFrameData(unsigned int *length, byte* data_out)
 	}
 
 	i_error = IsisTrxvu_rcGetCommandFrame(I2C_BUS_ADDR, &rxFrameCmd);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_TRXVU_GET_FRAM, SYSTEM_TRXVU, i_error);
 	check_int("TRX_getFrameData, IsisTrxvu_rcGetCommandFrame", i_error);
 
 	*length = (int)rxFrameCmd.rx_length;
@@ -917,6 +979,8 @@ void unmute_Tx()
 	time_unix mute_time = 0;
 	set_system_state(mute_param, SWITCH_OFF);
 	int i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, i_error);
 	check_int("unmute_Tx, FRAM_read(MUTE_TIME_ADDR)", i_error);
 
 	update_FRAM_bitRate();
@@ -928,9 +992,13 @@ void check_time_off_mute()
 
 	int i_error = Time_getUnixEpoch(&time_now);
 	check_int("check_time_off_mute, Time_getUnixEpoch", i_error);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 
 	i_error = FRAM_read((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
 	check_int("check_time_off_mute, FRAM_read(MUTE_TIME_ADDR)", i_error);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, i_error);
 	if (time_now >= mute_time && get_system_state(mute_param))
 		unmute_Tx();
 }
@@ -939,6 +1007,8 @@ int set_mute_time(unsigned short time)
 {
 	time_unix time_now;
 	int error = Time_getUnixEpoch(&time_now);
+	if (error != 0)
+		WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, error);
 	check_int("set_mute_time, Time_getUnixEpoch", error);
 
 	if (time > MAX_NUTE_TIME)
@@ -949,6 +1019,8 @@ int set_mute_time(unsigned short time)
 	time_now += (time_unix)(time * 60);
 
 	error = FRAM_write((byte*)&time_now, MUTE_TIME_ADDR, TIME_SIZE);
+	if (error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, error);
 	check_int("set_mute_time, FRAM_write", error);
 
 	mute_Tx(TRUE);
@@ -985,6 +1057,8 @@ void change_TRXVU_state(Boolean state)
 	if (state == NOMINAL_MODE)
 	{
 		i_error = FRAM_read(rssiData, TRANSPONDER_RSSI_ADDR, 2);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, i_error);
 		check_int("change_TRXVU_state, FRAM_read", i_error);
 		change_trans_RSSI(rssiData);
 		//nominal mode
@@ -1003,6 +1077,8 @@ void change_TRXVU_state(Boolean state)
 	}
 	//sends I2C command
 	i_error = I2C_write(I2C_TRXVU_TC_ADDR, data, 2);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_TRXVU_I2C_TRANSPONDER, SYSTEM_TRXVU, i_error);
 	check_int("change_TRXVU_state, I2C_write", i_error);
 }
 
@@ -1014,5 +1090,7 @@ void change_trans_RSSI(byte *param)
 	data[2] = param[1];
 
 	int i_error = I2C_write(I2C_TRXVU_TC_ADDR, data, 2);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_TRXVU_I2C_TRANSPONDER, SYSTEM_TRXVU, i_error);
 	check_int("change_TRXVU_state, I2C_write", i_error);
 }

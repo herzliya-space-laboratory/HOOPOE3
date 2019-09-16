@@ -195,6 +195,8 @@ int InitSubsystems()
 
 	InitializeFS(activation);
 
+	CUFManageRestart(activation);
+
 	EPS_Init();
 
 #ifdef ANTS_ON

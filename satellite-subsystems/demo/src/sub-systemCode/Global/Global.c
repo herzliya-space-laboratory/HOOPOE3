@@ -99,14 +99,20 @@ int soft_reset_subsystem(subSystem_indx reset_idx)
 	case EPS:
 		error = GomEpsSoftReset(0);
 		check_int("soft reset, EPS", error);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_EPS_SOFT_RESET, SYSTEM_OBC, error);
 		break;
 	case TRXVU:
 		error = IsisTrxvu_softReset(0);
 		check_int("soft reset, TRXVU", error);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_TRXVU_SOFT_RESET, SYSTEM_OBC, error);
 		break;
 	case ADCS:
 		error = cspaceADCS_componentReset(0);
 		check_int("soft reset, ADCS", error);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_ADCS_SOFT_RESET, SYSTEM_OBC, error);
 		break;
 	case OBC:
 		gracefulReset();
@@ -132,16 +138,24 @@ int hard_reset_subsystem(subSystem_indx reset_idx)
 	case TRXVU:
 		error = IsisTrxvu_hardReset(0);
 		check_int("hard reset TRXVU", error);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_TRXVU_HARD_RESET, SYSTEM_OBC, error);
 		break;
 	case Ants:
 		error = IsisAntS_reset(0, isisants_sideA);
 		check_int("hard reset to ants_a", error);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_HARD_RESET_ANTS, SYSTEM_OBC, error);
 		error = IsisAntS_reset(0, isisants_sideB);
 		check_int("hard reset to ants_b", error);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_HARD_RESET_ANTS, SYSTEM_OBC, error);
 		break;
 	case ADCS:
 		channel.raw = 0;
 		error = GomEpsSetOutput(0, channel);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_ADCS_SOFT_RESET, SYSTEM_OBC, error);
 		check_int("Hard reset ADCS, turn off EPS channels", error);
 		break;
 	case CAMMERA:
@@ -199,6 +213,8 @@ int fram_byte_fix(unsigned int address)
 	unsigned char byte = 0;
 	int error = 0;
 	i_error = FRAM_read(&byte, address, sizeof(byte));
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_OBC, i_error);
 	check_int("fram_byte_fix, FRAM_read", i_error);
 	if ((byte != 255) || (byte != 0))
 	{
@@ -228,6 +244,8 @@ int fram_byte_fix(unsigned int address)
 			error = 1;
 		}
 		i_error = FRAM_write(&byte, address, 1);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, i_error);
 		check_int("fram_byte_fix, FRAM_write", i_error);
 	}
 	return error;
@@ -252,23 +270,33 @@ void reset_FRAM_MAIN()
 	raw[0] = 0;
 	// reset the states byte in the FRAM
 	int err = FRAM_write(raw, STATES_ADDR, 1);
+	if (err != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, err);
 	check_int("reset_FRAM_MAIN, FRAM_write(STATES_ADDR)", err);
 	// sets the FIRST_ACTIVATION_ADDR to true (now is the first activation)
 	raw[0] = TRUE_8BIT;
 	err = FRAM_write(raw, FIRST_ACTIVATION_ADDR, 1);
+	if (err != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, err);
 	check_int("reset_FRAM_MAIN, FRAM_write(FIRST_ACTIVATION_ADDR)", err);
 
 	int i;
 	for (i = 0; i < 4; i++)
 		raw[i] = 0;
 	err = FRAM_write(raw, TIME_ADDR, TIME_SIZE);
+	if (err != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, err);
 	check_int("reset_FRAM_MAIN, FRAM_write(TIME_ADDR)", err);
 
 	err = FRAM_write(raw, RESTART_FLAG_ADDR, 4);
+	if (err != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, err);
 	check_int("reset_FRAM_MAIN, FRAM_write(RESTART_FLAG)", err);
 
 	Boolean8bit bool = FALSE_8BIT;
 	err = FRAM_write(&bool, STOP_TELEMETRY_ADDR, 1);
+	if (err != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, err);
 	check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
 }
 

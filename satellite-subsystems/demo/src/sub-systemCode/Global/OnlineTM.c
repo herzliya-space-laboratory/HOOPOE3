@@ -119,6 +119,8 @@ void save_offlineSetting_FRAM()
 	}
 
 	int i_error = FRAM_writeAndVerify((byte*)list, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, i_error);
 	check_int("FRAM_writeAndVerify, save_offlineSettings_FRAM", i_error);
 }
 //get the current off line list in the FRAM
@@ -127,6 +129,8 @@ int get_offlineSetting_FRAM(saveTM_FRAM *list)
 	if (list == NULL)
 		return -4;
 	int i_error = FRAM_read((byte*)list, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_OBC, i_error);
 	check_int("FRAM_writeAndVerify, save_offlineSettings_FRAM", i_error);
 	return 0;
 }
@@ -165,6 +169,8 @@ int get_offlineSettingPacket(TM_spl* setPacket)
 	setPacket->subType = OFFLINE_SETTING_ST;
 	setPacket->length = SETTING_LIST_SIZE;
 	int i_error = Time_getUnixEpoch(&setPacket->time);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_OBC, i_error);
 	check_int("Time_getUnixEpoch, get_offlineSettingPacket", i_error);
 	saveTM_FRAM FRAM_list[MAX_ITEMS_OFFLINE_LIST];
 	i_error = get_offlineSetting_FRAM(FRAM_list);
@@ -484,6 +490,8 @@ void save_onlineTM_logic()
 	int i_error;
 	time_unix time_now;
 	i_error = Time_getUnixEpoch(&time_now);
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_OBC, i_error);
 	check_int("Time_getUnixEpoch, save_onlineTM_logic", i_error);
 	printf("       time now: %u\n", time_now);
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
@@ -540,6 +548,8 @@ void save_onlineTM_task()
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 		offline_TM_list[i].lastSave = 0;
 	int i_error = f_managed_enterFS();
+	if (i_error != 0)
+		WriteErrorLog(LOG_ERR_ENTER_FS, SYSTEM_OBC, i_error);
 	check_int("save_onlineTM_task, f_managed_enterFS", i_error);
 	while(TRUE)
 	{

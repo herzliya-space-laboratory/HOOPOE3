@@ -102,11 +102,11 @@ int LoadPerminantCUF()
 	return 0; //return 0 on success
 }
 
-int CUFManageRestart()
+int CUFManageRestart(Boolean isFirst)
 {
-	InitCUF(FALSE); //initiate the CUF switch array
-	int i = 0;
+	InitCUF(isFirst); //initiate the CUF switch array
 	LoadPerminantCUF();
+	int i = 0;
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 		if (PerminantCUF[i]->name != NULL && !PerminantCUF[i]->disabled) //check if CUF slot is empty
 			ExecuteCUF(PerminantCUF[i]->name); //run CUF in slot if not empty
@@ -345,6 +345,13 @@ CUF* GetFromCUFTempArray(char* name)
 		if (strcmp(TempCUF[i]->name, name) == 0)
 		{
 			return TempCUF[i];
+		}
+	}
+	for (i = 0; i < PERMINANTCUFLENGTH; i++)
+	{
+		if (strcmp(PerminantCUF[i]->name, name) == 0)
+		{
+			return PerminantCUF[i];
 		}
 	}
 	return NULL;

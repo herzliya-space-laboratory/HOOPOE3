@@ -74,7 +74,7 @@ int LoadPerminantCUF();
  * Function to manage the CUF satellite restart rutine
  * @return 0 on success
  */
-int CUFManageRestart();
+int CUFManageRestart(Boolean isFirst);
 
 /*!
  * Function to add a perminant CUF to the CUF slot array

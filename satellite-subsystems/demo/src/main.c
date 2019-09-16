@@ -55,6 +55,8 @@ void save_time()
 	time_unix current_time;
 	err = Time_getUnixEpoch(&current_time);
 	check_int("set time, Time_getUnixEpoch", err);
+	if (err != 0)
+		WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_OBC, err);
 	byte raw_time[TIME_SIZE];
 	// converting the time_unix to raw (small endien)
 	raw_time[0] = (byte)current_time;
@@ -63,6 +65,8 @@ void save_time()
 	raw_time[3] = (byte)(current_time >> 24);
 	// writing to FRAM the current time
 	err = FRAM_write(raw_time, TIME_ADDR, TIME_SIZE);
+	if (err != 0)
+		WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_OBC, err);
 	check_int("set time, FRAM_write", err);
 }
 

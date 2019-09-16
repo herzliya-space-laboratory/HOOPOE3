@@ -104,6 +104,8 @@ Boolean get_system_state(systems_state_parameters param)
 	{
 		i_error = FRAM_read((byte*)&(current_global_param.state), STATES_ADDR, 1);
 		check_int("can't get system state from FRAM", i_error);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_OBC, i_error);
 		switch (param)
 		{
 		case mute_param:
@@ -168,6 +170,8 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 	if (xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
 		i_error = FRAM_read((byte*)&current_global_param.state, STATES_ADDR, 1);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_OBC, i_error);
 		check_int("can't read from FRAM in set_system_state", i_error);
 		switch (param)
 		{
@@ -221,7 +225,9 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 			break;
 		}
 
-		FRAM_write(&current_global_param.state.raw, STATES_ADDR, 1);
+		i_error = FRAM_write(&current_global_param.state.raw, STATES_ADDR, 1);
+		if (i_error != 0)
+			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_OBC, i_error);
 		check_int("can't read from FRAM in set_system_state", i_error);
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCST_semaphore in set_system_state", lu_error);
