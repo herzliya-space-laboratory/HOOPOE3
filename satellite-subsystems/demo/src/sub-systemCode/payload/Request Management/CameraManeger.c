@@ -196,7 +196,10 @@ void Take_pictures_with_time_in_between()
 			Time_getUnixEpoch(&turnedOnCamera);
 			TurnOnGecko();
 			ImageDataBaseResult error = takePicture(imageDataBase, FALSE_8BIT);
-			save_ACK(ACK_CAMERA, error + 30, cmd_id_for_takePicturesWithTimeInBetween);
+			if (error != DataBaseSuccess)
+			{
+				WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
+			}
 		}
 
 		numberOfPicturesLeftToBeTaken--;

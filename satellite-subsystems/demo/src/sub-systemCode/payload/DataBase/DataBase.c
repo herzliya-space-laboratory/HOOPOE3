@@ -104,7 +104,7 @@ static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 
 	strcpy(string, baseString);
 
-	printf("file name = %s\n", string);
+//	printf("file name = %s\n", string);
 }
 
 /*
@@ -145,7 +145,7 @@ ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadat
 {
 	int result;
 
-	while (database_current_address < DATABASE_FRAM_END)
+	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
 	{
 		result = FRAM_read((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
@@ -182,7 +182,7 @@ ImageDataBaseResult SearchDataBase_byMark(uint32_t database_current_address, Ima
 {
 	int result;
 
-	while (database_current_address < DATABASE_FRAM_END)
+	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
 	{
 		result = FRAM_read((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
@@ -519,7 +519,7 @@ ImageDataBaseResult clearImageDataBase(void)
 	ImageMetadata image_metadata;
 	uint32_t image_address = DATABASE_FRAM_START;
 
-	while(image_address < DATABASE_FRAM_END)
+	while(image_address < DATABASE_FRAM_END && image_address >= DATABASE_FRAM_START)
 	{
 		vTaskDelay(DELAY);
 
@@ -535,11 +535,14 @@ ImageDataBaseResult clearImageDataBase(void)
 				if(checkForFileType(image_metadata, i) == DataBaseSuccess)
 				{
 					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);												return result;
-					if (result != DataBaseSuccess && result != DataBaseNotInSD)
+					if (result == DataBaseSuccess)
+					{
+						updateFileTypes(&image_metadata, image_address, i, FALSE);
+					}
+					else if (result != DataBaseNotInSD)
 					{
 						return result;
 					}
-					updateFileTypes(&image_metadata, image_address, i, FALSE);
 				}
 			}
 		}
@@ -564,6 +567,9 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 		DB_result = SearchDataBase_byMark(database_current_address, &image_metadata, &image_address);
 		database_current_address = image_address + sizeof(ImageMetadata);
 
+		if (database_current_address == DATABASE_FRAM_END)
+			break;
+
 		Boolean already_transferred_raw = FALSE;
 
 		if ( DB_result == 0 )
@@ -579,13 +585,15 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 				TurnOffGecko();
 
 				vTaskDelay(DELAY);
-
+			}
+			else
+			{
 				already_transferred_raw = TRUE;
 			}
 
 			if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
 			{
-				DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, 4, TRUE, image_address, image_metadata);
+				DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, DEFAULT_REDUCTION_LEVEL, TRUE, image_address, image_metadata);
 				if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
 					return DB_result;
 
@@ -666,17 +674,18 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	Time_getUnixEpoch(&currentDate);
 
 	// Getting Sat Angular Rates:
-	cspace_adcs_angrate_t sen_rates;
-	TroubleErrCode ADCS_error = AdcsGetMeasAngSpeed(&sen_rates);
-	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingAngleRates);
+	/*cspace_adcs_angrate_t sen_rates;
 
-	uint16_t angle_rates[3];
-	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
+	TroubleErrCode ADCS_error = AdcsGetMeasAngSpeed(&sen_rates);
+	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingAngleRates);*/
+
+	uint16_t angle_rates[3];/*
+	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);*/
 
 	// Getting Course-Sun-Sensor Values:
-	byte raw_css[10];
+	byte raw_css[10];/*
 	ADCS_error = AdcsGetCssVector(raw_css);
-	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingCssVector);
+	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingCssVector);*/
 
 	// Taking the Image:
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
