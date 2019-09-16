@@ -98,7 +98,6 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv);
  */
 int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd);
 
-
 /*!
  * @brief Executes the command sent to the ADCS
  * @param[in] cmd the command to be executed

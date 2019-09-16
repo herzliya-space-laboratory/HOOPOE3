@@ -417,28 +417,13 @@ void CommissionAdcsMode(AdcsComsnCmd_t *modeCmd, unsigned int length){
 	for(unsigned int i = 0; i < length; i++){
 
 		if(0 == choice){// Discrete Testing
-			printf("Continue to Next Command?\n0 = Exit\n1 = Continue\n 2 = Costume Command\n");
+			printf("Continue to Next Command?\n0 = Exit\n1 = Continue\n");
 			while(UTIL_DbguGetIntegerMinMax(&choice,0,2)==0);
 
 			switch(choice){
 			case 0:
 				return;
 			case 1:
-				break;
-			case 2:
-					printf("subtype:(0 to 255)\n");
-					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.subType,0,255)==0);
-					printf("cmd length:(0 to %d)\n",sizeof(cmd.data));
-					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.length,0,sizeof(cmd.data))==0);
-					printf("Insert Data:\n");
-					for(unsigned int i = 0; i< cmd.length; i++){
-						printf("data[%d]:",i);
-						while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.data[i],0,255) == 0);
-						printf("\n");
-					}
-					AdcsCmdQueueAdd(&cmd);
-					i--;
-					continue;
 				break;
 			}
 		}
@@ -460,9 +445,10 @@ void TestAdcsCommissioningTask(){
 	unsigned int coms_mode = 0;
 	vTaskDelay(10000);
 	unsigned int length = 0;
+	TC_spl cmd;
 	while(1){
 		printf("\nChoose Commissioning mode:\n");
-		printf("\t%d) %s\n",	0,"Delay for 2 minute");
+		printf("\t%d) %s\n",	0,"Costume Command");
 		printf("\t%d) %s\n",	1,"Initial Angular Rate Estimation");
 		printf("\t%d) %s\n",	2,"Detumbling");
 		printf("\t%d) %s\n",	3,"Magnetometer Deployment");
@@ -470,14 +456,28 @@ void TestAdcsCommissioningTask(){
 		printf("\t%d) %s\n",	5,"Angular Rate And Pitch Angle Estimation");
 		printf("\t%d) %s\n",	6,"Y-Wheel Ramp-Up Test");
 		printf("\t%d) %s\n",	7,"Y-Momentum Mode Commissioning");
-		while(UTIL_DbguGetIntegerMinMax(&coms_mode,0,7)==0);
+		printf("\t%d) %s\n",	8,"Delay for 2 minute");
+		while(UTIL_DbguGetIntegerMinMax(&coms_mode,0,8)==0);
 
 		AdcsComsnCmd_t *mode = NULL;
 		printf("-------");
 		switch(coms_mode){
 		case 0:
-			vTaskDelay(2*60*1000);
-			break;
+			cmd.type = TM_ADCS_T;
+			printf("Choose ADCS command subtype:\n");
+			while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.subType,0,255)==0);
+			printf("Command Length:\n");
+			while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.length,0,sizeof(cmd.data))==0);
+			if(cmd.length >0){
+				printf("Insert Data(in decimal):\n");
+				for(unsigned int i = 0; i< cmd.length; i++){
+					printf("data[%d]:",i);
+					while(UTIL_DbguGetIntegerMinMax((unsigned int*)&cmd.data[i],0,255) == 0);
+					printf("\n");
+				}
+			}
+			AdcsCmdQueueAdd(&cmd);
+			continue;
 		case 1:
 			mode = InitialAngularRateEstimation;
 			length = (sizeof(InitialAngularRateEstimation)/sizeof(AdcsComsnCmd_t));
@@ -512,6 +512,9 @@ void TestAdcsCommissioningTask(){
 			mode = YMomentumModeCommissioning;
 			length = (sizeof(YMomentumModeCommissioning)/sizeof(AdcsComsnCmd_t));
 			printf("\tY-Momentum Mode Commissioning\n");
+			break;
+		case 8:
+			vTaskDelay(2*60*1000);
 			break;
 		}
 		CommissionAdcsMode(mode,length);

@@ -105,7 +105,6 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	return err;
 }
 
-
 void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	TM_spl tm;
 	time_unix time_now;
