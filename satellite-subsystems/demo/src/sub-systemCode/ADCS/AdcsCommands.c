@@ -17,13 +17,7 @@
 #include "AdcsCommands.h"
 #include "AdcsMain.h"
 
-
-
-#ifdef TESTING
-	#define PRINT_ON_TEST(msg,err)	printf(#msg " = %d\n",err);
-#else
-	#define PRINT_ON_TEST(msg,err) ;
-#endif
+#define MAX_CONFIG_PARAM_LENGTH 64
 
 
 //TODO: define as enum
@@ -105,7 +99,6 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	return err;
 }
 
-
 void SendAdcsTlm(byte *info, unsigned int length, int subType){
 	TM_spl tm;
 	time_unix time_now;
@@ -116,10 +109,18 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 
 	tm.length = length;
 	memcpy(tm.data,info,tm.length);
+
 	byte rawData[SPL_TM_HEADER_SIZE + tm.length];
-	int rawDataLength = 0;
-	encode_TMpacket(rawData, &rawDataLength, tm);
+	unsigned int rawDataLength = 0;
+	encode_TMpacket(rawData, (int*)&rawDataLength, tm);
 	TRX_sendFrame(rawData, (unsigned char)rawDataLength);
+#ifdef TESTING
+	printf("\n[%d",rawData[0]);
+	for(unsigned int i = 1; i < rawDataLength;i++){
+		printf(",%X",rawData[i]);
+	}
+	printf("]\n");
+#endif
 }
 
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
@@ -132,7 +133,8 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	int temp = 0;
 	byte sub_type = cmd->subType;
 
-	byte data[300] = {0};
+	byte data[ADCS_CMD_MAX_DATA_LENGTH] = {0};
+	memset(data,0xFF,ADCS_CMD_MAX_DATA_LENGTH);
 
 	cspace_adcs_bootprogram bootindex;
 	cspace_adcs_runmode_t runmode;
@@ -144,7 +146,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 	adcs_i2c_cmd i2c_cmd = {0};
 #ifdef TESTING
-	printf("\n\nExecuting CMD with subtyp:	%d\n\n",sub_type);
+	printf("\n\nExecuting CMD with subtype:	%d\n\n",sub_type);
 #endif
 	switch(sub_type)
 	{
@@ -165,7 +167,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 					memcpy(i2c_cmd.data,I2cData,i2c_cmd.length);
 				}
 				err = AdcsGenericI2cCmd(&i2c_cmd);
-
 
 				if (i2c_cmd.id >= 128){// is TLM
 					if (i2c_cmd.length > ADCS_CMD_MAX_DATA_LENGTH/2){
@@ -212,11 +213,11 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 #ifdef TESTING
 			printf("\nSet Current Power Control:\n");
-			printf("signal_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.signal_cubecontrol);
-			printf("motor_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.motor_cubecontrol);
-			printf("pwr_cubesen: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubesense);
-			printf("pwr_cubest: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubestar);
-			printf("pwr_cubewhee: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel1);
+			printf("signal_cubecontrol: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.signal_cubecontrol);
+			printf("motor_cubecontrol: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.motor_cubecontrol);
+			printf("pwr_cubesense: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubesense);
+			printf("pwr_cubestar: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubestar);
+			printf("pwr_cubewheel1: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel1);
 			printf("pwr_cubewheel2: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel2);
 			printf("pwr_cubewheel3: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel3);
 			printf("pwr_mot: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_motor);
@@ -408,16 +409,15 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			memcpy(&temp,cmd->data,sizeof(Boolean));
 			err = AdcsSetTlmOverrideFlag((Boolean)temp);
 			break;
-		case ADCS_SET_ADCS_LOOP_PARAMETERS:
+		case ADCS_SET_ADCS_LOOP_PARAMETERS_ST:
 			err = UpdateAdcsFramParameters(cmd->data[0],cmd->data+1);
 			break;
-		case ADCS_UPDATE_TLM_PERIOD_VEC:
+		case ADCS_UPDATE_TLM_PERIOD_VEC_ST:
 			err = UpdateTlmPeriodVector(cmd->data);
 			break;
-		case ADCS_UPDATE_TLM_SAVE_VEC:
+		case ADCS_UPDATE_TLM_SAVE_VEC_ST:
 			err = UpdateTlmToSaveVector((Boolean8bit*)cmd->data);
 			break;
-
 		case ADCS_SET_BOOT_INDEX_ST:
 			memcpy(&bootindex,cmd->data,sizeof(bootindex));
 			err = cspaceADCS_BLSetBootIndex(ADCS_ID,bootindex);
@@ -425,8 +425,14 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_RUN_BOOT_PROGRAM_ST:
 			err = cspaceADCS_BLRunSelectedProgram(ADCS_ID);
 			break;
+
+
 			
-		/**** Telemetry ****/
+/*******************************************************************************/
+/****************************     Telemetry     ********************************/
+/*******************************************************************************/
+
+
 		case ADCS_GET_GENERAL_INFO_ST:
 			err = cspaceADCS_getGeneralInfo(ADCS_ID,(cspace_adcs_geninfo_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_geninfo_t),ADCS_GET_GENERAL_INFO_ST);
@@ -643,10 +649,10 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_GET_ADCS_CONFIG_PARAM_ST:
 			i2c_cmd.id = GET_ADCS_FULL_CONFIG_CMD_ID;
-			i2c_cmd.length = GET_ADCS_FULL_CONFIG_DATA_LENGTH;
+			i2c_cmd.length = ADCS_FULL_CONFIG_DATA_LENGTH;
 			err = AdcsGenericI2cCmd(&i2c_cmd);
-			memcpy(&data,&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2]);
-			SendAdcsTlm(data,ADCS_MAX_GET_CONFIG_PARAM_LENGTH,ADCS_GET_ADCS_CONFIG_PARAM_ST);
+			memcpy(data,&(i2c_cmd.data[(cmd->data[0]<<8) + cmd->data[1]]),cmd->data[2]);
+			SendAdcsTlm(data,MAX_CONFIG_PARAM_LENGTH,ADCS_GET_ADCS_CONFIG_PARAM_ST);
 			break;
 		case ADCS_GET_TLM_OVERRIDE_FLAG_ST:
 			err = AdcsGetTlmOverrideFlag((Boolean*)&temp);
@@ -660,6 +666,11 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 	}
 
+#ifdef TESTING
+	if(0 != err || 0!= i2c_cmd.ack){
+		printf("Error in Subtype %d: err = %d; I2C.ack = %d",sub_type,(unsigned int)err,(unsigned int)i2c_cmd.ack);
+	}
+#endif
 	unsigned int error_codes[] = {sub_type,err,i2c_cmd.ack};
 	SendAdcsTlm((byte*)error_codes,sizeof(error_codes),ADCS_ACK_DATA_ST);
 //TODO: save ACK with 'err' value

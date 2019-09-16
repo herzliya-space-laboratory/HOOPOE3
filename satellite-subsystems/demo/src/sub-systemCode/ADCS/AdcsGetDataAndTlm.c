@@ -6,16 +6,14 @@
 #include <hal/errors.h>
 #include <satellite-subsystems/cspaceADCS.h>
 #include <satellite-subsystems/cspaceADCS_types.h>
-
 #include "sub-systemCode/Global/TLM_management.h"
 #include "sub-systemCode/Global/FRAMadress.h"
+
+#include "sub-systemCode/Global/Global.h"
 #include "AdcsCommands.h"
 #include "AdcsGetDataAndTlm.h"
 
-#define TLM_ELEMENT_SIZE		(1+1+4+FN_MAXNAME+1+1+1) //TODO: check if needed
-
 Boolean OverrideSaveTLM = TRUE;
-
 AdcsTlmElement_t TlmElements[NUM_OF_ADCS_TLM];
 
 #define ADCS_TLM_DEFAULT_COLLECT_PERIOD 10	// (1/10) Hz - once every 10 seconds
@@ -154,7 +152,6 @@ int cspaceADCS_getSatellitePosition(int adcs_id, cspace_adcs_satellitePosition_t
 		ADCS_MISC_CURR_FILENAME,	ADCS_TLM_DEFAULT_COLLECT_PERIOD,	(time_unix)0,FALSE_8BIT},					\
 		};
 
-
 TroubleErrCode InitTlmElements()
 {
 	TroubleErrCode err = TRBL_SUCCESS;
@@ -215,27 +212,24 @@ Boolean CreateTlmElementFiles()
 	return err;
 }
 
-
-TroubleErrCode SaveElementTlmAtIndex(unsigned int index);
-
 TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 {
 	if (index >= NUM_OF_ADCS_TLM) {
 		return TRBL_INPUT_PARAM_ERR;
 	}
 
-	TroubleErrCode err = 0;
+	int err = 0;
 	FileSystemResult res = 0;
 	unsigned char adcs_tlm[ADCS_MAX_TLM_SIZE] = { 0 };
 
 	if ((NULL 	== TlmElements[index].TlmCollectFunc||
-		 NULL	== TlmElements[index].TlmFileName 	||
-		 TRUE_8BIT != TlmElements[index].ToSave		)
-			&&
-		FALSE == OverrideSaveTLM)
-	{
+		 NULL	== TlmElements[index].TlmFileName )){
+		return TRBL_NULL_DATA;
+	}
+	if((TRUE_8BIT != TlmElements[index].ToSave) && (!OverrideSaveTLM)	){
 		return TRBL_SUCCESS;
 	}
+
 	if(TlmElements[index].SavePeriod == 0){ // in case of Period error
 		TlmElements[index].SavePeriod = ADCS_TLM_DEFAULT_COLLECT_PERIOD;
 	}
@@ -246,7 +240,7 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 	}
 	if((curr_time - TlmElements[index].LastSaveTime) >= TlmElements[index].SavePeriod ){
 		err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
-		if (0 != err) {
+		if (0 != err && (E_COMMAND_NACKED != err)) {
 			// TODO: log error
 			return err;
 		}
@@ -257,22 +251,41 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 		}
 		TlmElements[index].LastSaveTime = curr_time;
 #ifdef TESTING
-			printf("Collected Tlm \t\"%s\"\n",TlmElements[index].TlmFileName);
-#ifdef PRINTTLM
-			if(index == 7){	// magnetic field vector
-				printf("\n[");
-				for(int i = 0; i< TlmElements[index].TlmElementeSize - 1;i++){
-					printf("%X,",adcs_tlm[i]);
-				}
-				printf("%X]\n",adcs_tlm[TlmElements[index].TlmElementeSize-1]);
+			printf("Collected Tlm \t\"%s\"\tat time:%d\n",TlmElements[index].TlmFileName,curr_time);
+	#ifdef PRINTTLM
+			printf("\n[");
+			for(int i = 0; i < TlmElements[index].TlmElementeSize - 1;i++){
+				printf("%X,",adcs_tlm[i]);
 			}
-#endif
+			printf("%X]\n",adcs_tlm[TlmElements[index].TlmElementeSize-1]);
+	#endif
+
+	#ifdef PRINT_MAG_TLM
+			if(4 == index){
+				printf("Mag Field X = %d\n",((cspace_adcs_magfieldvec_t*)(adcs_tlm))->fields.magfield_x);
+				printf("Mag Field Y = %d\n",((cspace_adcs_magfieldvec_t*)(adcs_tlm))->fields.magfield_y);
+				printf("Mag Field Z = %d\n",((cspace_adcs_magfieldvec_t*)(adcs_tlm))->fields.magfield_z);
+			}
+	#endif
+	#ifdef PRINT_ANG_RATE_TLM
+			if(7 == index){
+				printf("Ang Rate X = %d\n",((cspace_adcs_angrate_t*)(adcs_tlm))->fields.angrate_x);
+				printf("Ang Rate Y = %d\n",((cspace_adcs_angrate_t*)(adcs_tlm))->fields.angrate_y);
+				printf("Ang Rate Z = %d\n",((cspace_adcs_angrate_t*)(adcs_tlm))->fields.angrate_z);
+			}
+	#endif
+	#ifdef PRINT_WHEEL_SPEED_TLM
+			if(8 == index){
+				printf("Wheel Speed X = %d\n",((cspace_adcs_wspeed_t*)(adcs_tlm))->fields.speed_x);
+				printf("Wheel Speed Y = %d\n",((cspace_adcs_wspeed_t*)(adcs_tlm))->fields.speed_y);
+				printf("Wheel Speed Z = %d\n",((cspace_adcs_wspeed_t*)(adcs_tlm))->fields.speed_z);
+			}
+	#endif
 #endif
 		}
 
 	return TRBL_SUCCESS;
 }
-
 
 TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates)
 {
@@ -284,7 +297,6 @@ TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates)
 	}
 	return TRBL_SUCCESS;
 }
-
 
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 {
@@ -317,7 +329,6 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 		//TODO: log error
 		return (int) TRBL_NULL_DATA;
 	}
-
 	int err = 0;
 
 	err = FRAM_write(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
@@ -331,7 +342,6 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 	}
 	return 0;
 }
-
 
 int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM])
 {
@@ -414,14 +424,12 @@ TroubleErrCode RestoreDefaultTlmElement(){
 	return TRBL_SUCCESS;
 }
 
-
 void GetTlmElementAtIndex(AdcsTlmElement_t *elem,unsigned int index){
 	if(NULL == elem || index >= NUM_OF_ADCS_TLM){
 		return;
 	}
 	memcpy(elem,&TlmElements[index],sizeof(*elem));
 }
-
 
 TroubleErrCode GatherTlmAndData()
 {
@@ -442,29 +450,4 @@ TroubleErrCode GatherTlmAndData()
 	}
 	f_managed_releaseFS();
 	return err_occured;
-}
-
-TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10])
-{
-	if (raw_css == NULL)
-	{
-		return TRBL_NULL_DATA;
-	}
-
-	cspace_adcs_rawcss1_6_t css_1to6;
-	cspace_adcs_rawcss7_10_t css_7to10;
-
-	if (cspaceADCS_getRawCss1_6Measurements(0, &css_1to6) != 0)
-	{
-		return TRBL_FAIL;
-	}
-	if (cspaceADCS_getRawCss7_10Measurements(0, &css_7to10) != 0)
-	{
-		return TRBL_FAIL;
-	}
-
-	memcpy(raw_css, css_1to6.raw, 6);
-	memcpy(&raw_css[6], css_7to10.raw, 4);
-
-	return TRBL_SUCCESS;
 }

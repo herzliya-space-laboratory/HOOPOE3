@@ -446,12 +446,20 @@ int build_HK_spl_packet(HK_types type, byte* raw_data, TM_spl* packet)
 		return 0;
 	}
 
-	if (offlineTM_T <= type && type < ADCS_science_T){
+	if (type >= offlineTM_T && type < ADCS_science_T){
 		onlineTM_param OnlineTM_type = get_item_by_index(type - offlineTM_T);
 		packet->type = TM_ONLINE_TM_T;
 		packet->subType = (byte)type;
 		packet->length = (unsigned short)OnlineTM_type.TM_param_length;
 		memcpy(packet->data, raw_data + TIME_SIZE, OnlineTM_type.TM_param_length);
+		return 0;
+	}
+
+	if (type >= ADCS_science_T){
+		packet->type = TM_ADCS_T;
+		packet->subType = (byte)type;
+		packet->length = (unsigned short)HK_findElementSize(type);
+		memcpy(packet->data, raw_data + TIME_SIZE, packet->length);
 		return 0;
 	}
 	return -13;

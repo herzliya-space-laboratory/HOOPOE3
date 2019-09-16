@@ -61,8 +61,9 @@
 
 #define GET_ADCS_FULL_CONFIG_CMD_ID 		206
 #define GET_ADCS_FULL_CONFIG_DATA_LENGTH 	272
-#define ADCS_MAX_GET_CONFIG_PARAM_LENGTH 	64
 
+
+#define ADCS_FULL_CONFIG_DATA_LENGTH 		272
 #define ADCS_SGP4_ORBIT_PARAMS_DATA_LENGTH 	68
 
 #define ADCS_CMD_MAX_DATA_LENGTH			300
@@ -96,7 +97,6 @@ int AdcsReadI2cAck(AdcsTcErrorReason *rv);
  * @return Errors according to "<hal/Drivers/I2C.h>"
  */
 int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd);
-
 
 /*!
  * @brief Executes the command sent to the ADCS

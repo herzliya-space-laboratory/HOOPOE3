@@ -49,24 +49,24 @@ typedef enum HK_dump_types{
 }HK_types;
 
 typedef enum __attribute__ ((__packed__)) HK_AdcsTlmTypes{
-	AdcsTlm_UnixTime,
-	AdcsTlm_EstimatedAngles,
-	AdcsTlm_EstimatedRates,
-	AdcsTlm_SatellitePosition,
-	AdcsTlm_MagneticField,
-	AdcsTlm_CoarseSunVec,
-	AdcsTlm_FineSunVec,
-	AdcsTlm_RateSensor,
-	AdcsTlm_WheelSpeed,
-	AdcsTlm_MagnetorquerCommand,
-	AdcsTlm_RawCss1_6,
-	AdcsTlm_RawCss7_10,
-	AdcsTlm_RawMagnetic,
-	AdcsTlm_CubeCtrlCurrents,
-	AdcsTlm_AdcsState,
-	AdcsTlm_EstimatedMetaData,
-	AdcsTlm_PowerTemperature,
-	AdcsTlm_MiscCurrents
+	AdcsTlm_UnixTime = 			140 - ADCS_science_T,
+	AdcsTlm_EstimatedAngles = 	146 - ADCS_science_T,
+	AdcsTlm_EstimatedRates = 	147 - ADCS_science_T,
+	AdcsTlm_SatellitePosition = 150 - ADCS_science_T,
+	AdcsTlm_MagneticField = 	151 - ADCS_science_T,
+	AdcsTlm_CoarseSunVec = 		152 - ADCS_science_T,
+	AdcsTlm_FineSunVec =		153 - ADCS_science_T,
+	AdcsTlm_RateSensor = 		155 - ADCS_science_T,
+	AdcsTlm_WheelSpeed = 		156 - ADCS_science_T,
+	AdcsTlm_MagnetorquerCommand = 157 - ADCS_science_T,
+	AdcsTlm_RawCss1_6 = 		168 - ADCS_science_T,
+	AdcsTlm_RawCss7_10 = 		169 - ADCS_science_T,
+	AdcsTlm_RawMagnetic = 		170 - ADCS_science_T,
+	AdcsTlm_CubeCtrlCurrents =	172 - ADCS_science_T,
+	AdcsTlm_AdcsState = 		190 - ADCS_science_T,
+	AdcsTlm_EstimatedMetaData = 193 - ADCS_science_T,
+	AdcsTlm_PowerTemperature = 	195  - ADCS_science_T,
+	AdcsTlm_MiscCurrents =		198 - ADCS_science_T
 }HK_AdcsTlmTypes;
 /*
 

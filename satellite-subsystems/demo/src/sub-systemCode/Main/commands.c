@@ -509,7 +509,7 @@ void AUC_CUF(TC_spl decode)
 		startCUFintegration();
 		break;
 	case 3:
-		ExecuteCUF(decode.data);
+		ExecuteCUF((char*)decode.data);
 		break;
 	case 4:
 		saveBackup();
@@ -521,13 +521,13 @@ void AUC_CUF(TC_spl decode)
 		removeFiles();
 		break;
 	case 7:
-		RemoveCUF(decode.data);
+		RemoveCUF((char*)decode.data);
 		break;
 	case 8:
-		DisableCUF(decode.data);
+		DisableCUF((char*)decode.data);
 		break;
 	case 9:
-		EnableCUF(decode.data);
+		EnableCUF((char*)decode.data);
 		break;
 	default:
 		cmd_error(&type, &err);

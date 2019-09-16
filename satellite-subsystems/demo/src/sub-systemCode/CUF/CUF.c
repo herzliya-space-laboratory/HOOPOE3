@@ -156,7 +156,7 @@ unsigned long GenerateSSH(unsigned char* data)
 int AuthenticateCUF(CUF* code)
 {
 	unsigned long newSSH;
-	newSSH = GenerateSSH(code->data); //generate an ssh for the data
+	newSSH = GenerateSSH((char*)code->data); //generate an ssh for the data
 	if (newSSH == 0) //check generation
 		return -1; //return -1 on fail
 	if (newSSH == code->SSH) //authenticate the ssh with the pre-made one
@@ -263,7 +263,7 @@ int ExecuteCUF(char* name)
 		}
 		f_close(codeFile);
 		CUFFunction = (int (*)(void* (*CUFSwitch)(int))) CUFDataStorage; //convert the CUF data to a function
-		code->data = castCharArrayToIntArray(CUFDataStorage, code->length*4);
+		code->data = castCharArrayToIntArray((unsigned char*)CUFDataStorage, code->length*4);
 	}
 	else
 	{
@@ -388,7 +388,7 @@ Boolean CUFTest(int* testCUFData)
 			printf("%d, %d, %d\n", testCUFDataCheck[i], testCUFData[i], i);
 		}
 	}
-	CUF* testFile = IntegrateCUF("CodeFile001", testCUFData, 28, GenerateSSH(testCUFData), TRUE, FALSE, FALSE);
+	CUF* testFile = IntegrateCUF((char*)"CodeFile001", testCUFData, 28, GenerateSSH(testCUFData), TRUE, FALSE, FALSE);
 	if (testFile == NULL)
 	{
 		printf("Failed To Integrate CUF\n");

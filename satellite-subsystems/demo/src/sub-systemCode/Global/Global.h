@@ -19,9 +19,7 @@
 #include <hal/Timing/Time.h>
 #include <hal/Storage/FRAM.h>
 
-
 #include "sub-systemCode/HoopoeTestingConfigurations.h"
-
 
 #include "FRAMadress.h"
 #include "sizes.h"
