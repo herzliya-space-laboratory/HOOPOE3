@@ -564,6 +564,8 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 		DB_result = SearchDataBase_byMark(database_current_address, &image_metadata, &image_address);
 		database_current_address = image_address + sizeof(ImageMetadata);
 
+		Boolean already_transferred_raw = FALSE;
+
 		if ( DB_result == 0 )
 		{
 			if (checkForFileType(image_metadata, raw) == DataBaseNotInSD)
@@ -577,6 +579,8 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 				TurnOffGecko();
 
 				vTaskDelay(DELAY);
+
+				already_transferred_raw = TRUE;
 			}
 
 			if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
@@ -588,8 +592,11 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 				vTaskDelay(DELAY);
 			}
 
-			DB_result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, raw, image_address, image_metadata);
-			DB_RETURN_ERROR(DB_result);
+			if (!already_transferred_raw)
+			{
+				DB_result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, raw, image_address, image_metadata);
+				DB_RETURN_ERROR(DB_result);
+			}
 
 			// making sure i wont lose the data written in the functions above to the FRAM:
 			FRAM_read( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
@@ -657,20 +664,21 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 
 	unsigned int currentDate = 0;
 	Time_getUnixEpoch(&currentDate);
-/*
-	// Getting Sat Angles:
+
+	// Getting Sat Angular Rates:
 	cspace_adcs_angrate_t sen_rates;
 	TroubleErrCode ADCS_error = AdcsGetMeasAngSpeed(&sen_rates);
 	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingAngleRates);
-*/
+
 	uint16_t angle_rates[3];
-	//memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
+	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
 
 	// Getting Course-Sun-Sensor Values:
-	byte raw_css[10];/*
+	byte raw_css[10];
 	ADCS_error = AdcsGetCssVector(raw_css);
 	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingCssVector);
-*/
+
+	// Taking the Image:
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
 	CMP_AND_RETURN(err, 0, GECKO_Take_Success - err);
 
