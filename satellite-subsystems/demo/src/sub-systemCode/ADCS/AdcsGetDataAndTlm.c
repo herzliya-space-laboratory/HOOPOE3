@@ -224,18 +224,18 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 		return TRBL_INPUT_PARAM_ERR;
 	}
 
-	TroubleErrCode err = 0;
+	int err = 0;
 	FileSystemResult res = 0;
 	unsigned char adcs_tlm[ADCS_MAX_TLM_SIZE] = { 0 };
 
 	if ((NULL 	== TlmElements[index].TlmCollectFunc||
-		 NULL	== TlmElements[index].TlmFileName 	||
-		 TRUE_8BIT != TlmElements[index].ToSave		)
-			&&
-		FALSE == OverrideSaveTLM)
-	{
+		 NULL	== TlmElements[index].TlmFileName )){
+		return TRBL_NULL_DATA;
+	}
+	if((TRUE_8BIT != TlmElements[index].ToSave) && (!OverrideSaveTLM)	){
 		return TRBL_SUCCESS;
 	}
+
 	if(TlmElements[index].SavePeriod == 0){ // in case of Period error
 		TlmElements[index].SavePeriod = ADCS_TLM_DEFAULT_COLLECT_PERIOD;
 	}
@@ -246,7 +246,7 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 	}
 	if((curr_time - TlmElements[index].LastSaveTime) >= TlmElements[index].SavePeriod ){
 		err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
-		if (0 != err) {
+		if (0 != err && (E_COMMAND_NACKED != err)) {
 			// TODO: log error
 			return err;
 		}
@@ -256,20 +256,7 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 			return TRBL_FS_WRITE_ERR;
 		}
 		TlmElements[index].LastSaveTime = curr_time;
-#ifdef TESTING
-			printf("Collected Tlm \t\"%s\"\n",TlmElements[index].TlmFileName);
-#ifdef PRINTTLM
-			if(index == 7){	// magnetic field vector
-				printf("\n[");
-				for(int i = 0; i< TlmElements[index].TlmElementeSize - 1;i++){
-					printf("%X,",adcs_tlm[i]);
-				}
-				printf("%X]\n",adcs_tlm[TlmElements[index].TlmElementeSize-1]);
-			}
-#endif
-#endif
-		}
-
+	}
 	return TRBL_SUCCESS;
 }
 
