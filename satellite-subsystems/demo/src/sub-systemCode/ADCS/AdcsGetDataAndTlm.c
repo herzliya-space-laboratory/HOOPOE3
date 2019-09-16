@@ -265,6 +265,18 @@ TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates)
 	return TRBL_SUCCESS;
 }
 
+TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]){
+	int err = cspaceADCS_getRawCss1_6Measurements(ADCS_ID,(cspace_adcs_rawcss1_6_t*)raw_css);
+	if(0 != err){
+		return TRBL_FAIL;
+	}
+	err = cspaceADCS_getRawCss7_10Measurements(ADCS_ID,(cspace_adcs_rawcss7_10_t*)(raw_css+sizeof(cspace_adcs_rawcss1_6_t)));
+	if(0 != err){
+		return TRBL_FAIL;
+	}
+	return TRBL_SUCCESS;
+}
+
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 {
 	TroubleErrCode err = TRBL_SUCCESS;

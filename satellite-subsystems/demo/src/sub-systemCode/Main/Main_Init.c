@@ -44,7 +44,6 @@
 #include "../Ants.h"
 
 #include "../ADCS/AdcsMain.h"
-#include "../ADCS/AdcsTest.h"
 
 #include "../TRXVU.h"
 #include "../payload/Request Management/CameraManeger.h"

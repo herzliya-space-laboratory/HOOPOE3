@@ -29,6 +29,9 @@
 #define I2C_TRXVU_TC_ADDR 0x61
 #define I2C_TRXVU_RC_ADDR 0x60
 
+#define ADCS_ID 0
+#define ADCS_I2C_ADRR 0x57
+
 #define TEMP_VALUE 0
 
 #define SWITCH_ON TRUE

@@ -2,10 +2,9 @@
 #define ADCS_MAIN_H_
 
 #include "sub-systemCode/COMM/GSC.h"
+#include "sub-systemCode/Global/Global.h"
 #include "AdcsTroubleShooting.h"
 
-#define ADCS_ID 0
-#define ADCS_I2C_ADRR 0x57
 
 typedef enum
 {

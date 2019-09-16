@@ -73,6 +73,14 @@ Boolean CreateTlmElementFiles();
 TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates);
 
 /*!
+ * @brief	returns the measured CSS values
+ * @return 	TRBL_FAIL in case of error.
+ * 			TRBL_SUCCSESS in case of success.
+ * 			TRBL_NULL_DATA in case of NULL input data.
+ */
+TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]);
+
+/*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD
  * 			and which will not.
  * @param[in] tlm_to_save a boolean array stating which TLM will be saved.
@@ -133,13 +141,5 @@ void GetTlmElementAtIndex(AdcsTlmElement_t * elem,unsigned int index);
  * @get the data from the ADCS computer.
  */
 TroubleErrCode GatherTlmAndData();
-
-/*!
- * @brief	returns the measured CSS values
- * @return 	TRBL_FAIL in case of error.
- * 			TRBL_SUCCSESS in case of success.
- * 			TRBL_NULL_DATA in case of NULL input data.
- */
-TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]);
 
 #endif /* ADCSGETDATAANDTLM_H_ */
