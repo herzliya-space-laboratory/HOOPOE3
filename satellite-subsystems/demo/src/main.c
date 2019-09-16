@@ -108,6 +108,7 @@ void taskMain()
 
 int main()
 {
+
 	TRACE_CONFIGURE_ISP(DBGU_STANDARD, 2000000, BOARD_MCK);
 	// Enable the Instruction cache of the ARM9 core. Keep the MMU and Data Cache disabled.
 	CP15_Enable_I_Cache();
@@ -115,9 +116,9 @@ int main()
 	// The actual watchdog is already started, this only initializes the watchdog-kick interface.
 	WDT_start();
 
-	printf("Task Main \n");
+	printf("\n\n\n\n\n---Task Main \n");
 	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 8196, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
-	printf("start sch\n");
+	printf("\n---Start Scheduler\n");
 	vTaskStartScheduler();
 	while(1){
 		printf("should not be here\n");

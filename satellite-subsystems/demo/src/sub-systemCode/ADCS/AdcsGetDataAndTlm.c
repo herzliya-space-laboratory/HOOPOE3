@@ -223,13 +223,13 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 	unsigned char adcs_tlm[ADCS_MAX_TLM_SIZE] = { 0 };
 
 	if ((NULL 	== TlmElements[index].TlmCollectFunc||
-		 NULL	== TlmElements[index].TlmFileName 	||
-		 TRUE_8BIT != TlmElements[index].ToSave		)
-			&&
-		FALSE == OverrideSaveTLM)
-	{
+		 NULL	== TlmElements[index].TlmFileName )){
+		return TRBL_NULL_DATA;
+	}
+	if((TRUE_8BIT != TlmElements[index].ToSave) && (!OverrideSaveTLM)	){
 		return TRBL_SUCCESS;
 	}
+
 	if(TlmElements[index].SavePeriod == 0){ // in case of Period error
 		TlmElements[index].SavePeriod = ADCS_TLM_DEFAULT_COLLECT_PERIOD;
 	}
@@ -240,7 +240,7 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 	}
 	if((curr_time - TlmElements[index].LastSaveTime) >= TlmElements[index].SavePeriod ){
 		err = TlmElements[index].TlmCollectFunc(0, adcs_tlm);
-		if (0 != err && E_COMMAND_NACKED != err) {
+		if (0 != err && (E_COMMAND_NACKED != err)) {
 			// TODO: log error
 			return err;
 		}
@@ -307,7 +307,6 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 		//TODO: log error
 		return (int) TRBL_NULL_DATA;
 	}
-
 	int err = 0;
 
 	err = FRAM_write(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,

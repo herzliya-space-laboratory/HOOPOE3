@@ -19,12 +19,6 @@
 
 #define MAX_CONFIG_PARAM_LENGTH 64
 
-#ifdef TESTING
-	#define PRINT_ON_TEST(msg,err)	printf(#msg " = %d\n",err);
-#else
-	#define PRINT_ON_TEST(msg,err) ;
-#endif
-
 
 //TODO: define as enum
 #define ADCS_ACK_PROCESSED_FLAG_INDEX 1
@@ -150,7 +144,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 
 	adcs_i2c_cmd i2c_cmd = {0};
 #ifdef TESTING
-	printf("\n\nExecuting CMD with subtyp:	%d\n\n",sub_type);
+	printf("\n\nExecuting CMD with subtype:	%d\n\n",sub_type);
 #endif
 	switch(sub_type)
 	{
@@ -413,16 +407,15 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			memcpy(&temp,cmd->data,sizeof(Boolean));
 			err = AdcsSetTlmOverrideFlag((Boolean)temp);
 			break;
-		case ADCS_SET_ADCS_LOOP_PARAMETERS:
+		case ADCS_SET_ADCS_LOOP_PARAMETERS_ST:
 			err = UpdateAdcsFramParameters(cmd->data[0],cmd->data+1);
 			break;
-		case ADCS_UPDATE_TLM_PERIOD_VEC:
+		case ADCS_UPDATE_TLM_PERIOD_VEC_ST:
 			err = UpdateTlmPeriodVector(cmd->data);
 			break;
-		case ADCS_UPDATE_TLM_SAVE_VEC:
+		case ADCS_UPDATE_TLM_SAVE_VEC_ST:
 			err = UpdateTlmToSaveVector((Boolean8bit*)cmd->data);
 			break;
-
 		case ADCS_SET_BOOT_INDEX_ST:
 			memcpy(&bootindex,cmd->data,sizeof(bootindex));
 			err = cspaceADCS_BLSetBootIndex(ADCS_ID,bootindex);
