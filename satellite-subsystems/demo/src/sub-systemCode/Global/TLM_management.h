@@ -46,8 +46,6 @@ typedef enum
 	FS_COULD_NOT_GIVE_SEMAPHORE
 } FileSystemResult;
 
-int f_managed_enterFS();
-int f_managed_releaseFS();
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler);
 int f_managed_close(F_FILE** fileHandler);
 /*

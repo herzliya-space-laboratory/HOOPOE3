@@ -88,9 +88,10 @@ void CameraManagerTaskMain()
 	Camera_Request req;
 	time_unix timeNow;
 
+	int f_error = f_enterFS();//task 3 enter
+	check_int("CameraManagerTaskMain, enter FS", f_error);
 	while(TRUE)
 	{
-		f_managed_enterFS();
 		if (removeRequestFromQueue(&req) > -1)
 		{
 			act_upon_request(req);
@@ -110,7 +111,7 @@ void CameraManagerTaskMain()
 			Camera_Request request = { .cmd_id = 0, .id = Handle_Mark, .keepOnCamera = 10 };
 			act_upon_request(request);
 		}
-		f_managed_releaseFS();
+
 		vTaskDelay(SYSTEM_DEALY);
 	}
 }

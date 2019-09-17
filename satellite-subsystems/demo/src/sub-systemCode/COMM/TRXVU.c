@@ -160,9 +160,7 @@ void TRXVU_task()
 	//6. entering infinite loop
 	while(1)
 	{
-		f_managed_enterFS();
 		trxvu_logic();
-		f_managed_releaseFS();
 		vTaskDelay(TASK_DELAY);
 	}
 }
@@ -267,16 +265,16 @@ void Dump_task(void *arg)
 	startTime = BigEnE_raw_to_uInt(&dump_param_data[10]);
 	endTime = BigEnE_raw_to_uInt(&dump_param_data[14]);
 
-	f_managed_enterFS();
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
 		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, id);
-		f_managed_releaseFS();
 		vTaskDelete(NULL);
 	}
 	else
 	{
+		int f_error = f_enterFS();
+		check_int("enter FS, dump task", f_error);// task enter 5
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
@@ -294,7 +292,7 @@ void Dump_task(void *arg)
 	}
 
 	set_system_state(dump_param, SWITCH_OFF);
-	f_managed_releaseFS();
+	f_releaseFS();
 	vTaskDelete(NULL);
 }
 
@@ -338,7 +336,6 @@ void transponder_logic(time_unix time, command_id cmdID)
 
 void Transponder_task(void *arg)
 {
-	f_managed_enterFS();
 	portBASE_TYPE lu_error = 0;
 	int i_error = 0;
 
@@ -350,7 +347,6 @@ void Transponder_task(void *arg)
 	if (get_system_state(transponder_active_param))
 	{
 		save_ACK(ACK_TRANSPONDER, ERR_TASK_EXISTS, cmdId);
-		f_managed_releaseFS();
 		vTaskDelete(NULL);
 	}
 	else
@@ -380,7 +376,6 @@ void Transponder_task(void *arg)
 		xQueueReset(xTransponderQueue);
 		transponder_logic(time, cmdId);
 		save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
-		f_managed_releaseFS();
 		vTaskDelete(NULL);
 	}
 	else
@@ -391,7 +386,6 @@ void Transponder_task(void *arg)
 	change_TRXVU_state(NOMINAL_MODE);
 	lu_error = xSemaphoreGive_extended(xIsTransmitting);
 	check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
-	f_managed_releaseFS();
 	vTaskDelete(NULL);
 }
 
@@ -409,7 +403,6 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 			save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
 			WriteTransponderLog(TRANSPONDER_DEACTIVATION, TRANSPONDER_STOP_CMD_INFO);
 			change_TRXVU_state(NOMINAL_MODE);
-			f_managed_releaseFS();
 			vTaskDelete(NULL);
 		}
 	}
@@ -427,7 +420,7 @@ void lookForRequestToDelete_dump(command_id cmdID)
 			vTaskDelay(100);
 			save_ACK(ACK_DUMP, ERR_STOP_TASK, cmdID);
 			set_system_state(dump_param, SWITCH_OFF);
-			f_managed_releaseFS();
+			f_releaseFS();
 			vTaskDelete(NULL);
 		}
 	}
@@ -616,7 +609,6 @@ void Beacon_task()
 	voltage_t low_v_beacon;
 	while(1)
 	{
-		f_managed_enterFS();
 		printf("\n         Beacon logic\n\n");
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
@@ -649,7 +641,6 @@ void Beacon_task()
 			// low
 			delay = GET_BEACON_DELAY_LOW_VOLTAGE(delay);
 		}
-		f_managed_releaseFS();
 		vTaskDelayUntil(&last_time, delay);
 	}
 }
