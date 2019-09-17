@@ -81,6 +81,7 @@ void delete_allTMFilesFromSD()
 						break;
 					else
 						printf("f_delete in delete_allTMFilesFromSD: %d\n", err);
+					vTaskDelay(1);
 				}
 			}
 

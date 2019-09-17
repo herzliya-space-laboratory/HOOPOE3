@@ -4,9 +4,12 @@
 
 #define TESTING
 #define PRINTTLM
-#define ANTS_ON
+
+// ---- ANTENNAS
+
+//#define ANTS_ON
 #define ANTS_DO_NOT_DEPLOY
-#define PRINT_IN_CHECK_FUNCTION			(0)
+#define PRINT_IN_CHECK_FUNCTION			0
 
 //#define NOT_USE_ACK_HK
 #define TESTS
@@ -17,4 +20,6 @@
 #define PRINT_MAG_TLM
 #define PRINT_ANG_RATE_TLM
 #define PRINT_WHEEL_SPEED_TLM
+
+
 #endif /* HOOPOETESTINGCONFIGURATIONS_H_ */

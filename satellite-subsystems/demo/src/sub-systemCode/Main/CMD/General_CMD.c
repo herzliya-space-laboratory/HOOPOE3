@@ -148,6 +148,27 @@ void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
 	}
 }
 
+void cmd_stop_TM(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_STOP_TM;
+	Boolean8bit value = FALSE_8BIT;
+	int i_error = FRAM_write(&value, STOP_TELEMETRY_ADDR, 1);
+	if (i_error == 0)
+		*err = ERR_SUCCESS;
+	else
+		*err = ERR_FRAM_WRITE_FAIL;
+}
+void cmd_resume_TM(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_RESUME_TM;
+	Boolean8bit value = TRUE_8BIT;
+	int i_error = FRAM_write(&value, STOP_TELEMETRY_ADDR, 1);
+	if (i_error == 0)
+		*err = ERR_SUCCESS;
+	else
+		*err = ERR_FRAM_WRITE_FAIL;
+}
+
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	*type = ACK_SOFT_RESTART;

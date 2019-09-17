@@ -79,6 +79,8 @@
 #define DUMMY_FUNC_ST						122
 #define REDEPLOY							56
 #define ARM_DISARM							57
+#define STOP_TM_ST							200
+#define RESUME_TM_ST						201
 
 //payload
 #define SEND_PIC_CHUNCK_CHUNK_FIELD_ST		1

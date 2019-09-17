@@ -21,6 +21,10 @@ void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_dump(TC_spl cmd);
 
+void cmd_resume_TM(Ack_type* type, ERR_type* err);
+
+void cmd_stop_TM(Ack_type* type, ERR_type* err);
+
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_reset_satellite(Ack_type* type, ERR_type* err);

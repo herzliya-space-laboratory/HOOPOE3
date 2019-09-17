@@ -168,6 +168,14 @@ int check_number_commands()
 
 void act_upon_command(TC_spl decode)
 {
+	byte FRAMdata[OFFLINE_FRAM_STRUCT_SIZE * 10];
+	int error = FRAM_read(FRAMdata, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * 10);
+	printf("online TM:  ");
+	for (int i = 0; i < OFFLINE_FRAM_STRUCT_SIZE * 10; i++)
+	{
+		printf("%u ", FRAMdata[i]);
+	}
+	printf("\n");
 	//later use in ACK
 	switch (decode.type)
 	{
@@ -300,6 +308,12 @@ void AUC_general(TC_spl decode)
 		break;
 	case (DUMMY_FUNC_ST):
 		cmd_dummy_func(&type, &err);
+		break;
+	case (STOP_TM_ST):
+		cmd_stop_TM(&type, &err);
+		break;
+	case (RESUME_TM_ST):
+		cmd_resume_TM(&type, &err);
 		break;
 	default:
 		cmd_error(&type, &err);
@@ -452,6 +466,7 @@ void AUC_SW(TC_spl decode)
 		cmd_error(&type, &err);
 		break;
 	}
+
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
 	save_ACK_s(type, err, decode.id);
@@ -497,13 +512,15 @@ void AUC_CUF(TC_spl decode)
 	Ack_type type;
 	ERR_type err;
 
+	f_managed_enterFS();
+
 	switch (decode.subType)
 	{
 	case 0:
 		headerHandle(decode);
 		break;
 	case 1:
-		addToArray(decode, (int) decode.data[0]);
+		addToArray(decode, castCharPointerToInt(decode.data));
 		break;
 	case 2:
 		startCUFintegration();
@@ -533,6 +550,9 @@ void AUC_CUF(TC_spl decode)
 		cmd_error(&type, &err);
 		break;
 	}
+
+	f_managed_releaseFS();
+
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
 	save_ACK_s(type, err, decode.id);

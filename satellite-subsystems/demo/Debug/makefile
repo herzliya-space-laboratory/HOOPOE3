@@ -19,6 +19,7 @@ RM := rm -rf
 -include src/sub-systemCode/Main/CMD/subdir.mk
 -include src/sub-systemCode/Main/subdir.mk
 -include src/sub-systemCode/Global/subdir.mk
+-include src/sub-systemCode/CUF/subdir.mk
 -include src/sub-systemCode/COMM/subdir.mk
 -include src/sub-systemCode/ADCS/subdir.mk
 -include src/subdir.mk

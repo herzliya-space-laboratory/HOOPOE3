@@ -13,7 +13,6 @@ static Boolean uploadBoolArray[uploadCodeLength/frameLength];
 
 void initializeUpload()
 {
-	InitCUF(TRUE);
 	int i = 0;
 	for (; i < uploadCodeLength; i++)
 	{
@@ -81,7 +80,7 @@ void addToArray(TC_spl decode, int framePlace)
 {
 	saveAck("Start to save code!!!");
 	int i = 1;
-	for (; i < decode.length; i++)
+	for (; i < decode.length - 3; i++)
 	{
 		uploadCodeArry[framePlace*frameLength+i-1] = decode.data[i+3];//!!may not be used!!Upload code array (sizeof(int))*2)<is used to pass the frame parameters data
 	}
@@ -89,7 +88,7 @@ void addToArray(TC_spl decode, int framePlace)
 //	printf("Now array is \n %s", uploadCodeArry);
 	saveAck("Finished!!");
 	uploadBoolArray[framePlace] = 1;
-	//CUFTest(uploadCodeArry);
+	TRX_sendFrame(uploadBoolArray, boolArrayLength);
 }
 
 void headerHandle(TC_spl decode)
