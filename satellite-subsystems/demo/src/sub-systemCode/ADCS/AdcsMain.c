@@ -128,6 +128,7 @@ void AdcsTask()
 
 	while(TRUE)
 	{
+		f_managed_enterFS();
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
 			vTaskDelay(system_off_delay);
 			continue;
@@ -150,7 +151,7 @@ void AdcsTask()
 		if(TRBL_SUCCESS != trbl){
 			AdcsTroubleShooting(trbl);
 		}
-
+		f_managed_releaseFS();
 		vTaskDelay(delay_loop);
 	}
 

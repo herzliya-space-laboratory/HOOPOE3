@@ -80,10 +80,7 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			i_error = HK_find_fileName(files[i], file_name);
 			if (i_error != 0)
 				continue;
-			int i_error = f_managed_enterFS();
-			check_int("f_managed_enterFS in cmd_delete_TM", i_error);
 			result = c_fileDeleteElements(file_name, start_time, end_time);
-			f_managed_releaseFS();
 			if (result != FS_SUCCSESS)
 			{
 				errorRes = FS_FAIL;
@@ -141,11 +138,7 @@ void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
 {
 	*type = ACK_RESET_SD_TLM;
 	*err = ERR_SUCCESS;
-	if(f_managed_enterFS() == 0)
-	{
-		delete_allTMFilesFromSD();
-		f_managed_releaseFS();
-	}
+	delete_allTMFilesFromSD();
 }
 
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)

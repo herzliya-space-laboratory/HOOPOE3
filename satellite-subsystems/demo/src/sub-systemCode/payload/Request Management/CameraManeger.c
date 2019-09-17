@@ -90,6 +90,7 @@ void CameraManagerTaskMain()
 
 	while(TRUE)
 	{
+		f_managed_enterFS();
 		if (removeRequestFromQueue(&req) > -1)
 		{
 			act_upon_request(req);
@@ -109,7 +110,7 @@ void CameraManagerTaskMain()
 			Camera_Request request = { .cmd_id = 0, .id = Handle_Mark, .keepOnCamera = 10 };
 			act_upon_request(request);
 		}
-
+		f_managed_releaseFS();
 		vTaskDelay(SYSTEM_DEALY);
 	}
 }
@@ -229,9 +230,6 @@ void startDumpTask(Camera_Request request)
 void act_upon_request(Camera_Request request)
 {
 	ImageDataBaseResult error = DataBaseSuccess;
-	int FSerror = f_managed_enterFS();
-	if (FSerror)
-		WriteErrorLog(FSerror, SYSTEM_OBC, (int)0);
 
 	Boolean CouldNotExecute = FALSE;
 
@@ -373,12 +371,5 @@ void act_upon_request(Camera_Request request)
 		{
 			WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 		}
-	}
-
-	if (FSerror == 0)
-	{
-		FSerror = f_managed_releaseFS();
-		if (FSerror)
-			WriteErrorLog(FSerror, SYSTEM_OBC, (int)0);
 	}
 }

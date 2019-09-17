@@ -68,6 +68,7 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Main/CMD/../../ADCS/AdcsTroubleShooting.h \
  ../src/sub-systemCode/ADCS/AdcsMain.h \
  C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h \
+ C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/Global/Global.h \
  ../src/sub-systemCode/ADCS/AdcsTroubleShooting.h \
  ../src/sub-systemCode/ADCS/AdcsCommands.h \
  ../src/sub-systemCode/Global/OnlineTM.h \
@@ -223,6 +224,8 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:
 ../src/sub-systemCode/ADCS/AdcsMain.h:
 
 C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h:
+
+C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/Global/Global.h:
 
 ../src/sub-systemCode/ADCS/AdcsTroubleShooting.h:
 

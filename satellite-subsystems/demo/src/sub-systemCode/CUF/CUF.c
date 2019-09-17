@@ -388,7 +388,7 @@ Boolean CUFTest(int* testCUFData)
 			printf("%d, %d, %d\n", testCUFDataCheck[i], testCUFData[i], i);
 		}
 	}
-	CUF* testFile = IntegrateCUF((char*)"CodeFile001", testCUFData, 28, GenerateSSH(testCUFData), TRUE, FALSE, FALSE);
+	CUF* testFile = IntegrateCUF((char*)("CodeFile001"), testCUFData, 28, GenerateSSH(testCUFData), TRUE, FALSE, FALSE);
 	if (testFile == NULL)
 	{
 		printf("Failed To Integrate CUF\n");

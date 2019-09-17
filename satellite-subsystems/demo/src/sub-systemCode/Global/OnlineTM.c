@@ -539,12 +539,12 @@ void save_onlineTM_task()
 	}
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 		offline_TM_list[i].lastSave = 0;
-	int i_error = f_managed_enterFS();
-	check_int("save_onlineTM_task, f_managed_enterFS", i_error);
 	while(TRUE)
 	{
+		f_managed_enterFS();
 		updateSD_state();
 		save_onlineTM_logic();
+		f_managed_releaseFS();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }

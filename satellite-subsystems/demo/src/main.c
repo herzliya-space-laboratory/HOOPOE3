@@ -96,6 +96,7 @@ void taskMain()
 	
 	while(1)
 	{
+		f_managed_enterFS();
 		EPS_Conditioning();
 
 		Command_logic();
@@ -105,7 +106,7 @@ void taskMain()
 #ifdef ANTS_ON
 		DeployIfNeeded();
 #endif
-
+		f_managed_releaseFS();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
