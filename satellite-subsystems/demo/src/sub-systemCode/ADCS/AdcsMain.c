@@ -131,6 +131,7 @@ void AdcsTask()
 		f_managed_enterFS();
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
 			vTaskDelay(system_off_delay);
+			f_managed_releaseFS();
 			continue;
 		}
 		UpdateAdcsStateMachine();

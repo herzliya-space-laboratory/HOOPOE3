@@ -222,7 +222,7 @@ int SubSystemTaskStart()
 
 	KickStartCamera();
 	vTaskDelay(100);
-	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	return 0;
 }
 

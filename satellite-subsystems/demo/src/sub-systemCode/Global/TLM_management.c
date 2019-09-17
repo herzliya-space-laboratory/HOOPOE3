@@ -122,13 +122,17 @@ void printSem()
 void updateVectorSem(xTaskHandle taskHandle, Boolean take)
 {
 	char* currentName = (char*)pcTaskGetTaskName(taskHandle);
+	if (currentName[0] == 's' && currentName[1] == 'k')
+	{
+		printf("this is sk, get him!!!!!!!\n");
+	}
 	if (take)
 	{
 		for (int i = 0; i < FS_MAX_TASK_TETER; i++)
 		{
 			if (strcmp(taskName[i], currentName) == 0)
 			{
-				printf("updateVectorSem(), You are already on the list\n");
+				printf("%s: updateVectorSem(), You are already on the list\n", currentName);
 				printSem();
 				return;
 			}
@@ -142,7 +146,7 @@ void updateVectorSem(xTaskHandle taskHandle, Boolean take)
 				return;
 			}
 		}
-		printf("updateVectorSem(), Sem nooooooo\n");
+		printf("%s: updateVectorSem(), Sem you cannot enter the list\n", currentName);
 		printSem();
 	}
 	else
@@ -155,7 +159,7 @@ void updateVectorSem(xTaskHandle taskHandle, Boolean take)
 				return;
 			}
 		}
-		printf("updateVectorSem(), Sem yesssssssss\n");
+		printf("%s: updateVectorSem(), Sem you are not on the list\n", currentName);
 		printSem();
 	}
 }
