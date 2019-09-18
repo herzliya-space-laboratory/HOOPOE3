@@ -273,7 +273,7 @@ void Dump_task(void *arg)
 	}
 	else
 	{
-		int f_error = f_enterFS();
+		int f_error = f_managed_enterFS();
 		check_int("enter FS, dump task", f_error);// task enter 5
 		set_system_state(dump_param, SWITCH_ON);
 	}
@@ -292,7 +292,7 @@ void Dump_task(void *arg)
 	}
 
 	set_system_state(dump_param, SWITCH_OFF);
-	f_releaseFS();
+	f_managed_releaseFS();
 	vTaskDelete(NULL);
 }
 
@@ -378,14 +378,9 @@ void Transponder_task(void *arg)
 		save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
 		vTaskDelete(NULL);
 	}
-	else
-	{
-		save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
-	}
 
+	save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
 	change_TRXVU_state(NOMINAL_MODE);
-	lu_error = xSemaphoreGive_extended(xIsTransmitting);
-	check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
 	vTaskDelete(NULL);
 }
 
@@ -420,7 +415,7 @@ void lookForRequestToDelete_dump(command_id cmdID)
 			vTaskDelay(100);
 			save_ACK(ACK_DUMP, ERR_STOP_TASK, cmdID);
 			set_system_state(dump_param, SWITCH_OFF);
-			f_releaseFS();
+			f_managed_releaseFS();
 			vTaskDelete(NULL);
 		}
 	}

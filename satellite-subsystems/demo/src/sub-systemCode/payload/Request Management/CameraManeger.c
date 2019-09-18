@@ -88,7 +88,7 @@ void CameraManagerTaskMain()
 	Camera_Request req;
 	time_unix timeNow;
 
-	int f_error = f_enterFS();//task 3 enter
+	int f_error = f_managed_enterFS();//task 3 enter
 	check_int("CameraManagerTaskMain, enter FS", f_error);
 	while(TRUE)
 	{

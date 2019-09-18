@@ -540,7 +540,7 @@ void save_onlineTM_task()
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
 		offline_TM_list[i].lastSave = 0;
 
-	int f_error = f_enterFS();//4 enter FS
+	int f_error = f_managed_enterFS();//4 enter FS
 	check_int("save online TM, enter FS", f_error);
 	while(TRUE)
 	{

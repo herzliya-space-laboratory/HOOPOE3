@@ -285,7 +285,7 @@ void imageDump_task(void* param)
 	}
 	else
 	{
-		int f_error = f_enterFS();// task enter 5
+		int f_error = f_managed_enterFS();// task enter 5
 		check_int("enter FS, in imageDump_task", f_error);
 		set_system_state(dump_param, SWITCH_ON);
 	}
@@ -298,7 +298,7 @@ void imageDump_task(void* param)
 	if (error != DataBaseSuccess)
 	{
 		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
-		f_releaseFS();
+		f_managed_releaseFS();
 		vTaskDelete(NULL);
 	}
 
@@ -364,6 +364,6 @@ void imageDump_task(void* param)
 		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 
 	set_system_state(dump_param, SWITCH_OFF);
-	f_releaseFS();
+	f_managed_releaseFS();
 	vTaskDelete(NULL);
 }

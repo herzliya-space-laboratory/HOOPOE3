@@ -11,11 +11,19 @@
 #include "TLM_management.h"
 #include "Global.h"
 
+#define MAX_ELEMENT_SIZE	20
+
 typedef struct __attribute__ ((__packed__))
 {
 	char file_name[MAX_F_FILE_NAME_SIZE];
 	int elementSize;
-	byte
+	byte buffer[MAX_ELEMENT_SIZE];
 }saveRequest_task;
+
+void init_GenericSaveQueue();
+
+int add_GenericElement_queue(saveRequest_task item);
+
+void GenericSave_Task();
 
 #endif /* GENERICTASKSAVE_H_ */

@@ -108,6 +108,16 @@ static int setNumOfFilesInFS(int new_num_of_files)
 	return 0;
 }
 
+int f_managed_enterFS()
+{
+	return f_enterFS();
+}
+int f_managed_releaseFS()
+{
+	f_releaseFS();
+	return 0;
+}
+
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 {
 	int lastError = 0;
@@ -169,7 +179,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 		return FS_FAT_API_FAIL;
 	}
 
-	ret = f_enterFS(); /* Register this task with filesystem 1*/
+	ret = f_managed_enterFS(); /* Register this task with filesystem 1*/
 	if (ret == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	if( ret != F_NO_ERROR)

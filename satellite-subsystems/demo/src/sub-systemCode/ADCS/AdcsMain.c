@@ -125,7 +125,7 @@ void AdcsTask()
 	//TODO: log start task
 
 	vTaskDelay(ADCS_INIT_DELAY);
-	int f_error = f_enterFS();// task 2 enter
+	int f_error = f_managed_enterFS();// task 2 enter
 	check_int("AdcsTask, enter FS", f_error);
 	while(TRUE)
 	{
