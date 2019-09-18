@@ -105,7 +105,6 @@ void taskMain()
 #ifdef ANTS_ON
 		DeployIfNeeded();
 #endif
-
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }

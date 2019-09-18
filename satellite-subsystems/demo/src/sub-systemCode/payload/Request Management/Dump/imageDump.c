@@ -277,25 +277,16 @@ void imageDump_task(void* param)
 	Camera_Request request;
 	memcpy(&request, param, sizeof(Camera_Request));
 
-	int error = f_managed_enterFS();
-	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
-	{
-		error = f_managed_enterFS();
-		if (error != 0)
-		{
-			WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
-			vTaskDelete(NULL);
-		}
-	}
-
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
 		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, request.cmd_id);
-		terminateTask();
+		vTaskDelete(NULL);
 	}
 	else
 	{
+		int f_error = f_managed_enterFS();// task enter 5
+		check_int("enter FS, in imageDump_task", f_error);
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
@@ -303,11 +294,12 @@ void imageDump_task(void* param)
 
 	xQueueReset(xDumpQueue);
 
-	error = readChunkDimentionsFromFRAM();
+	int error = readChunkDimentionsFromFRAM();
 	if (error != DataBaseSuccess)
 	{
 		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
-		terminateTask();
+		f_managed_releaseFS();
+		vTaskDelete(NULL);
 	}
 
 	memset(chunk, 0, MAX_CHUNK_SIZE);
@@ -372,5 +364,6 @@ void imageDump_task(void* param)
 		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 
 	set_system_state(dump_param, SWITCH_OFF);
-	terminateTask();
+	f_managed_releaseFS();
+	vTaskDelete(NULL);
 }

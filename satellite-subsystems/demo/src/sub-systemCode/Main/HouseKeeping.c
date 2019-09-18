@@ -42,27 +42,23 @@
 #include "../Global/GlobalParam.h"
 #include "../Global/logger.h"
 #include "../Global/OnlineTM.h"
+#include "../Global/GenericTaskSave.h"
 
 
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 {
-	FileSystemResult error;
-	byte raw_ACK[ACK_DATA_LENGTH];
-	build_data_field_ACK(type, err, ACKcommandId, raw_ACK);
-	error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
-	if (error == FS_NOT_EXIST)
+	int error;
+
+	saveRequest_task element;
+	strcpy(element.file_name, ACK_FILE_NAME);
+	element.elementSize = ACK_DATA_LENGTH;
+	build_data_field_ACK(type, err, ACKcommandId, element.buffer);
+
+	error = add_GenericElement_queue(element);
+	if (error == -1)
 	{
-		error = c_fileCreate(ACK_FILE_NAME, ACK_DATA_LENGTH);
-		if (error != FS_SUCCSESS)
-			printf("could not create ACK file, error %d", error);
-		error = c_fileWrite(ACK_FILE_NAME, raw_ACK);
-		if (error != FS_SUCCSESS)
-			printf("could not save ACK after creating one, error %d", error);
-	}
-	else if (error != FS_SUCCSESS)
-	{
-		printf("could not save ACK, error %d", error);
-		//if theres errors
+		printf("could not write to queue ACK\n\n");
+		return -1;
 	}
 
 #ifdef TESTING

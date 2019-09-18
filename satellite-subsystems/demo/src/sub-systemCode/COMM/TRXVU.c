@@ -265,25 +265,16 @@ void Dump_task(void *arg)
 	startTime = BigEnE_raw_to_uInt(&dump_param_data[10]);
 	endTime = BigEnE_raw_to_uInt(&dump_param_data[14]);
 
-	int f_error = f_managed_enterFS();
-	check_int("error in Dump_task, f_managed_enterFS - data abort exeption\n", f_error);
-	if (f_error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
-	{
-		f_error = f_managed_enterFS();
-		if (f_error != 0)
-		{
-			vTaskDelete(NULL);
-		}
-	}
-
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
 		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, id);
-		terminateTask();
+		vTaskDelete(NULL);
 	}
 	else
 	{
+		int f_error = f_managed_enterFS();
+		check_int("enter FS, dump task", f_error);// task enter 5
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
@@ -301,17 +292,14 @@ void Dump_task(void *arg)
 	}
 
 	set_system_state(dump_param, SWITCH_OFF);
-	terminateTask();
+	f_managed_releaseFS();
+	vTaskDelete(NULL);
 }
 
 
 void transponder_logic(time_unix time, command_id cmdID)
 {
-	if (f_managed_enterFS() == 0)
-	{
-		WriteTransponderLog(TRANSPONDER_ACTIVATION, 0);
-		f_managed_releaseFS();
-	}
+	WriteTransponderLog(TRANSPONDER_ACTIVATION, 0);
 
 	time_unix time_now;
 	int i_error;
@@ -342,16 +330,12 @@ void transponder_logic(time_unix time, command_id cmdID)
 		vTaskDelay(TASK_DELAY);
 	}
 
-	if (f_managed_enterFS() == 0)
-	{
-		WriteTransponderLog(TRANSPONDER_DEACTIVATION, stopInfo);
-		f_managed_releaseFS();
-	}
+
+	WriteTransponderLog(TRANSPONDER_DEACTIVATION, stopInfo);
 }
 
 void Transponder_task(void *arg)
 {
-	portBASE_TYPE lu_error = 0;
 	int i_error = 0;
 
 	byte *raw = arg;
@@ -361,10 +345,8 @@ void Transponder_task(void *arg)
 
 	if (get_system_state(transponder_active_param))
 	{
-		i_error = f_managed_enterFS();
-		check_int("f_managed_enterFS in Transponder task", i_error);
 		save_ACK(ACK_TRANSPONDER, ERR_TASK_EXISTS, cmdId);
-		terminateTask();
+		vTaskDelete(NULL);
 	}
 	else
 	{
@@ -392,29 +374,12 @@ void Transponder_task(void *arg)
 		change_TRXVU_state(TRANSPONDER_MODE);
 		xQueueReset(xTransponderQueue);
 		transponder_logic(time, cmdId);
-		i_error = f_managed_enterFS();
-		if (i_error == 0)
-		{
-			check_int("f_managed_enterFS in Transponder task", i_error);
-			save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
-
-			terminateTask();
-		}
-	}
-	else
-	{
-		i_error = f_managed_enterFS();
-		check_int("f_managed_enterFS in Transponder task", i_error);
-		if (i_error == 0)
-		{
-			save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
-			f_managed_releaseFS();
-		}
+		save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
+		vTaskDelete(NULL);
 	}
 
+	save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
 	change_TRXVU_state(NOMINAL_MODE);
-	lu_error = xSemaphoreGive_extended(xIsTransmitting);
-	check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
 	vTaskDelete(NULL);
 }
 
@@ -429,14 +394,8 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 		if (queueParameter == deleteTask)
 		{
 			vTaskDelay(100);
-			int i_error = f_managed_enterFS();
-			if (i_error == 0)
-			{
-				check_int("f_managed_enterFS in Transponder task", i_error);
-				save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
-				WriteTransponderLog(TRANSPONDER_DEACTIVATION, TRANSPONDER_STOP_CMD_INFO);
-				f_managed_releaseFS();
-			}
+			save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
+			WriteTransponderLog(TRANSPONDER_DEACTIVATION, TRANSPONDER_STOP_CMD_INFO);
 			change_TRXVU_state(NOMINAL_MODE);
 			vTaskDelete(NULL);
 		}
@@ -455,7 +414,8 @@ void lookForRequestToDelete_dump(command_id cmdID)
 			vTaskDelay(100);
 			save_ACK(ACK_DUMP, ERR_STOP_TASK, cmdID);
 			set_system_state(dump_param, SWITCH_OFF);
-			terminateTask();
+			f_managed_releaseFS();
+			vTaskDelete(NULL);
 		}
 	}
 }
@@ -675,7 +635,6 @@ void Beacon_task()
 			// low
 			delay = GET_BEACON_DELAY_LOW_VOLTAGE(delay);
 		}
-
 		vTaskDelayUntil(&last_time, delay);
 	}
 }

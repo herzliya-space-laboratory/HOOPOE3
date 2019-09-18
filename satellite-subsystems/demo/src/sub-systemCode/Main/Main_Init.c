@@ -40,8 +40,10 @@
 #include "../Global/GlobalParam.h"
 #include "../Global/TLM_management.h"
 #include "../Global/OnlineTM.h"
+#include "../Global/GenericTaskSave.h"
 #include "../EPS.h"
 #include "../Ants.h"
+#include "../CUF/CUF.h"
 
 #include "../ADCS/AdcsMain.h"
 
@@ -184,6 +186,8 @@ int InitSubsystems()
 
 	init_onlineParam();
 
+	init_GenericSaveQueue();
+
 	Boolean activation = first_activation();
 
 	StartTIME();
@@ -222,9 +226,13 @@ int SubSystemTaskStart()
 	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(100);
 
+	xTaskCreate(GenericSave_Task, (const signed char*)("generic save task"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
+	vTaskDelay(100);
+
 	KickStartCamera();
 	vTaskDelay(100);
-	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+
+	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	return 0;
 }
 

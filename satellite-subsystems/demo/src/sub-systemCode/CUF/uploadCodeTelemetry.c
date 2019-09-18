@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "..\Global\TLM_management.h"
+#include "../Global/TLM_management.h"
+#include "../TRXVU.h"
 static unsigned char uploadCodeArry[uploadCodeLength]; //Set global code array
 static Boolean uploadBoolArray[uploadCodeLength/frameLength];
 
@@ -88,7 +89,7 @@ void addToArray(TC_spl decode, int framePlace)
 //	printf("Now array is \n %s", uploadCodeArry);
 	saveAck("Finished!!");
 	uploadBoolArray[framePlace] = 1;
-	TRX_sendFrame(uploadBoolArray, boolArrayLength);
+	TRX_sendFrame((byte*)uploadBoolArray, (uint8_t)boolArrayLength);
 }
 
 void headerHandle(TC_spl decode)

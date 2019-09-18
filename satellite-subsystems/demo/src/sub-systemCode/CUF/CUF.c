@@ -283,6 +283,7 @@ int ExecuteCUF(char* name)
 		return -3;
 	int ret = CUFFunction(CUFSwitch); //call the CUF function with the test function as its parameter and return its output
 	printf("\n\nCUF RET: %d\n\n", ret);
+	return ret;//todo: YAARI!!!!
 }
 
 CUF* IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, Boolean isTemporary, Boolean hasTask, Boolean disabled)

@@ -62,17 +62,6 @@ xSemaphoreHandle xCTE = NULL;
 TC_spl command_to_execute[COMMAND_LIST_SIZE];
 int place_in_list = 0;
 
-void save_ACK_s(Ack_type type, ERR_type err, command_id ACKcommandId)
-{
-	int i_error = f_managed_enterFS();
-	if (i_error == 0)
-	{
-		check_int("f_managed_enterFS in AUC", i_error);
-		save_ACK(type, err, ACKcommandId);
-		f_managed_releaseFS();
-	}
-}
-
 void copy_command(TC_spl source, TC_spl* to)
 {
 	// copy command from source to to
@@ -168,14 +157,6 @@ int check_number_commands()
 
 void act_upon_command(TC_spl decode)
 {
-	byte FRAMdata[OFFLINE_FRAM_STRUCT_SIZE * 10];
-	int error = FRAM_read(FRAMdata, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * 10);
-	printf("online TM:  ");
-	for (int i = 0; i < OFFLINE_FRAM_STRUCT_SIZE * 10; i++)
-	{
-		printf("%u ", FRAMdata[i]);
-	}
-	printf("\n");
 	//later use in ACK
 	switch (decode.type)
 	{
@@ -257,7 +238,7 @@ void AUC_COMM(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
+	save_ACK(type, err, decode.id);
 #endif
 }
 
@@ -322,7 +303,7 @@ void AUC_general(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
+	save_ACK(type, err, decode.id);
 #endif
 }
 
@@ -442,7 +423,7 @@ void AUC_EPS(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
+	save_ACK(type, err, decode.id);
 #endif
 }
 
@@ -469,7 +450,7 @@ void AUC_SW(TC_spl decode)
 
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
+	save_ACK(type, err, decode.id);
 #endif
 }
 
@@ -503,7 +484,7 @@ void AUC_onlineTM(TC_spl decode)
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
+	save_ACK(type, err, decode.id);
 #endif
 }
 
@@ -555,7 +536,7 @@ void AUC_CUF(TC_spl decode)
 
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
-	save_ACK_s(type, err, decode.id);
+	save_ACK(type, err, decode.id);
 #endif
 }
 

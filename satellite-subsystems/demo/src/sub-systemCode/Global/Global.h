@@ -132,7 +132,4 @@ Boolean getBitValueByIndex(byte* data, int length, int index);
 
 void reset_FRAM_MAIN();
 
-
-//FreeRTOS extension
-void terminateTask();
 #endif /* GLOBAL_H_ */

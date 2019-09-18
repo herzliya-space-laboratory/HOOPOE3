@@ -37,7 +37,6 @@ char allocked_read_element[MAX_ELEMENT_SIZE];
 char allocked_delete_element[MAX_ELEMENT_SIZE];
 
 xSemaphoreHandle xFileOpenHandler;
-xSemaphoreHandle xEnterTaskFS;
 
 //struct for filesystem info
 typedef struct
@@ -58,7 +57,6 @@ typedef struct
 
 } C_FILE;
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
-
 
 void delete_allTMFilesFromSD()
 {
@@ -111,88 +109,14 @@ static int setNumOfFilesInFS(int new_num_of_files)
 	return 0;
 }
 
-char taskName[FAT_MAXTASK][20];
-void printSem()
-{
-	printf("\nThis is Sem, here you go:\n");
-	for (int i = 0; i < FAT_MAXTASK; i++)
-	{
-		printf("%s\n", taskName[i]);
-	}
-}
-void updateVectorSem(xTaskHandle taskHandle, Boolean take)
-{
-	char* currentName = pcTaskGetTaskName(taskHandle);
-	if (take)
-	{
-		for (int i = 0; i < FAT_MAXTASK; i++)
-		{
-			if (strcmp(taskName[i], currentName) == 0)
-			{
-				printf("updateVectorSem(), You are already on the list\n");
-				printSem();
-				return;
-			}
-		}
-
-		for (int i = 0; i < FAT_MAXTASK; i++)
-		{
-			if (taskName[i][0] == 0)
-			{
-				strcpy(taskName[i], currentName);
-				return;
-			}
-		}
-		printf("updateVectorSem(), Sem nooooooo\n");
-		printSem();
-	}
-	else
-	{
-		for (int i = 0; i < FAT_MAXTASK; i++)
-		{
-			if (strcmp(taskName[i], currentName) == 0)
-			{
-				memset(taskName[i], 0, 20);
-				return;
-			}
-		}
-		printf("updateVectorSem(), Sem yesssssssss\n");
-		printSem();
-	}
-}
-
 int f_managed_enterFS()
 {
-	if (xSemaphoreTake_extended(xEnterTaskFS, FS_TAKE_SEMPH_DELAY) == pdTRUE)
-	{
-		updateVectorSem(xTaskGetCurrentTaskHandle(), TRUE);
-
-		int error = f_enterFS();
-		if (error != 0)
-		{
-			updateVectorSem(xTaskGetCurrentTaskHandle(), FALSE);
-			portBASE_TYPE portRet = xSemaphoreGive_extended(xEnterTaskFS);
-			check_portBASE_TYPE("could not return the xEnterTaskFS", portRet);
-			return error;
-		}
-
-		return 0;
-	}
-	else
-	{
-		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xEnterTaskFS!!!!!!\n");
-		return COULD_NOT_TAKE_SEMAPHORE_ERROR;
-	}
+	return f_enterFS();
 }
 int f_managed_releaseFS()
 {
 	f_releaseFS();
-	updateVectorSem(xTaskGetCurrentTaskHandle(), FALSE);
-	if (xSemaphoreGive_extended(xEnterTaskFS) == pdTRUE)
-		return 0;
-
-	printf("could not return the xEnterTaskFS\n");
-	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
+	return 0;
 }
 
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
@@ -200,17 +124,16 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 	int lastError = 0;
 	if (xSemaphoreTake_extended(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
 	{
-		do
+		for (int i = 0; i < 3; i++)
 		{
 			*fileHandler = f_open(file_name, config);
-			if (*fileHandler == NULL)
-			{
-				//TODO: write data to log error
-				lastError = f_getlasterror();
-				printf("file open: %s FS last error: %d\n", file_name, lastError);
-				vTaskDelay(SYSTEM_DEALY);
-			}
-		}while(lastError==F_ERR_LOCKED);
+			if (*fileHandler != NULL)
+				return 0;
+			vTaskDelay(100);
+		}
+		lastError = f_getlasterror();
+		printf("file open: %s FS last error: %d\n", file_name, lastError);
+		vTaskDelay(SYSTEM_DEALY);
 	}
 	else
 	{
@@ -236,21 +159,13 @@ int f_managed_close(F_FILE** fileHandler)
 
 FileSystemResult createSemahores_FS()
 {
-	xFileOpenHandler = xSemaphoreCreateCounting(F_MAXFILES, F_MAXFILES);
-	if (xFileOpenHandler == NULL)
-		return FS_COULD_NOT_CREATE_SEMAPHORE;
-	xEnterTaskFS = xSemaphoreCreateCounting(FAT_MAXTASK, FAT_MAXTASK);
+	xFileOpenHandler = xSemaphoreCreateCounting(FS_MAX_OPENFILES, FS_MAX_OPENFILES);
 	if (xFileOpenHandler == NULL)
 		return FS_COULD_NOT_CREATE_SEMAPHORE;
 	return FS_SUCCSESS;
 }
 FileSystemResult InitializeFS(Boolean first_time)
 {
-	for (int i = 0; i < FAT_MAXTASK; i++)
-	{
-		memset(taskName[i], 0, 20);
-	}
-
 	FileSystemResult FS_result = createSemahores_FS();
 	if (FS_result == FS_COULD_NOT_CREATE_SEMAPHORE)
 		return FS_result;
@@ -265,7 +180,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 		return FS_FAT_API_FAIL;
 	}
 
-	ret = f_managed_enterFS(); /* Register this task with filesystem */
+	ret = f_managed_enterFS(); /* Register this task with filesystem 1*/
 	if (ret == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	if( ret != F_NO_ERROR)
@@ -313,7 +228,6 @@ FileSystemResult InitializeFS(Boolean first_time)
 	printf("\nError %d reading drive\n", ret);
 	}
 
-	f_managed_releaseFS();
 	return FS_SUCCSESS;
 }
 
@@ -723,8 +637,6 @@ void DeInitializeFS( void )
 	{
 		printf("f_delvolume err %d\n", err);
 	}
-
-	f_managed_releaseFS(); /* release this task from the filesystem */
 
 	printf("2\n");
 

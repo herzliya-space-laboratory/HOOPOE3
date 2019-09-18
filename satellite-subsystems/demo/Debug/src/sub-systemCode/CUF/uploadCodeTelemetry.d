@@ -37,8 +37,12 @@ src/sub-systemCode/CUF/uploadCodeTelemetry.d: \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h \
- ../src/sub-systemCode/CUF/..\Global\TLM_management.h \
- ../src/sub-systemCode/CUF/..\Global\../Global/Global.h
+ ../src/sub-systemCode/CUF/../Global/TLM_management.h \
+ ../src/sub-systemCode/CUF/../Global/../Global/Global.h \
+ ../src/sub-systemCode/CUF/../TRXVU.h \
+ C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/IsisTRXVU.h \
+ ../src/sub-systemCode/CUF/../Global/Global.h \
+ ../src/sub-systemCode/CUF/../COMM/GSC.h
 
 ../src/sub-systemCode/CUF/uploadCodeTelemetry.h:
 
@@ -114,6 +118,14 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_f
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:
 
-../src/sub-systemCode/CUF/..\Global\TLM_management.h:
+../src/sub-systemCode/CUF/../Global/TLM_management.h:
 
-../src/sub-systemCode/CUF/..\Global\../Global/Global.h:
+../src/sub-systemCode/CUF/../Global/../Global/Global.h:
+
+../src/sub-systemCode/CUF/../TRXVU.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/IsisTRXVU.h:
+
+../src/sub-systemCode/CUF/../Global/Global.h:
+
+../src/sub-systemCode/CUF/../COMM/GSC.h:

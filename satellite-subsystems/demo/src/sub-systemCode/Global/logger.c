@@ -8,23 +8,25 @@
 #include <stdio.h>
 #include "logger.h"
 
+#include "GenericTaskSave.h"
+
 static FileSystemResult WriteLog(void *log, char filename[5])
 {
-	FileSystemResult fs = c_fileWrite(filename, log);
-	if (fs == FS_SUCCSESS)
+	int error;
+
+	saveRequest_task element;
+	strcpy(element.file_name, filename);
+	element.elementSize = LOG_STRUCT_ELEMENT_SIZE;
+	memcpy(element.buffer, log, LOG_STRUCT_ELEMENT_SIZE);
+
+	error = add_GenericElement_queue(element);
+	if (error == -1)
 	{
-		return FS_SUCCSESS;
+		printf("could not write to queue LOG\n\n");
+		return -1;
 	}
-	if (fs == FS_NOT_EXIST)
-	{
-		fs = c_fileCreate(filename, sizeof(LogStruct));
-		if (fs == FS_SUCCSESS)
-		{
-			return c_fileWrite(filename, log);
-		}
-		return fs;
-	}
-	return fs;
+
+	return 0;
 }
 
 FileSystemResult WriteErrorLog(log_errors log_num, log_systems system, int info)

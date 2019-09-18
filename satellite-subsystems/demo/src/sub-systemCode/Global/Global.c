@@ -288,11 +288,3 @@ Boolean getBitValueByIndex(byte* data, int length, int index)
 	else
 		return TRUE;
 }
-
-
-//FreeRTOS extension
-void terminateTask()
-{
-	f_managed_releaseFS();
-	vTaskDelete(NULL);
-}

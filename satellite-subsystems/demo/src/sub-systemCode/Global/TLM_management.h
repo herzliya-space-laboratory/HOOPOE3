@@ -23,6 +23,9 @@
 #define FSFRAM 0x20000
 #endif
 
+#define FS_MAX_OPENFILES	F_MAXFILES - 2
+#define FS_MAX_TASK_TETER	FAT_MAXTASK - 1
+
 #define COULD_NOT_TAKE_SEMAPHORE_ERROR -1
 #define COULD_NOT_GIVE_SEMAPHORE_ERROR -2
 
@@ -45,6 +48,7 @@ typedef enum
 
 int f_managed_enterFS();
 int f_managed_releaseFS();
+
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler);
 int f_managed_close(F_FILE** fileHandler);
 /*

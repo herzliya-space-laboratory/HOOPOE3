@@ -125,7 +125,8 @@ void AdcsTask()
 	//TODO: log start task
 
 	vTaskDelay(ADCS_INIT_DELAY);
-
+	int f_error = f_managed_enterFS();// task 2 enter
+	check_int("AdcsTask, enter FS", f_error);
 	while(TRUE)
 	{
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
@@ -150,7 +151,6 @@ void AdcsTask()
 		if(TRBL_SUCCESS != trbl){
 			AdcsTroubleShooting(trbl);
 		}
-
 		vTaskDelay(delay_loop);
 	}
 
