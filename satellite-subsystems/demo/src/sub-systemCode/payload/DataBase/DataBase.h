@@ -50,10 +50,10 @@ typedef struct ImageDataBase_t* ImageDataBase;	///< ADT architecture
 
 typedef struct __attribute__ ((__packed__))
 {
-	// size = 14 bytes
+	// size = 24 bytes
 	imageid cameraId;
 	time_unix timestamp;
-	char fileTypes;
+	byte fileTypes;
 	uint16_t angle_rates[3];
 	byte raw_css[10];
 	Boolean8bit markedFor_TumbnailCreation;
@@ -70,8 +70,7 @@ typedef enum
 	t64,	// thumbnail, factor 64 (reduction level 6), 17x32
 	jpg,	// a compressed picture
 	NumberOfFileTypes,
-	bmp,	// bitmap for jpg, unavailable - deleted and created for jpg
-	GeckoSD
+	bmp	// bitmap for jpg, unavailable - deleted and created for jpg
 } fileType;
 
 typedef enum

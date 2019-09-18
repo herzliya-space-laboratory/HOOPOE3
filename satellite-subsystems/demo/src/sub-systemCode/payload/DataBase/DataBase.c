@@ -632,15 +632,12 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 	image_metadata.timestamp = time_image_taken;
 	memcpy(&image_metadata.angle_rates, angle_rates, sizeof(uint16_t) * 3);
 	memcpy(&image_metadata.raw_css, raw_css, sizeof(byte) * 10);
+	image_metadata.fileTypes = 0;
 
 	if (database->AutoThumbnailCreation)
 		image_metadata.markedFor_TumbnailCreation = TRUE_8BIT;
 	else
 		image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
-
-	for (fileType i = 0; i < NumberOfFileTypes; i++) {
-		updateFileTypes(&image_metadata, image_address, i, FALSE_bit);
-	}
 
 	result = FRAM_write((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 	CMP_AND_RETURN(result, 0, DataBaseFramFail);
