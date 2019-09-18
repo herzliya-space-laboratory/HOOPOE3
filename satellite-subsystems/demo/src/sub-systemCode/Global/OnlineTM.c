@@ -118,7 +118,7 @@ void save_offlineSetting_FRAM()
 		list[i].period = offline_TM_list[i].period;
 	}
 
-	int i_error = FRAM_writeAndVerify((byte*)list, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST);
+	int i_error = FRAM_writeAndVerify_exte((byte*)list, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST);
 	check_int("FRAM_writeAndVerify, save_offlineSettings_FRAM", i_error);
 }
 //get the current off line list in the FRAM
@@ -126,7 +126,7 @@ int get_offlineSetting_FRAM(saveTM_FRAM *list)
 {
 	if (list == NULL)
 		return -4;
-	int i_error = FRAM_read((byte*)list, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST);
+	int i_error = FRAM_read_exte((byte*)list, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST);
 	check_int("FRAM_writeAndVerify, save_offlineSettings_FRAM", i_error);
 	return 0;
 }

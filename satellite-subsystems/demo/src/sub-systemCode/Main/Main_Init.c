@@ -65,12 +65,12 @@
 void numberOfRestarts()
 {
 	byte raw[4];
-	int err = FRAM_read(raw, RESTART_FLAG_ADDR, 4);
-	check_int("numberOfRestarts, FRAM_write()", err);
+	int err = FRAM_read_exte(raw, RESTART_FLAG_ADDR, 4);
+	check_int("numberOfRestarts, FRAM_write_exte()", err);
 	unsigned int *num = (unsigned int*)raw;
 	(*num)++;
-	err = FRAM_write(raw, RESTART_FLAG_ADDR, 4);
-	check_int("numberOfRestarts, FRAM_write(++)", err);
+	err = FRAM_write_exte(raw, RESTART_FLAG_ADDR, 4);
+	check_int("numberOfRestarts, FRAM_write_exte(++)", err);
 	set_numOfResets(*num);
 }
 
@@ -118,7 +118,7 @@ void StartTIME()
 	// get last saved time before reset from FRAM
 	time_unix set_time;
 	byte raw_time[TIME_SIZE];
-	FRAM_read(raw_time, TIME_ADDR, TIME_SIZE);
+	FRAM_read_exte(raw_time, TIME_ADDR, TIME_SIZE);
 	set_time = (time_unix)raw_time[0];
 	set_time += (time_unix)(raw_time[1] << 8);
 	set_time += (time_unix)(raw_time[2] << 16);
@@ -135,7 +135,7 @@ void StartTIME()
 Boolean first_activation()
 {
 	byte dataFRAM = FALSE_8BIT;
-	FRAM_read(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+	FRAM_read_exte(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 	if (!dataFRAM)
 	{
 		return FALSE;
@@ -151,7 +151,7 @@ Boolean first_activation()
 	// 3. cahnge the first activation to false
 	dataFRAM = FALSE_8BIT;
 
-	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+	FRAM_write_exte(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 	return TRUE;
 }
 

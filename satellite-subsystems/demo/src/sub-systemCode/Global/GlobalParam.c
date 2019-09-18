@@ -57,7 +57,7 @@ int init_GP()
 	current_global_param.state.fields.transponder_active = SWITCH_OFF;
 	current_global_param.state.fields.mute = SWITCH_OFF;
 	current_global_param.state.fields.anttena_deploy = SWITCH_OFF;
-	FRAM_read(&current_global_param.state.raw, STATES_ADDR, 1);
+	FRAM_read_exte(&current_global_param.state.raw, STATES_ADDR, 1);
 	//4. Initialize current_global_param
 	current_global_param.Vbatt = 0;
 	current_global_param.curBat = 0;
@@ -102,7 +102,7 @@ Boolean get_system_state(systems_state_parameters param)
 	Boolean return_value = SWITCH_ON;
 	if (xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		i_error = FRAM_read((byte*)&(current_global_param.state), STATES_ADDR, 1);
+		i_error = FRAM_read_exte((byte*)&(current_global_param.state), STATES_ADDR, 1);
 		check_int("can't get system state from FRAM", i_error);
 		switch (param)
 		{
@@ -167,7 +167,7 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 	portBASE_TYPE lu_error;
 	if (xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		i_error = FRAM_read((byte*)&current_global_param.state, STATES_ADDR, 1);
+		i_error = FRAM_read_exte((byte*)&current_global_param.state, STATES_ADDR, 1);
 		check_int("can't read from FRAM in set_system_state", i_error);
 		switch (param)
 		{
@@ -221,7 +221,7 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 			break;
 		}
 
-		FRAM_write(&current_global_param.state.raw, STATES_ADDR, 1);
+		FRAM_write_exte(&current_global_param.state.raw, STATES_ADDR, 1);
 		check_int("can't read from FRAM in set_system_state", i_error);
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCST_semaphore in set_system_state", lu_error);

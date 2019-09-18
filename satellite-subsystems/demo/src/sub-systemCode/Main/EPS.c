@@ -65,26 +65,26 @@ voltage_t round_vol(voltage_t vol)
 Boolean8bit  get_shut_ADCS()
 {
 	Boolean8bit mode;
-	int error = FRAM_read(&mode, SHUT_ADCS_ADDR, 1);
+	int error = FRAM_read_exte(&mode, SHUT_ADCS_ADDR, 1);
 	check_int("shut_ADCS, FRAM_read", error);
 	return mode;
 }
 void shut_ADCS(Boolean mode)
 {
-	int error = FRAM_write((byte*)&mode, SHUT_ADCS_ADDR, 1);
+	int error = FRAM_write_exte((byte*)&mode, SHUT_ADCS_ADDR, 1);
 	check_int("shut_ADCS, FRAM_write", error);
 }
 
 Boolean8bit  get_shut_CAM()
 {
 	Boolean8bit mode;
-	int error = FRAM_read(&mode, SHUT_CAM_ADDR, 1);
+	int error = FRAM_read_exte(&mode, SHUT_CAM_ADDR, 1);
 	check_int("shut_CAM, FRAM_read", error);
 	return mode;
 }
 void shut_CAM(Boolean mode)
 {
-	int error = FRAM_write((byte*)&mode, SHUT_CAM_ADDR, 1);
+	int error = FRAM_write_exte((byte*)&mode, SHUT_CAM_ADDR, 1);
 	check_int("shut_CAM, FRAM_write", error);
 }
 
@@ -102,7 +102,7 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 		i_error = GomEpsSetOutput(0, switches_states);
 		check_int("can't set channel state in EPS_Conditioning", i_error);
 
-		i_error = FRAM_write(&switches_states.raw, EPS_STATES_ADDR, 1);
+		i_error = FRAM_write_exte(&switches_states.raw, EPS_STATES_ADDR, 1);
 		check_int("EPS_Conditioning, FRAM_write", i_error);
 
 		return TRUE;
@@ -145,7 +145,7 @@ void EPS_Init()
 	IsisSolarPanelv2_sleep();
 
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
-	error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	error = FRAM_read_exte((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("FRAM_read, EPS_Init", error);
 
 	gom_eps_hk_t eps_tlm;
@@ -186,16 +186,16 @@ void reset_FRAM_EPS()
 
 	//reset EPS_STATES_ADDR
 	byte data = 0;
-	i_error = FRAM_write(&data, EPS_STATES_ADDR, 1);
+	i_error = FRAM_write_exte(&data, EPS_STATES_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	data = SWITCH_OFF;
-	i_error = FRAM_write(&data, SHUT_ADCS_ADDR, 1);
+	i_error = FRAM_write_exte(&data, SHUT_ADCS_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
-	i_error = FRAM_write(&data, SHUT_CAM_ADDR, 1);
+	i_error = FRAM_write_exte(&data, SHUT_CAM_ADDR, 1);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	alpha = EPS_ALPHA_DEFFAULT_VALUE;
-	i_error = FRAM_write((byte*)&alpha, EPS_ALPHA_ADDR, 4);
-	check_int("can't FRAM_write(EPS_ALPHA_ADDR), reset_FRAM_EPS", i_error);
+	i_error = FRAM_write_exte((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+	check_int("can't FRAM_write_exte(EPS_ALPHA_ADDR), reset_FRAM_EPS", i_error);
 }
 
 void reset_EPS_voltages()
@@ -205,13 +205,13 @@ void reset_EPS_voltages()
 	voltage_t voltages[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	voltage_t comm_voltage  = 7250;
 
-	i_error = FRAM_write((byte*)voltages, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	i_error = FRAM_write_exte((byte*)voltages, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("reset_FRAM_EPS, FRAM_read", i_error);
 
-	i_error = FRAM_write((byte*)&comm_voltage, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+	i_error = FRAM_write_exte((byte*)&comm_voltage, BEACON_LOW_BATTERY_STATE_ADDR, 2);
 	check_int("reset_FRAM_EPS, FRAM_read", i_error);
 
-	i_error = FRAM_write((byte*)&comm_voltage, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+	i_error = FRAM_write_exte((byte*)&comm_voltage, TRANS_LOW_BATTERY_STATE_ADDR, 2);
 	check_int("reset_FRAM_EPS, FRAM_read", i_error);
 }
 
@@ -242,7 +242,7 @@ void writeState_log(EPS_mode_t mode)
 void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
-	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	int i_error = FRAM_read_exte((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("FRAM_read, EPS_Init", i_error);
 
 
@@ -262,7 +262,7 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
-	int i_error = FRAM_read((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	int i_error = FRAM_read_exte((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	check_int("FRAM_read, EPS_Init", i_error);
 
 
@@ -314,8 +314,8 @@ void EPS_Conditioning()
 		return;
 	set_Vbatt(eps_tlm.fields.vbatt);
 
-	i_error = FRAM_read((byte*)&alpha, EPS_ALPHA_ADDR, 4);
-	check_int("can't FRAM_read(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
+	i_error = FRAM_read_exte((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+	check_int("can't FRAM_read_exte(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
 	if (!CHECK_EPS_ALPHA_VALUE(alpha))
 	{
 		alpha = EPS_ALPHA_DEFFAULT_VALUE;

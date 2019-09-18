@@ -92,7 +92,7 @@ void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 
 	change_trans_RSSI(cmd.data);
-	int error = FRAM_write(cmd.data, TRANSPONDER_RSSI_ADDR, 2);
+	int error = FRAM_write_exte(cmd.data, TRANSPONDER_RSSI_ADDR, 2);
 	check_int("cmd_change_trans_rssi, FRAM_write", error);
 	if (error == 0)
 		*err = ERR_SUCCESS;
@@ -133,7 +133,7 @@ void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 	}
 	//2. update time in FRAM
-	else if (FRAM_writeAndVerify(&cmd.data[0], BEACON_TIME_ADDR, 1))
+	else if (FRAM_writeAndVerify_exte(&cmd.data[0], BEACON_TIME_ADDR, 1))
 	{
 		*err = ERR_FRAM_WRITE_FAIL;
 	}
@@ -165,7 +165,7 @@ void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	if (validValue)
 	{
-		int error = FRAM_write(cmd.data, BIT_RATE_ADDR, 1);
+		int error = FRAM_write_exte(cmd.data, BIT_RATE_ADDR, 1);
 		check_int("FRAM_write, cmd_change_def_bit_rate", error);
 		if (error)
 		{

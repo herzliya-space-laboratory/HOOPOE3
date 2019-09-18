@@ -91,7 +91,7 @@ static int getNumOfFilesInFS()
 {
 	FS fs;
 
-	if(FRAM_read((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+	if(FRAM_read_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 	{
 		return -1;
 	}
@@ -102,7 +102,7 @@ static int setNumOfFilesInFS(int new_num_of_files)
 {
 	FS fs;
 	fs.num_of_files = new_num_of_files;
-	if(FRAM_write((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+	if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 	{
 		return -1;
 	}
@@ -208,7 +208,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 	{
 		delete_allTMFilesFromSD();
 		FS fs = {0};
-		if(FRAM_write((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
 			return FS_FAT_API_FAIL;
 		}
@@ -251,7 +251,7 @@ FileSystemResult c_fileCreate(char* c_file_name,
 		return FS_FRAM_FAIL;
 	}
 	int c_file_address =C_FILES_BASE_ADDR+num_of_files_in_FS*sizeof(C_FILE);
-	if(FRAM_write((unsigned char*)&c_file,
+	if(FRAM_write_exte((unsigned char*)&c_file,
 			c_file_address,sizeof(C_FILE))!=0)//write c_file struct in FRAM
 	{
 			return FS_FRAM_FAIL;
@@ -293,7 +293,7 @@ static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address
 	for(i =0; i < num_of_files_in_FS; i++)			//search correct c_file struct
 	{
 		c_file_address= C_FILES_BASE_ADDR+sizeof(C_FILE)*(i);
-		err_read = FRAM_read((unsigned char*)c_file,c_file_address,sizeof(C_FILE));
+		err_read = FRAM_read_exte((unsigned char*)c_file,c_file_address,sizeof(C_FILE));
 		if(0 != err_read)
 		{
 			printf("FRAM error in 'get_C_FILE_struct()' error = %d\n",err_read);
@@ -390,7 +390,7 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	writewithEpochtime(file,element,c_file.size_of_element,curr_time);
 	f_managed_close(&file);	/* data is also considered safe when file is closed */
 	c_file.last_time_modified= curr_time;
-	if(FRAM_write((unsigned char *)&c_file,addr,sizeof(C_FILE))!=0)//update last written
+	if(FRAM_write_exte((unsigned char *)&c_file,addr,sizeof(C_FILE))!=0)//update last written
 	{
 		return FS_FRAM_FAIL;
 	}

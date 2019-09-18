@@ -56,7 +56,7 @@ static byte Dump_buffer[DUMP_BUFFER_SIZE];
 void update_FRAM_bitRate()
 {
 	byte dat;
-	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
+	int error = FRAM_read_exte(&dat, BIT_RATE_ADDR, 1);
 	check_int("TRXVU_init_softWare, FRAM_read", error);
 	ISIStrxvuBitrate newParam = DEFAULT_BIT_RATE;
 	for (uint8_t i = 1; i < 9; i *= 2)
@@ -319,8 +319,8 @@ void transponder_logic(time_unix time, command_id cmdID)
 		lookForRequestToDelete_transponder(cmdID);
 
 		// 7. check if we are under right voltage
-		i_error = FRAM_read((byte*)&low_shut_vol, TRANS_LOW_BATTERY_STATE_ADDR, 2);
-		check_int("Transponder Task ,FRAM_read(TRANS_LOW_BATTERY_STATE_ADDR)", i_error);
+		i_error = FRAM_read_exte((byte*)&low_shut_vol, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+		check_int("Transponder Task ,FRAM_read_exte(TRANS_LOW_BATTERY_STATE_ADDR)", i_error);
 		if (low_shut_vol > get_Vbatt())
 		{
 			stopInfo = TRANSPONDER_STOP_VOLTAGE_INFO;
@@ -551,7 +551,7 @@ void pass_above_Ground()
 void check_TRXVUState()
 {
 	byte dat;
-	int error = FRAM_read(&dat, BIT_RATE_ADDR, 1);
+	int error = FRAM_read_exte(&dat, BIT_RATE_ADDR, 1);
 	check_int("TRXVU_init_softWare, FRAM_read", error);
 
 	ISIStrxvuBitrateStatus FRAMBitRate;
@@ -610,8 +610,8 @@ void Beacon_task()
 		else
 			printf("skip beacon\n");
 
-		i_error = FRAM_read(&delayBaecon, BEACON_TIME_ADDR, 1);
-		check_int("beacon_task, FRAM_write(BEACON_TIME_ADDR)", i_error);
+		i_error = FRAM_read_exte(&delayBaecon, BEACON_TIME_ADDR, 1);
+		check_int("beacon_task, FRAM_write_exte(BEACON_TIME_ADDR)", i_error);
 		// 6. check if value in range
 		if (!(10 <= delayBaecon || delayBaecon <= 40))
 		{
@@ -619,8 +619,8 @@ void Beacon_task()
 		}
 
 		//reading low_v_vbat from FRAM
-		i_error = FRAM_read((byte*)&low_v_beacon, BEACON_LOW_BATTERY_STATE_ADDR, 2);
-		check_int("beacon_task, FRAM_write(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
+		i_error = FRAM_read_exte((byte*)&low_v_beacon, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+		check_int("beacon_task, FRAM_write_exte(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 
 #ifdef TESTING
 		if (7400 < low_v_beacon || low_v_beacon < 7200)
@@ -748,26 +748,26 @@ void reset_FRAM_TRXVU()
 
 	//BEACON_LOW_BATTERY_STATE_ADDR reset
 	voltage_t voltage = DEFULT_COMM_VOL;
-	i_error = FRAM_write((byte*)&voltage, BEACON_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
+	i_error = FRAM_write_exte((byte*)&voltage, BEACON_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
 	check_int("reset_FRAM_TRXVU, FRAM_write", i_error);
 
-	i_error = FRAM_write((byte*)&voltage, TRANS_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
+	i_error = FRAM_write_exte((byte*)&voltage, TRANS_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
 	check_int("reset_FRAM_TRXVU, FRAM_write", i_error);
 
 	data[0] = DEFULT_BEACON_DELAY;
-	i_error = FRAM_write(data, BEACON_TIME_ADDR, 1);
-	check_int("reset_FRAM_TRXVU,, FRAM_write(BEACON_TIME_ADDR)", i_error);
+	i_error = FRAM_write_exte(data, BEACON_TIME_ADDR, 1);
+	check_int("reset_FRAM_TRXVU,, FRAM_write_exte(BEACON_TIME_ADDR)", i_error);
 
 	data[0] = DEFAULT_BIT_RATE;
-	i_error = FRAM_write(data, BIT_RATE_ADDR, 1);
-	check_int("reset_FRAM_TRXVU,, FRAM_write(BIT_RATE_ADDR)", i_error);
+	i_error = FRAM_write_exte(data, BIT_RATE_ADDR, 1);
+	check_int("reset_FRAM_TRXVU,, FRAM_write_exte(BIT_RATE_ADDR)", i_error);
 
 	time_unix mute_time = 0;
-	i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
-	check_int("reset_FRAM_TRXVU, FRAM_read(MUTE_TIME_ADDR)", i_error);
+	i_error = FRAM_write_exte((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	check_int("reset_FRAM_TRXVU, FRAM_read_exte(MUTE_TIME_ADDR)", i_error);
 
 	unsigned short trans_rssi = DEFAULT_TRANS_RSSI;
-	i_error = FRAM_write((byte*)&trans_rssi, TRANSPONDER_RSSI_ADDR, sizeof(unsigned short));
+	i_error = FRAM_write_exte((byte*)&trans_rssi, TRANSPONDER_RSSI_ADDR, sizeof(unsigned short));
 	check_int("TRANSPONDER_RSSI_ADDR, FRAM_write", i_error);
 }
 
@@ -875,8 +875,8 @@ void unmute_Tx()
 {
 	time_unix mute_time = 0;
 	set_system_state(mute_param, SWITCH_OFF);
-	int i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
-	check_int("unmute_Tx, FRAM_read(MUTE_TIME_ADDR)", i_error);
+	int i_error = FRAM_write_exte((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	check_int("unmute_Tx, FRAM_read_exte(MUTE_TIME_ADDR)", i_error);
 
 	update_FRAM_bitRate();
 }
@@ -888,8 +888,8 @@ void check_time_off_mute()
 	int i_error = Time_getUnixEpoch(&time_now);
 	check_int("check_time_off_mute, Time_getUnixEpoch", i_error);
 
-	i_error = FRAM_read((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
-	check_int("check_time_off_mute, FRAM_read(MUTE_TIME_ADDR)", i_error);
+	i_error = FRAM_read_exte((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	check_int("check_time_off_mute, FRAM_read_exte(MUTE_TIME_ADDR)", i_error);
 	if (time_now >= mute_time && get_system_state(mute_param))
 		unmute_Tx();
 }
@@ -907,7 +907,7 @@ int set_mute_time(unsigned short time)
 
 	time_now += (time_unix)(time * 60);
 
-	error = FRAM_write((byte*)&time_now, MUTE_TIME_ADDR, TIME_SIZE);
+	error = FRAM_write_exte((byte*)&time_now, MUTE_TIME_ADDR, TIME_SIZE);
 	check_int("set_mute_time, FRAM_write", error);
 
 	mute_Tx(TRUE);
@@ -943,7 +943,7 @@ void change_TRXVU_state(Boolean state)
 	data[0] = 0x38;
 	if (state == NOMINAL_MODE)
 	{
-		i_error = FRAM_read(rssiData, TRANSPONDER_RSSI_ADDR, 2);
+		i_error = FRAM_read_exte(rssiData, TRANSPONDER_RSSI_ADDR, 2);
 		check_int("change_TRXVU_state, FRAM_read", i_error);
 		change_trans_RSSI(rssiData);
 		//nominal mode

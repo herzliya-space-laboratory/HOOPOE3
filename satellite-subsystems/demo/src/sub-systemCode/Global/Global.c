@@ -198,7 +198,7 @@ int fram_byte_fix(unsigned int address)
 	int i_error;
 	unsigned char byte = 0;
 	int error = 0;
-	i_error = FRAM_read(&byte, address, sizeof(byte));
+	i_error = FRAM_read_exte(&byte, address, sizeof(byte));
 	check_int("fram_byte_fix, FRAM_read", i_error);
 	if ((byte != 255) || (byte != 0))
 	{
@@ -227,7 +227,7 @@ int fram_byte_fix(unsigned int address)
 			byte = 0;
 			error = 1;
 		}
-		i_error = FRAM_write(&byte, address, 1);
+		i_error = FRAM_write_exte(&byte, address, 1);
 		check_int("fram_byte_fix, FRAM_write", i_error);
 	}
 	return error;
@@ -251,25 +251,25 @@ void reset_FRAM_MAIN()
 	byte raw[4];
 	raw[0] = 0;
 	// reset the states byte in the FRAM
-	int err = FRAM_write(raw, STATES_ADDR, 1);
-	check_int("reset_FRAM_MAIN, FRAM_write(STATES_ADDR)", err);
+	int err = FRAM_write_exte(raw, STATES_ADDR, 1);
+	check_int("reset_FRAM_MAIN, FRAM_write_exte(STATES_ADDR)", err);
 	// sets the FIRST_ACTIVATION_ADDR to true (now is the first activation)
 	raw[0] = TRUE_8BIT;
-	err = FRAM_write(raw, FIRST_ACTIVATION_ADDR, 1);
-	check_int("reset_FRAM_MAIN, FRAM_write(FIRST_ACTIVATION_ADDR)", err);
+	err = FRAM_write_exte(raw, FIRST_ACTIVATION_ADDR, 1);
+	check_int("reset_FRAM_MAIN, FRAM_write_exte(FIRST_ACTIVATION_ADDR)", err);
 
 	int i;
 	for (i = 0; i < 4; i++)
 		raw[i] = 0;
-	err = FRAM_write(raw, TIME_ADDR, TIME_SIZE);
-	check_int("reset_FRAM_MAIN, FRAM_write(TIME_ADDR)", err);
+	err = FRAM_write_exte(raw, TIME_ADDR, TIME_SIZE);
+	check_int("reset_FRAM_MAIN, FRAM_write_exte(TIME_ADDR)", err);
 
-	err = FRAM_write(raw, RESTART_FLAG_ADDR, 4);
-	check_int("reset_FRAM_MAIN, FRAM_write(RESTART_FLAG)", err);
+	err = FRAM_write_exte(raw, RESTART_FLAG_ADDR, 4);
+	check_int("reset_FRAM_MAIN, FRAM_write_exte(RESTART_FLAG)", err);
 
 	Boolean8bit bool = FALSE_8BIT;
-	err = FRAM_write(&bool, STOP_TELEMETRY_ADDR, 1);
-	check_int("reset_FRAM_MAIN, FRAM_write(STOP_TELEMETRY)", err);
+	err = FRAM_write_exte(&bool, STOP_TELEMETRY_ADDR, 1);
+	check_int("reset_FRAM_MAIN, FRAM_write_exte(STOP_TELEMETRY)", err);
 }
 
 Boolean getBitValueByIndex(byte* data, int length, int index)
@@ -287,4 +287,41 @@ Boolean getBitValueByIndex(byte* data, int length, int index)
 		return FALSE;
 	else
 		return TRUE;
+}
+
+int FRAM_write_exte(unsigned char *data, unsigned int address, unsigned int size)
+{
+	int error = 0;
+	for (int i = 0; i < 10; i++)
+	{
+		 error = FRAM_write(data, address, size);
+		 if (error == 0)
+			 return 0;
+		 vTaskDelay(10);
+	}
+	return error;
+}
+int FRAM_read_exte(unsigned char *data, unsigned int address, unsigned int size)
+{
+	int error = 0;
+	for (int i = 0; i < 10; i++)
+	{
+		 error = FRAM_read(data, address, size);
+		 if (error == 0)
+			 return 0;
+		 vTaskDelay(10);
+	}
+	return error;
+}
+int FRAM_writeAndVerify_exte(unsigned char *data, unsigned int address, unsigned int size)
+{
+	int error = 0;
+	for (int i = 0; i < 10; i++)
+	{
+		 error = FRAM_writeAndVerify(data, address, size);
+		 if (error == 0)
+			 return 0;
+		 vTaskDelay(10);
+	}
+	return error;
 }

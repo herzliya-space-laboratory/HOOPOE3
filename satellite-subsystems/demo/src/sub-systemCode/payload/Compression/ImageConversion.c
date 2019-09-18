@@ -68,7 +68,7 @@ void ImageSkipping(fileType reductionLevel)	// where 2^(bin level) is the size r
 
 ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType reductionLevel, Boolean Skipping, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 
 	bit fileTypes[8];
 	char2bits(image_metadata.fileTypes, fileTypes);

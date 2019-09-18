@@ -145,7 +145,7 @@ void cmd_stop_TM(Ack_type* type, ERR_type* err)
 {
 	*type = ACK_STOP_TM;
 	Boolean8bit value = FALSE_8BIT;
-	int i_error = FRAM_write(&value, STOP_TELEMETRY_ADDR, 1);
+	int i_error = FRAM_write_exte(&value, STOP_TELEMETRY_ADDR, 1);
 	if (i_error == 0)
 		*err = ERR_SUCCESS;
 	else
@@ -155,7 +155,7 @@ void cmd_resume_TM(Ack_type* type, ERR_type* err)
 {
 	*type = ACK_RESUME_TM;
 	Boolean8bit value = TRUE_8BIT;
-	int i_error = FRAM_write(&value, STOP_TELEMETRY_ADDR, 1);
+	int i_error = FRAM_write_exte(&value, STOP_TELEMETRY_ADDR, 1);
 	if (i_error == 0)
 		*err = ERR_SUCCESS;
 	else

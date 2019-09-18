@@ -124,7 +124,7 @@ int checkDeployAttempt(int attemptNumber)
 
 	deploy_attempt attempt;
 	unsigned int addres = DEPLOY_ANTS_ATTEMPTS_ADDR + attemptNumber*SIZE_DEPLOY_ATTEMPT_UNION;
-	int i_error = FRAM_read((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+	int i_error = FRAM_read_exte((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
 	check_int("FRAM_read, checkDeployAttempt", i_error);
 
 	if (attempt.isAtemptDone == ATTEMPT_DONE)
@@ -139,7 +139,7 @@ int checkDeployAttempt(int attemptNumber)
 	printf("\n\n\n       deploy ants!!!!!!!\n\n\n");
 	//deploye_ants(nextDeploy);
 	attempt.isAtemptDone = ATTEMPT_DONE;
-	i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+	i_error = FRAM_write_exte((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
 	check_int("FRAM_write, checkDeployAttempt", i_error);
 	if (nextDeploy == isisants_sideA)
 		nextDeploy = isisants_sideB;
@@ -159,7 +159,7 @@ void reset_deployStatusFRAM(int delayForNextAttempt)
 	{
 		attempt.timeToDeploy = time + delayForNextAttempt + i * DELAY_BETWEEN_3_ATTEMPTS;
 		unsigned int addres = DEPLOY_ANTS_ATTEMPTS_ADDR + i*SIZE_DEPLOY_ATTEMPT_UNION;
-		i_error = FRAM_write((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
+		i_error = FRAM_write_exte((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
 		check_int("FRAM_write, reset_deployStatusFRAM", i_error);
 	}
 }
@@ -167,10 +167,10 @@ void reset_deployStatusFRAM(int delayForNextAttempt)
 void reset_FRAM_ants()
 {
 	Boolean8bit stopDeploy = FALSE;
-	int i_error = FRAM_write(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	int i_error = FRAM_write_exte(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
 	check_int("FRAM_write, DeployIfNeeded", i_error);
 
-	i_error = FRAM_write(&stopDeploy, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+	i_error = FRAM_write_exte(&stopDeploy, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
 	check_int("FRAM_write, DeployIfNeeded", i_error);
 
 	reset_deployStatusFRAM(START_MUTE_TIME_FIRST);
@@ -183,9 +183,9 @@ void reset_FRAM_ants()
 Boolean DeployIfNeeded()
 {
 	Boolean8bit stopDeploy, autoDeploy_finish;
-	int i_error = FRAM_read(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	int i_error = FRAM_read_exte(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
 	check_int("FRAM_read, DeployIfNeeded", i_error);
-	i_error = FRAM_read(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+	i_error = FRAM_read_exte(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
 	check_int("FRAM_read, DeployIfNeeded", i_error);
 	if (stopDeploy && autoDeploy_finish)
 		return FALSE;
@@ -202,7 +202,7 @@ Boolean DeployIfNeeded()
 			{
 				shut_ADCS(SWITCH_OFF);
 				autoDeploy_finish = TRUE_8BIT;
-				i_error = FRAM_write(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
+				i_error = FRAM_write_exte(&autoDeploy_finish, ANTS_AUTO_DEPLOY_FINISH_ADDR, 1);
 				check_int("FRAM_read, DeployIfNeeded", i_error);
 			}
 		}
@@ -215,6 +215,6 @@ Boolean DeployIfNeeded()
 void update_stopDeploy_FRAM()
 {
 	Boolean8bit stopDeploy = TRUE_8BIT;
-	int i_error = FRAM_write(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
+	int i_error = FRAM_write_exte(&stopDeploy, STOP_DEPLOY_ATTEMPTS_ADDR, 1);
 	check_int("FRAM_write, update_stopDeploy_FRAM", i_error);
 }

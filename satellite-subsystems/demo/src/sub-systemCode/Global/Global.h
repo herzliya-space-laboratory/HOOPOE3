@@ -132,4 +132,7 @@ Boolean getBitValueByIndex(byte* data, int length, int index);
 
 void reset_FRAM_MAIN();
 
+int FRAM_write_exte(unsigned char *data, unsigned int address, unsigned int size);
+int FRAM_read_exte(unsigned char *data, unsigned int address, unsigned int size);
+int FRAM_writeAndVerify_exte(unsigned char *data, unsigned int address, unsigned int size);
 #endif /* GLOBAL_H_ */

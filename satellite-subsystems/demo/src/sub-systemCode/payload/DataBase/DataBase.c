@@ -120,7 +120,7 @@ ImageDataBaseResult zeroImageDataBase()
 		zero[i] = 0;
 	}
 
-	int result = FRAM_write((unsigned char*)zero, DATABASEFRAMADDRESS, database_fram_size);
+	int result = FRAM_write_exte((unsigned char*)zero, DATABASEFRAMADDRESS, database_fram_size);
 	CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 	return DataBaseSuccess;
@@ -130,7 +130,7 @@ ImageDataBaseResult updateGeneralDataBaseParameters(ImageDataBase database)
 {
 	CHECK_FOR_NULL(database, DataBaseNullPointer)
 
-	int FRAM_result = FRAM_write((unsigned char*)(database), DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
+	int FRAM_result = FRAM_write_exte((unsigned char*)(database), DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
 	if(FRAM_result != 0)	// checking if the read from theFRAM succeeded
 	{
 		return DataBaseFramFail;
@@ -147,7 +147,7 @@ ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadat
 
 	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
 	{
-		result = FRAM_read((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
+		result = FRAM_read_exte((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 		// printing for tests:
@@ -184,7 +184,7 @@ ImageDataBaseResult SearchDataBase_byMark(uint32_t database_current_address, Ima
 
 	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
 	{
-		result = FRAM_read((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
+		result = FRAM_read_exte((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 		if (image_metadata->markedFor_TumbnailCreation)
@@ -226,7 +226,7 @@ void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, file
 
 	image_metadata->fileTypes = bits2char(fileTypes);
 
-	FRAM_write((unsigned char*)image_metadata, image_address, sizeof(ImageMetadata));
+	FRAM_write_exte((unsigned char*)image_metadata, image_address, sizeof(ImageMetadata));
 }
 
 uint32_t GetImageFactor(fileType image_type)
@@ -328,7 +328,7 @@ ImageDataBase initImageDataBase(Boolean first_activation)
 {
 	ImageDataBase database = malloc(SIZEOF_IMAGE_DATABASE);	// allocate the memory for the database's variables
 
-	int FRAM_result = FRAM_read((unsigned char*)(database),  DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
+	int FRAM_result = FRAM_read_exte((unsigned char*)(database),  DATABASEFRAMADDRESS, SIZEOF_IMAGE_DATABASE);
 	if(FRAM_result != 0)	// checking if the read from theFRAM succeeded
 	{
 		free(database);
@@ -382,7 +382,7 @@ void setCameraPhotographyValues(ImageDataBase database, uint32_t frameAmount, ui
 
 ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 
 	int error = checkForFileType(image_metadata, raw);
 	CMP_AND_RETURN(error, DataBaseNotInSD, DataBasealreadyInSD);
@@ -438,7 +438,7 @@ ImageDataBaseResult transferImageToSD(ImageDataBase database, imageid cameraId)
 
 ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType type, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 
 	char fileName[FILE_NAME_SIZE];
     getFileName(cameraId, type, fileName);
@@ -500,7 +500,7 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 	uint8_t zero = 0;
 	for(unsigned int i = 0; i < sizeof(ImageMetadata); i += sizeof(uint8_t))
 	{
-		int FRAM_result = FRAM_write(&zero, image_address + i, sizeof(uint8_t));
+		int FRAM_result = FRAM_write_exte(&zero, image_address + i, sizeof(uint8_t));
 		CMP_AND_RETURN(FRAM_result, 0, DataBaseFramFail);
 	}
 
@@ -523,7 +523,7 @@ ImageDataBaseResult clearImageDataBase(void)
 	{
 		vTaskDelay(DELAY);
 
-		result = FRAM_read((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+		result = FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 		image_address += sizeof(ImageMetadata);
@@ -607,10 +607,10 @@ ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
 			}
 
 			// making sure i wont lose the data written in the functions above to the FRAM:
-			FRAM_read( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+			FRAM_read_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
 
 			image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
-			FRAM_write( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+			FRAM_write_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
 		}
 	}
 
@@ -639,7 +639,7 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 	else
 		image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
 
-	result = FRAM_write((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
+	result = FRAM_write_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 	CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 	database->nextId++;
@@ -755,7 +755,7 @@ uint32_t getDataBaseSize()
 
 ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buffer[DATABASE_FRAM_SIZE], uint32_t* size)
 {
-	int result = FRAM_read((unsigned char*)(buffer),  DATABASEFRAMADDRESS, DATABASE_FRAM_SIZE);
+	int result = FRAM_read_exte((unsigned char*)(buffer),  DATABASEFRAMADDRESS, DATABASE_FRAM_SIZE);
 	CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 	uint32_t database_size = SIZEOF_IMAGE_DATABASE;

@@ -166,13 +166,13 @@ TroubleErrCode InitTlmElements()
 
 	unsigned char Periods[NUM_OF_ADCS_TLM] = {0};
 
-	err = FRAM_read(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
+	err = FRAM_read_exte(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
 			(NUM_OF_ADCS_TLM) * sizeof(*save_tlm_flag));
 	if (0 != err) {
 		//TODO: log err
 		return TRBL_FRAM_READ_ERR;
 	}
-	err = FRAM_read((unsigned char*)Periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
+	err = FRAM_read_exte((unsigned char*)Periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
 			NUM_OF_ADCS_TLM* sizeof(*Periods));
 	if(0 != err){
 		//TODO: log err
@@ -183,7 +183,7 @@ TroubleErrCode InitTlmElements()
 		TlmElements[i].SavePeriod = Periods[i];
 	}
 
-	if(0 != FRAM_read((unsigned char*)&OverrideSaveTLM,ADCS_OVERRIDE_SAVE_TLM_ADDR,sizeof(OverrideSaveTLM))){
+	if(0 != FRAM_read_exte((unsigned char*)&OverrideSaveTLM,ADCS_OVERRIDE_SAVE_TLM_ADDR,sizeof(OverrideSaveTLM))){
 		OverrideSaveTLM = TRUE;
 	}
 	//TODO: log successful init
@@ -287,14 +287,14 @@ int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 	TlmElements[index].ToSave = ToSave;
 
 	ToSave = ToSave ? TRUE_8BIT : FALSE_8BIT;
-	err = FRAM_write(&ToSave,ADCS_TLM_SAVE_VECTOR_START_ADDR + index,sizeof(ToSave));
+	err = FRAM_write_exte(&ToSave,ADCS_TLM_SAVE_VECTOR_START_ADDR + index,sizeof(ToSave));
 	if(TRBL_SUCCESS != err){
 		return TRBL_FRAM_WRITE_ERR;
 	}
 
 	if(0 != Period){
 		TlmElements[index].SavePeriod = Period;
-		err = FRAM_write((unsigned char*)&Period,ADCS_TLM_PERIOD_VECTOR_START_ADDR + index,sizeof(ToSave));
+		err = FRAM_write_exte((unsigned char*)&Period,ADCS_TLM_PERIOD_VECTOR_START_ADDR + index,sizeof(ToSave));
 		if(TRBL_SUCCESS != err){
 			return TRBL_FRAM_WRITE_ERR;
 		}
@@ -311,7 +311,7 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 	}
 	int err = 0;
 
-	err = FRAM_write(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
+	err = FRAM_write_exte(save_tlm_flag, ADCS_TLM_SAVE_VECTOR_START_ADDR,
 			NUM_OF_ADCS_TLM * sizeof(*save_tlm_flag));
 	if (0 != err) {
 		return err;
@@ -335,7 +335,7 @@ int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM])
 			periods[i] = ADCS_TLM_DEFAULT_COLLECT_PERIOD;
 		}
 	}
-	err = FRAM_write(periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
+	err = FRAM_write_exte(periods, ADCS_TLM_PERIOD_VECTOR_START_ADDR,
 			NUM_OF_ADCS_TLM * sizeof(*periods));
 	if (0 != err) {
 		return err;
@@ -353,7 +353,7 @@ int AdcsGetTlmOverrideFlag(Boolean *override_flag){
 	}
 
 	int trbl;
-	trbl = FRAM_read((unsigned char*)override_flag,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
+	trbl = FRAM_read_exte((unsigned char*)override_flag,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
 	if(0 != trbl){
 		return TRBL_FRAM_READ_ERR;
 	}
@@ -365,10 +365,10 @@ int AdcsSetTlmOverrideFlag(Boolean override_flag){
 	int trbl;
 	if(override_flag){
 		temp = TRUE;
-		trbl = FRAM_write((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
+		trbl = FRAM_write_exte((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
 	}else{
 		temp = FALSE;
-		trbl = FRAM_write((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
+		trbl = FRAM_write_exte((unsigned char*)&temp,ADCS_OVERRIDE_SAVE_TLM_ADDR,ADCS_OVERRIDE_SAVE_TLM_SIZE);
 	}
 	if(0 != trbl){
 		return TRBL_FRAM_WRITE_ERR;
@@ -387,7 +387,7 @@ TroubleErrCode RestoreDefaultTlmElement(){
 	for(int i = 0;i < NUM_OF_ADCS_TLM;i++){
 		temp[i] = def_tlm[i].ToSave;
 	}
-	int err = FRAM_write(temp,ADCS_TLM_SAVE_VECTOR_START_ADDR,ADCS_TLM_SAVE_VECTOR_END_ADDR);
+	int err = FRAM_write_exte(temp,ADCS_TLM_SAVE_VECTOR_START_ADDR,ADCS_TLM_SAVE_VECTOR_END_ADDR);
 	if(0 != err){
 		return TRBL_FRAM_WRITE_ERR;
 	}
@@ -396,7 +396,7 @@ TroubleErrCode RestoreDefaultTlmElement(){
 		temp[i] = def_tlm[i].SavePeriod;
 	}
 
-	err = FRAM_write(temp,ADCS_TLM_PERIOD_VECTOR_START_ADDR,ADCS_TLM_PERIOD_VECTOR_END_ADDR);
+	err = FRAM_write_exte(temp,ADCS_TLM_PERIOD_VECTOR_START_ADDR,ADCS_TLM_PERIOD_VECTOR_END_ADDR);
 	if(0 != err){
 		return TRBL_FRAM_WRITE_ERR;
 	}

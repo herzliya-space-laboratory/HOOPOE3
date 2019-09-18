@@ -62,7 +62,7 @@ void save_time()
 	raw_time[2] = (byte)(current_time >> 16);
 	raw_time[3] = (byte)(current_time >> 24);
 	// writing to FRAM the current time
-	err = FRAM_write(raw_time, TIME_ADDR, TIME_SIZE);
+	err = FRAM_write_exte(raw_time, TIME_ADDR, TIME_SIZE);
 	check_int("set time, FRAM_write", err);
 }
 

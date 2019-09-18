@@ -59,7 +59,7 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 		return TRBL_FAIL;
 	}
 
-	if(0 != FRAM_write(data,addr,size)){
+	if(0 != FRAM_write_exte(data,addr,size)){
 		return TRBL_FRAM_WRITE_ERR;
 	}
 	if(NULL == memcpy(ptr,data,size)){
@@ -100,18 +100,18 @@ TroubleErrCode AdcsInit()
 	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 
-	if(0 != FRAM_read((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
+	if(0 != FRAM_read_exte((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 		//todo: log error
 	}
-	if(0 != FRAM_read((unsigned char*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
+	if(0 != FRAM_read_exte((unsigned char*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
-	if(0 != FRAM_read((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
+	if(0 != FRAM_read_exte((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
 	}
-	if(0 != FRAM_read((byte*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
+	if(0 != FRAM_read_exte((byte*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
 

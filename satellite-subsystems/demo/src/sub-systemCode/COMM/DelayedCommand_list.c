@@ -99,8 +99,8 @@ void check_delaycommand()
 	Boolean list_changed = FALSE;
 	int err;
 	unsigned char numberOfCommands = 0;	//stored the number of commands from the FRAM
-	err = FRAM_read(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
-	check_int("check_delaycommand, FRAM_read(NUMBER_COMMAND_FRAM_ADDR)", err);
+	err = FRAM_read_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
+	check_int("check_delaycommand, FRAM_read_exte(NUMBER_COMMAND_FRAM_ADDR)", err);
 	set_numOfDelayedCommand(numberOfCommands);
 	//printf("number of commands in FRAM %d\n", numberOfCommands);
 	//2. Loading delayed command list from FRAM
@@ -132,8 +132,8 @@ void check_delaycommand()
 	if (list_changed == TRUE)
 	{
 		// 12. return the list to the FRAM
-		FRAM_write(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND));	//write back the new list
-		FRAM_write(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, sizeof(numberOfCommands));	//write back the nuber of commands that stored in the FRAM
+		FRAM_write_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND));	//write back the new list
+		FRAM_write_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, sizeof(numberOfCommands));	//write back the nuber of commands that stored in the FRAM
 	}
 
 	//set_numOfDelayedCommand(numberOfCommands);
@@ -145,11 +145,11 @@ void reset_delayCommand(Boolean firstActivation)
 
 	memset(DelayCommand_list, 0, MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND);
 
-	int err = FRAM_write(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND));	//reset the memory of the delay command list in the FRAM
-	check_int("reset_delayCommand, FRAM_write(DELAY_COMMAD_FRAM_ADDR)", err);
+	int err = FRAM_write_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND));	//reset the memory of the delay command list in the FRAM
+	check_int("reset_delayCommand, FRAM_write_exte(DELAY_COMMAD_FRAM_ADDR)", err);
 
-	err = FRAM_write(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, sizeof(numberOfCommands));	//reset the number of commands in the FRAM to 0
-	check_int("reset_delayCommand, FRAM_write(NUMBER_COMMAND_FRAM_ADDR)", err);
+	err = FRAM_write_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, sizeof(numberOfCommands));	//reset the number of commands in the FRAM to 0
+	check_int("reset_delayCommand, FRAM_write_exte(NUMBER_COMMAND_FRAM_ADDR)", err);
 
 	//  if its not init, update the number of APRS commands
 	if (!firstActivation)
@@ -176,7 +176,7 @@ int add_delayCommand(TC_spl decode)
 	encode_TCpacket(command, &size, decode);
 
 	// 3. read number of delay commands in delay command list
-	i_error = FRAM_read(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
+	i_error = FRAM_read_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
 	check_int("add_delayCommand, FRAM_read", i_error);
 
 	// 4. check if the list is full
@@ -196,10 +196,10 @@ int add_delayCommand(TC_spl decode)
 	}
 
 	// 7.1. returns the list to the FRAM
-	i_error = FRAM_write(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (SIZE_OF_DELAYED_COMMAND * MAX_NUMBER_OF_DELAY_COMMAND));
+	i_error = FRAM_write_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (SIZE_OF_DELAYED_COMMAND * MAX_NUMBER_OF_DELAY_COMMAND));
 	check_int("add_delayCommand, FRAM_write", i_error);
 	numberOfCommands++;
-	i_error = FRAM_write(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
+	i_error = FRAM_write_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
 	check_int("add_delayCommand, FRAM_write", i_error);
 
 	return 0;
@@ -209,11 +209,11 @@ void get_delayCommand_list()
 {
 	int error;
 	memset(DelayCommand_list, 0, MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND);	//sets all slots in the array to zero for later write to the FRAM
-	error = FRAM_read(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND);
-	check_int("get_delayCommand_list, FRAM_read(DELAY_COMMAD_FRAM_ADDR)", error);
+	error = FRAM_read_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND);
+	check_int("get_delayCommand_list, FRAM_read_exte(DELAY_COMMAD_FRAM_ADDR)", error);
 	unsigned char num;
-	error = FRAM_read(&num, NUMBER_COMMAND_FRAM_ADDR, 1);
-	check_int("get_delayCommand_list, FRAM_read(NUMBER_COMMAND_FRAM_ADDR)", error);
+	error = FRAM_read_exte(&num, NUMBER_COMMAND_FRAM_ADDR, 1);
+	check_int("get_delayCommand_list, FRAM_read_exte(NUMBER_COMMAND_FRAM_ADDR)", error);
 	//set_numOfDelayedCommand(num);
 }
 

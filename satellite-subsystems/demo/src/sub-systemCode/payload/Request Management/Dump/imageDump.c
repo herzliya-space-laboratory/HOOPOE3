@@ -36,9 +36,9 @@ static byte chunk[MAX_CHUNK_SIZE];
 ImageDataBaseResult readChunkDimentionsFromFRAM(void)
 {
 	int error = 0;
-	error = FRAM_read((unsigned char*)&chunk_width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
+	error = FRAM_read_exte((unsigned char*)&chunk_width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
 	CMP_AND_RETURN(error, 0, DataBaseFramFail);
-	error = FRAM_read((unsigned char*)&chunk_height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
+	error = FRAM_read_exte((unsigned char*)&chunk_height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
 	CMP_AND_RETURN(error, 0, DataBaseFramFail);
 
 	return DataBaseSuccess;
@@ -50,9 +50,9 @@ ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height)
 		return Butcher_Parameter_Value;
 
 	int error = 0;
-	error = FRAM_write((unsigned char*)&width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
+	error = FRAM_write_exte((unsigned char*)&width, IMAGE_CHUNK_WIDTH_ADDR, IMAGE_CHUNK_WIDTH_SIZE);
 	CMP_AND_RETURN(error, 0, DataBaseFramFail);
-	error = FRAM_write((unsigned char*)&height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
+	error = FRAM_write_exte((unsigned char*)&height, IMAGE_CHUNK_HEIGHT_ADDR, IMAGE_CHUNK_HEIGHT_SIZE);
 	CMP_AND_RETURN(error, 0, DataBaseFramFail);
 
 	error = readChunkDimentionsFromFRAM();
