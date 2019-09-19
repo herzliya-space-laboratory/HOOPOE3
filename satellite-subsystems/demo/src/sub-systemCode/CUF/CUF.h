@@ -9,6 +9,8 @@
 #define CUF_H_
 
 #include <hal/boolean.h>
+#include <hal/Storage/FRAM.h>
+#include <satellite-subsystems/GomEPS.h>
 #include "../Global/TLM_management.h"
 
 #define TEMPORARYCUFSTORAGESIZE 50000 //size of the array that accumilates the temporary CUFs data
@@ -16,8 +18,21 @@
 #define PERMINANTCUFLENGTH 100 //size of the array that accumilates the perminant CUF names
 #define CUFNAMELENGTH 12 //length of the name of a CUF
 #define uploadCodeLength 33120 //180 packets
-#define PERCUFSAVEFILENAME "CUFPer"
+#define PERCUFSAVEFILENAME "CUFPer" //name of file to save cuf slot array to
+#define RESETSTHRESHOLD 5 //resets threshold before failsafe
 //#define VTASKDELAY_CUF(xTicksToDelay) ((void (*)(portTickType))(CUFSwitch(0)))(xTicksToDelay)
+
+//defines for AUC_CUF switch for ground commands
+#define CUF_HEADER_ST 0 //header ahndle
+#define CUF_ARRAY_ST 1 //add to array
+#define CUF_INTEGRATE_ST 2 //integrate cuf
+#define CUF_EXECUTE_ST 3 //execute cuf
+#define CUF_SAVEBACKUP_ST 4 //save backup
+#define CUF_LOADBACKUP_ST 5 //load backup
+#define CUF_REMOVEFILES_ST 6 //remove files
+#define CUF_REMOVE_ST 7 //remove cuf
+#define CUF_DISABLE_ST 8 //disable cuf
+#define CUF_ENABLE_ST 9 //enable cuf
 
 //the struct of a CUF
 typedef struct {
@@ -31,7 +46,6 @@ typedef struct {
 
 /*!
  * Function to initiate the CUF functions array and reset the CUF slot array if needed
- * @param[in] isFirstRun boolean to indicate if the CUF slot array shuld be reset
  * @return 0 on success
  */
 int InitCUF();
@@ -61,27 +75,27 @@ unsigned long GenerateSSH(unsigned char* data);
 int AuthenticateCUF(CUF* code);
 
 /*!
- * Function to save the CUF slot array to FRAM
+ * Function to save the CUF slot array to per save file
  * @return 0 on success
  */
 int SavePerminantCUF();
 
 /*!
- * Function to load the CUF slot array from FRAM
+ * Function to load the CUF slot array from per save file
  * @return 0 on success
  */
 int LoadPerminantCUF();
 
 /*!
- * Function to manage the CUF satellite restart rutine
+ * Function to manage the CUF satellite restart routine
  * @return 0 on success
  */
 int CUFManageRestart();
 
 /*!
- * Function to add a perminant CUF to the CUF slot array
+ * Function to add a permanent CUF to the CUF slot array
  * @param[in] CUF the cuf to be added to CUF slot array
- * @return 0 if successfull
+ * @return 0 if successful
  * -3 if failed
  */
 int UpdatePerminantCUF(CUF* code);
@@ -89,7 +103,7 @@ int UpdatePerminantCUF(CUF* code);
 /*!
  * Function remove a CUF
  * @param[in] name the name of the cuf to be removed
- * @return 0 if successfull
+ * @return 0 if successful
  * -1 if failed
  */
 int RemoveCUF(char* name);
@@ -113,7 +127,7 @@ int CUFTestFunction2(int index);
  * @param[in] name the name of the cuf to be executed
  * @return what the CUF execution returns
  * -200 on fail (not to confuse with -1 which can be an output of the CUFs execution if the CUFs code failed)
- * -500 if cuf is un-authenticated
+ * -300 if cuf is un-authenticated
  */
 int ExecuteCUF(char* name);
 
@@ -124,8 +138,9 @@ int ExecuteCUF(char* name);
  * @param[in] length length of cuf
  * @param[in] SSH SSH code of cuf
  * @param[in] isTemporary self explanatory
- * @return the integrated CUF on success
- * NULL on fail
+ * @return 0 on success
+ * -1 on fail
+ * -2 if cuf is un-authenticated
  */
 int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, Boolean isTemporary, Boolean disabled);
 
@@ -144,7 +159,7 @@ void AddToCUFTempArray(CUF* temp);
 CUF* GetFromCUFTempArray(char* name);
 
 /*!
- * Function to test CUF  functionality
+ * Function to test CUF functionality
  * @return TRUE
  */
 Boolean CUFTest();
@@ -159,8 +174,33 @@ void DisableCUF(char* name);
  */
 void EnableCUF(char* name);
 
+/*!
+ * checks if the satellite has had RESETSTHRESHOLD resets since first run (for CUF failsafe)
+ * param[in] isFirst is this the first run of the satellite
+ * @return the truth value of the statement above
+ */
+Boolean CheckResetThreashold(Boolean isFirst);
+
+/*!
+ * self explanatory
+ * param[in] pointer the pointer to convert to int
+ * @return the int
+ */
 unsigned int castCharPointerToInt(unsigned char* pointer);
+
+/*!
+ * self explanatory
+ * param[in] array the char array to convert to int array
+ * param[in] the length of the char array
+ * @return the int array
+ */
 unsigned int* castCharArrayToIntArray(unsigned char* array, int length);
+
+/*
+ * adds the .cuf extension to a cuf name (string)
+ * param[in] name the name to add the .cuf extension to
+ * @return the extended name (with the .cuf extension)
+ */
 char* getExtendedName(char* name);
 
 #endif /* CUF_H_ */

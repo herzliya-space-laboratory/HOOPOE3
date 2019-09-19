@@ -47,6 +47,18 @@ void removeFiles()
 		f_delete(fheaderName);
 	else
 		saveAck("Failed to open file on removeFiles headerFile");
+	f_delete(PERCUFSAVEFILENAME);
+	F_FIND find;
+	if (!f_findfirst("A:/*.*",&find))
+	{
+		do
+		{
+			if (strstr(find.filename, "cuf") != NULL || strstr(find.filename, "CUF") != NULL)
+				f_delete(find.filename);
+			vTaskDelay(1);
+
+		} while (!f_findnext(&find));
+	}
 }
 
 void loadBackup()

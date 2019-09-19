@@ -106,6 +106,24 @@ int LoadPerminantCUF()
 	return 0; //return 0 on success
 }
 
+Boolean CheckResetThreashold(Boolean isFirst)
+{
+	gom_eps_hk_wdt_t resets;
+	int gret = GomEpsGetHkData_wdt(0, &resets);
+	if (isFirst)
+	{
+		FRAM_write((unsigned char*)&resets, 10, sizeof(gom_eps_hk_wdt_t));
+		return TRUE;
+	}
+	gom_eps_hk_wdt_t savedresets;
+	int fret = FRAM_read((unsigned char*)&savedresets, 10, sizeof(gom_eps_hk_wdt_t));
+	if (fret != 0 || gret != 0)
+		return TRUE;
+	if ((resets.fields.counter_wdt_i2c - savedresets.fields.counter_wdt_i2c) % RESETSTHRESHOLD == 0 || (resets.fields.counter_wdt_gnd - savedresets.fields.counter_wdt_gnd) % RESETSTHRESHOLD == 0 || (resets.fields.counter_wdt_csp[0] - savedresets.fields.counter_wdt_csp[0]) % RESETSTHRESHOLD == 0 || (resets.fields.counter_wdt_csp[1] - savedresets.fields.counter_wdt_csp[1]) % RESETSTHRESHOLD == 0)
+		return FALSE;
+	return TRUE;
+}
+
 int CUFManageRestart(Boolean isFirst)
 {
 	if (isFirst)
@@ -126,6 +144,13 @@ int CUFManageRestart(Boolean isFirst)
 	InitCUF(); //initiate the CUF switch array
 	LoadPerminantCUF();
 	int i = 0;
+	if (!CheckResetThreashold(isFirst)) //check for reset threshold
+	{
+		for (i = 0; i < PERMINANTCUFLENGTH; i++)
+			if (PerminantCUF[i]->length != 0)
+				PerminantCUF[i]->disabled = TRUE;
+		return -1; //return -1 on reset threshold met
+	}
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 		if (PerminantCUF[i]->length != 0 && !PerminantCUF[i]->disabled) //check if CUF slot is empty
 			ExecuteCUF(PerminantCUF[i]->name); //run CUF in slot if not empty
@@ -255,14 +280,14 @@ int ExecuteCUF(char* name)
 	name = getExtendedName(name);
 	CUF* code = GetFromCUFTempArray(name);
 	if (code == NULL)
-		return -2;
+		return -200;
 	unsigned char* CUFDataStorage = (unsigned char*) code->data;
 	int (*CUFFunction)(void* (*CUFSwitch)(int)) = (int (*)(void* (*CUFSwitch)(int))) CUFDataStorage; //convert the CUF data to a function
 	if (CUFFunction == NULL)
-		return -2; //return -2 on fail
+		return -200; //return -2 on fail
 	int auth = AuthenticateCUF(code);
 	if (auth != 1)
-		return -3;
+		return -300;
 	int ret = CUFFunction(CUFSwitch); //call the CUF function with the test function as its parameter and return its output
 	printf("\n\nCUF RET: %d\n\n", ret);
 	return ret;
