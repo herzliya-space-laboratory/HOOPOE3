@@ -319,37 +319,37 @@ void AUC_payload(TC_spl decode)
 
 	switch (decode.subType)
 	{
-		case (SEND_PIC_CHUNCK_CHUNK_FIELD_ST):
-			request.id = Image_Dump_chunkField;
+		case (SEND_IMG_CHUNCK_CHUNK_FIELD_ST):
+			request.id = image_Dump_chunkField;
 			break;
-		case (SEND_PIC_CHUNCK_BIT_FIELD_ST):
-			request.id = Image_Dump_bitField;
+		case (SEND_IMG_CHUNCK_BIT_FIELD_ST):
+			request.id = image_Dump_bitField;
 			break;
 		case (TAKE_IMG_ST):
-			request.id = take_picture;
+			request.id = take_image;
 			break;
 		case (TAKE_IMG_SPECIAL_VAL_ST):
-			request.id = take_picture_with_special_values;
+			request.id = take_image_with_special_values;
 			break;
-		case (TAKE_PICTURE_WITH_TIME_IN_BETWEEN):
-			request.id = take_pictures_with_time_in_between;
+		case (TAKE_IMG_WITH_TIME_INTERVALS):
+			request.id = take_image_with_time_intervals;
 			break;
 		case (UPDATE_PHOTOGRAPHY_VALUES_ST):
 			request.id = update_photography_values;
 			break;
-		case (DELETE_PIC_FILE_ST):
-			request.id = delete_picture_file;
+		case (DELETE_IMG_FILE_ST):
+			request.id = delete_image_file;
 			break;
-		case (DELETE_PIC_ST):
-			request.id = delete_picture;
+		case (DELETE_IMG_ST):
+			request.id = delete_image;
 			break;
 		case (MOV_IMG_CAM_OBS_ST):
 			request.id = transfer_image_to_OBC;
 			break;
-		case (CREATE_THUMBNAIL_FROM_IMAGE_ST):
+		case (CREATE_THUMBNAIL_FROM_IMG_ST):
 			request.id = create_thumbnail;
 			break;
-		case (CREATE_JPEG_FROM_IMAGE_ST):
+		case (CREATE_JPEG_FROM_IMG_ST):
 			request.id = create_jpg;
 			break;
 		case (RESET_DATA_BASE_ST):
@@ -361,20 +361,29 @@ void AUC_payload(TC_spl decode)
 		case (UPDATE_DEF_DUR_ST):
 			request.id = update_defult_duration;
 			break;
+		case (SET_CHUNK_SIZE):
+			request.id = set_chunk_size;
+			break;
+		case (STOP_TAKING_IMG_TIME_INTERVAL_ST):
+			request.id = stop_take_image_with_time_intervals;
+			break;
 		case (OFF_CAM_ST):
-			request.id = Turn_Off_Camera;
+			request.id = turn_off_camera;
 			break;
 		case (ON_CAM_ST):
-			request.id = Turn_On_Camera;
+			request.id = turn_on_camera;
 			break;
-		case (SET_CHUNK_SIZE):
-			request.id = Set_Chunk_Size;
+		case (ON_FUTURE_AUTO_THUMB):
+			request.id = turn_on_future_AutoThumbnailCreation;
+			break;
+		case (OFF_FUTURE_AUTO_THUMB):
+			request.id = turn_off_future_AutoThumbnailCreation;
 			break;
 		case (ON_AUTO_THUMB):
-			request.id = Turn_On_AutoThumbnailCreation;
+			request.id = turn_on_AutoThumbnailCreation;
 			break;
 		case (OFF_AUTO_THUMB):
-			request.id = Turn_Off_AutoThumbnailCreation;
+			request.id = turn_off_AutoThumbnailCreation;
 			break;
 		default:
 			cmd_error(&type, &err);

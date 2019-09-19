@@ -304,7 +304,7 @@ void imageDump_task(void* param)
 
 	memset(chunk, 0, MAX_CHUNK_SIZE);
 
-	if (request.id == Image_Dump_bitField)
+	if (request.id == image_Dump_bitField)
 	{
 		imageid image_id;
 		memcpy(&image_id, request.data, sizeof(imageid));
@@ -326,7 +326,7 @@ void imageDump_task(void* param)
 
 		error = bitField_imageDump(image_id, comprasionType, request.cmd_id, firstIndex, packetsToSend);
 	}
-	else if (request.id == Image_Dump_chunkField)
+	else if (request.id == image_Dump_chunkField)
 	{
 		imageid image_id;
 		memcpy(&image_id, request.data, sizeof(imageid));

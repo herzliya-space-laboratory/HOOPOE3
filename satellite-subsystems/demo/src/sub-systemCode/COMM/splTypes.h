@@ -83,25 +83,28 @@
 #define RESUME_TM_ST						201
 
 //payload
-#define SEND_PIC_CHUNCK_CHUNK_FIELD_ST		1
-#define SEND_PIC_CHUNCK_BIT_FIELD_ST 		2
+#define SEND_IMG_CHUNCK_CHUNK_FIELD_ST		1
+#define SEND_IMG_CHUNCK_BIT_FIELD_ST 		2
 #define TAKE_IMG_ST							3
 #define TAKE_IMG_SPECIAL_VAL_ST				4
-#define TAKE_PICTURE_WITH_TIME_IN_BETWEEN 	5
+#define TAKE_IMG_WITH_TIME_INTERVALS	 	5
 #define UPDATE_PHOTOGRAPHY_VALUES_ST		6
-#define DELETE_PIC_FILE_ST					7
-#define DELETE_PIC_ST						8
+#define DELETE_IMG_FILE_ST					7
+#define DELETE_IMG_ST						8
 #define MOV_IMG_CAM_OBS_ST					9
-#define CREATE_THUMBNAIL_FROM_IMAGE_ST		10
-#define CREATE_JPEG_FROM_IMAGE_ST			11
+#define CREATE_THUMBNAIL_FROM_IMG_ST		10
+#define CREATE_JPEG_FROM_IMG_ST				11
 #define RESET_DATA_BASE_ST					12
 #define SEND_IMAGE_DATA_BASE_ST				13
 #define UPDATE_DEF_DUR_ST					14
-#define	OFF_CAM_ST							15
-#define ON_CAM_ST							16
-#define SET_CHUNK_SIZE						17
-#define OFF_AUTO_THUMB						18
-#define ON_AUTO_THUMB						19
+#define SET_CHUNK_SIZE						15
+#define STOP_TAKING_IMG_TIME_INTERVAL_ST	16
+#define	OFF_CAM_ST							17
+#define ON_CAM_ST							18
+#define OFF_FUTURE_AUTO_THUMB				19
+#define ON_FUTURE_AUTO_THUMB				20
+#define OFF_AUTO_THUMB						21
+#define ON_AUTO_THUMB						22
 
 //eps
 #define ALLOW_ADCS_ST						99

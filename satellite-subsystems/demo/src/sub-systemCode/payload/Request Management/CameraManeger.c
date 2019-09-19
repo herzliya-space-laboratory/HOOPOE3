@@ -47,6 +47,8 @@ static uint32_t numberOfPicturesLeftToBeTaken;
 
 command_id cmd_id_for_takePicturesWithTimeInBetween;
 
+Boolean8bit auto_thumbnail_creation;
+
 static time_unix turnedOnCamera;
 static time_unix cameraActivation_duration; ///< the duration the camera will stay turned on after being activated
 
@@ -106,7 +108,7 @@ void CameraManagerTaskMain()
 
 		Take_pictures_with_time_in_between();
 
-		if ( !get_ground_conn() )
+		if ( !get_ground_conn() && auto_thumbnail_creation )
 		{
 			Camera_Request request = { .cmd_id = 0, .id = Handle_Mark, .keepOnCamera = 10 };
 			act_upon_request(request);
@@ -144,6 +146,10 @@ int KickStartCamera(void)
 		return -1;
 
 	numberOfPicturesLeftToBeTaken = 0;
+	lastPicture_time = 0;
+	timeBetweenPictures = 0;
+
+	auto_thumbnail_creation = FALSE_8BIT;
 
 	cameraActivation_duration = DEFALT_DURATION;
 
@@ -236,7 +242,7 @@ void act_upon_request(Camera_Request request)
 
 	switch (request.id)
 	{
-	case take_picture:
+	case take_image:
 		if (get_system_state(cam_operational_param))
 		{
 			Time_getUnixEpoch(&turnedOnCamera);
@@ -248,7 +254,7 @@ void act_upon_request(Camera_Request request)
 		}
 		break;
 
-	case take_picture_with_special_values:
+	case take_image_with_special_values:
 		if (get_system_state(cam_operational_param))
 		{
 			Time_getUnixEpoch(&turnedOnCamera);
@@ -260,18 +266,18 @@ void act_upon_request(Camera_Request request)
 		}
 		break;
 
-	case take_pictures_with_time_in_between:
+	case take_image_with_time_intervals:
 		memcpy(&numberOfPicturesLeftToBeTaken, request.data, sizeof(int));
 		memcpy(&timeBetweenPictures, request.data + 4, sizeof(int));
 		Time_getUnixEpoch(&lastPicture_time);
 		cmd_id_for_takePicturesWithTimeInBetween = request.cmd_id;
 		break;
 
-	case delete_picture_file:
+	case delete_image_file:
 		error = DeletePictureFile(imageDataBase, request.data);
 		break;
 
-	case delete_picture:
+	case delete_image:
 		if (get_system_state(cam_operational_param))
 		{
 			Time_getUnixEpoch(&turnedOnCamera);
@@ -313,8 +319,8 @@ void act_upon_request(Camera_Request request)
 		error = resetImageDataBase(imageDataBase);
 		break;
 
-	case Image_Dump_chunkField:
-	case Image_Dump_bitField:
+	case image_Dump_chunkField:
+	case image_Dump_bitField:
 	case DataBase_Dump:
 		startDumpTask(request);
 		break;
@@ -323,7 +329,17 @@ void act_upon_request(Camera_Request request)
 		memcpy(&cameraActivation_duration, request.data, sizeof(time_unix));
 		break;
 
-	case Turn_On_Camera:
+	case set_chunk_size:
+		error = setChunkDimensions(request.data);
+		break;
+
+	case stop_take_image_with_time_intervals:
+		numberOfPicturesLeftToBeTaken = 0;
+		timeBetweenPictures = 0;
+		lastPicture_time = 0;
+		break;
+
+	case turn_on_camera:
 		if (get_system_state(cam_operational_param))
 		{
 			Time_getUnixEpoch(&turnedOnCamera);
@@ -335,20 +351,24 @@ void act_upon_request(Camera_Request request)
 		}
 		break;
 
-	case Turn_Off_Camera:
+	case turn_off_camera:
 		TurnOffGecko();
 		turnedOnCamera = 0;
 		break;
 
-	case Set_Chunk_Size:
-		error = setChunkDimensions(request.data);
-		break;
-
-	case Turn_Off_AutoThumbnailCreation:
+	case turn_off_future_AutoThumbnailCreation:
 		setAutoThumbnailCreation(imageDataBase, FALSE_8BIT);
 		break;
+	case turn_on_future_AutoThumbnailCreation:
+		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
+		break;
 
-	case Turn_On_AutoThumbnailCreation:
+	case turn_off_AutoThumbnailCreation:
+		auto_thumbnail_creation = FALSE_8BIT;
+		setAutoThumbnailCreation(imageDataBase, FALSE_8BIT);
+		break;
+	case turn_on_AutoThumbnailCreation:
+		auto_thumbnail_creation = TRUE_8BIT;
 		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
 		break;
 
