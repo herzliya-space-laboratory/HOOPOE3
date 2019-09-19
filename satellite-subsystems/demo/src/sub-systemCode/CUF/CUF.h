@@ -9,12 +9,14 @@
 #define CUF_H_
 
 #include <hal/boolean.h>
+#include "../Global/TLM_management.h"
 
 #define TEMPORARYCUFSTORAGESIZE 50000 //size of the array that accumilates the temporary CUFs data
 #define CUFARRSTORAGE 1000 //size of the array that accumilates the CUF functions
 #define PERMINANTCUFLENGTH 100 //size of the array that accumilates the perminant CUF names
-#define CUFNAMELENGTH 8 //length of the name of a CUF
-#define uploadCodeLength 110400 //600 packets
+#define CUFNAMELENGTH 12 //length of the name of a CUF
+#define uploadCodeLength 33120 //180 packets
+#define PERCUFSAVEFILENAME "CUFPer"
 //#define VTASKDELAY_CUF(xTicksToDelay) ((void (*)(portTickType))(CUFSwitch(0)))(xTicksToDelay)
 
 //the struct of a CUF
@@ -24,7 +26,6 @@ typedef struct {
 	unsigned int length; //the length of its data (in 4-byte int elements, not bytes!)
 	unsigned long SSH; //the ssh associated with the CUF
 	Boolean isTemporary; //is it temporary
-	Boolean hasTask; //does it contain a task
 	Boolean disabled; //is it disabled
 } CUF;
 
@@ -108,16 +109,6 @@ int CUFTestFunction(void* (*CUFSwitch)(int));
 int CUFTestFunction2(int index);
 
 /*!
- * Function to convert an array of test data to a test file
- * @param[in] CUF the cuf to be created
- * @return 0 on success
- * -1 if failed
- * -2 if perminat CUF name already taken
- * -3 if failed to add perminant CUF to CUF slot array
- */
-int CreateCUF(CUF* code);
-
-/*!
  * Function to execute a CUF
  * @param[in] name the name of the cuf to be executed
  * @return what the CUF execution returns
@@ -133,11 +124,10 @@ int ExecuteCUF(char* name);
  * @param[in] length length of cuf
  * @param[in] SSH SSH code of cuf
  * @param[in] isTemporary self explanatory
- * @param[in] hasTask self explanatory
  * @return the integrated CUF on success
  * NULL on fail
  */
-CUF* IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, Boolean isTemporary, Boolean hasTask, Boolean disabled);
+int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, Boolean isTemporary, Boolean disabled);
 
 /*!
  * Function to add CUF to the temp array
@@ -171,5 +161,6 @@ void EnableCUF(char* name);
 
 unsigned int castCharPointerToInt(unsigned char* pointer);
 unsigned int* castCharArrayToIntArray(unsigned char* array, int length);
+char* getExtendedName(char* name);
 
 #endif /* CUF_H_ */
