@@ -20,11 +20,14 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 	*err = ERR_SUCCESS;
 	//convert raw logic to voltage_t[8]
-	voltage_t eps_logic[6];
+	voltage_t eps_logic[2][NUM_BATTERY_MODE - 1];
 	voltage_t comm_vol[2];
-	for(int i = 0; i < 6; i++)
+	for(int i = 0; i < 2; i++)
 	{
-		eps_logic[i] = BigEnE_raw_to_uShort(cmd.data + i*2);
+		for (int l = 0; l < NUM_BATTERY_MODE - 1; l++)
+		{
+			eps_logic[i][l] = BigEnE_raw_to_uShort(cmd.data + i*6 + l*2);
+		}
 	}
 	for(int i = 0; i < 2; i++)
 	{
@@ -32,56 +35,30 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 
 	// check logic
-	if (eps_logic[0] < EPS_VOL_LOGIC_MIN)
+	if (!check_EPSTableCorrection(eps_logic))
 	{
 		*err = ERR_PARAMETERS;
 		return;
 	}
-	if (eps_logic[5] >= eps_logic[1] || eps_logic[1] >= eps_logic[4])
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-	if (eps_logic[4] >= eps_logic[2] || eps_logic[2] >= eps_logic[3])
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-	if (eps_logic[2] >= eps_logic[3] || eps_logic[3] > EPS_VOL_LOGIC_MAX)
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-	if (eps_logic[1] >= eps_logic[4] || eps_logic[4] >= eps_logic[2])
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-	if (eps_logic[0] >= eps_logic[5] || eps_logic[5] >= eps_logic[1])
-	{
-		*err = ERR_PARAMETERS;
-		return;
-	}
-
 	for (int i = 0; i < 2; i++)
 	{
-		if (eps_logic[3] < comm_vol[i] && comm_vol[i] < eps_logic[4])
+		if (eps_logic[1][0] < comm_vol[i] && comm_vol[i] < eps_logic[1][1])
 		{
 			*err = ERR_PARAMETERS;
 			return;
 		}
 	}
 
-	int FRAM_err = FRAM_writeAndVerify((byte*)eps_logic, EPS_VOLTAGES_ADDR, 12);
-	check_int("cmd_upload_volt_logic, FRAM_writeAndVerify(EPS_VOLTAGES_ADDR)", FRAM_err);
+	int FRAM_err = FRAM_writeAndVerify_exte((byte*)eps_logic, EPS_VOLTAGES_ADDR, 12);
+	check_int("cmd_upload_volt_logic, FRAM_writeAndVerify_exte(EPS_VOLTAGES_ADDR)", FRAM_err);
 	if (FRAM_err)
 	{
 		*err = ERR_FRAM_WRITE_FAIL;
 		return;
 	}
 
-	FRAM_err = FRAM_writeAndVerify((byte*)comm_vol, BEACON_LOW_BATTERY_STATE_ADDR, 2);
-	check_int("cmd_upload_volt_logic, FRAM_writeAndVerify(BEACON_LOW_BATTERY_STATE_ADDR)", FRAM_err);
+	FRAM_err = FRAM_writeAndVerify_exte((byte*)comm_vol, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+	check_int("cmd_upload_volt_logic, FRAM_writeAndVerify_exte(BEACON_LOW_BATTERY_STATE_ADDR)", FRAM_err);
 	if (FRAM_err)
 	{
 		reset_EPS_voltages();
@@ -92,8 +69,8 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	byte raw[2];
 	raw[0] = (byte)(comm_vol[1]);
 	raw[1] = (byte)(comm_vol[1] << 8);
-	FRAM_err = FRAM_writeAndVerify(raw, TRANS_LOW_BATTERY_STATE_ADDR, 2);
-	check_int("cmd_upload_volt_logic, FRAM_writeAndVerify(TRANS_LOW_BATTERY_STATE_ADDR)", FRAM_err);
+	FRAM_err = FRAM_writeAndVerify_exte(raw, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+	check_int("cmd_upload_volt_logic, FRAM_writeAndVerify_exte(TRANS_LOW_BATTERY_STATE_ADDR)", FRAM_err);
 	if (FRAM_err)
 	{
 		reset_EPS_voltages();
@@ -112,29 +89,29 @@ void cmd_upload_volt_COMM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 	voltage_t comm_vol[2];
-	voltage_t eps_logic[6];
+	voltage_t eps_logic[2][NUM_BATTERY_MODE - 1];
 
 	for (int i = 0; i < 2; i++)
 	{
 		comm_vol[i] = BigEnE_raw_to_uShort(cmd.data + i*2);
 	}
 
-	int i_error = FRAM_read((byte*)eps_logic, EPS_VOLTAGES_ADDR, 12);
-	check_int("cmd_upload_volt_COMM, FRAM_write(EPS_VOLTAGES_ADDR)", i_error);
+	int i_error = FRAM_read_exte((byte*)eps_logic, EPS_VOLTAGES_ADDR, 12);
+	check_int("cmd_upload_volt_COMM, FRAM_write_exte(EPS_VOLTAGES_ADDR)", i_error);
 	for (int i = 0; i < 2; i++)
 	{
-		if (eps_logic[3] < comm_vol[i] && comm_vol[i] < eps_logic[4])
+		if (eps_logic[1][0] < comm_vol[i] && comm_vol[i] < eps_logic[1][1])
 		{
 			*err = ERR_PARAMETERS;
 			return;
 		}
 	}
 
-	i_error = FRAM_write((byte*)comm_vol, BEACON_LOW_BATTERY_STATE_ADDR, 2);
-	check_int("cmd_upload_volt_COMM, FRAM_write(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
+	i_error = FRAM_write_exte((byte*)comm_vol, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+	check_int("cmd_upload_volt_COMM, FRAM_write_exte(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 	voltage_t volll = comm_vol[1];
-	i_error = FRAM_write((byte*)&volll, TRANS_LOW_BATTERY_STATE_ADDR, 2);
-	check_int("cmd_upload_volt_COMM, FRAM_write(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
+	i_error = FRAM_write_exte((byte*)&volll, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+	check_int("cmd_upload_volt_COMM, FRAM_write_exte(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 }
 void cmd_heater_temp(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
@@ -208,4 +185,31 @@ void cmd_allow_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 	*err = ERR_SUCCESS;
 	shut_ADCS(SWITCH_OFF);
+}
+void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_EPS_ALPHA;
+	if (cmd.length != sizeof(float))
+	{
+		*err = ERR_PARAMETERS;
+		return;
+	}
+
+	float alpha;
+	memcpy(&alpha, cmd.data, 4);
+	if (CHECK_EPS_ALPHA_VALUE(alpha))
+	{
+		int error = FRAM_write_exte((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+		if (error)
+		{
+			*err = ERR_FRAM_WRITE_FAIL;
+			return;
+		}
+		check_int("cmd_update_alpha, FRAM_write_exte(EPS_ALPHA_ADDR)", error);
+		*err = ERR_SUCCESS;
+	}
+	else
+	{
+		*err = ERR_PARAMETERS;
+	}
 }

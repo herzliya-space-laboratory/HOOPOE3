@@ -1,16 +1,12 @@
 src/main.d: ../src/main.c \
- C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/trace.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/board.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/at91sam9g20/AT91SAM9G20.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/dbgu/dbgu.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/pio/pio.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/projdefs.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOSConfig.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/board.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/at91sam9g20/AT91SAM9G20.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/trace.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/dbgu/dbgu.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/pio/pio.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/assert.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/portable.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/portable/GCC/ARM9_AT91SAM9G20/portmacro.h \
@@ -20,6 +16,10 @@ src/main.d: ../src/main.c \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/list.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h \
+ C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/WatchDogTimer.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/boolean.h \
@@ -31,6 +31,7 @@ src/main.d: ../src/main.c \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Storage/FRAM.h \
  ../src/sub-systemCode/COMM/GSC.h \
  ../src/sub-systemCode/COMM/../Global/Global.h \
+ C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/HoopoeTestingConfigurations.h \
  ../src/sub-systemCode/COMM/../Global/FRAMadress.h \
  ../src/sub-systemCode/COMM/../Global/sizes.h \
  ../src/sub-systemCode/COMM/splTypes.h \
@@ -47,38 +48,58 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Main/../COMM/GSC.h \
  ../src/sub-systemCode/Main/../Global/sizes.h \
  ../src/sub-systemCode/Main/../Global/Global.h \
- ../src/sub-systemCode/Main/../Global/TM_managment.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h \
+ ../src/sub-systemCode/Main/../Global/TLM_management.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h \
  ../src/sub-systemCode/Main/../Global/../Global/Global.h \
  ../src/sub-systemCode/Main/Main_Init.h \
  ../src/sub-systemCode/Global/Global.h ../src/sub-systemCode/EPS.h \
  ../src/sub-systemCode/Global/FRAMadress.h \
  ../src/sub-systemCode/Global/Global.h \
- ../src/sub-systemCode/Global/sizes.h
-
-C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/trace.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/board.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/at91sam9g20/AT91SAM9G20.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/dbgu/dbgu.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/pio/pio.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h:
+ ../src/sub-systemCode/Global/sizes.h \
+ ../src/sub-systemCode/Main/CMD/ADCS_CMD.h \
+ ../src/sub-systemCode/Main/CMD/../../COMM/GSC.h \
+ ../src/sub-systemCode/Main/CMD/../commands.h \
+ ../src/sub-systemCode/Main/CMD/../../ADCS/AdcsTroubleShooting.h \
+ ../src/sub-systemCode/ADCS/AdcsMain.h \
+ C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h \
+ C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/Global/Global.h \
+ ../src/sub-systemCode/ADCS/AdcsTroubleShooting.h \
+ ../src/sub-systemCode/ADCS/AdcsCommands.h \
+ ../src/sub-systemCode/Global/OnlineTM.h \
+ ../src/sub-systemCode/Global/Global.h \
+ ../src/sub-systemCode/Global/TLM_management.h \
+ ../src/sub-systemCode/Global/../COMM/GSC.h \
+ ../src/sub-systemCode/Global/../COMM/splTypes.h \
+ ../src/sub-systemCode/Global/../Main/HouseKeeping.h \
+ ../src/sub-systemCode/Global/../Main/../Global/Global.h \
+ ../src/sub-systemCode/Global/../Main/../Global/GlobalParam.h \
+ ../src/sub-systemCode/Global/../Main/../Global/sizes.h \
+ ../src/sub-systemCode/Global/../Main/../Global/Global.h \
+ ../src/sub-systemCode/Global/../Main/../COMM/GSC.h \
+ ../src/sub-systemCode/Global/../Main/../Global/TLM_management.h \
+ ../src/sub-systemCode/Ants.h
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/projdefs.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOSConfig.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/board.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/boards/ISIS_OBC_G20/at91sam9g20/AT91SAM9G20.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/trace.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/dbgu/dbgu.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/pio/pio.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/assert.h:
 
@@ -97,6 +118,14 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/list.h
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/semphr.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/version/version.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h:
 
@@ -119,6 +148,8 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Storage/FRAM.h:
 ../src/sub-systemCode/COMM/GSC.h:
 
 ../src/sub-systemCode/COMM/../Global/Global.h:
+
+C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/HoopoeTestingConfigurations.h:
 
 ../src/sub-systemCode/COMM/../Global/FRAMadress.h:
 
@@ -152,9 +183,21 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/errors.h:
 
 ../src/sub-systemCode/Main/../Global/Global.h:
 
-../src/sub-systemCode/Main/../Global/TM_managment.h:
+../src/sub-systemCode/Main/../Global/TLM_management.h:
 
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:
 
 ../src/sub-systemCode/Main/../Global/../Global/Global.h:
 
@@ -169,3 +212,47 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Boolean.h:
 ../src/sub-systemCode/Global/Global.h:
 
 ../src/sub-systemCode/Global/sizes.h:
+
+../src/sub-systemCode/Main/CMD/ADCS_CMD.h:
+
+../src/sub-systemCode/Main/CMD/../../COMM/GSC.h:
+
+../src/sub-systemCode/Main/CMD/../commands.h:
+
+../src/sub-systemCode/Main/CMD/../../ADCS/AdcsTroubleShooting.h:
+
+../src/sub-systemCode/ADCS/AdcsMain.h:
+
+C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/COMM/GSC.h:
+
+C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/Global/Global.h:
+
+../src/sub-systemCode/ADCS/AdcsTroubleShooting.h:
+
+../src/sub-systemCode/ADCS/AdcsCommands.h:
+
+../src/sub-systemCode/Global/OnlineTM.h:
+
+../src/sub-systemCode/Global/Global.h:
+
+../src/sub-systemCode/Global/TLM_management.h:
+
+../src/sub-systemCode/Global/../COMM/GSC.h:
+
+../src/sub-systemCode/Global/../COMM/splTypes.h:
+
+../src/sub-systemCode/Global/../Main/HouseKeeping.h:
+
+../src/sub-systemCode/Global/../Main/../Global/Global.h:
+
+../src/sub-systemCode/Global/../Main/../Global/GlobalParam.h:
+
+../src/sub-systemCode/Global/../Main/../Global/sizes.h:
+
+../src/sub-systemCode/Global/../Main/../Global/Global.h:
+
+../src/sub-systemCode/Global/../Main/../COMM/GSC.h:
+
+../src/sub-systemCode/Global/../Main/../Global/TLM_management.h:
+
+../src/sub-systemCode/Ants.h:

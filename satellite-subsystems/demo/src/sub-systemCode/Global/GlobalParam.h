@@ -10,7 +10,6 @@
 
 #include "sizes.h"
 #include "Global.h"
-#include "../ADCS/Stage_Table.h"
 
 typedef enum
 {
@@ -45,7 +44,6 @@ typedef union __attribute__ ((__packed__))
 typedef struct __attribute__ ((__packed__))
 {
 	voltage_t Vbatt;//current voltage of the batteries
-	voltage_t pre_vbatt[3];
 	current_t curBat;//
 	current_t cur3V3;
 	current_t cur5V;
@@ -60,7 +58,6 @@ typedef struct __attribute__ ((__packed__))
 	unsigned short TxRefl;
 	unsigned short TxForw;
 
-	stageTable ST;
 	short Attitude[3];
 
 	uint8_t numOfPics;//number of pictures saved in the file system of the satellite
@@ -78,15 +75,13 @@ int init_GP();
 
 Boolean get_system_state(systems_state_parameters param);
 void set_system_state(systems_state_parameters param, Boolean set_state);
+systems_state get_systems_state_param();
 
 // get the whole global structure.
 void get_current_global_param(global_param* param_out);
 //	CGP->current Vbatt
 voltage_t get_Vbatt();
 void set_Vbatt(voltage_t param);
-//	CGP->Vbatt privouse
-void set_Vbatt_previous(voltage_t vbatt_prev[3]);
-void get_Vbatt_previous(voltage_t *vbatt_prev);
 // CGP ->current system
 void set_curBat(current_t param);
 current_t get_curBat();
@@ -123,8 +118,7 @@ void set_TxRefl(unsigned short param);
 // CGP-> TxFrow
 unsigned short get_TxForw();
 void set_TxForw(unsigned short param);
-// CGP-> ST
-stageTable get_ST();
+
 // CGP-> Attitude
 short get_Attitude(int index);
 void set_Attitude(int index, short param);

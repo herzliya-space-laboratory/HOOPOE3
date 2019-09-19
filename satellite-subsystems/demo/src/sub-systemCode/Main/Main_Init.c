@@ -27,7 +27,7 @@
 #include <hal/Drivers/LED.h>
 #include <hal/Drivers/I2C.h>
 #include <hal/Drivers/SPI.h>
-
+#include <hal/errors.h>
 #include <hal/boolean.h>
 
 #include <hal/version/version.h>
@@ -38,14 +38,23 @@
 
 #include "../Global/Global.h"
 #include "../Global/GlobalParam.h"
-#include "../Global/TM_managment.h"
+#include "../Global/TLM_management.h"
+#include "../Global/OnlineTM.h"
+#include "../Global/GenericTaskSave.h"
 #include "../EPS.h"
 #include "../Ants.h"
-#include "../ADCS.h"
-#include "../ADCS/Stage_Table.h"
+#include "../CUF/CUF.h"
+
+#include "../ADCS/AdcsMain.h"
+
 #include "../TRXVU.h"
+#include "../payload/Request Management/CameraManeger.h"
+#include "sub-systemCode/ADCS/AdcsMain.h"
 #include "HouseKeeping.h"
 #include "commands.h"
+
+#include "../payload/Compression/ImageConversion.h"
+#include "../payload/Compression/jpeg/ImgCompressor.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -53,18 +62,15 @@
 #define RESET_COUNT_FRAM_ID 666
 // will Boot- deploy all  appropriate subsytems
 
-//extern unsigned short* Vbat_Prv;
-stageTable ST;
-
 void numberOfRestarts()
 {
 	byte raw[4];
-	int err = FRAM_read(raw, RESTART_FLAG_ADDR, 4);
-	check_int("numberOfRestarts, FRAM_write()", err);
+	int err = FRAM_read_exte(raw, RESTART_FLAG_ADDR, 4);
+	check_int("numberOfRestarts, FRAM_write_exte()", err);
 	unsigned int *num = (unsigned int*)raw;
 	(*num)++;
-	err = FRAM_write(raw, RESTART_FLAG_ADDR, 4);
-	check_int("numberOfRestarts, FRAM_write(++)", err);
+	err = FRAM_write_exte(raw, RESTART_FLAG_ADDR, 4);
+	check_int("numberOfRestarts, FRAM_write_exte(++)", err);
 	set_numOfResets(*num);
 }
 
@@ -105,13 +111,14 @@ void StartTIME()
 	{
 		printf("error in Time_start; err = %d\n",error);
 	}
+	vTaskDelay(100);
 	time_unix time_now;
 	error = Time_getUnixEpoch(&time_now);
 	check_int("StartTIME, Time_getUnixEpoch", error);
 	// get last saved time before reset from FRAM
 	time_unix set_time;
 	byte raw_time[TIME_SIZE];
-	FRAM_read(raw_time, TIME_ADDR, TIME_SIZE);
+	FRAM_read_exte(raw_time, TIME_ADDR, TIME_SIZE);
 	set_time = (time_unix)raw_time[0];
 	set_time += (time_unix)(raw_time[1] << 8);
 	set_time += (time_unix)(raw_time[2] << 16);
@@ -128,7 +135,7 @@ void StartTIME()
 Boolean first_activation()
 {
 	byte dataFRAM = FALSE_8BIT;
-	FRAM_read(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+	FRAM_read_exte(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 	if (!dataFRAM)
 	{
 		return FALSE;
@@ -139,15 +146,14 @@ Boolean first_activation()
 	reset_FRAM_TRXVU();
 	// 3. reset TRXVU FRAM adress
 	reset_FRAM_EPS();
+
+	reset_offline_TM_list();
 	// 3. cahnge the first activation to false
 	dataFRAM = FALSE_8BIT;
 
-	FRAM_write(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
+	FRAM_write_exte(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 	return TRUE;
 }
-
-#define BUFFLEN 30+F_MAXNAME
-
 
 void resetSD()
 {
@@ -178,6 +184,10 @@ int InitSubsystems()
 
 	StartFRAM();
 
+	init_onlineParam();
+
+	init_GenericSaveQueue();
+
 	Boolean activation = first_activation();
 
 	StartTIME();
@@ -188,29 +198,19 @@ int InitSubsystems()
 
 	InitializeFS(activation);
 
-	create_files(activation);
+	CUFManageRestart();
 
 	EPS_Init();
 
 #ifdef ANTS_ON
-	init_Ants();
-
-#ifdef TESTING
-	printf("before deploy\n");
-	readAntsState();
+	init_Ants(activation);
 #endif
 
-	Auto_Deploy();
-
-#ifdef TESTING
-	printf("after deploy\n");
-	readAntsState();
-#endif
-#endif
-
-	init_adcs(activation);
+	AdcsInit();
 
 	init_trxvu();
+
+	initCamera(activation);
 
 	init_command();
 
@@ -220,14 +220,19 @@ int InitSubsystems()
 // this function initializes all neccesary subsystem tasks in main
 int SubSystemTaskStart()
 {
-	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(TRXVU_task, (const signed char*)("TRX"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(100);
 
-	xTaskCreate(HouseKeeping_highRate_Task, (const signed char*)("HK_H"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
-	xTaskCreate(HouseKeeping_lowRate_Task, (const signed char*)("HK_L"), 8192, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), NULL);
+	xTaskCreate(save_onlineTM_task, (const signed char*)("OnlineTM"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(100);
 
+	xTaskCreate(GenericSave_Task, (const signed char*)("generic save task"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(100);
+
+	KickStartCamera();
+	vTaskDelay(100);
+
+	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	return 0;
 }
 

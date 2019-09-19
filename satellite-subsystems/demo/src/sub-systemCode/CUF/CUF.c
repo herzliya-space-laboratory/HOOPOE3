@@ -69,10 +69,8 @@ int SavePerminantCUF()
 	{
 		if (PerminantCUF[i]->name != NULL)
 		{
-			F_FILE* CUFdata = f_open(PerminantCUF[i]->name, "r");
-			f_read(currentCUFData, PerminantCUF[i]->length, 1, CUFdata);
-			f_close(CUFdata);
-			f_write(currentCUFData, sizeof(int) * PerminantCUF[i]->length, sizeof(void*), PerminantCUFData);
+			f_write(PerminantCUF[i]->data, uploadCodeLength, sizeof(void*), PerminantCUFData);
+			f_write(&PerminantCUF[i]->length, sizeof(unsigned int), sizeof(void*), PerminantCUFData);
 			f_write(&PerminantCUF[i]->isTemporary, sizeof(Boolean), sizeof(void*), PerminantCUFData);
 			f_write(&PerminantCUF[i]->SSH, sizeof(unsigned long), sizeof(void*), PerminantCUFData);
 			f_write(PerminantCUF[i]->name, CUFNAMELENGTH, sizeof(void*), PerminantCUFData);
@@ -91,7 +89,8 @@ int LoadPerminantCUF()
 	//read all data members of all perminant CUFs
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 	{
-		f_read(PerminantCUF[i]->data, sizeof(int) * PerminantCUF[i]->length, sizeof(void*), PerminantCUFData);
+		f_read(PerminantCUF[i]->data, uploadCodeLength, sizeof(void*), PerminantCUFData);
+		f_read(&PerminantCUF[i]->length, sizeof(unsigned int), sizeof(void*), PerminantCUFData);
 		f_read(&PerminantCUF[i]->isTemporary, sizeof(Boolean), sizeof(void*), PerminantCUFData);
 		f_read(&PerminantCUF[i]->SSH, sizeof(unsigned long), sizeof(void*), PerminantCUFData);
 		f_read(PerminantCUF[i]->name, CUFNAMELENGTH, sizeof(void*), PerminantCUFData);
@@ -104,34 +103,32 @@ int LoadPerminantCUF()
 
 int CUFManageRestart()
 {
-	InitCUF(FALSE); //initiate the CUF switch array
-	int i = 0;
+	InitCUF(); //initiate the CUF switch array
 	LoadPerminantCUF();
+	int i = 0;
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 		if (PerminantCUF[i]->name != NULL && !PerminantCUF[i]->disabled) //check if CUF slot is empty
 			ExecuteCUF(PerminantCUF[i]->name); //run CUF in slot if not empty
 	return 0; //return 0 on success
 }
 
-int InitCUF(Boolean isFirstRun)
+int InitCUF()
 {
 	CUFArr[0] = (void*)vTaskDelay;
 	//reset the CUF slot array if first run
 	int i = 0;
 	for (i = 0; i < PERMINANTCUFLENGTH; ++i)
 	{
-		PerminantCUF[i] = malloc(sizeof(CUF));
 		TempCUF[i] = malloc(sizeof(CUF));
-	}
-	if (isFirstRun == TRUE)
-	{
-		for (i = 0; i < PERMINANTCUFLENGTH; ++i)
-		{
-			PerminantCUF[i]->data = NULL;
-			PerminantCUF[i]->name = NULL;
-			PerminantCUF[i]->SSH = 0;
-			PerminantCUF[i]->length = 0;
-		}
+		TempCUF[i]->data = NULL;
+		TempCUF[i]->name = NULL;
+		TempCUF[i]->SSH = 0;
+		TempCUF[i]->length = 0;
+		PerminantCUF[i] = malloc(sizeof(CUF));
+		PerminantCUF[i]->data = NULL;
+		PerminantCUF[i]->name = NULL;
+		PerminantCUF[i]->SSH = 0;
+		PerminantCUF[i]->length = 0;
 	}
 	return 0; //return 0 on success
 }
@@ -156,7 +153,7 @@ unsigned long GenerateSSH(unsigned char* data)
 int AuthenticateCUF(CUF* code)
 {
 	unsigned long newSSH;
-	newSSH = GenerateSSH(code->data); //generate an ssh for the data
+	newSSH = GenerateSSH((char*)code->data); //generate an ssh for the data
 	if (newSSH == 0) //check generation
 		return -1; //return -1 on fail
 	if (newSSH == code->SSH) //authenticate the ssh with the pre-made one
@@ -241,18 +238,20 @@ int CreateCUF(CUF* code)
 int ExecuteCUF(char* name)
 {
 	CUF* code = GetFromCUFTempArray(name);
+	if (code == NULL)
+		return -2;
 	F_FILE* codeFile = f_open(code->name, "r"); //open the given CUF
 	int CUFDataSize = ((int)(f_filelength(code->name))) / sizeof(void*); //get the CUF length
 	unsigned char* CUFDataStorage = NULL; //for perminant CUFs
-	if (code->hasTask == TRUE)
+	if (code->hasTask != FALSE)
 		CUFDataStorage = malloc(code->length * sizeof(void*)); //allocate space for CUF if perminant
-	if (code->hasTask == TRUE && CUFDataStorage == NULL) //check fail
+	if (code->hasTask != FALSE && CUFDataStorage == NULL) //check fail
 	{
 		free(CUFDataStorage);
 		return -2; //return -2 on fail
 	}
 	int (*CUFFunction)(void* (*CUFSwitch)(int)) = NULL; //create the function pointer to convert the CUF into
-	if (code->hasTask == TRUE)
+	if (code->hasTask != FALSE)
 	{
 		//read a perminant CUF into the CUF function
 		if ((int)f_read(CUFDataStorage, sizeof(void*), CUFDataSize, codeFile) != (int)(CUFDataSize)) //read data from CUF and check fail
@@ -263,7 +262,7 @@ int ExecuteCUF(char* name)
 		}
 		f_close(codeFile);
 		CUFFunction = (int (*)(void* (*CUFSwitch)(int))) CUFDataStorage; //convert the CUF data to a function
-		code->data = castCharArrayToIntArray(CUFDataStorage, code->length*4);
+		code->data = castCharArrayToIntArray((unsigned char*)CUFDataStorage, code->length*4);
 	}
 	else
 	{
@@ -282,7 +281,9 @@ int ExecuteCUF(char* name)
 	int auth = AuthenticateCUF(code);
 	if (auth != 1)
 		return -3;
-	return CUFFunction(CUFSwitch); //call the CUF function with the test function as its parameter and return its output
+	int ret = CUFFunction(CUFSwitch); //call the CUF function with the test function as its parameter and return its output
+	printf("\n\nCUF RET: %d\n\n", ret);
+	return ret;//todo: YAARI!!!!
 }
 
 CUF* IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, Boolean isTemporary, Boolean hasTask, Boolean disabled)
@@ -329,7 +330,7 @@ void AddToCUFTempArray(CUF* temp)
 	int i = 0;
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 	{
-		if (TempCUF[i] == 0 || strcmp(TempCUF[i]->name, temp->name) == 0)
+		if (TempCUF[i]->name == NULL || strcmp(TempCUF[i]->name, temp->name) == 0)
 		{
 			TempCUF[i] = temp;
 			return;
@@ -345,6 +346,13 @@ CUF* GetFromCUFTempArray(char* name)
 		if (strcmp(TempCUF[i]->name, name) == 0)
 		{
 			return TempCUF[i];
+		}
+	}
+	for (i = 0; i < PERMINANTCUFLENGTH; i++)
+	{
+		if (strcmp(PerminantCUF[i]->name, name) == 0)
+		{
+			return PerminantCUF[i];
 		}
 	}
 	return NULL;
@@ -388,7 +396,7 @@ Boolean CUFTest(int* testCUFData)
 			printf("%d, %d, %d\n", testCUFDataCheck[i], testCUFData[i], i);
 		}
 	}
-	CUF* testFile = IntegrateCUF("CodeFile001", testCUFData, 28, GenerateSSH(testCUFData), TRUE, FALSE, FALSE);
+	CUF* testFile = IntegrateCUF((char*)"CodeFile001", testCUFData, 28, GenerateSSH(testCUFData), TRUE, FALSE, FALSE);
 	if (testFile == NULL)
 	{
 		printf("Failed To Integrate CUF\n");

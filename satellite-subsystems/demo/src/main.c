@@ -2,6 +2,10 @@
  * main.c
  *      Author: Akhil
  */
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/semphr.h>
+
 #include <satellite-subsystems/version/version.h>
 
 #include <at91/utility/exithandler.h>
@@ -9,9 +13,6 @@
 #include <at91/utility/trace.h>
 #include <at91/peripherals/cp15/cp15.h>
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <freertos/semphr.h>
 
 #include <hal/Utility/util.h>
 #include <hal/Timing/WatchDogTimer.h>
@@ -35,15 +36,17 @@
 #include "sub-systemCode/Global/Global.h"
 #include "sub-systemCode/EPS.h"
 
+#include "sub-systemCode/Main/CMD/ADCS_CMD.h"
+#include "sub-systemCode/ADCS/AdcsMain.h"
+#include "sub-systemCode/ADCS/AdcsCommands.h"
+#include "sub-systemCode/Global/OnlineTM.h"
+#include "sub-systemCode/Ants.h"
+
 #define DEBUGMODE
 
 #ifndef DEBUGMODE
 	#define DEBUGMODE
 #endif
-
-
-#define HK_DELAY_SEC 10
-#define MAX_SIZE_COMMAND_Q 20
 
 void save_time()
 {
@@ -59,7 +62,7 @@ void save_time()
 	raw_time[2] = (byte)(current_time >> 16);
 	raw_time[3] = (byte)(current_time >> 24);
 	// writing to FRAM the current time
-	err = FRAM_write(raw_time, TIME_ADDR, TIME_SIZE);
+	err = FRAM_write_exte(raw_time, TIME_ADDR, TIME_SIZE);
 	check_int("set time, FRAM_write", err);
 }
 
@@ -76,24 +79,32 @@ void Command_logic()
 	while (error == 0);
 }
 
+
 void taskMain()
 {
 	WDT_startWatchdogKickTask(10 / portTICK_RATE_MS, FALSE);
+
 	InitSubsystems();
+	printf("init\n");
 
 	vTaskDelay(100);
-	printf("init\n");
+
 	SubSystemTaskStart();
-	printf("Task Main start\n");
 
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
-
+	
 	while(1)
 	{
 		EPS_Conditioning();
+
 		Command_logic();
+
 		save_time();
+
+#ifdef ANTS_ON
+		DeployIfNeeded();
+#endif
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
@@ -104,11 +115,17 @@ int main()
 	// Enable the Instruction cache of the ARM9 core. Keep the MMU and Data Cache disabled.
 	CP15_Enable_I_Cache();
 
+	// The actual watchdog is already started, this only initializes the watchdog-kick interface.
 	WDT_start();
 
-	printf("Task Main 2121\n");
-	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 2048, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
+	printf("Task Main \n");
+	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 8196, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
 	printf("start sch\n");
 	vTaskStartScheduler();
+	while(1){
+		printf("should not be here\n");
+		vTaskDelay(2000);
+	}
+
 	return 0;
 }

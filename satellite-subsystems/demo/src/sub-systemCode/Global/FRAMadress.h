@@ -2,7 +2,7 @@
  * FRAMadress.h
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef FRAMADRESS_H_
@@ -17,57 +17,58 @@
 #define STOP_TELEMETRY_ADDR 0x10C// << 1 byte >>
 #define SHUT_ADCS_ADDR		0x10D// << 1 byte >>
 #define SHUT_CAM_ADDR		0x10E// << 1 byte >>
-#define DEPLOY_ANTS_ATTEMPTS_ADDR	0x10F// << 3 byte >>, array of 3 variables - 3 attempts
+#define OFFLINE_LIST_SETTINGS_ADDR	0x200// << OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST = 9 * 20 = 180 >>
 //ANTS
+
 #define ARM_DEPLOY_ADDR 0x1100// << 1 byte >> , can be 0 or 255
-#define ANTS_FRAM_ADDR 0x1101
+#define ANTS_AUTO_DEPLOY_FINISH_ADDR 0x1101
+#define DEPLOY_ANTS_ATTEMPTS_ADDR	0x110F// <<3 * 4 = 12 byte >>, array of 3 variables - 3 attempts
+#define STOP_DEPLOY_ATTEMPTS_ADDR	0x111B// << 1 byte >>
+
 
 //EPS
 #define EPS_VOLTAGES_ADDR 0x2100 // << EPS_VOLTAGES_SIZE_RAW bytes >>
 #define EPS_STATES_ADDR 0x211C // << 1 byte >> Address of consumption state
+#define EPS_ALPHA_ADDR		0x211D	//<< 4 byte >>
+
 
 //TRX
-#define FRAME_COUNT_ADDR 0x311C // << 1 byte >>
 #define BEACON_LOW_BATTERY_STATE_ADDR 0x311D // << 2 bytes >>
 #define TRANS_LOW_BATTERY_STATE_ADDR 0x311F
 #define NUMBER_COMMAND_FRAM_ADDR  0x3121 // << 1 byte >> The number of delayed command stored in the FRAM
 #define DELAY_COMMAD_FRAM_ADDR	0x3122 //<<100 * SIZE_OF_COMMAND = 30080 bytes >> All delayed command will be stored in this address ass one big array of bytes
 #define NUMBER_PACKET_APRS_ADDR 0x8CEE // << 1 byte >> number of APRS packets in the FRAM
 #define APRS_PACKETS_ADDR 0x8CEF// << 20 * 18 = 360 >>
-#define BEACON_BIT_RATE_ADDR 0x8E57// << 1 byte >>
 #define BEACON_TIME_ADDR 0x8E58// << 1 byte >>
-#define MUTE_TIME_ADDR		0x8E59//<<1 bytes>>
+#define MUTE_TIME_ADDR		0x8E59//<<4 bytes>>
+#define BIT_RATE_ADDR		0x8E5D //<<1 bytes>>
+#define TRANSPONDER_RSSI_ADDR	0x8E5E// << 2 bytes>
+
 
 //ADCS
-#define STAGE_TABLE_ADDR 0x9044
+#define ADCS_LOOP_DELAY_FRAM_ADDR 0X6542			// main loop delay
+#define ADCS_LOOP_DELAY_FRAM_SIZE 4
+
+#define ADCS_SYS_OFF_DELAY_ADDR 0x6546				// delay incase the system is off- wait to wakeup
+#define ADCS_SYS_OFF_DELAY_SIZE	4
+
+#define ADCS_QUEUE_WAIT_TIME_FRAM_ADDR 0X6552		// max wait time for the adcs cmd queue
+#define ADCS_QUEUE_WAIT_TIME_FRAM_SIZE 4
+
+#define ADCS_TLM_SAVE_VECTOR_START_ADDR 	(0x6242)		//<! FRAM start address
+
+#define ADCS_TLM_PERIOD_VECTOR_START_ADDR 		(ADCS_TLM_SAVE_VECTOR_START_ADDR + NUM_OF_ADCS_TLM + 1)	//<! FRAM start address
+#define ADCS_TLM_PERIOD_VECTOR_END_ADDR 		(ADCS_TLM_PERIOD_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) 	//<! FRAM end address
+
+#define ADCS_OVERRIDE_SAVE_TLM_ADDR				(0X6300)
+#define ADCS_OVERRIDE_SAVE_TLM_SIZE				(4)
 
 //CAMERA
-#define AUTO_PILOT_STATE_ADDR			0x9FFB
-#define CAMERA_LAST_PICTUR_TIME_ADDR	0x9FFC // <<4 bytes>>
+#define IMAGE_CHUNK_WIDTH_ADDR 0xD000
+#define IMAGE_CHUNK_WIDTH_SIZE 2
 
-#define GECKO_STATUS_FLAG_ADDR 0xA000
-#define GECKO_STATUS_FLAG_SIZE 1
-
-#define GECKO_ADC_GAIN_ADDR 0xA001
-#define GECKO_ADC_GAIN_SIZE 1
-
-#define GECKO_PGA_GAIN_ADDR 0xA002
-#define GECKO_PGA_GAIN_SIZE 1
-
-#define GECKO_EXPOSURE_ADDR 0xA003
-#define GECKO_EXPOSURE_SIZE 4
-
-#define GECKO_FRAME_AMOUNT_ADDR 0xA007
-#define GECKO_FRAME_AMOUNT_SIZE 4
-
-#define GECKO_FRAME_RATE_ADDR 0xA011
-#define GECKO_FRAME_RATE_SIZE 4
-
-#define GECKO_FAST_ADDR 0xA015
-#define GECKO_FAST_SIZE 4
-
-#define GECKO_MAX_ON_TIME_ADDR 0xA019
-#define GECKO_MAX_ON_TIME_SIZE 4
+#define IMAGE_CHUNK_HEIGHT_ADDR 0xD002
+#define IMAGE_CHUNK_HEIGHT_SIZE 2
 
 #define DATABASEFRAMADDRESS 0x10000	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
 #endif /* FRAMADRESS_H_ */

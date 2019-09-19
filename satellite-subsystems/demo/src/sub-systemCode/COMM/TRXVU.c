@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include "../Global/freertosExtended.h"
 #include <freertos/task.h>
 
 #include <at91/utility/exithandler.h>
@@ -31,12 +31,13 @@
 
 #include "../Main/HouseKeeping.h"
 #include "../Main/commands.h"
+#include "../Ants.h"
 #include "../Global/FRAMadress.h"
-#include "../Global/TM_managment.h"
+#include "../Global/TLM_management.h"
 #include "splTypes.h"
 #include "APRS.h"
+#include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
-#include "../ADCS/Stage_Table.h"
 #include "DelayedCommand_list.h"
 
 #define FIRST 0
@@ -52,8 +53,41 @@ xTaskHandle xBeaconTask;
 
 static byte Dump_buffer[DUMP_BUFFER_SIZE];
 
+void update_FRAM_bitRate()
+{
+	byte dat;
+	int error = FRAM_read_exte(&dat, BIT_RATE_ADDR, 1);
+	check_int("TRXVU_init_softWare, FRAM_read", error);
+	ISIStrxvuBitrate newParam = DEFAULT_BIT_RATE;
+	for (uint8_t i = 1; i < 9; i *= 2)
+	{
+		if (dat == i)
+		{
+			newParam = (ISIStrxvuBitrate)dat;
+			break;
+		}
+	}
+	vTaskDelay(2000);
+	printf("new bit rate value: %d\n", newParam);
+	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
+	vTaskDelay(1000);
+	check_int("IsisTrxvu_tcSetAx25Bitrate, update_FRAM_bitRate", error);
+}
+void toggle_idle_state()
+{
+	for (int i = 0; i < 2; i++)
+	{
+		vTaskDelay(500);
+		int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
+		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
+		vTaskDelay(1000);
+		retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
+		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
+		vTaskDelay(1500);
+	}
+}
 
-void init_trxvu(void)
+void TRXVU_init_hardWare()
 {
 	int retValInt = 0;
 
@@ -75,36 +109,21 @@ void init_trxvu(void)
 	retValInt = IsisTrxvu_initialize(myTRXVUAddress, myTRXVUBuffers, myTRXVUBitrates, 1);
 	check_int("init_trxvu, IsisTrxvu_initialize", retValInt);
 
-
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
-	vTaskDelay(500);
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
-	vTaskDelay(500);
-
-	change_TRXVU_state(NOMINAL_MODE);
-
-	vTaskDelay(500);
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
-	vTaskDelay(500);
-	retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
-
-	retValInt = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
-
-	/*retValInt = IsisTrxvu_tcSetDefFromClSign(0, TRXVU_FROM_CALSIGN);
-	check_int("init_trxvu, frommm call sign", retValInt);
-
-	retValInt = IsisTrxvu_tcSetDefToClSign(0, TRXVU_TO_CALSIGN);
-	check_int("init_trxvu, tooo call sign", retValInt);*/
+	if (!get_system_state(mute_param))
+	{
+		toggle_idle_state();
+		if (get_system_state(transponder_active_param))
+			change_TRXVU_state(NOMINAL_MODE);
+	}
 }
-
-void TRXVU_task()
+void TRXVU_init_softWare()
 {
-	portBASE_TYPE lu_error = 0;
+	get_APRS_list();
+	get_delayCommand_list();
+
+	update_FRAM_bitRate();
+	vTaskDelay(100);
+
 	//1. create binary semaphore for transmitting
 	vSemaphoreCreateBinary(xIsTransmitting);
 	vTaskDelay(SYSTEM_DEALY);
@@ -116,10 +135,20 @@ void TRXVU_task()
 	if (xDumpQueue == NULL || xTransponderQueue == NULL || xIsTransmitting == NULL)
 	{
 		//2.1. in case the semaphore and queues are damaged
-		return;
+		printf("abort! abort!!!\n");
 	}
+}
+
+void init_trxvu(void)
+{
+	TRXVU_init_hardWare();
+	TRXVU_init_softWare();
+}
+
+void TRXVU_task()
+{
 	//3. create beacon task
-	lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)(configMAX_PRIORITIES - 2), xBeaconTask);
+	portBASE_TYPE lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, xBeaconTask);
 	check_portBASE_TYPE("could not create Beacon Task.", lu_error);
 	vTaskDelay(SYSTEM_DEALY);
 	//4. checks if theres was a dump before the reset and turned him off
@@ -128,9 +157,6 @@ void TRXVU_task()
 		//4.1. stop allowing transponder
 		set_system_state(dump_param, SWITCH_OFF);
 	}
-	//5. gets FRAM lists to ram
-	get_APRS_list();
-	get_delayCommand_list();
 	//6. entering infinite loop
 	while(1)
 	{
@@ -140,7 +166,7 @@ void TRXVU_task()
 }
 
 
-void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[5])
+void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[5])
 {
 	char fileName[MAX_F_FILE_NAME_SIZE];
 	ERR_type err = ERR_SUCCESS;
@@ -152,7 +178,6 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 	byte raw_packet[MAX_SIZE_TM_PACKET];
 
 	time_unix last_read = 0;
-	time_unix last_send = 0;
 
 	sendRequestToStop_transponder();
 	vTaskDelay(SYSTEM_DEALY);
@@ -162,53 +187,63 @@ void dump_logic(command_id cmdID, time_unix start_time, time_unix end_time, uint
 
 	if (CHECK_STARTING_DUMP_ABILITY)
 	{
-#ifdef TESTING_BRONFELD
-		for (uint8_t i = 0; i < 210; i++)
-		{
-			i_error = TRX_sendFrame(&i, (uint8_t)1, trxvu_bitrate_9600);
-			check_int("TRX_sendFrame, dump_logic", i_error);
-			printf("number of packets: %u\n", i);
-		}
-#else
-
 		for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		{
 			if (HK[i] == this_is_not_the_file_you_are_looking_for)
 				continue;
 
-			find_fileName(HK[i], fileName);
-			parameterSize = (size_of_element(HK[i]) + TIME_SIZE);
+			HK_find_fileName(HK[i], fileName);
+			parameterSize = (HK_findElementSize(HK[i]) + TIME_SIZE);
 			last_read = start_time;
-			last_send = 0;
 			do
 			{
 				numberOfParameters = 0;
-				FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, start_time, end_time,
-						&numberOfParameters, &last_read);
+				if (HK[i] == ACK_T || HK[i] == log_files_erorrs_T || HK[i] == log_files_events_T)
+				{
+					FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
+							&numberOfParameters, &last_read, (uint)1);
+				}
+				else
+				{
+					FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
+							&numberOfParameters, &last_read, (uint)resulotion);
+				}
+				last_read++;
 
 				if (FS_result != FS_SUCCSESS && FS_result != FS_BUFFER_OVERFLOW)
 					break;
+				else if (FS_result == FS_BUFFER_OVERFLOW)
+					printf("overflow from reading data!!!!!\n");
 
-				last_read++;
 				for (int l = 0; l < numberOfParameters; l++)
 				{
 					build_HK_spl_packet(HK[i], Dump_buffer + l * parameterSize, &packet);
 					encode_TMpacket(raw_packet, &length_raw_packet, packet);
 
-					if (last_send + (time_unix)resulotion <= packet.time || HK[i] == ACK_T)
+					i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
+					check_int("TRX_sendFrame, dump_logic", i_error);
+					printf("number of packets: %d\n", numberOfPackets++);
+
+					if (i_error == 4)
 					{
-						last_send = packet.time;
-						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet, trxvu_bitrate_9600);
-						check_int("TRX_sendFrame, dump_logic", i_error);
-						printf("number of packets: %d\n", numberOfPackets++);
-						vTaskDelay(SYSTEM_DEALY);
+						err = ERR_SYSTEM_OFF;
+						break;
 					}
+					else if (i_error == 5)
+					{
+						err = ERR_FAIL;
+						break;
+					}
+
 					lookForRequestToDelete_dump(cmdID);
 				}
 			}
 			while (FS_result == FS_BUFFER_OVERFLOW);
 		}
-#endif
+	}
+	else
+	{
+		err = ERR_FAIL;
 	}
 
 	save_ACK(ACK_DUMP, err, cmdID);
@@ -238,6 +273,8 @@ void Dump_task(void *arg)
 	}
 	else
 	{
+		int f_error = f_managed_enterFS();
+		check_int("enter FS, dump task", f_error);// task enter 5
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
@@ -255,14 +292,18 @@ void Dump_task(void *arg)
 	}
 
 	set_system_state(dump_param, SWITCH_OFF);
+	f_managed_releaseFS();
 	vTaskDelete(NULL);
 }
 
 
 void transponder_logic(time_unix time, command_id cmdID)
 {
+	WriteTransponderLog(TRANSPONDER_ACTIVATION, 0);
+
 	time_unix time_now;
 	int i_error;
+	int stopInfo = TRANSPONDER_STOP_TIMER_INFO;
 	voltage_t low_shut_vol = DEFULT_COMM_VOL;
 	for (;;)
 	{
@@ -270,23 +311,31 @@ void transponder_logic(time_unix time, command_id cmdID)
 		i_error = Time_getUnixEpoch(&time_now);
 		check_int("error from Transponder Task, get_time", i_error);
 		if (time < time_now)
+		{
+			stopInfo = TRANSPONDER_STOP_TIMER_INFO;
 			break;
+		}
 
 		lookForRequestToDelete_transponder(cmdID);
 
 		// 7. check if we are under right voltage
-		i_error = FRAM_read((byte*)&low_shut_vol, TRANS_LOW_BATTERY_STATE_ADDR, 2);
-		check_int("Transponder Task ,FRAM_read(TRANS_LOW_BATTERY_STATE_ADDR)", i_error);
+		i_error = FRAM_read_exte((byte*)&low_shut_vol, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+		check_int("Transponder Task ,FRAM_read_exte(TRANS_LOW_BATTERY_STATE_ADDR)", i_error);
 		if (low_shut_vol > get_Vbatt())
+		{
+			stopInfo = TRANSPONDER_STOP_VOLTAGE_INFO;
 			break;
+		}
 
 		vTaskDelay(TASK_DELAY);
 	}
+
+
+	WriteTransponderLog(TRANSPONDER_DEACTIVATION, stopInfo);
 }
 
 void Transponder_task(void *arg)
 {
-	portBASE_TYPE lu_error = 0;
 	int i_error = 0;
 
 	byte *raw = arg;
@@ -320,20 +369,17 @@ void Transponder_task(void *arg)
 		time = time_now + DEFAULT_TIME_TRANSMITTER;
 	}
 
-	if (xSemaphoreTake(xIsTransmitting, MAX_DELAY) == pdTRUE)
+	if (!get_system_state(mute_param) && get_system_state(Tx_param))
 	{
-		if (!get_system_state(mute_param) && get_system_state(Tx_param))
-		{
-			save_ACK(ACK_TRANSPONDER, ERR_ACTIVE, cmdId);
-			change_TRXVU_state(TRANSPONDER_MODE);
-			xQueueReset(xTransponderQueue);
-			transponder_logic(time, cmdId);
-		}
+		change_TRXVU_state(TRANSPONDER_MODE);
+		xQueueReset(xTransponderQueue);
+		transponder_logic(time, cmdId);
+		save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
+		vTaskDelete(NULL);
 	}
 
+	save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
 	change_TRXVU_state(NOMINAL_MODE);
-	lu_error = xSemaphoreGive(xIsTransmitting);
-	check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
 	vTaskDelete(NULL);
 }
 
@@ -347,10 +393,10 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 	{
 		if (queueParameter == deleteTask)
 		{
+			vTaskDelay(100);
 			save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
+			WriteTransponderLog(TRANSPONDER_DEACTIVATION, TRANSPONDER_STOP_CMD_INFO);
 			change_TRXVU_state(NOMINAL_MODE);
-			portBASE_TYPE lu_error = xSemaphoreGive(xIsTransmitting);
-			check_portBASE_TYPE("error in transponder task, semaphore xIsTransmitting", lu_error);
 			vTaskDelete(NULL);
 		}
 	}
@@ -365,8 +411,10 @@ void lookForRequestToDelete_dump(command_id cmdID)
 	{
 		if (queueParameter == deleteTask)
 		{
+			vTaskDelay(100);
 			save_ACK(ACK_DUMP, ERR_STOP_TASK, cmdID);
 			set_system_state(dump_param, SWITCH_OFF);
+			f_managed_releaseFS();
 			vTaskDelete(NULL);
 		}
 	}
@@ -375,7 +423,7 @@ void lookForRequestToDelete_dump(command_id cmdID)
 int sendRequestToStop_dump()
 {
 	//1. check if the task is running
-	if (get_system_state(dump_param))
+	if (!get_system_state(dump_param))
 	{
 		return 1;
 	}
@@ -394,7 +442,7 @@ int sendRequestToStop_dump()
 int sendRequestToStop_transponder()
 {
 	//1. check if the task is running
-	if (eTaskGetState(xTransponderHandle) == eDeleted)
+	if (!get_system_state(transponder_active_param))
 	{
 		return 1;
 	}
@@ -432,12 +480,14 @@ void Rx_logic()
 			i_error = decode_TCpacket(dataBuffer, dataBuffer_length ,&packet);
 			if (i_error == 0)
 			{
+				GomEpsResetWDT(0);
+				update_stopDeploy_FRAM();
 				set_ground_conn(TRUE);
 				// 1.3. sends receive ACK
 				byte rawACK[ACK_RAW_SIZE];
 				build_raw_ACK(ACK_RECEIVE_COMM, ERR_SUCCESS, packet.id, rawACK);
 				printf("Send ACK\n");
-				TRX_sendFrame(rawACK, ACK_RAW_SIZE, trxvu_bitrate_9600);
+				TRX_sendFrame(rawACK, ACK_RAW_SIZE);
 
 				i_error = Time_getUnixEpoch(&time_now);
 				check_int("trxvu_logic, Time_getUnixEpoch", i_error);
@@ -498,8 +548,42 @@ void pass_above_Ground()
 	}
 }
 
+void check_TRXVUState()
+{
+	byte dat;
+	int error = FRAM_read_exte(&dat, BIT_RATE_ADDR, 1);
+	check_int("TRXVU_init_softWare, FRAM_read", error);
+
+	ISIStrxvuBitrateStatus FRAMBitRate;
+	if (dat == trxvu_bitrate_1200)
+		FRAMBitRate = trxvu_bitratestatus_1200;
+	else if (dat == trxvu_bitrate_2400)
+		FRAMBitRate = trxvu_bitratestatus_2400;
+	else if (dat == trxvu_bitrate_4800)
+		FRAMBitRate = trxvu_bitratestatus_4800;
+	else if (dat == trxvu_bitrate_9600)
+		FRAMBitRate = trxvu_bitratestatus_9600;
+	else
+		return;
+
+	ISIStrxvuTransmitterState TxState;
+	error = IsisTrxvu_tcGetState(0, &TxState);
+	if (error)
+	{
+		printf("error in IsisTrxvu_tcGetState\n");
+		return;
+	}
+
+	if (TxState.fields.transmitter_bitrate != FRAMBitRate)
+	{
+		update_FRAM_bitRate();
+	}
+}
+
 void trxvu_logic()
 {
+	check_TRXVUState();
+
 	Rx_logic();
 
 	check_time_off_mute();
@@ -516,28 +600,18 @@ void Beacon_task()
 	// 0. Creating variables for task, initialize variables
 	uint8_t delayBaecon = DEFULT_BEACON_DELAY;
 	portTickType last_time = xTaskGetTickCount();
-	int beacon_count = 0;
-	ISIStrxvuBitrate bitrate = trxvu_bitrate_9600;
 	voltage_t low_v_beacon;
 	while(1)
 	{
+		printf("\n         Beacon logic\n\n");
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
-		{
-			// 2. check if this is the third beacon in a row
-			if (beacon_count % 3 == 0)
-				bitrate = trxvu_bitrate_1200;
-			else
-				bitrate = trxvu_bitrate_9600;
+			buildAndSend_beacon();
+		else
+			printf("skip beacon\n");
 
-			// 3. build and send beacon
-			buildAndSend_beacon(bitrate);
-			// 4. adding last beacon to count
-			beacon_count++;
-		}
-		// 5. reading from FRAM the low vBatt in wich the beacon is once in a minute
-		i_error = FRAM_read(&delayBaecon, BEACON_TIME_ADDR, 1);
-		check_int("beacon_task, FRAM_write(BEACON_TIME_ADDR)", i_error);
+		i_error = FRAM_read_exte(&delayBaecon, BEACON_TIME_ADDR, 1);
+		check_int("beacon_task, FRAM_write_exte(BEACON_TIME_ADDR)", i_error);
 		// 6. check if value in range
 		if (!(10 <= delayBaecon || delayBaecon <= 40))
 		{
@@ -545,9 +619,15 @@ void Beacon_task()
 		}
 
 		//reading low_v_vbat from FRAM
-		i_error = FRAM_read((byte*)&low_v_beacon, BEACON_LOW_BATTERY_STATE_ADDR, 2);
-		check_int("beacon_task, FRAM_write(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
+		i_error = FRAM_read_exte((byte*)&low_v_beacon, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+		check_int("beacon_task, FRAM_write_exte(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 
+#ifdef TESTING
+		if (7400 < low_v_beacon || low_v_beacon < 7200)
+		{
+			low_v_beacon = 7250;
+		}
+#endif
 		// 7. check if low vBatt
 		portTickType delay = CONVERT_SECONDS_TO_MS(delayBaecon);//normal
 		if (low_v_beacon > get_Vbatt())
@@ -555,12 +635,11 @@ void Beacon_task()
 			// low
 			delay = GET_BEACON_DELAY_LOW_VOLTAGE(delay);
 		}
-
 		vTaskDelayUntil(&last_time, delay);
 	}
 }
 
-void buildAndSend_beacon(ISIStrxvuBitrate bitRate)
+void buildAndSend_beacon()
 {
 	// 1. Declaring variables
 	TM_spl beacon;
@@ -619,42 +698,30 @@ void buildAndSend_beacon(ISIStrxvuBitrate bitRate)
 	beacon.data[29] = beacon_param.TxRefl;
 	beacon.data[30] = beacon_param.TxForw << 8;
 	beacon.data[31] = beacon_param.TxForw;
-	// 4.4. ADCS
-	byte raw_stageTable[STAGE_TABLE_SIZE];
-	getTableTo(get_ST(), raw_stageTable);
-	beacon.data[32] = raw_stageTable[2];
-	beacon.data[33] = raw_stageTable[1];
-	beacon.data[34] = raw_stageTable[0];
-	beacon.data[35] = raw_stageTable[3];
-	beacon.data[36] = raw_stageTable[4];
-	beacon.data[37] = raw_stageTable[5];
-	beacon.data[38] = raw_stageTable[8];
-	beacon.data[39] = raw_stageTable[7];
-	beacon.data[40] = raw_stageTable[6];
 	for (i = 0; i < 3; i++)
 	{
 		raw_param = (byte*)&(beacon_param.Attitude[i]);
 		for (l = 0; l < 2; l++)
 		{
-			beacon.data[41 + i * 2 + l] = raw_param[l];
+			beacon.data[32 + i * 2 + l] = raw_param[l];
 		}
 	}
 	// 4.5. stats
-	beacon.data[47] = beacon_param.numOfPics;
-	beacon.data[48] = beacon_param.numOfAPRS;
-	beacon.data[49] = beacon_param.numOfDelayedCommand;
+	beacon.data[38] = beacon_param.numOfPics;
+	beacon.data[39] = beacon_param.numOfAPRS;
+	beacon.data[40] = beacon_param.numOfDelayedCommand;
 	raw_param = (byte*)&beacon_param.numOfResets;
 	for(i = 0; i < 4; i++)
 	{
-		beacon.data[50 + i] = raw_param[3 - i];
+		beacon.data[41 + i] = raw_param[3 - i];
 	}
 	raw_param = (byte*)&beacon_param.lastReset;
 	for(i = 0; i < 4; i++)
 	{
-		beacon.data[54 + i] = raw_param[3 - i];
+		beacon.data[45 + i] = raw_param[3 - i];
 	}
 	// 4.6. states
-	beacon.data[58] = beacon_param.state.raw;
+	beacon.data[49] = beacon_param.state.raw;
 	// 5. Encoding beacon for sending
 	byte rawData[BEACON_LENGTH + SPL_TM_HEADER_SIZE];
 	int size = 0;
@@ -662,7 +729,7 @@ void buildAndSend_beacon(ISIStrxvuBitrate bitRate)
 	//11. sending beacon
 	for (i = 0; i < 1; i++)
 	{
-		TRX_sendFrame(rawData, size, bitRate);
+		TRX_sendFrame(rawData, size);
 	}
 }
 
@@ -681,47 +748,52 @@ void reset_FRAM_TRXVU()
 
 	//BEACON_LOW_BATTERY_STATE_ADDR reset
 	voltage_t voltage = DEFULT_COMM_VOL;
-	i_error = FRAM_write((byte*)&voltage, BEACON_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
+	i_error = FRAM_write_exte((byte*)&voltage, BEACON_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
 	check_int("reset_FRAM_TRXVU, FRAM_write", i_error);
 
-	i_error = FRAM_write((byte*)&voltage, TRANS_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
+	i_error = FRAM_write_exte((byte*)&voltage, TRANS_LOW_BATTERY_STATE_ADDR, sizeof(voltage_t));
 	check_int("reset_FRAM_TRXVU, FRAM_write", i_error);
 
 	data[0] = DEFULT_BEACON_DELAY;
-	i_error = FRAM_write(data, BEACON_TIME_ADDR, 1);
-	check_int("reset_FRAM_TRXVU,, FRAM_write(BEACON_TIME_ADDR)", i_error);
+	i_error = FRAM_write_exte(data, BEACON_TIME_ADDR, 1);
+	check_int("reset_FRAM_TRXVU,, FRAM_write_exte(BEACON_TIME_ADDR)", i_error);
 
+	data[0] = DEFAULT_BIT_RATE;
+	i_error = FRAM_write_exte(data, BIT_RATE_ADDR, 1);
+	check_int("reset_FRAM_TRXVU,, FRAM_write_exte(BIT_RATE_ADDR)", i_error);
+
+	time_unix mute_time = 0;
+	i_error = FRAM_write_exte((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	check_int("reset_FRAM_TRXVU, FRAM_read_exte(MUTE_TIME_ADDR)", i_error);
+
+	unsigned short trans_rssi = DEFAULT_TRANS_RSSI;
+	i_error = FRAM_write_exte((byte*)&trans_rssi, TRANSPONDER_RSSI_ADDR, sizeof(unsigned short));
+	check_int("TRANSPONDER_RSSI_ADDR, FRAM_write", i_error);
 }
 
 
-int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
+int TRX_sendFrame(byte* data, uint8_t length)
 {
 	int i_error = 0, retVal = 0;
 	portBASE_TYPE lu_error = 0;
 	if (get_system_state(mute_param) == SWITCH_ON)
 	{
 		//mute
-		return -3;
+		return 3;
 	}
 	if (get_system_state(Tx_param) == SWITCH_OFF)
 	{
 		//tx off
-		return -4;
+		return 4;
 	}
 	if (get_system_state(transponder_active_param) == SWITCH_ON)
 	{
 		//we in transponder mode
-		return -5;
+		return 5;
 	}
 
-	if (xSemaphoreTake(xIsTransmitting, MAX_DELAY))
+	if (xSemaphoreTake_extended(xIsTransmitting, MAX_DELAY))
 	{
-		if (bitRate != trxvu_bitrate_9600)
-		{
-			i_error = IsisTrxvu_tcSetAx25Bitrate(0, bitRate);
-			check_int("TRX_sendFrame, IsisTrxvu_tcSetAx25Bitrate", i_error);
-		}
-
 		unsigned char avalFrames = VALUE_TX_BUFFER_FULL;
 
 		int count = 0;
@@ -730,28 +802,19 @@ int TRX_sendFrame(byte* data, uint8_t length, ISIStrxvuBitrate bitRate)
 			i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
 			check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
 			retVal = 0;
+			if (count > 0)
+				vTaskDelay(200);
 			if (count % 10 == 1)
 			{
-				vTaskDelay((portTickType)(length * 20));
 				printf("Tx buffer is full\n");
 				retVal = -1;
 			}
 			count++;
 		}while(avalFrames == VALUE_TX_BUFFER_FULL);
 
-		//delay so Tx buffer will never be full
-		if (bitRate == trxvu_bitrate_1200 && retVal == 0)
-		{
-			vTaskDelay(TRANSMMIT_DELAY_1200(length));
-		}
-
-		//returns bit rate to normal (9600)
-		i_error = IsisTrxvu_tcSetAx25Bitrate(0, trxvu_bitrate_9600);
-		check_int("TRX_sendFrame, IsisTrxvu_tcSetAx25Bitrate", i_error);
-
 		// returns xIsTransmitting semaphore
-		lu_error = xSemaphoreGive(xIsTransmitting);
-		check_portBASE_TYPE("TRX_sendFrame, xSemaphoreGive", lu_error);
+		lu_error = xSemaphoreGive_extended(xIsTransmitting);
+		check_portBASE_TYPE("TRX_sendFrame, xSemaphoreGive_extended", lu_error);
 		retVal = 0;
 	}
 	else
@@ -812,8 +875,10 @@ void unmute_Tx()
 {
 	time_unix mute_time = 0;
 	set_system_state(mute_param, SWITCH_OFF);
-	int i_error = FRAM_write((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
-	check_int("unmute_Tx, FRAM_read(MUTE_TIME_ADDR)", i_error);
+	int i_error = FRAM_write_exte((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	check_int("unmute_Tx, FRAM_read_exte(MUTE_TIME_ADDR)", i_error);
+
+	update_FRAM_bitRate();
 }
 
 void check_time_off_mute()
@@ -823,9 +888,9 @@ void check_time_off_mute()
 	int i_error = Time_getUnixEpoch(&time_now);
 	check_int("check_time_off_mute, Time_getUnixEpoch", i_error);
 
-	i_error = FRAM_read((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
-	check_int("check_time_off_mute, FRAM_read(MUTE_TIME_ADDR)", i_error);
-	if (time_now >= mute_time)
+	i_error = FRAM_read_exte((byte*)&mute_time, MUTE_TIME_ADDR, TIME_SIZE);
+	check_int("check_time_off_mute, FRAM_read_exte(MUTE_TIME_ADDR)", i_error);
+	if (time_now >= mute_time && get_system_state(mute_param))
 		unmute_Tx();
 }
 
@@ -842,7 +907,7 @@ int set_mute_time(unsigned short time)
 
 	time_now += (time_unix)(time * 60);
 
-	error = FRAM_write((byte*)&time_now, MUTE_TIME_ADDR, TIME_SIZE);
+	error = FRAM_write_exte((byte*)&time_now, MUTE_TIME_ADDR, TIME_SIZE);
 	check_int("set_mute_time, FRAM_write", error);
 
 	mute_Tx(TRUE);
@@ -871,15 +936,22 @@ temp_t check_Tx_temp()
 //I2C functions
 void change_TRXVU_state(Boolean state)
 {
+	byte rssiData[2];
 	byte data[2];
+	int i_error;
 	//command id
 	data[0] = 0x38;
 	if (state == NOMINAL_MODE)
 	{
+		i_error = FRAM_read_exte(rssiData, TRANSPONDER_RSSI_ADDR, 2);
+		check_int("change_TRXVU_state, FRAM_read", i_error);
+		change_trans_RSSI(rssiData);
 		//nominal mode
 		printf("\tTransponder is disabled\n\n");
 		data[1] = 0x01;
 		set_system_state(transponder_active_param, SWITCH_OFF);
+		vTaskDelay(10000);
+		update_FRAM_bitRate();
 	}
 	else
 	{
@@ -889,7 +961,7 @@ void change_TRXVU_state(Boolean state)
 		set_system_state(transponder_active_param, SWITCH_ON);
 	}
 	//sends I2C command
-	int i_error = I2C_write(I2C_TRXVU_TC_ADDR, data, 2);
+	i_error = I2C_write(I2C_TRXVU_TC_ADDR, data, 2);
 	check_int("change_TRXVU_state, I2C_write", i_error);
 }
 

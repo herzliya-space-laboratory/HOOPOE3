@@ -2,13 +2,14 @@
  * DelayedCommand_list.h
  *
  *  Created on: Apr 6, 2019
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef DELAYEDCOMMAND_LIST_H_
 #define DELAYEDCOMMAND_LIST_H_
 
 #include "../Global/Global.h"
+#include "../Global/GlobalParam.h"
 #include "GSC.h"
 #include "../Global/sizes.h"
 

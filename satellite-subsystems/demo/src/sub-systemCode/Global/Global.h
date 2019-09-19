@@ -2,21 +2,13 @@
  * Global.h
  *
  *  Created on: Oct 20, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-//#define TESTING
-
-//#define ANTS_ON
-#define ANTS_DO_NOT_DEPLOY
 #include <hal/boolean.h>
-
-#ifndef BOOLEAN_H_
-typedef unsigned int  Boolean;
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,19 +19,18 @@ typedef unsigned int  Boolean;
 #include <hal/Timing/Time.h>
 #include <hal/Storage/FRAM.h>
 
+#include "sub-systemCode/HoopoeTestingConfigurations.h"
+
 #include "FRAMadress.h"
 #include "sizes.h"
 
-//for tests
-//#define NOT_USE_ACK_HK
-#define TESTS
-#define FILE_SYSTEM_NOT_TESTED
-//#define TESTING_BRONFELD
-//for tests
 
 #define I2C_BUS_ADDR 0
 #define I2C_TRXVU_TC_ADDR 0x61
 #define I2C_TRXVU_RC_ADDR 0x60
+
+#define ADCS_ID 0
+#define ADCS_I2C_ADRR 0x57
 
 #define TEMP_VALUE 0
 
@@ -53,12 +44,13 @@ typedef unsigned int  Boolean;
 
 //delay
 #define SYSTEM_DEALY		5
-#define TASK_DELAY 100//test...
+#define TASK_DELAY 20//test...
 #define QUEUE_DELAY 100//test...
 #define QUEUE_DELETE_DELAY 1000//test...
 #define MAX_DELAY 100000//test...
 #define ONE_MINUTE	60 * 1000
 
+#define TASK_DEFAULT_PRIORITIES 3
 
 //tasks buffer
 #define BEACON_TASK_BUFFER	2048
@@ -66,6 +58,7 @@ typedef unsigned int  Boolean;
 
 // times
 #define CONVERT_SECONDS_TO_MS(ms) (ms * 1000)
+#define CONVERT_MINUTES_TO_SECONDS(m) (m * 60)
 
 #define SAVE_TELEMETRY_TIME 60
 #define MAIN_ITERATION_TIME 1000
@@ -138,4 +131,8 @@ Boolean comapre_string(unsigned char* str0, unsigned char* str1, int numberOfByt
 Boolean getBitValueByIndex(byte* data, int length, int index);
 
 void reset_FRAM_MAIN();
+
+int FRAM_write_exte(unsigned char *data, unsigned int address, unsigned int size);
+int FRAM_read_exte(unsigned char *data, unsigned int address, unsigned int size);
+int FRAM_writeAndVerify_exte(unsigned char *data, unsigned int address, unsigned int size);
 #endif /* GLOBAL_H_ */

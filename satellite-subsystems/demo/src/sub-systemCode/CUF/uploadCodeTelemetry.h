@@ -8,8 +8,7 @@
 #define uploadNameLength 10
 #define uploadName "UPLOAD"
 
-#define uploadCodeLength 1024
-#define frameLength 256
+#define frameLength 184
 #define boolArrayLength (uploadCodeLength/frameLength)
 
 void addToArray(TC_spl decode, int framePlace);

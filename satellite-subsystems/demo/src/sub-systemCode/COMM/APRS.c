@@ -22,11 +22,11 @@ void reset_APRS_list(Boolean firstActivation)
 	memset(APRS_list, 0, APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS);	//sets all slots in the array to zero for later write to the FRAM
 
 	// write 0 to all the FRAM list
-	i_error = FRAM_write(APRS_list, APRS_PACKETS_ADDR, (APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS));//reset the memory of the delay command list in the FRAM
+	i_error = FRAM_write_exte(APRS_list, APRS_PACKETS_ADDR, (APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS));//reset the memory of the delay command list in the FRAM
 	check_int("reset_APRS_list, FRAM_write", i_error);
 
 	// write 0 in number of APRS
-	i_error = FRAM_write(&numberOfPackets, NUMBER_PACKET_APRS_ADDR, 1);//reset the number of commands in the FRAM to 0
+	i_error = FRAM_write_exte(&numberOfPackets, NUMBER_PACKET_APRS_ADDR, 1);//reset the number of commands in the FRAM to 0
 	check_int("reset_APRS_list, FRAM_write", i_error);
 
 	//  if its not init, update the number of APRS commands
@@ -42,9 +42,9 @@ int send_APRS_Dump()
 	byte numberOfAPRS = 0;	// number of packets in APRS_packets
 
 	// 1. Get the list of APRS packets and number of packets from the FRAM
-	i_error = FRAM_read(&numberOfAPRS, NUMBER_PACKET_APRS_ADDR, sizeof(numberOfAPRS));
+	i_error = FRAM_read_exte(&numberOfAPRS, NUMBER_PACKET_APRS_ADDR, sizeof(numberOfAPRS));
 	check_int("send_APRS_Dump, FRAM_read", i_error);
-	i_error =FRAM_read(APRS_list, APRS_PACKETS_ADDR, (numberOfAPRS * APRS_SIZE_WITH_TIME));
+	i_error =FRAM_read_exte(APRS_list, APRS_PACKETS_ADDR, (numberOfAPRS * APRS_SIZE_WITH_TIME));
 	check_int("send_APRS_Dump, FRAM_read", i_error);
 
 	if (numberOfAPRS == 0)
@@ -76,7 +76,7 @@ int send_APRS_Dump()
 		// 4. Sends packet twice
 		for (j = 0; j < 2; j++)
 		{
-			TRX_sendFrame(rawData, (unsigned char)rawDataLength, trxvu_bitrate_9600);
+			TRX_sendFrame(rawData, (unsigned char)rawDataLength);
 		}
 	}
 
@@ -99,18 +99,18 @@ int check_APRS(unsigned char* data)
 
 		//3. save APRS Packet in the FRAM list
 		uint8_t number_of_APRS_save = 0;
-		FRAM_read(&number_of_APRS_save, NUMBER_PACKET_APRS_ADDR, sizeof(number_of_APRS_save));
+		FRAM_read_exte(&number_of_APRS_save, NUMBER_PACKET_APRS_ADDR, sizeof(number_of_APRS_save));
 
 		if (number_of_APRS_save == 0)	//in case there's no list in the FRAM
 		{
-			FRAM_write(data, APRS_PACKETS_ADDR, APRS_SIZE_WITH_TIME);//write the list back to the FRAM
+			FRAM_write_exte(data, APRS_PACKETS_ADDR, APRS_SIZE_WITH_TIME);//write the list back to the FRAM
 			number_of_APRS_save++;
-			FRAM_write(&number_of_APRS_save, NUMBER_PACKET_APRS_ADDR, sizeof(number_of_APRS_save));//write the number of APRS packets in the FRAM back to the FRAM
+			FRAM_write_exte(&number_of_APRS_save, NUMBER_PACKET_APRS_ADDR, sizeof(number_of_APRS_save));//write the number of APRS packets in the FRAM back to the FRAM
 
 			return 1;	//returns that the packet was an APRS packet
 		}
 
-		FRAM_read(APRS_list, APRS_PACKETS_ADDR, (MAX_NAMBER_OF_APRS_PACKETS * APRS_SIZE_WITH_TIME));//read exiting list in the FRAM
+		FRAM_read_exte(APRS_list, APRS_PACKETS_ADDR, (MAX_NAMBER_OF_APRS_PACKETS * APRS_SIZE_WITH_TIME));//read exiting list in the FRAM
 		int count = 0;
 		while (APRS_list[count] == '!')//find if empty place for the new APRS packet
 		{
@@ -123,9 +123,9 @@ int check_APRS(unsigned char* data)
 			APRS_list[i + count] = data[i];
 		}
 
-		FRAM_write(APRS_list, APRS_PACKETS_ADDR, APRS_SIZE_WITH_TIME);//write the list back to the FRAM
+		FRAM_write_exte(APRS_list, APRS_PACKETS_ADDR, APRS_SIZE_WITH_TIME);//write the list back to the FRAM
 		number_of_APRS_save++;
-		FRAM_write(&number_of_APRS_save, NUMBER_PACKET_APRS_ADDR, sizeof(number_of_APRS_save));//write the number of APRS packets in the FRAM back to the FRAM
+		FRAM_write_exte(&number_of_APRS_save, NUMBER_PACKET_APRS_ADDR, sizeof(number_of_APRS_save));//write the number of APRS packets in the FRAM back to the FRAM
 		set_numOfAPRS(number_of_APRS_save);
 
 		return 1;	//returns that the packet was an APRS packet
@@ -139,12 +139,12 @@ void get_APRS_list()
 	int error;
 
 	memset(APRS_list, 0, APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS);	//sets all slots in the array to zero for later write to the FRAM
-	error = FRAM_read(APRS_list, APRS_PACKETS_ADDR, APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS);
-	check_int("get_APRS_list, FRAM_read(APRS_PACKETS_ADDR)", error);
+	error = FRAM_read_exte(APRS_list, APRS_PACKETS_ADDR, APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS);
+	check_int("get_APRS_list, FRAM_read_exte(APRS_PACKETS_ADDR)", error);
 
 	uint8_t num_of_APRS_save;
-	error = FRAM_read(&num_of_APRS_save, NUMBER_PACKET_APRS_ADDR, 1);
-	check_int("get_APRS_list, FRAM_read(NUMBER_PACKET_APRS_ADDR)", error);
+	error = FRAM_read_exte(&num_of_APRS_save, NUMBER_PACKET_APRS_ADDR, 1);
+	check_int("get_APRS_list, FRAM_read_exte(NUMBER_PACKET_APRS_ADDR)", error);
 
 	set_numOfAPRS(num_of_APRS_save);
 }

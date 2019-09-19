@@ -60,7 +60,7 @@
 									<listOptionValue builtIn="false" value="__ASSEMBLY__"/>
 									<listOptionValue builtIn="false" value="sdram"/>
 									<listOptionValue builtIn="false" value="at91sam9g20"/>
-									<listOptionValue builtIn="false" value="TRACE_LEVEL=5"/>
+									<listOptionValue builtIn="false" value="TRACE_LEVEL=0"/>
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
 									<listOptionValue builtIn="false" value="'BASE_REVISION_NUMBER=$(REV)'"/>
 									<listOptionValue builtIn="false" value="'BASE_REVISION_HASH_SHORT=$(REVHASH_SHORT)'"/>
@@ -81,7 +81,7 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.663972223" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="sdram"/>
 									<listOptionValue builtIn="false" value="at91sam9g20"/>
-									<listOptionValue builtIn="false" value="TRACE_LEVEL=5"/>
+									<listOptionValue builtIn="false" value="TRACE_LEVEL=0"/>
 									<listOptionValue builtIn="false" value="DEBUG=1"/>
 									<listOptionValue builtIn="false" value="'BASE_REVISION_NUMBER=$(REV)'"/>
 									<listOptionValue builtIn="false" value="'BASE_REVISION_HASH_SHORT=$(REVHASH_SHORT)'"/>
@@ -219,6 +219,7 @@
 									<listOptionValue builtIn="false" value="'BASE_REVISION_HASH_SHORT=$(REVHASH_SHORT)'"/>
 									<listOptionValue builtIn="false" value="'BASE_REVISION_HASH=$(REVHASH)'"/>
 								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.other.1929555089" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.other" value="-std=c99" valueType="string"/>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.556885632" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.760206862" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler"/>
@@ -292,10 +293,10 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Debug">
+		<configuration configurationName="Release">
 			<resource resourceType="PROJECT" workspacePath="/${ProjName}"/>
 		</configuration>
-		<configuration configurationName="Release">
+		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/${ProjName}"/>
 		</configuration>
 	</storageModule>

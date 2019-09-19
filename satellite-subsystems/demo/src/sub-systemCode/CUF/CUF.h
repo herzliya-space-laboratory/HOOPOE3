@@ -1,7 +1,7 @@
 /*
  * CUF.h
  *
- *  Created on: 15 бреб 2018
+ *  Created on: 15 пїЅпїЅпїЅпїЅ 2018
  *      Author: USER1
  */
 
@@ -13,7 +13,8 @@
 #define TEMPORARYCUFSTORAGESIZE 50000 //size of the array that accumilates the temporary CUFs data
 #define CUFARRSTORAGE 1000 //size of the array that accumilates the CUF functions
 #define PERMINANTCUFLENGTH 100 //size of the array that accumilates the perminant CUF names
-#define CUFNAMELENGTH 11 //length of the name of a CUF
+#define CUFNAMELENGTH 8 //length of the name of a CUF
+#define uploadCodeLength 110400 //600 packets
 //#define VTASKDELAY_CUF(xTicksToDelay) ((void (*)(portTickType))(CUFSwitch(0)))(xTicksToDelay)
 
 //the struct of a CUF
@@ -32,7 +33,7 @@ typedef struct {
  * @param[in] isFirstRun boolean to indicate if the CUF slot array shuld be reset
  * @return 0 on success
  */
-int InitCUF(Boolean isFirstRun);
+int InitCUF();
 
 /*!
  * Function to enable CUF function use

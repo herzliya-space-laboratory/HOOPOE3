@@ -2,7 +2,7 @@
  * commands.h
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 
 #ifndef COMMANDS_H_
@@ -25,7 +25,7 @@
 #include "../COMM/GSC.h"
 #include "../Global/sizes.h"
 #include "../Global/Global.h"
-#include "../Global/TM_managment.h"
+#include "../Global/TLM_management.h"
 
 //ADCS
 #define ADCS_INDEX 1
@@ -51,10 +51,10 @@ void AUC_EPS(TC_spl decode);
 
 void AUC_ADCS(TC_spl decode);
 
-void AUC_GS(TC_spl decode);
-
 void AUC_SW(TC_spl decode);
 
-void AUC_special_operation(TC_spl decode);
+void AUC_onlineTM(TC_spl decode);
+
+void AUC_CUF(TC_spl decode);
 
 #endif /* COMMANDS_H_ */

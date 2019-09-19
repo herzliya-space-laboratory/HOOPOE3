@@ -2,12 +2,12 @@
  * commands.c
  *
  *  Created on: Dec 5, 2018
- *      Author: Hoopoe3n
+ *      Author: DBTn
  */
 #include <stdlib.h>
 
 #include <freertos/FreeRTOS.h>
-#include <freertos/semphr.h>
+#include "../Global/freertosExtended.h"
 #include <freertos/task.h>
 
 #include <at91/utility/exithandler.h>
@@ -34,15 +34,17 @@
 #include "CMD/COMM_CMD.h"
 #include "CMD/SW_CMD.h"
 #include "CMD/payload_CMD.h"
+#include "CMD/ADCS_CMD.h"
 
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
 #include "../TRXVU.h"
 #include "../Ants.h"
-#include "../ADCS.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
+#include "../payload/Request Management/CameraManeger.h"
+#include "../payload/DataBase/DataBase.h"
 #include "../CUF/uploadCodeTelemetry.h"
 
 #include "hcc/api_fat.h"
@@ -59,7 +61,6 @@ xSemaphoreHandle xCTE = NULL;
 
 TC_spl command_to_execute[COMMAND_LIST_SIZE];
 int place_in_list = 0;
-
 
 void copy_command(TC_spl source, TC_spl* to)
 {
@@ -98,12 +99,12 @@ int add_command(TC_spl command)
 {
 	portBASE_TYPE error;
 	// 1. try to take semaphore
-	if (xSemaphoreTake(xCTE, MAX_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xCTE, MAX_DELAY) == pdTRUE)
 	{
 		// 2. if queue full
 		if (place_in_list == COMMAND_LIST_SIZE)
 		{
-			error = xSemaphoreGive(xCTE);
+			error = xSemaphoreGive_extended(xCTE);
 			check_portBASE_TYPE("could not return xCTE in add_command", error);
 			return 1;
 		}
@@ -112,7 +113,7 @@ int add_command(TC_spl command)
 		// 4. moving forward current place in command queue
 		place_in_list++;
 		// 5. return semaphore
-		error = xSemaphoreGive(xCTE);
+		error = xSemaphoreGive_extended(xCTE);
 		check_portBASE_TYPE("cold not return xCTE in add_command", error);
 	}
 
@@ -122,13 +123,13 @@ int get_command(TC_spl* command)
 {
 	portBASE_TYPE error;
 	// 1. try to take semaphore
-	if (xSemaphoreTake(xCTE, MAX_DELAY) == pdTRUE)
+	if (xSemaphoreTake_extended(xCTE, MAX_DELAY) == pdTRUE)
 	{
 		// 2. check if there's commands in list
 		if (place_in_list == 0)
 		{
-			error = xSemaphoreGive(xCTE);
-			check_portBASE_TYPE("get_command, xSemaphoreGive(xCTE)", error);
+			error = xSemaphoreGive_extended(xCTE);
+			check_portBASE_TYPE("get_command, xSemaphoreGive_extended(xCTE)", error);
 			return 1;
 		}
 		// 3. copy first in command to TC_spl* command
@@ -144,8 +145,8 @@ int get_command(TC_spl* command)
 		reset_command(&command_to_execute[i]);
 		place_in_list--;
 		// 6. return semaphore
-		error = xSemaphoreGive(xCTE);
-		check_portBASE_TYPE("get_command, xSemaphoreGive(xCTE)", error);
+		error = xSemaphoreGive_extended(xCTE);
+		check_portBASE_TYPE("get_command, xSemaphoreGive_extended(xCTE)", error);
 	}
 	return 0;
 }
@@ -172,21 +173,28 @@ void act_upon_command(TC_spl decode)
 		AUC_EPS(decode);
 		break;
 	case (TC_ADCS_T):
-		AUC_ADCS(decode);
-		break;
-	case (GENERALLY_SPEAKING_T):
-		AUC_GS(decode);
+		AdcsCmdQueueAdd(&decode); // TODO: save ACK
 		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
 		break;
-	case (SPECIAL_OPERATIONS_T):
-		AUC_special_operation(decode);
+	case (CUF_T):
+		AUC_CUF(decode);
+		break;
+	case (TC_ONLINE_TM_T):
+		AUC_onlineTM(decode);
 		break;
 	default:
 		printf("wrong type: %d\n", decode.type);
 		break;
 	}
+}
+
+
+void cmd_error(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_NOTHING;
+	*err = ERR_FAIL;
 }
 
 
@@ -221,6 +229,9 @@ void AUC_COMM(TC_spl decode)
 	case (TIME_FREQUENCY_ST):
 		cmd_time_frequency(&type, &err, decode);
 		break;
+	case (UPDATE_BIT_RATE_ST):
+		cmd_change_def_bit_rate(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;
@@ -238,8 +249,31 @@ void AUC_general(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	case (SOFT_RESET_ST):
-		cmd_soft_reset_cmponent(&type, &err, decode);
+	//todo: add generic ADCS I2C command as bypass to the ADCS logic = use the AdcsGenericI2C...
+
+	case (GENERIC_I2C_ST):
+		cmd_generic_I2C(&type, &err, decode);
+		break;
+	case (UPLOAD_TIME_ST):
+		cmd_upload_time(&type, &err, decode);
+		break;
+	case (DUMP_ST):
+		cmd_dump(decode);
+		return;
+		break;
+	case (DELETE_PACKETS_ST):
+		cmd_delete_TM(&type, &err, decode);
+		break;
+	case (RESET_FILE_ST):
+		cmd_reset_file(&type, &err, decode);
+		break;
+	case (RESTSRT_FS_ST):
+		cmd_reset_TLM_SD(&type, &err);
+		break;
+	case (REDEPLOY):
+		break;
+	case (ARM_DISARM):
+		cmd_ARM_DIARM(&type, &err, decode);
 		break;
 	case (HARD_RESET_ST):
 		cmd_hard_reset_cmponent(&type, &err, decode);
@@ -247,15 +281,25 @@ void AUC_general(TC_spl decode)
 	case (RESET_SAT_ST):
 		cmd_reset_satellite(&type, &err);
 		break;
+	case (SOFT_RESET_ST):
+		cmd_soft_reset_cmponent(&type, &err, decode);
+		break;
 	case (GRACEFUL_RESET_ST):
 		cmd_gracefull_reset_satellite(&type, &err);
 		break;
-	case (UPLOAD_TIME_ST):
-		cmd_upload_time(&type, &err, decode);
+	case (DUMMY_FUNC_ST):
+		cmd_dummy_func(&type, &err);
+		break;
+	case (STOP_TM_ST):
+		cmd_stop_TM(&type, &err);
+		break;
+	case (RESUME_TM_ST):
+		cmd_resume_TM(&type, &err);
 		break;
 	default:
 		cmd_error(&type, &err);
 		break;
+
 	}
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
@@ -265,45 +309,90 @@ void AUC_general(TC_spl decode)
 
 void AUC_payload(TC_spl decode)
 {
-	Ack_type type;
-	ERR_type err;
+	Ack_type type = ACK_CAMERA;
+	ERR_type err = ERR_SUCCESS;
+
+	Camera_Request request;
+	request.cmd_id = decode.id;
+	request.keepOnCamera = 24*60*60;	// currently one day, ToDo: just do something!
+	memcpy(request.data, decode.data, SPL_TC_DATA_SIZE);
 
 	switch (decode.subType)
 	{
-	case (SEND_PIC_CHUNCK_ST):
-		break;
-	case (UPDATE_STN_PARAM_ST):
-		return;
-		break;
-	case GET_IMG_DATA_BASE_ST:
-		break;
-	case RESET_DATA_BASE_ST:
-		break;
-	case DELETE_PIC_ST:
-		return;
-		break;
-	case UPD_DEF_DUR_ST:
-		break;
-	case OFF_CAM_ST:
-		break;
-	case ON_CAM_ST:
-		break;
-	case MOV_IMG_CAM_OBS_ST:
-		return;
-		break;
-	case TAKE_IMG_DEF_VAL_ST:
-		return;
-		break;
-	case TAKE_IMG_ST:
-		break;
-	default:
-		cmd_error(&type, &err);
-		break;
+		case (SEND_IMG_CHUNCK_CHUNK_FIELD_ST):
+			request.id = image_Dump_chunkField;
+			break;
+		case (SEND_IMG_CHUNCK_BIT_FIELD_ST):
+			request.id = image_Dump_bitField;
+			break;
+		case (TAKE_IMG_ST):
+			request.id = take_image;
+			break;
+		case (TAKE_IMG_SPECIAL_VAL_ST):
+			request.id = take_image_with_special_values;
+			break;
+		case (TAKE_IMG_WITH_TIME_INTERVALS):
+			request.id = take_image_with_time_intervals;
+			break;
+		case (UPDATE_PHOTOGRAPHY_VALUES_ST):
+			request.id = update_photography_values;
+			break;
+		case (DELETE_IMG_FILE_ST):
+			request.id = delete_image_file;
+			break;
+		case (DELETE_IMG_ST):
+			request.id = delete_image;
+			break;
+		case (MOV_IMG_CAM_OBS_ST):
+			request.id = transfer_image_to_OBC;
+			break;
+		case (CREATE_THUMBNAIL_FROM_IMG_ST):
+			request.id = create_thumbnail;
+			break;
+		case (CREATE_JPEG_FROM_IMG_ST):
+			request.id = create_jpg;
+			break;
+		case (RESET_DATA_BASE_ST):
+			request.id = reset_DataBase;
+			break;
+		case (SEND_IMAGE_DATA_BASE_ST):
+			request.id = DataBase_Dump;
+			break;
+		case (UPDATE_DEF_DUR_ST):
+			request.id = update_defult_duration;
+			break;
+		case (SET_CHUNK_SIZE):
+			request.id = set_chunk_size;
+			break;
+		case (STOP_TAKING_IMG_TIME_INTERVAL_ST):
+			request.id = stop_take_image_with_time_intervals;
+			break;
+		case (OFF_CAM_ST):
+			request.id = turn_off_camera;
+			break;
+		case (ON_CAM_ST):
+			request.id = turn_on_camera;
+			break;
+		case (ON_FUTURE_AUTO_THUMB):
+			request.id = turn_on_future_AutoThumbnailCreation;
+			break;
+		case (OFF_FUTURE_AUTO_THUMB):
+			request.id = turn_off_future_AutoThumbnailCreation;
+			break;
+		case (ON_AUTO_THUMB):
+			request.id = turn_on_AutoThumbnailCreation;
+			break;
+		case (OFF_AUTO_THUMB):
+			request.id = turn_off_AutoThumbnailCreation;
+			break;
+		default:
+			cmd_error(&type, &err);
+			break;
 	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
-#endif
+
+	if (err == ERR_SUCCESS)
+		addRequestToQueue(request);
+
 }
 
 void AUC_EPS(TC_spl decode)
@@ -334,63 +423,8 @@ void AUC_EPS(TC_spl decode)
 	case (SHUT_CAM_ST):
 		cmd_SHUT_CAM(&type, &err, decode);
 		break;
-	default:
-		cmd_error(&type, &err);
-		break;
-	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
-#endif
-}
-
-void AUC_ADCS(TC_spl decode)
-{
-	Ack_type type;
-	ERR_type err;
-
-	switch (decode.subType)
-	{
-	default:
-		cmd_error(&type, &err);
-		break;
-	}
-	//Builds ACK
-#ifndef NOT_USE_ACK_HK
-	save_ACK(type, err, decode.id);
-#endif
-}
-
-void AUC_GS(TC_spl decode)
-{
-	Ack_type type;
-	ERR_type err;
-
-	switch (decode.subType)
-	{
-	case (GENERIC_I2C_ST):
-		cmd_generic_I2C(&type, &err, decode);
-		break;
-	case (DUMP_ST):
-		cmd_dump(decode);
-		return;
-		break;
-	case (DELETE_PACKETS_ST):
-		cmd_delete_TM(&type, &err, decode);
-		break;
-	case (RESET_FILE_ST):
-		cmd_reset_file(&type, &err, decode);
-		break;
-	case (RESTSRT_FS_ST):
-		break;
-	case (DUMMY_FUNC_ST):
-		cmd_dummy_func(&type, &err);
-		break;
-	case (REDEPLOY):
-		cmd_deploy_ants(&type, &err, decode);
-		break;
-	case (ARM_DISARM):
-		cmd_ARM_DIARM(&type, &err, decode);
+	case (UPDATE_EPS_ALPHA_ST):
+		cmd_update_alpha(&type, &err, decode);
 		break;
 	default:
 		cmd_error(&type, &err);
@@ -406,39 +440,9 @@ void AUC_SW(TC_spl decode)
 {
 	Ack_type type;
 	ERR_type err;
-	f_enterFS(); //temporary workaround!!!!
+
 	switch (decode.subType)
 	{
-	case 0:
-		headerHandle(decode);
-		break;
-	case 1:
-		addToArray(decode, (int) decode.data[0]);
-		break;
-	case 2:
-		startCUFintegration();
-		break;
-	case 3:
-		ExecuteCUF(decode.data);
-		break;
-	case 4:
-		saveBackup();
-		break;
-	case 5:
-		loadBackup();
-		break;
-	case 6:
-		removeFiles();
-		break;
-	case 7:
-		RemoveCUF(decode.data);
-		break;
-	case 8:
-		DisableCUF(decode.data);
-		break;
-	case 9:
-		EnableCUF(decode.data);
-		break;
 	case (RESET_APRS_LIST_ST):
 		cmd_reset_APRS_list(&type, &err);
 		break;
@@ -452,31 +456,36 @@ void AUC_SW(TC_spl decode)
 		cmd_error(&type, &err);
 		break;
 	}
-	f_releaseFS(); //temporary workaround!!!!
+
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
 	save_ACK(type, err, decode.id);
 #endif
 }
 
-void AUC_special_operation(TC_spl decode)
+void AUC_onlineTM(TC_spl decode)
 {
 	Ack_type type;
 	ERR_type err;
-
 	switch (decode.subType)
 	{
-	case DELETE_UNF_CUF_ST:
+	case (RESET_APRS_LIST_ST):
+		cmd_reset_APRS_list(&type, &err);
 		break;
-	case UPLOAD_CUF_ST:
+	case (GET_ONLINE_TM_INDEX_ST):
+		cmd_get_onlineTM(&type, &err, decode);
 		break;
-	case CON_UNF_CUF_ST:
+	case (RESET_OFF_LINE_LIST_ST):
+		cmd_reset_off_line(&type, &err, decode);
 		break;
-	case PAUSE_UP_CUF_ST:
+	case (ADD_ITEM_OFF_LINE_LIST_ST):
+		cmd_add_item_off_line(&type, &err, decode);
 		break;
-	case EXECUTE_CUF:
+	case (DELETE_ITEM_OFF_LINE_LIST_ST):
+		cmd_delete_item_off_line(&type, &err, decode);
 		break;
-	case REVERT_CUF:
+	case GET_OFFLINE_LIST_SETTING_ST:
+		cmd_get_off_line_setting(&type, &err, decode);
 		break;
 	default:
 		cmd_error(&type, &err);
@@ -487,3 +496,74 @@ void AUC_special_operation(TC_spl decode)
 	save_ACK(type, err, decode.id);
 #endif
 }
+
+void AUC_CUF(TC_spl decode)
+{
+	Ack_type type;
+	ERR_type err;
+
+	f_managed_enterFS();
+
+	switch (decode.subType)
+	{
+	case 0:
+		headerHandle(decode);
+		break;
+	case 1:
+		addToArray(decode, castCharPointerToInt(decode.data));
+		break;
+	case 2:
+		startCUFintegration();
+		break;
+	case 3:
+		ExecuteCUF((char*)decode.data);
+		break;
+	case 4:
+		saveBackup();
+		break;
+	case 5:
+		loadBackup();
+		break;
+	case 6:
+		removeFiles();
+		break;
+	case 7:
+		RemoveCUF((char*)decode.data);
+		break;
+	case 8:
+		DisableCUF((char*)decode.data);
+		break;
+	case 9:
+		EnableCUF((char*)decode.data);
+		break;
+	default:
+		cmd_error(&type, &err);
+		break;
+	}
+
+	f_managed_releaseFS();
+
+	//Builds ACK
+#ifndef NOT_USE_ACK_HK
+	save_ACK(type, err, decode.id);
+#endif
+}
+
+#ifdef TESTING
+void AUC_test(TC_spl decode)
+{
+	Ack_type type;
+	ERR_type err;
+
+	switch (decode.subType)
+	{
+	default:
+		cmd_error(&type, &err);
+		break;
+	}
+	//Builds ACK
+#ifndef NOT_USE_ACK_HK
+	save_ACK(type, err, decode.id);
+#endif
+}
+#endif

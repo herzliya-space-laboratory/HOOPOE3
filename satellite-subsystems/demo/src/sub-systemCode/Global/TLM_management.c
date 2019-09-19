@@ -4,24 +4,39 @@
  *  Created on: 20 áîøõ 2019
  *      Author: Idan
  */
-
+#include <freertos/FreeRTOS.h>
+#include "freertosExtended.h"
+#include <freertos/task.h>
 
 #include <satellite-subsystems/GomEPS.h>
-#include <hal/Timing/Time.h>
-#include <hcc/api_fat.h>
-#include <hal/errors.h>
-#include <hcc/api_hcc_mem.h>
-#include <string.h>
+
+#include <config/config_fat.h>
+
 #include <hcc/api_mdriver_atmel_mcipdc.h>
-#include <hal/Storage/FRAM.h>
+#include <hcc/api_hcc_mem.h>
+
 #include <at91/utility/trace.h>
-#include "TM_managment.h"
+
+#include <hal/Timing/Time.h>
+#include <hal/errors.h>
+#include <hal/Storage/FRAM.h>
+
+#include <string.h>
 #include <stdlib.h>
+
+#include "TLM_management.h"
 
 #define SKIP_FILE_TIME_SEC 1000000
 #define _SD_CARD 0
 #define FIRST_TIME -1
 #define FILE_NAME_WITH_INDEX_SIZE MAX_F_FILE_NAME_SIZE+sizeof(int)*2
+#define MAX_ELEMENT_SIZE MAX_SIZE_TM_PACKET+sizeof(int)
+#define FS_TAKE_SEMPH_DELAY	1000 * 30
+char allocked_write_element[MAX_ELEMENT_SIZE];
+char allocked_read_element[MAX_ELEMENT_SIZE];
+char allocked_delete_element[MAX_ELEMENT_SIZE];
+
+xSemaphoreHandle xFileOpenHandler;
 
 //struct for filesystem info
 typedef struct
@@ -43,7 +58,6 @@ typedef struct
 } C_FILE;
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
 
-
 void delete_allTMFilesFromSD()
 {
 	F_FIND find;
@@ -57,7 +71,16 @@ void delete_allTMFilesFromSD()
 			count++;
 			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
 			{
-				f_delete(find.filename);
+				int err = 0;
+				for(int i = 0; i < 20; i++)
+				{
+					err = f_delete(find.filename);
+					if (err == 0)
+						break;
+					else
+						printf("f_delete in delete_allTMFilesFromSD: %d\n", err);
+					vTaskDelay(1);
+				}
 			}
 
 		} while (!f_findnext(&find));
@@ -68,7 +91,7 @@ static int getNumOfFilesInFS()
 {
 	FS fs;
 
-	if(FRAM_read((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+	if(FRAM_read_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 	{
 		return -1;
 	}
@@ -79,14 +102,73 @@ static int setNumOfFilesInFS(int new_num_of_files)
 {
 	FS fs;
 	fs.num_of_files = new_num_of_files;
-	if(FRAM_write((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+	if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 	{
 		return -1;
 	}
 	return 0;
 }
+
+int f_managed_enterFS()
+{
+	return f_enterFS();
+}
+int f_managed_releaseFS()
+{
+	f_releaseFS();
+	return 0;
+}
+
+int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
+{
+	int lastError = 0;
+	if (xSemaphoreTake_extended(xFileOpenHandler, FS_TAKE_SEMPH_DELAY) == pdTRUE)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			*fileHandler = f_open(file_name, config);
+			if (*fileHandler != NULL)
+				return 0;
+			vTaskDelay(100);
+		}
+		lastError = f_getlasterror();
+		printf("file open: %s FS last error: %d\n", file_name, lastError);
+		vTaskDelay(SYSTEM_DEALY);
+	}
+	else
+	{
+		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xFileOpenHandler!!!!!!\n");
+		printf("FS last error: %d\n", lastError);
+		return COULD_NOT_TAKE_SEMAPHORE_ERROR;
+	}
+	return lastError;
+}
+int f_managed_close(F_FILE** fileHandler)
+{
+	int error = f_close(*fileHandler);
+	if (error != 0)
+	{
+		printf("f_close in f_managed_close, error: %d", error);
+		return error;
+	}
+	if (xSemaphoreGive_extended(xFileOpenHandler) == pdTRUE)
+		return 0;
+
+	return COULD_NOT_GIVE_SEMAPHORE_ERROR;
+}
+
+FileSystemResult createSemahores_FS()
+{
+	xFileOpenHandler = xSemaphoreCreateCounting(FS_MAX_OPENFILES, FS_MAX_OPENFILES);
+	if (xFileOpenHandler == NULL)
+		return FS_COULD_NOT_CREATE_SEMAPHORE;
+	return FS_SUCCSESS;
+}
 FileSystemResult InitializeFS(Boolean first_time)
 {
+	FileSystemResult FS_result = createSemahores_FS();
+	if (FS_result == FS_COULD_NOT_CREATE_SEMAPHORE)
+		return FS_result;
 
 	int ret;
 	hcc_mem_init(); /* Initialize the memory to be used by filesystem */
@@ -98,8 +180,10 @@ FileSystemResult InitializeFS(Boolean first_time)
 		return FS_FAT_API_FAIL;
 	}
 
-	ret = f_enterFS(); /* Register this task with filesystem */
-	if(ret != F_NO_ERROR )
+	ret = f_managed_enterFS(); /* Register this task with filesystem 1*/
+	if (ret == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+		return FS_COULD_NOT_TAKE_SEMAPHORE;
+	if( ret != F_NO_ERROR)
 	{
 		TRACE_ERROR("f_enterFS pb: %d\n\r", ret);
 		return FS_FAT_API_FAIL;
@@ -109,7 +193,10 @@ FileSystemResult InitializeFS(Boolean first_time)
 
 	if( F_ERR_NOTFORMATTED == ret )
 	{
-		TRACE_ERROR("Filesystem not formated!\n\r");
+		TRACE_ERROR("\n\nFilesystem not formated!\n\r\n\n");
+		DeInitializeFS();
+		vTaskDelay(1000);
+		InitializeFS(first_time);
 		return FS_FAT_API_FAIL;
 	}
 	else if( F_NO_ERROR != ret)
@@ -121,7 +208,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 	{
 		delete_allTMFilesFromSD();
 		FS fs = {0};
-		if(FRAM_write((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
 			return FS_FAT_API_FAIL;
 		}
@@ -164,7 +251,7 @@ FileSystemResult c_fileCreate(char* c_file_name,
 		return FS_FRAM_FAIL;
 	}
 	int c_file_address =C_FILES_BASE_ADDR+num_of_files_in_FS*sizeof(C_FILE);
-	if(FRAM_write((unsigned char*)&c_file,
+	if(FRAM_write_exte((unsigned char*)&c_file,
 			c_file_address,sizeof(C_FILE))!=0)//write c_file struct in FRAM
 	{
 			return FS_FRAM_FAIL;
@@ -187,10 +274,11 @@ static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int t
 	//printf("writing element, time is: %u\n",time);
 	if(number_of_writes!=2)
 	{
+
 		printf("writewithEpochtime error\n");
 	}
 	f_flush( file ); /* only after flushing can data be considered safe */
-	f_close( file ); /* data is also considered safe when file is closed */
+
 }
 // get C_FILE struct from FRAM by name
 static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address)
@@ -205,7 +293,7 @@ static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address
 	for(i =0; i < num_of_files_in_FS; i++)			//search correct c_file struct
 	{
 		c_file_address= C_FILES_BASE_ADDR+sizeof(C_FILE)*(i);
-		err_read = FRAM_read((unsigned char*)c_file,c_file_address,sizeof(C_FILE));
+		err_read = FRAM_read_exte((unsigned char*)c_file,c_file_address,sizeof(C_FILE));
 		if(0 != err_read)
 		{
 			printf("FRAM error in 'get_C_FILE_struct()' error = %d\n",err_read);
@@ -227,6 +315,10 @@ static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address
 static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 {
 	PLZNORESTART();
+	if(current_time<creation_time)
+	{
+		return 0;
+	}
 	return ((current_time-creation_time)/SKIP_FILE_TIME_SEC);
 }
 //write to curr_file_name
@@ -244,16 +336,28 @@ FileSystemResult c_fileReset(char* c_file_name)
 	PLZNORESTART();
 	unsigned int curr_time;
 	Time_getUnixEpoch(&curr_time);
+	int err;
 	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
 	{
 		return FS_NOT_EXIST;
 	}
-	for(int i =0; i<c_file.num_of_files;i++)
+	int last_index = getFileIndex(c_file.creation_time,c_file.last_time_modified);
+	for(int i =0; i<last_index+1;i++)
 	{
+		int j=0;
 		get_file_name_by_index(c_file_name,i,curr_file_name);
-		f_delete(c_file_name);
+		do
+		{
+			err = f_delete(curr_file_name);
+			if(err!=0)
+			{
+				printf("c_fileReset  f_delete: %d\n",err);
+			}
+			vTaskDelay(100);
+		}
+		while(err !=0 &&(j++)<20);
 	}
-	c_file.last_time_modified=-1;
+	c_file.last_time_modified=curr_time;
 	c_file.creation_time =curr_time;
 	return FS_SUCCSESS;
 }
@@ -262,7 +366,7 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 {
 	C_FILE c_file;
 	unsigned int addr;//FRAM ADDRESS
-	F_FILE *file;
+	F_FILE *file = NULL;
 	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
 	PLZNORESTART();
 	unsigned int curr_time;
@@ -273,17 +377,23 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	}
 	int index_current = getFileIndex(c_file.creation_time,curr_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
-	int error = f_enterFS();
-	check_int("c_fileWrite, f_enterFS", error);
-	file = f_open(curr_file_name,"a+");
+	int error = f_managed_open(curr_file_name, "a+", &file);
+	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+		return FS_COULD_NOT_TAKE_SEMAPHORE;
+	if (file == NULL)
+		return FS_FAIL;
+	if(error!=0)
+	{
+		printf("c_fileWrite FS_FAIL %d\n",error);
+		f_managed_close(&file);	/* data is also considered safe when file is closed */
+	}
 	writewithEpochtime(file,element,c_file.size_of_element,curr_time);
+	f_managed_close(&file);	/* data is also considered safe when file is closed */
 	c_file.last_time_modified= curr_time;
-	if(FRAM_write((unsigned char *)&c_file,addr,sizeof(C_FILE))!=0)//update last written
+	if(FRAM_write_exte((unsigned char *)&c_file,addr,sizeof(C_FILE))!=0)//update last written
 	{
 		return FS_FRAM_FAIL;
 	}
-	f_close(file);
-	f_releaseFS();
 	return FS_SUCCSESS;
 }
 FileSystemResult fileWrite(char* file_name, void* element,int size)
@@ -295,6 +405,73 @@ FileSystemResult fileWrite(char* file_name, void* element,int size)
 	writewithEpochtime(file,element,size,curr_time);
 	f_flush(file);
 	f_close(file);
+	return FS_SUCCSESS;
+}
+static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long from_time,
+		unsigned long to_time,int full_element_size)
+{
+	F_FILE* file = NULL;
+	int error = f_managed_open(file_name,"r", &file);
+	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+		return FS_COULD_NOT_TAKE_SEMAPHORE;
+	else if (error != 0)
+		return FS_FAIL;
+
+	F_FILE* temp_file = NULL;
+	error = f_managed_open("temp","a+", &temp_file);
+	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
+		return FS_COULD_NOT_TAKE_SEMAPHORE;
+	else if (error != 0)
+		return FS_FAIL;
+	char* buffer = allocked_delete_element;
+	for(int i = 0; i<f_filelength(file_name); i+=full_element_size)
+	{
+
+		f_read(buffer,1,full_element_size,file);
+		unsigned int element_time = *((unsigned int*)buffer);
+		if(element_time<from_time||element_time>to_time)
+		{
+			f_write(buffer,1,full_element_size,temp_file);
+		}
+	}
+	f_managed_close(&file);
+	f_managed_close(&temp_file);
+	//free(buffer);
+	f_delete(file_name);
+	f_rename("temp",file_name);
+	return FS_SUCCSESS;
+
+}
+FileSystemResult c_fileDeleteElements(char* c_file_name, time_unix from_time,
+		time_unix to_time)
+{
+	C_FILE c_file;
+	unsigned int addr;//FRAM ADDRESS
+	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
+	PLZNORESTART();
+	unsigned int curr_time;
+	Time_getUnixEpoch(&curr_time);
+	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
+	{
+		return FS_NOT_EXIST;
+	}
+	int first_file_index = getFileIndex(c_file.creation_time,from_time);
+	int last_file_index = getFileIndex(c_file.creation_time,to_time);
+	if(first_file_index+1<last_file_index)//delete all files between first to kast file
+	{
+		for(int i =first_file_index+1; i<last_file_index;i++)
+		{
+			get_file_name_by_index(c_file_name,i,curr_file_name);
+			f_delete(curr_file_name);
+		}
+	}
+	get_file_name_by_index(c_file_name,first_file_index,curr_file_name);
+	deleteElementsFromFile(curr_file_name,from_time,to_time,c_file.size_of_element+sizeof(int));
+	if(first_file_index!=last_file_index)
+	{
+		get_file_name_by_index(c_file_name,last_file_index,curr_file_name);
+		deleteElementsFromFile(curr_file_name,from_time,to_time,c_file.size_of_element+sizeof(int));
+	}
 	return FS_SUCCSESS;
 }
 FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
@@ -335,16 +512,16 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	f_close(current_file);
 
 
-	free(element);
+	//free(element);
 
 	return FS_SUCCSESS;
 }
 FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
-		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time)
+		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time, unsigned int resolution)
 {
+	time_unix lastCopy_time = 0;
 	C_FILE c_file;
 	unsigned int addr;//FRAM ADDRESS
-	//F_FILE *file;
 	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
 	PLZNORESTART();
 
@@ -358,19 +535,17 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	{
 		from_time=c_file.creation_time;
 	}
-	F_FILE* current_file;
+	F_FILE* current_file = NULL;
 	int index_current = getFileIndex(c_file.creation_time,from_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
 	unsigned int size_elementWithTimeStamp = c_file.size_of_element+sizeof(unsigned int);
-	element = malloc(size_elementWithTimeStamp);//store element and his timestamp
+	element = allocked_read_element;//store element and his timestamp
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
-		int error = f_enterFS();
-		check_int("c_fileWrite, f_enterFS", error);
-		current_file= f_open(curr_file_name,"r");
+		int error = f_managed_open(curr_file_name, "r", &current_file);
 		if (current_file == NULL)
-			return FS_NOT_EXIST;
+			continue;
 		unsigned int length =f_filelength(curr_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
 		int err_fread=0;
 		(void)err_fread;
@@ -389,29 +564,36 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			if(element_time >= from_time)
 			{
 				*last_read_time = element_time;
-				if((unsigned int)buffer_index>(unsigned int)size_of_buffer)
+				if((unsigned int)buffer_index + size_elementWithTimeStamp>=(unsigned int)size_of_buffer)
 				{
-					free(element);
+					error = f_managed_close(&current_file);
+					if (error == COULD_NOT_GIVE_SEMAPHORE_ERROR)
+						return FS_COULD_NOT_GIVE_SEMAPHORE;
 					return FS_BUFFER_OVERFLOW;
 				}
-				(*read)++;
-				memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
-				buffer_index += size_elementWithTimeStamp;
+
+				if (element_time > (time_unix)resolution + lastCopy_time)
+				{
+					(*read)++;
+					memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
+					buffer_index += size_elementWithTimeStamp;
+					lastCopy_time = element_time;
+				}
 			}
 		}
-		f_close(current_file);
-		f_releaseFS();
-	}while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current);
-
-
-	free(element);
+		error = f_managed_close(&current_file);
+		if (error == COULD_NOT_GIVE_SEMAPHORE_ERROR)
+			return FS_COULD_NOT_GIVE_SEMAPHORE;
+		if (error != F_NO_ERROR)
+			return FS_FAIL;
+	} while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current);
 
 	return FS_SUCCSESS;
 }
 void print_file(char* c_file_name)
 {
 	C_FILE c_file;
-	F_FILE* current_file;
+	F_FILE* current_file = NULL;
 	int i = 0;
 	void* element;
 	char curr_file_name[FILE_NAME_WITH_INDEX_SIZE];//store current file's name
@@ -427,7 +609,9 @@ void print_file(char* c_file_name)
 	{
 		printf("file %d:\n",i);//print file index
 		get_file_name_by_index(c_file_name,i,curr_file_name);
-		current_file=f_open(curr_file_name,"r");
+		int error = f_managed_open(curr_file_name, "r", &current_file);
+		if (error != 0)
+			return;
 		for(int j=0;j<f_filelength(curr_file_name)/((int)c_file.size_of_element+(int)sizeof(unsigned int));j++)
 		{
 			f_read(element,c_file.size_of_element,(size_t)c_file.size_of_element+sizeof(unsigned int),current_file);
@@ -438,7 +622,7 @@ void print_file(char* c_file_name)
 			}
 			printf("\n");
 		}
-		f_close(current_file);
+		f_managed_close(&current_file);
 	}
 }
 
@@ -453,8 +637,6 @@ void DeInitializeFS( void )
 	{
 		printf("f_delvolume err %d\n", err);
 	}
-
-	f_releaseFS(); /* release this task from the filesystem */
 
 	printf("2\n");
 
