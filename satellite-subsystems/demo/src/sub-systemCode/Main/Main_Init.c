@@ -198,7 +198,7 @@ int InitSubsystems()
 
 	InitializeFS(activation);
 
-	CUFManageRestart();
+	//CUFManageRestart();
 
 	EPS_Init();
 
