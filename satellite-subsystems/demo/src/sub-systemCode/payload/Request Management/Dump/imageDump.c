@@ -280,7 +280,7 @@ void imageDump_task(void* param)
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
-		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, request.cmd_id);
+		save_ACK(ACK_TASK, ERR_ALLREADY_EXIST, request.cmd_id);
 		vTaskDelete(NULL);
 	}
 	else

@@ -20,11 +20,11 @@
 void cmd_mute(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	//1. send ACK before mutes satellite
-	*type = ACK_MUTE;
-	*err = ERR_ACTIVE;
+	*type = ACK_NOTHING;
 	if (cmd.length != 2)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	//2. mute satellite
@@ -33,27 +33,40 @@ void cmd_mute(Ack_type* type, ERR_type* err, TC_spl cmd)
 	int error = set_mute_time(param);
 	if (error == 666)
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 	}
 	else if (error != 0)
 	{
-		*err = ERR_FAIL;
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
 	}
+
+	*type = ACK_NOTHING;
+	*err = ERR_SUCCESS;
 }
 void cmd_unmute(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_UNMUTE;
-	//1. unmute satellite
-	*err = ERR_FRAM_WRITE_FAIL;
-	set_mute_time(0);
+	int error = set_mute_time(0);
+	if (error == 0)
+	{
+		*type = ACK_CMD_FAIL;
+		*err = ERR_FAIL;
+	}
+	else if (error != 0)
+	{
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
+	}
 	unmute_Tx();
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
 void cmd_active_trans(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_TRANSPONDER;
 	if (cmd.length != 1)
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		return;
 	}
@@ -69,17 +82,30 @@ void cmd_active_trans(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_shut_trans(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_TRANSPONDER;
 	//1. shut down the transponder and returning the TRAX to regular transmitting
-	sendRequestToStop_transponder();
-	*err = ERR_TURNED_OFF;
+	int error = sendRequestToStop_transponder();
+	if (error == 1)
+	{
+		*type = ACK_SYSTEM;
+		*err = ERR_NOT_RUNNING;
+	}
+	else if (error == 2)
+	{
+		*type = ACK_QUEUE;
+		*err = ERR_FULL;
+	}
+	else
+	{
+		*type = ACK_NOTHING;
+		*type = ERR_SUCCESS;
+	}
 }
 void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_UPDATE_TRANS_RSSI;
 	if (cmd.length != 2)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -87,6 +113,7 @@ void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 	param += cmd.data[0] << 8;
 	if (param > MAX_TRANS_RSSI)
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		return;
 	}
@@ -95,59 +122,73 @@ void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 	int error = FRAM_write_exte(cmd.data, TRANSPONDER_RSSI_ADDR, 2);
 	check_int("cmd_change_trans_rssi, FRAM_write", error);
 	if (error == 0)
+	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
+	}
 	else
-		*err = ERR_FRAM_WRITE_FAIL;
+	{
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
+	}
 }
 void cmd_aprs_dump(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_DUMP;
-
-	*err = ERR_NO_DATA;
-	//1. send all APRS packets on satellite
-	if (send_APRS_Dump())
-	{
-	//no ACK
-
-	*err=ERR_SUCCESS;
-	}
+	*type = ACK_NOTHING;
+	*err = ERR_EMPTY;
 }
 void cmd_stop_dump(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_DUMP;
 	//1. stop dump
-	sendRequestToStop_dump();
-	*err = ERR_TURNED_OFF;
+	int error = sendRequestToStop_dump();
+	if (error == 1)
+	{
+		*type = ACK_SYSTEM;
+		*err = ERR_NOT_RUNNING;
+	}
+	else if (error == 2)
+	{
+		*type = ACK_QUEUE;
+		*err = ERR_FULL;
+	}
+	else
+	{
+		*type = ACK_NOTHING;
+		*err = ERR_SUCCESS;
+	}
 }
 void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_UPDATE_BEACON_TIME_DELAY;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	//1. check if parameter in range
 	if (cmd.data[0] < MIN_TIME_DELAY_BEACON || cmd.data[0] > MAX_TIME_DELAY_BEACON)
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 	}
 	//2. update time in FRAM
 	else if (FRAM_writeAndVerify_exte(&cmd.data[0], BEACON_TIME_ADDR, 1))
 	{
-		*err = ERR_FRAM_WRITE_FAIL;
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
 	}
 	else
 	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 	}
 }
 void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_UPDATE_BIT_RATE;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -169,20 +210,24 @@ void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
 		check_int("FRAM_write, cmd_change_def_bit_rate", error);
 		if (error)
 		{
-			*err = ERR_FRAM_WRITE_FAIL;
+			*type = ACK_FRAM;
+			*err = ERR_WRITE_FAIL;
 			return;
 		}
 		error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
 		check_int("IsisTrxvu_tcSetAx25Bitrate, cmd_change_def_bit_rate", error);
 		if (error)
 		{
-			*err = ERR_FAIL;
+			*type = ACK_TRXVU;
+			*err = ERR_DRIVER;
 			return;
 		}
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 	}
 	else
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 	}
 }

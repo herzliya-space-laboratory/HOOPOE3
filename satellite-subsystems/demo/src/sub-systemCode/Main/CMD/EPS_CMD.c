@@ -12,13 +12,12 @@
 
 void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_UPDATE_EPS_VOLTAGES;
 	if (cmd.length != 8 * 2)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
-	*err = ERR_SUCCESS;
 	//convert raw logic to voltage_t[8]
 	voltage_t eps_logic[2][NUM_BATTERY_MODE - 1];
 	voltage_t comm_vol[2];
@@ -37,6 +36,7 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	// check logic
 	if (!check_EPSTableCorrection(eps_logic))
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		return;
 	}
@@ -44,6 +44,7 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	{
 		if (eps_logic[1][0] < comm_vol[i] && comm_vol[i] < eps_logic[1][1])
 		{
+			*type = ACK_CMD_FAIL;
 			*err = ERR_PARAMETERS;
 			return;
 		}
@@ -53,7 +54,8 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	check_int("cmd_upload_volt_logic, FRAM_writeAndVerify_exte(EPS_VOLTAGES_ADDR)", FRAM_err);
 	if (FRAM_err)
 	{
-		*err = ERR_FRAM_WRITE_FAIL;
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
 		return;
 	}
 
@@ -62,7 +64,8 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	if (FRAM_err)
 	{
 		reset_EPS_voltages();
-		*err = ERR_FRAM_WRITE_FAIL;
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
 		return;
 	}
 
@@ -74,18 +77,20 @@ void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 	if (FRAM_err)
 	{
 		reset_EPS_voltages();
-		*err = ERR_FRAM_WRITE_FAIL;
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
 		return;
 	}
 
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
 void cmd_upload_volt_COMM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_UPDATE_COMM_VOLTAGES;
 	if (cmd.length != 2 * 2)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	voltage_t comm_vol[2];
@@ -102,6 +107,7 @@ void cmd_upload_volt_COMM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	{
 		if (eps_logic[1][0] < comm_vol[i] && comm_vol[i] < eps_logic[1][1])
 		{
+			*type = ACK_CMD_FAIL;
 			*err = ERR_PARAMETERS;
 			return;
 		}
@@ -116,9 +122,9 @@ void cmd_upload_volt_COMM(Ack_type* type, ERR_type* err, TC_spl cmd)
 void cmd_heater_temp(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	// 1. define type for later ACK
-	*type = ACK_UPDATE_EPS_HEATER_VALUES;
 	if (cmd.length != 2)
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		return;
 	}
@@ -132,66 +138,73 @@ void cmd_heater_temp(Ack_type* type, ERR_type* err, TC_spl cmd)
     switch (error)
     {
 		case E_NO_SS_ERR:
+			*type = ACK_NOTHING;
 			*err = ERR_SUCCESS;
 			break;
 		case E_NOT_INITIALIZED:
+			*type = ACK_EPS;
 			*err = ERR_NOT_INITIALIZED;
 			break;
 		default:
-			*err = ERR_FAIL;
+			*type = ACK_EPS;
+			*err = ERR_DRIVER;
 			break;
 	}
 }
 void cmd_SHUT_CAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_EPS_SHUT_SYSTEM;
 	if (cmd.length != 0)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 	shut_CAM(SWITCH_ON);
 }
 void cmd_SHUT_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_EPS_SHUT_SYSTEM;
 	if (cmd.length != 0)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 	shut_ADCS(SWITCH_ON);
 }
 void cmd_allow_CAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_EPS_SHUT_SYSTEM;
 	if (cmd.length != 0)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 	shut_CAM(SWITCH_OFF);
 }
 void cmd_allow_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_EPS_SHUT_SYSTEM;
 	if (cmd.length != 0)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 	shut_ADCS(SWITCH_OFF);
 }
 void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_EPS_ALPHA;
 	if (cmd.length != sizeof(float))
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -202,14 +215,17 @@ void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd)
 		int error = FRAM_write_exte((byte*)&alpha, EPS_ALPHA_ADDR, 4);
 		if (error)
 		{
-			*err = ERR_FRAM_WRITE_FAIL;
+			*type = ACK_FRAM;
+			*err = ERR_WRITE_FAIL;
 			return;
 		}
 		check_int("cmd_update_alpha, FRAM_write_exte(EPS_ALPHA_ADDR)", error);
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 	}
 	else
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 	}
 }

@@ -169,6 +169,7 @@ void TRXVU_task()
 void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[5])
 {
 	char fileName[MAX_F_FILE_NAME_SIZE];
+	Ack_type ack = ACK_NOTHING;
 	ERR_type err = ERR_SUCCESS;
 	int numberOfParameters, parameterSize;
 	FileSystemResult FS_result;
@@ -226,12 +227,14 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 
 					if (i_error == 4)
 					{
-						err = ERR_SYSTEM_OFF;
+						ack = ACK_TRXVU;
+						err = ERR_OFF;
 						break;
 					}
 					else if (i_error == 5)
 					{
-						err = ERR_FAIL;
+						ack = ACK_TRXVU;
+						err = ERR_MUTE;
 						break;
 					}
 
@@ -243,10 +246,11 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 	}
 	else
 	{
+		ack = ACK_TRXVU;
 		err = ERR_FAIL;
 	}
 
-	save_ACK(ACK_DUMP, err, cmdID);
+	save_ACK(ack, err, cmdID);
 }
 
 void Dump_task(void *arg)
@@ -268,7 +272,7 @@ void Dump_task(void *arg)
 	if (get_system_state(dump_param))
 	{
 		//	exit dump task and saves ACK
-		save_ACK(ACK_DUMP, ERR_TASK_EXISTS, id);
+		save_ACK(ACK_TASK, ERR_ALLREADY_EXIST, id);
 		vTaskDelete(NULL);
 	}
 	else
@@ -281,7 +285,7 @@ void Dump_task(void *arg)
 	// 2. check if parameters are legal
 	if (startTime > endTime)
 	{
-		save_ACK(ACK_DUMP, ERR_PARAMETERS, id);
+		save_ACK(ACK_CMD_FAIL, ERR_PARAMETERS, id);
 		set_system_state(dump_param, SWITCH_OFF);
 	}
 	else
@@ -345,7 +349,7 @@ void Transponder_task(void *arg)
 
 	if (get_system_state(transponder_active_param))
 	{
-		save_ACK(ACK_TRANSPONDER, ERR_TASK_EXISTS, cmdId);
+		save_ACK(ACK_TASK, ERR_ALLREADY_EXIST, cmdId);
 		vTaskDelete(NULL);
 	}
 	else
@@ -374,11 +378,14 @@ void Transponder_task(void *arg)
 		change_TRXVU_state(TRANSPONDER_MODE);
 		xQueueReset(xTransponderQueue);
 		transponder_logic(time, cmdId);
-		save_ACK(ACK_TRANSPONDER, ERR_SUCCESS, cmdId);
+		save_ACK(ACK_NOTHING, ERR_SUCCESS, cmdId);
 		vTaskDelete(NULL);
 	}
+	if (get_system_state(mute_param))
+		save_ACK(ACK_TRXVU, ERR_MUTE, cmdId);
+	else
+		save_ACK(ACK_TRXVU, ERR_OFF, cmdId);
 
-	save_ACK(ACK_TRANSPONDER, ERR_FAIL, cmdId);
 	change_TRXVU_state(NOMINAL_MODE);
 	vTaskDelete(NULL);
 }
@@ -394,7 +401,7 @@ void lookForRequestToDelete_transponder(command_id cmdID)
 		if (queueParameter == deleteTask)
 		{
 			vTaskDelay(100);
-			save_ACK(ACK_TRANSPONDER, ERR_STOP_TASK, cmdID);
+			save_ACK(ACK_QUEUE, ERR_STOP_REQUEST, cmdID);
 			WriteTransponderLog(TRANSPONDER_DEACTIVATION, TRANSPONDER_STOP_CMD_INFO);
 			change_TRXVU_state(NOMINAL_MODE);
 			vTaskDelete(NULL);
@@ -412,7 +419,7 @@ void lookForRequestToDelete_dump(command_id cmdID)
 		if (queueParameter == deleteTask)
 		{
 			vTaskDelay(100);
-			save_ACK(ACK_DUMP, ERR_STOP_TASK, cmdID);
+			save_ACK(ACK_QUEUE, ERR_STOP_REQUEST, cmdID);
 			set_system_state(dump_param, SWITCH_OFF);
 			f_managed_releaseFS();
 			vTaskDelete(NULL);
@@ -909,6 +916,8 @@ int set_mute_time(unsigned short time)
 
 	error = FRAM_write_exte((byte*)&time_now, MUTE_TIME_ADDR, TIME_SIZE);
 	check_int("set_mute_time, FRAM_write", error);
+	if (error != 0)
+		return error;
 
 	mute_Tx(TRUE);
 

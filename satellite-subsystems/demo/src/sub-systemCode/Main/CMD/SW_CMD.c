@@ -18,22 +18,22 @@
 
 void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_RESET_DELAYED_CMD;
 	reset_delayCommand(FALSE);
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
 void cmd_reset_APRS_list(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_RESET_APRS_LIST;
 	reset_APRS_list(FALSE);
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
 void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_FRAM_RESET;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	*err = ERR_SUCCESS;
@@ -55,6 +55,7 @@ void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			reset_FRAM_MAIN();
 			break;
 		case CAMMERA:
+			//todo:
 			break;
 		case everything:
 			reset_FRAM_MAIN();
@@ -65,6 +66,7 @@ void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			//grecful reset
 			break;
 		default:
+			*type = ACK_CMD_FAIL;
 			*err = ERR_PARAMETERS;
 			break;
 	}

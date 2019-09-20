@@ -21,15 +21,21 @@
 
 void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_GENERIC_I2C_CMD;
-
 	int error = I2C_write((unsigned int)cmd.data[0], &cmd.data[2] ,cmd.data[1]);
 
 	if (error == 0)
+	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
-	if (error < 0 || error == 4)
-		*err = ERR_WRITE;
-	if (error > 4)
+	}
+	*type = ACK_I2C;
+	if (error == 4)
+		*err = ERR_WRITE_FAIL;
+	else if (error == 6)
+		*err = ERR_TIME_OUT;
+	else if (error == -2)
+		*err = ERR_PARAMETERS;
+	else
 		*err = ERR_FAIL;
 }
 void cmd_dump(TC_spl cmd)
@@ -49,10 +55,10 @@ void cmd_dump(TC_spl cmd)
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	int i_error = 0;
-	*type = ACK_MEMORY;
 	if (cmd.length != 13)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -66,6 +72,7 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	if (start_time > end_time)
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		return;
 	}
@@ -83,7 +90,7 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			result = c_fileDeleteElements(file_name, start_time, end_time);
 			if (result != FS_SUCCSESS)
 			{
-				errorRes = FS_FAIL;
+				errorRes = result;
 			}
 		}
 	}
@@ -91,26 +98,30 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	switch(errorRes)
 	{
 	case FS_SUCCSESS:
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 		break;
 	case FS_NOT_EXIST:
-		*err = ERR_PARAMETERS;
+		*err = ERR_NOT_EXIST;
 		 break;
 	case FS_FRAM_FAIL:
-		*err = ERR_FRAM_WRITE_FAIL;
+		*err = ERR_WRITE_FAIL;
 		 break;
 	default:
 		*err = ERR_FAIL;
 		break;
 	}
+	*type = ACK_FILE_SYSTEM;
 }
 void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_RESET_FILE;
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
+
 	if (cmd.length != NUM_FILES_IN_DUMP)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -125,127 +136,150 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 			reslt = c_fileReset(file_name);
 
 		if (reslt != FS_SUCCSESS)
-			*err = ERR_FAIL;
+		{
+			*type = ACK_FILE_SYSTEM;
+			*err = ERR_NOT_EXIST;
+		}
 	}
 }
 void cmd_dummy_func(Ack_type* type, ERR_type* err)
 {
 	printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
-	*type = ACK_THE_MIGHTY_DUMMY_FUNC;
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
 void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_RESET_SD_TLM;
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 	delete_allTMFilesFromSD();
 }
 
 void cmd_stop_TM(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_STOP_TM;
 	Boolean8bit value = FALSE_8BIT;
 	int i_error = FRAM_write_exte(&value, STOP_TELEMETRY_ADDR, 1);
 	if (i_error == 0)
+	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
+	}
 	else
-		*err = ERR_FRAM_WRITE_FAIL;
+	{
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
+	}
 }
 void cmd_resume_TM(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_RESUME_TM;
 	Boolean8bit value = TRUE_8BIT;
 	int i_error = FRAM_write_exte(&value, STOP_TELEMETRY_ADDR, 1);
 	if (i_error == 0)
+	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
+	}
 	else
-		*err = ERR_FRAM_WRITE_FAIL;
+	{
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
+	}
 }
 
 void cmd_soft_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_SOFT_RESTART;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	int error = soft_reset_subsystem((subSystem_indx)cmd.data[0]);
 	switch (error)
 	{
 	case 0:
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 		break;
 	case -444:
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		break;
 	default:
-		*err = ERR_FAIL;
+		*type = ACK_SYSTEM;
+		*err = ERR_DRIVER;
 		break;
 	}
 }
 void cmd_hard_reset_cmponent(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_SOFT_RESTART;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	int error = hard_reset_subsystem((subSystem_indx)cmd.data[0]);
 	switch (error)
 	{
 	case 0:
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 		break;
 	case -444:
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		break;
 	default:
-		*err = ERR_FAIL;
+		*type = ACK_SYSTEM;
+		*err = ERR_DRIVER;
 		break;
 	}
 }
 void cmd_reset_satellite(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_SOFT_RESTART;
 	int error = hard_reset_subsystem(EPS);
 	switch (error)
 	{
 	case 0:
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 		break;
 	case -444:
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		break;
 	default:
-		*err = ERR_FAIL;
+		*type = ACK_SYSTEM;
+		*err = ERR_DRIVER;
 		break;
 	}
 }
 void cmd_gracefull_reset_satellite(Ack_type* type, ERR_type* err)
 {
-	*type = ACK_SOFT_RESTART;
 	int error = soft_reset_subsystem(OBC);
 	switch (error)
 	{
 	case 0:
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 		break;
 	case -444:
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		break;
 	default:
-		*err = ERR_FAIL;
+		*type = ACK_SYSTEM;
+		*err = ERR_DRIVER;
 		break;
 	}
 }
 void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_UPDATE_TIME;
 	if (cmd.length != TIME_SIZE)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	// 1. converting to time_unix
@@ -255,20 +289,22 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 	{
 		printf("fuckeddddddd\n");
 		printf("I gues we need to stay on this time forever\n");
+		*type = ACK_SYSTEM;
 		*err = ERR_FAIL;
 	}
 	else
 	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 	}
 }
 
 void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_ARM_DISARM;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	int error;
@@ -282,19 +318,23 @@ void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		error = DISARM_ants();
 		break;
 	default:
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		return;
 		break;
 	}
 	if (error == -2)
 	{
+		*type = ACK_ANTS;
 		*err = ERR_NOT_INITIALIZED;
 	}
 	else if (error == -1)
 	{
+		*type = ACK_ANTS;
 		*err = ERR_FAIL;
 	}
 
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 
 }
@@ -307,6 +347,7 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 	int error = deploye_ants();
 	if (error == -2)
 	{
+		*type = ACK_ANTS;
 		*err = ERR_NOT_INITIALIZED;
 	}
 	else if (error != 0)
@@ -315,25 +356,26 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 		{
 			printf("FUN FACT: deploy ants when you don't have permission can summon the DEVIL!!!\nerror: %d\n", error);
 		}
+		*type = ACK_ANTS;
 		*err = ERR_FAIL;
 	}
 	else
 	{
+	 	 *type = ACK_CMD_FAIL;
 		*err = ERR_SUCCESS;
 	}
 
 #else
 	printf("sho! sho!, get out before i kill you\n");
-	*err = ERR_TETST;
 #endif*/
 }
 
 void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_ONLINE_TM_GET;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -342,6 +384,7 @@ void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	if (error == -1)
 	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
 		return;
 	}
@@ -352,39 +395,65 @@ void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		error = encode_TMpacket(rawPacket, &size, packet);
 		if (error)
 		{
-			*err = ERR_FAIL;
+			*type = ACK_SYSTEM;
+			*err = ERR_SPL;
 			return;
 		}
 		error = TRX_sendFrame(rawPacket, (uint8_t)size);
-		if (error)
+		if (error == 0)
 		{
-			*err = ERR_FAIL;
-			return;
+			*type = ACK_NOTHING;
+			*err = ERR_SUCCESS;
 		}
-		*err = ERR_SUCCESS;
-		return;
+		else if (error == 3)
+		{
+			*type = ACK_TRXVU;
+			*err = ERR_MUTE;
+		}
+		else if (error == 4)
+		{
+			*type = ACK_TRXVU;
+			*err = ERR_OFF;
+		}
+		else if (error == 5)
+		{
+			*type = ACK_TRXVU;
+			*err = ERR_TRANSPONDER;
+		}
+		else if (error == -2)
+		{
+			*type = ACK_FREERTOS;
+			*err = ERR_SEMAPHORE;
+		}
+		else
+		{
+			*type = ACK_TRXVU;
+			*err = ERR_FAIL;
+		}
 	}
+	*type = ACK_SYSTEM;
 	*err = ERR_FAIL;
 }
 void cmd_reset_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_RESET;
 	if (cmd.length != 0)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
 	reset_offline_TM_list();
 
+	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
 void cmd_add_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_OFFLINE_TM_LIST;
 	if (cmd.length != 9)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 	TM_struct_types index = (TM_struct_types)cmd.data[0];
@@ -396,18 +465,27 @@ void cmd_add_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 	int error = add_onlineTM_param_to_save_list(index, period, stopTime);
 
 	if (error == 0)
+	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
+	}
 	else if (error == -1)
+	{
+		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
-	else
-		*err = ERR_FAIL;
+	}
+	else if (error == -3)
+	{
+		*type = ACK_LIST;
+		*err = ERR_FULL;
+	}
 }
 void cmd_delete_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_OFFLINE_TM_LIST;
 	if (cmd.length != 1)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -416,16 +494,22 @@ void cmd_delete_item_off_line(Ack_type* type, ERR_type* err, TC_spl cmd)
 	int error = delete_onlineTM_param_from_offline(index);
 
 	if (error == 0)
+	{
+		*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
+	}
 	else
-		*err = ERR_FAIL;
+	{
+		*type = ACK_LIST;
+		*err = ERR_NOT_EXIST;
+	}
 }
 void cmd_get_off_line_setting(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
-	*type = ACK_OFFLINE_TM_LIST;
 	if (cmd.length != 0)
 	{
-		*err = ERR_PARAMETERS;
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
 		return;
 	}
 
@@ -439,12 +523,39 @@ void cmd_get_off_line_setting(Ack_type* type, ERR_type* err, TC_spl cmd)
 		encode_TMpacket(rawPacket, &size, packet);
 		error = TRX_sendFrame(rawPacket, (uint8_t)size);
 		if (error == 0)
+		{
+			*type = ACK_NOTHING;
 			*err = ERR_SUCCESS;
+		}
+		else if (error == 3)
+		{
+			*type = ACK_TRXVU;
+			*err = ERR_MUTE;
+		}
+		else if (error == 4)
+		{
+			*type = ACK_TRXVU;
+			*err = ERR_OFF;
+		}
+		else if (error == 5)
+		{
+			*type = ACK_TRXVU;
+			*err = ERR_TRANSPONDER;
+		}
+		else if (error == -2)
+		{
+			*type = ACK_FREERTOS;
+			*err = ERR_SEMAPHORE;
+		}
 		else
+		{
+			*type = ACK_TRXVU;
 			*err = ERR_FAIL;
+		}
 	}
 	else
 	{
-		*err = ERR_FRAM_READ_FAIL;
+		*type = ACK_FRAM;
+		*err = ERR_READ_FAIL;
 	}
 }
