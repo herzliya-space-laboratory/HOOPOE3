@@ -32,6 +32,10 @@ typedef struct __attribute__((__packed__))	_LogStruct
 }LogStruct;
 
 typedef enum _log_errors{
+	LOG_ERR_FRAM_WRITE = 0,
+	LOG_ERR_FRAM_READ = 1,
+	LOG_ERR_GET_TIME = 2,
+	LOG_ERR_SET_TIME = 3,
 	/*
 	 * --------Payload Errors--------
 	 *
@@ -105,6 +109,25 @@ typedef enum _log_errors{
 	LOG_ERR_GECKO_Erase_TimeoutERR = 163,
 	LOG_ERR_GECKO_Erase_Error_ClearEraseDoneFlag = 164,
 } log_errors;
+
+typedef enum _log_errors_COMM{
+	LOG_ERR_COMM_SET_BIT_RATE = 0,
+	LOG_ERR_COMM_IDLE = 1,
+	LOG_ERR_COMM_INIT_TRXVU = 2,
+	LOG_ERR_COMM_SEMAPHORE_TRANSMITTING = 3,
+	LOG_ERR_COMM_DUMP_QUEUE = 4,
+	LOG_ERR_COMM_TRANSPONDER_QUEUE = 5,
+	LOG_ERR_COMM_BEACON_TASK = 6,
+
+	LOG_ERR_COMM_TRANSPONDER_GET_TIME = 10,
+
+	LOG_ERR_COMM_DELAYED_COMMAND_GET_TIME = 30,
+	LOG_ERR_COMM_DELAYED_COMMAND_FRAM_WRITE = 31,
+	LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ = 32,
+
+	LOG_ERR_COMM_DUMP_ENTER_FS = 33,
+	LOG_ERR_COMM_DUMP_READ_FS = 34,
+} log_errors_COMM;
 
 typedef enum _log_systems{
 	SYSTEM_TRXVU,

@@ -57,6 +57,8 @@ void update_FRAM_bitRate()
 {
 	byte dat;
 	int error = FRAM_read_exte(&dat, BIT_RATE_ADDR, 1);
+	if (error != 0)
+		WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, error);
 	check_int("TRXVU_init_softWare, FRAM_read", error);
 	ISIStrxvuBitrate newParam = DEFAULT_BIT_RATE;
 	for (uint8_t i = 1; i < 9; i *= 2)
@@ -70,8 +72,10 @@ void update_FRAM_bitRate()
 	vTaskDelay(2000);
 	printf("new bit rate value: %d\n", newParam);
 	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
-	vTaskDelay(1000);
+	if (error != 0)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_SET_BIT_RATE, SYSTEM_TRXVU, error);
 	check_int("IsisTrxvu_tcSetAx25Bitrate, update_FRAM_bitRate", error);
+	vTaskDelay(1000);
 }
 void toggle_idle_state()
 {
@@ -79,9 +83,13 @@ void toggle_idle_state()
 	{
 		vTaskDelay(500);
 		int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
+		if (retValInt != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
 		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
 		vTaskDelay(1000);
 		retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
+		if (retValInt != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
 		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
 		vTaskDelay(1500);
 	}
@@ -107,6 +115,8 @@ void TRXVU_init_hardWare()
 	//Bitrate definition
 	myTRXVUBitrates[0] = trxvu_bitrate_9600;
 	retValInt = IsisTrxvu_initialize(myTRXVUAddress, myTRXVUBuffers, myTRXVUBitrates, 1);
+	if (retValInt != 0)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_INIT_TRXVU, SYSTEM_TRXVU, retValInt);
 	check_int("init_trxvu, IsisTrxvu_initialize", retValInt);
 
 	if (!get_system_state(mute_param))
@@ -126,10 +136,16 @@ void TRXVU_init_softWare()
 
 	//1. create binary semaphore for transmitting
 	vSemaphoreCreateBinary(xIsTransmitting);
+	if (xIsTransmitting == NULL)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_SEMAPHORE_TRANSMITTING, SYSTEM_TRXVU, -1);
 	vTaskDelay(SYSTEM_DEALY);
 	xDumpQueue = xQueueCreate(1, sizeof(queueRequest));
+	if (xDumpQueue == NULL)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_QUEUE, SYSTEM_TRXVU, -1);
 	vTaskDelay(SYSTEM_DEALY);
 	xTransponderQueue = xQueueCreate(1, sizeof(queueRequest));
+	if (xTransponderQueue == NULL)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_TRANSPONDER_QUEUE, SYSTEM_TRXVU, -1);
 	vTaskDelay(SYSTEM_DEALY);
 	//2. check if the queues and the semaphore successfully created
 	if (xDumpQueue == NULL || xTransponderQueue == NULL || xIsTransmitting == NULL)
@@ -149,6 +165,8 @@ void TRXVU_task()
 {
 	//3. create beacon task
 	portBASE_TYPE lu_error = xTaskCreate(Beacon_task, (const signed char * const)"Beacon_Task", BEACON_TASK_BUFFER, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, xBeaconTask);
+	if (lu_error != pdTRUE)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_BEACON_TASK, SYSTEM_TRXVU, -1);
 	check_portBASE_TYPE("could not create Beacon Task.", lu_error);
 	vTaskDelay(SYSTEM_DEALY);
 	//4. checks if theres was a dump before the reset and turned him off
@@ -212,7 +230,10 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 				last_read++;
 
 				if (FS_result != FS_SUCCSESS && FS_result != FS_BUFFER_OVERFLOW)
+				{
+					WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_READ_FS, (int)FS_result);
 					break;
+				}
 				else if (FS_result == FS_BUFFER_OVERFLOW)
 					printf("overflow from reading data!!!!!\n");
 
@@ -278,6 +299,8 @@ void Dump_task(void *arg)
 	else
 	{
 		int f_error = f_managed_enterFS();
+		if (f_error != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_ENTER_FS, (int)f_error);
 		check_int("enter FS, dump task", f_error);// task enter 5
 		set_system_state(dump_param, SWITCH_ON);
 	}
@@ -313,6 +336,8 @@ void transponder_logic(time_unix time, command_id cmdID)
 	{
 		//checks if time to return to nominal mode
 		i_error = Time_getUnixEpoch(&time_now);
+		if (i_error != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_TRANSPONDER_GET_TIME, SYSTEM_TRXVU, i_error);
 		check_int("error from Transponder Task, get_time", i_error);
 		if (time < time_now)
 		{
