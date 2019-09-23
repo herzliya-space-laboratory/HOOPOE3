@@ -8,6 +8,7 @@
 #ifndef EPS_H_
 #define EPS_H_
 
+#include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
 #include <satellite-subsystems/GomEPS.h>
