@@ -42,6 +42,7 @@ typedef enum{
 	image_Dump_chunkField,
 	image_Dump_bitField,
 	DataBase_Dump,
+	fileType_Dump,
 	update_defult_duration,
 	set_chunk_size,
 	stop_take_image_with_time_intervals,

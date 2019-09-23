@@ -96,15 +96,16 @@
 #define CREATE_JPEG_FROM_IMG_ST				11
 #define RESET_DATA_BASE_ST					12
 #define SEND_IMAGE_DATA_BASE_ST				13
-#define UPDATE_DEF_DUR_ST					14
-#define SET_CHUNK_SIZE						15
-#define STOP_TAKING_IMG_TIME_INTERVAL_ST	16
-#define	OFF_CAM_ST							17
-#define ON_CAM_ST							18
-#define OFF_FUTURE_AUTO_THUMB				19
-#define ON_FUTURE_AUTO_THUMB				20
-#define OFF_AUTO_THUMB						21
-#define ON_AUTO_THUMB						22
+#define FILE_TYPE_DUMP_ST					14
+#define UPDATE_DEF_DUR_ST					15
+#define SET_CHUNK_SIZE						16
+#define STOP_TAKING_IMG_TIME_INTERVAL_ST	17
+#define	OFF_CAM_ST							18
+#define ON_CAM_ST							19
+#define OFF_FUTURE_AUTO_THUMB				20
+#define ON_FUTURE_AUTO_THUMB				21
+#define OFF_AUTO_THUMB						22
+#define ON_AUTO_THUMB						23
 
 //eps
 #define ALLOW_ADCS_ST						99
