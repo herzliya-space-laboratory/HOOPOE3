@@ -201,6 +201,63 @@ ImageDataBaseResult SearchDataBase_byMark(uint32_t database_current_address, Ima
 	return DataBaseIdNotFound;
 }
 
+ImageDataBaseResult SearchDataBase_byTimeRange(time_unix lower_barrier, time_unix higher_barrier, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address)
+{
+	int result;
+
+	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
+	{
+		result = FRAM_read_exte((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
+		CMP_AND_RETURN(result, 0, DataBaseFramFail);
+
+		if ( (image_metadata->timestamp >= lower_barrier && image_metadata->timestamp <= higher_barrier) && image_metadata->cameraId != 0)
+		{
+			memcpy(image_address, &database_current_address, sizeof(uint32_t));
+			return DataBaseSuccess;
+		}
+		else
+		{
+			database_current_address += sizeof(ImageMetadata);
+		}
+	}
+
+	return DataBaseIdNotFound;
+}
+
+//---------------------------------------------------------------
+
+ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType reductionLevel);
+
+ImageDataBaseResult SearchDataBase_forImageFileType_byTimeRange(time_unix lower_barrier, time_unix higher_barrier, fileType file_type, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_starting_address)
+{
+	uint32_t database_current_address = database_starting_address;
+	ImageDataBaseResult error;
+	ImageMetadata current_image_metadata;
+	uint32_t current_image_address;
+
+	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
+	{
+		error = SearchDataBase_byTimeRange(lower_barrier, higher_barrier, &current_image_metadata, &current_image_address, database_current_address);
+		database_current_address = current_image_address += sizeof(ImageMetadata);
+
+		if (error == DataBaseSuccess)
+		{
+			if (checkForFileType(current_image_metadata, file_type) == DataBaseSuccess)
+			{
+				memcpy(image_metadata, &current_image_metadata, sizeof(ImageMetadata));
+				memcpy(image_address, &current_image_address, sizeof(uint32_t));
+				return DataBaseSuccess;
+			}
+		}
+		else
+		{
+			return error;
+		}
+	}
+
+	return DataBaseIdNotFound;
+}
+
 //---------------------------------------------------------------
 
 ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType reductionLevel)
