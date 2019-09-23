@@ -123,10 +123,8 @@ void AdcsTask()
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
 	//TODO: log start task
-
+	int f_err = 0;
 	vTaskDelay(ADCS_INIT_DELAY);
-	int f_error = f_managed_enterFS();// task 2 enter
-	check_int("AdcsTask, enter FS", f_error);
 	while(TRUE)
 	{
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
@@ -146,14 +144,15 @@ void AdcsTask()
 			}
 			//todo: log cmd received
 		}
-
-		trbl = GatherTlmAndData(); //TODO: check if enough time has passed
+		f_err = f_managed_enterFS();
+		//TODO: log f_err if error
+		trbl = GatherTlmAndData();
 		if(TRBL_SUCCESS != trbl){
 			AdcsTroubleShooting(trbl);
 		}
+		f_err = f_managed_releaseFS();
+		//TODO: log f_err if error
 		vTaskDelay(delay_loop);
 	}
-
-	printf("that a shity thing");
 }
 

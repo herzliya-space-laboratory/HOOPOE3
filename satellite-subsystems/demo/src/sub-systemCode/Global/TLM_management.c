@@ -61,6 +61,8 @@ typedef struct
 void delete_allTMFilesFromSD()
 {
 	F_FIND find;
+	printf("\n        delete files\n\n\n");
+	int numm = 0;
 	if (!f_findfirst("A:/*.*",&find))
 	{
 		do
@@ -75,6 +77,7 @@ void delete_allTMFilesFromSD()
 				for(int i = 0; i < 20; i++)
 				{
 					err = f_delete(find.filename);
+					numm++;
 					if (err == 0)
 						break;
 					else
@@ -85,6 +88,7 @@ void delete_allTMFilesFromSD()
 
 		} while (!f_findnext(&find));
 	}
+	printf("\n        FINISH: delete files, files: %d\n\n\n", numm);
 }
 // return -1 for FRAM fail
 static int getNumOfFilesInFS()
@@ -266,19 +270,19 @@ FileSystemResult c_fileCreate(char* c_file_name,
 //write element with timestamp to file
 static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int time)
 {
-	PLZNORESTART();
-
-	int number_of_writes;
-	number_of_writes = f_write( &time,sizeof(unsigned int),1, file );
-	number_of_writes += f_write( data, size,1, file );
-	//printf("writing element, time is: %u\n",time);
-	if(number_of_writes!=2)
+	for (int i = 0; i < 1; i++)
 	{
+		int number_of_writes;
+		number_of_writes = f_write( &time,sizeof(unsigned int),1, file );
+		number_of_writes += f_write( data, size,1, file );
+		//printf("writing element, time is: %u\n",time);
+		if(number_of_writes!=2)
+		{
 
-		printf("writewithEpochtime error\n");
+			printf("writewithEpochtime error\n");
+		}
 	}
 	f_flush( file ); /* only after flushing can data be considered safe */
-
 }
 // get C_FILE struct from FRAM by name
 static Boolean get_C_FILE_struct(char* name,C_FILE* c_file,unsigned int *address)

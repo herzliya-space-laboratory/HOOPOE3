@@ -251,7 +251,6 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 		}
 		TlmElements[index].LastSaveTime = curr_time;
 	}
-	printf("Collected ADCS TLM :%s\n",TlmElements[index].TlmFileName);
 	return TRBL_SUCCESS;
 }
 
@@ -415,7 +414,6 @@ TroubleErrCode GatherTlmAndData()
 {
 	TroubleErrCode err = TRBL_SUCCESS;
 	TroubleErrCode err_occured = TRBL_SUCCESS;
-
 	for (unsigned int i = 0; i < NUM_OF_ADCS_TLM; ++i) {
 		err = SaveElementTlmAtIndex(i);
 		if (TRBL_SUCCESS != err) {
@@ -426,6 +424,5 @@ TroubleErrCode GatherTlmAndData()
 
 		}
 	}
-
 	return err_occured;
 }

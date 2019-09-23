@@ -57,7 +57,7 @@ void save_time()
 	check_int("set time, Time_getUnixEpoch", err);
 	byte raw_time[TIME_SIZE];
 	// converting the time_unix to raw (small endien)
-	raw_time[0] = (byte)current_time;
+	raw_time[0] = (byte)(current_time);
 	raw_time[1] = (byte)(current_time >> 8);
 	raw_time[2] = (byte)(current_time >> 16);
 	raw_time[3] = (byte)(current_time >> 24);
