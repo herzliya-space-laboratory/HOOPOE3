@@ -721,6 +721,7 @@ ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, ui
 	ImageDataBaseResult DB_result = takePicture(database, testPattern);
 
 	setCameraPhotographyValues(database, regularParameters.frameAmount, regularParameters.frameRate, regularParameters.adcGain, regularParameters.pgaGain, regularParameters.sensorOffset, regularParameters.exposure);
+	setDataBaseValues(database);
 
 	return DB_result;
 }
