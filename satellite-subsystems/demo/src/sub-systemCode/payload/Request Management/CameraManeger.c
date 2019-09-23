@@ -30,13 +30,13 @@
 #include "../../TRXVU.h"
 #include "../../Main/HouseKeeping.h"
 
+#include "AutomaticImageHandler.h"
 #include "CameraManeger.h"
 
 #define CameraManagmentTask_StackDepth 30000
 #define CameraManagmentTask_Name ("Camera Management Task")
 #define CameraDumpTask_Name ("Camera Dump Task")
 
-#define NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME 2
 
 static xQueueHandle interfaceQueue;
 xTaskHandle	camManeger_handler;
@@ -46,8 +46,6 @@ static time_unix timeBetweenPictures;
 static uint32_t numberOfPicturesLeftToBeTaken;
 
 command_id cmd_id_for_takePicturesWithTimeInBetween;
-
-Boolean8bit auto_thumbnail_creation;
 
 static time_unix turnedOnCamera;
 static time_unix cameraActivation_duration; ///< the duration the camera will stay turned on after being activated
@@ -92,6 +90,7 @@ void CameraManagerTaskMain()
 
 	int f_error = f_managed_enterFS();//task 3 enter
 	check_int("CameraManagerTaskMain, enter FS", f_error);
+
 	while(TRUE)
 	{
 		if (removeRequestFromQueue(&req) > -1)
@@ -107,12 +106,6 @@ void CameraManagerTaskMain()
 		}
 
 		Take_pictures_with_time_in_between();
-
-		if ( !get_ground_conn() && auto_thumbnail_creation )
-		{
-			Camera_Request request = { .cmd_id = 0, .id = Handle_Mark, .keepOnCamera = 10 };
-			act_upon_request(request);
-		}
 
 		vTaskDelay(SYSTEM_DEALY);
 	}
@@ -195,12 +188,17 @@ void Take_pictures_with_time_in_between()
 	time_unix currentTime;
 	Time_getUnixEpoch(&currentTime);
 
+	int auto_handler_error = 0;
+
 	if ( (lastPicture_time + timeBetweenPictures <= currentTime) && (numberOfPicturesLeftToBeTaken != 0) )
 	{
 		lastPicture_time = currentTime;
 
 		if (get_system_state(cam_operational_param))
 		{
+			auto_handler_error = stopAction();
+			handleErrors(auto_handler_error);
+
 			Time_getUnixEpoch(&turnedOnCamera);
 			TurnOnGecko();
 			ImageDataBaseResult error = takePicture(imageDataBase, FALSE_8BIT);
@@ -208,30 +206,13 @@ void Take_pictures_with_time_in_between()
 			{
 				WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
 			}
+
+			auto_handler_error = resumeAction();
+			handleErrors(auto_handler_error);
 		}
 
 		numberOfPicturesLeftToBeTaken--;
 	}
-}
-
-void Gecko_TroubleShooter(ImageDataBaseResult error)
-{
-	Boolean should_reset_take = error > GECKO_Take_Success && error < GECKO_Read_Success;
-	Boolean should_reset_read = error > GECKO_Read_Success && error < GECKO_Erase_Success;
-	Boolean should_reset_erase = error > GECKO_Erase_Success && error <= GECKO_Erase_Error_ClearEraseDoneFlag;
-
-	Boolean should_reset = should_reset_take || should_reset_read || should_reset_erase;
-
-	if (should_reset)
-	{
-		TurnOffGecko();
-	}
-}
-
-void startDumpTask(Camera_Request request)
-{
-	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraManagmentTask_StackDepth, &request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
-	vTaskDelay(SYSTEM_DEALY);
 }
 
 void act_upon_request(Camera_Request request)
@@ -239,14 +220,22 @@ void act_upon_request(Camera_Request request)
 	ImageDataBaseResult error = DataBaseSuccess;
 
 	Boolean CouldNotExecute = FALSE;
+	int auto_handler_error = 0;
 
 	switch (request.id)
 	{
 	case take_image:
 		if (get_system_state(cam_operational_param))
 		{
+			auto_handler_error = stopAction();
+			handleErrors(auto_handler_error);
+
 			Time_getUnixEpoch(&turnedOnCamera);
+
 			error = TakePicture(imageDataBase, request.data);
+
+			auto_handler_error = resumeAction();
+			handleErrors(auto_handler_error);
 		}
 		else
 		{
@@ -257,8 +246,14 @@ void act_upon_request(Camera_Request request)
 	case take_image_with_special_values:
 		if (get_system_state(cam_operational_param))
 		{
+			auto_handler_error = stopAction();
+			handleErrors(auto_handler_error);
+
 			Time_getUnixEpoch(&turnedOnCamera);
 			error = TakeSpecialPicture(imageDataBase, request.data);
+
+			auto_handler_error = resumeAction();
+			handleErrors(auto_handler_error);
 		}
 		else
 		{
@@ -280,8 +275,14 @@ void act_upon_request(Camera_Request request)
 	case delete_image:
 		if (get_system_state(cam_operational_param))
 		{
+			auto_handler_error = stopAction();
+			handleErrors(auto_handler_error);
+
 			Time_getUnixEpoch(&turnedOnCamera);
 			error = DeletePicture(imageDataBase, request.data);
+
+			auto_handler_error = resumeAction();
+			handleErrors(auto_handler_error);
 		}
 		else
 		{
@@ -298,8 +299,14 @@ void act_upon_request(Camera_Request request)
 		}
 		else
 		{
+			auto_handler_error = stopAction();
+			handleErrors(auto_handler_error);
+
 			Time_getUnixEpoch(&turnedOnCamera);
 			error = TransferPicture(imageDataBase, request.data);
+
+			auto_handler_error = resumeAction();
+			handleErrors(auto_handler_error);
 		}
 		break;
 
@@ -323,7 +330,7 @@ void act_upon_request(Camera_Request request)
 	case image_Dump_bitField:
 	case DataBase_Dump:
 	case fileType_Dump:
-		startDumpTask(request);
+		KickStartImageDumpTask(&request);
 		break;
 
 	case update_defult_duration:
@@ -373,9 +380,7 @@ void act_upon_request(Camera_Request request)
 		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
 		break;
 
-	case Handle_Mark:
-		Time_getUnixEpoch(&turnedOnCamera);
-		error = handleMarkedPictures(NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME);
+	case (cam_Request_id_t)70:
 		break;
 
 	default:
@@ -385,9 +390,9 @@ void act_upon_request(Camera_Request request)
 
 	Gecko_TroubleShooter(error);
 
-	if ( request.id != Handle_Mark && !CouldNotExecute )
+	if ( !CouldNotExecute )
 	{
-		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
+		//save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 
 		if (error != DataBaseSuccess)
 		{

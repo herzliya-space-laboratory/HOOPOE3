@@ -49,6 +49,7 @@
 
 #include "../TRXVU.h"
 #include "../payload/Request Management/CameraManeger.h"
+#include "../payload/Request Management/AutomaticImageHandler.h"
 #include "sub-systemCode/ADCS/AdcsMain.h"
 #include "HouseKeeping.h"
 #include "commands.h"
@@ -230,6 +231,9 @@ int SubSystemTaskStart()
 	vTaskDelay(100);
 
 	KickStartCamera();
+	vTaskDelay(100);
+
+	KickStartAutomaticImageHandlerTask();
 	vTaskDelay(100);
 
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);

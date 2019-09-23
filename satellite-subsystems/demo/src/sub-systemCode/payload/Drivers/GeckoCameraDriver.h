@@ -71,6 +71,17 @@ int initGecko();
  */
 int GECKO_TakeImage(uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern);
 
+/*
+ * -9 = error
+ * 0 = success
+ */
+int readStopFlag(Boolean8bit* stop_flag);
+/*
+ * -1 = error
+ * 0 = success
+ */
+int setStopFlag(Boolean8bit stop_flag);
+
 /*!
  * @brief Higher level function for reading an image.
  * @note An image is 136 pages long with every page having 4096 x 32-bit words
@@ -98,8 +109,11 @@ int GECKO_TakeImage(uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uin
  *  -6 = page count mismatch during read
  *  -7 = read done flag not set
  *  -8 = could not clear read done flag
+ *
+ *  -9 = could not read stop flag
+ *  -10 = stopped per flag request
  */
-int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer);
+int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer);
 
 /*!
  * @brief Higher level function for erasing an image.
@@ -115,7 +129,7 @@ int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer);
  *  -3 = erase timeout
  *  -4 = could not clear erase done flag
  */
-int GECKO_EraseBlock( uint32_t imageID );
+int GECKO_EraseBlock(uint32_t imageID);
 
 
 #endif /* Camera_H_ */

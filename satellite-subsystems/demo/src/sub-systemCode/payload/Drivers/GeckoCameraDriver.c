@@ -16,6 +16,8 @@
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
 
+#include "../../Global/FRAMadress.h"
+
 #include "../../Global/GlobalParam.h"
 #include "../../Global/logger.h"
 
@@ -28,7 +30,7 @@
 #define	totalPageCount 136
 #define totalFlashCount 4096
 
-#define MAGIC_NUM 10000
+#define READ_DELAY_INDEXES 10000
 
 void Initialized_GPIO()
 {
@@ -212,15 +214,27 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 	return 0;
 }
 
-int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
+int readStopFlag(Boolean8bit* stop_flag)
 {
-	unsigned char somebyte = 0;
-	GomEpsPing(0, 0, &somebyte);
+	int result = FRAM_read_exte(stop_flag, GECKO_STOP_TRANSFER_FLAG_ADDR, GECKO_STOP_TRANSFER_FLAG_SIZE);
+	Result(result, -9);
+	return 0;
+}
+int setStopFlag(Boolean8bit stop_flag)
+{
+	int result = FRAM_write_exte(&stop_flag, GECKO_STOP_TRANSFER_FLAG_ADDR, GECKO_STOP_TRANSFER_FLAG_SIZE);
+	Result(result, -1);
+	return 0;
+}
 
-	printf("GomEpsResetWDT = %d\n", GomEpsResetWDT(0));
-	printf("starting read\n");
-	// Init Flash:
+int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
+{
+	Boolean8bit stop_flag = FALSE_8BIT;
+
 	int result, i = 0;
+	result = GomEpsResetWDT(0);
+
+	// Init Flash:
 	do
 	{
 		result = GECKO_GetFlashInitDone();
@@ -259,11 +273,19 @@ int GECKO_ReadImage( uint32_t imageID, uint32_t *buffer)
 	{
 		buffer[i] = GECKO_GetImgData();
 
-		// Printimg a value one every 40000 pixels:
-		if(i % MAGIC_NUM == 0)
+		// Printing a value one every 40000 pixels:
+		if(i % READ_DELAY_INDEXES == 0)
 		{
 			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
+
 			vTaskDelay(SYSTEM_DEALY);
+
+			result = readStopFlag(&stop_flag);
+			if (stop_flag)
+			{
+				setStopFlag(FALSE_8BIT);
+				return -10;
+			}
 		}
 	}
 
