@@ -110,6 +110,7 @@ typedef enum _log_systems{
 	SYSTEM_TRXVU,
 	SYSTEM_EPS,
 	SYSTEM_PAYLOAD,
+	SYSTEM_PAYLOAD_AUTO_HANDLING,
 	SYSTEM_OBC,
 	SYSTEM_ADCS,
 } log_systems;

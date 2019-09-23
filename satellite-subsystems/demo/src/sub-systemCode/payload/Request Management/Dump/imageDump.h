@@ -38,4 +38,6 @@ ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height);
  */
 void imageDump_task(void* param);
 
+void KickStartImageDumpTask(void* param);
+
 #endif /* IMAGEDUMP_H_ */

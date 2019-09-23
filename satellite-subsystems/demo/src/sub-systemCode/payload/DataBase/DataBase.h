@@ -76,73 +76,76 @@ typedef enum
 typedef enum
 {
 	// General DataBase Error Messages:
-	DataBaseSuccess								= 0,
-	DataBaseNullPointer							= 1,
-	DataBaseNotInSD								= 2,
-	DataBaseRawDoesNotExist						= 3,
-	DataBasealreadyInSD							= 4,
-	DataBaseIllegalId							= 5,
-	DataBaseIdNotFound							= 6,
-	DataBaseFull								= 7,
-	DataBaseJpegFail							= 8,
-	DataBaseAlreadyMarked						= 9,
-	DataBaseTimeError							= 10,
-	DataBaseFramFail							= 11,
-	DataBaseFileSystemError						= 12,
-	DataBaseFail								= 13,
+	DataBaseSuccess									= 0,
+	DataBaseNullPointer								= 1,
+	DataBaseNotInSD									= 2,
+	DataBaseRawDoesNotExist							= 3,
+	DataBasealreadyInSD								= 4,
+	DataBaseIllegalId								= 5,
+	DataBaseIdNotFound								= 6,
+	DataBaseFull									= 7,
+	DataBaseJpegFail								= 8,
+	DataBaseAlreadyMarked							= 9,
+	DataBaseTimeError								= 10,
+	DataBaseFramFail								= 11,
+	DataBaseFileSystemError							= 12,
+	DataBaseFail									= 13,
 
-	DataBaseAdcsError_gettingAngleRates			= 14,
-	DataBaseAdcsError_gettingCssVector			= 15,
+	DataBaseAdcsError_gettingAngleRates				= 14,
+	DataBaseAdcsError_gettingCssVector				= 15,
 
 	// Gecko Drivers Image Taking Error Messages:
-	GECKO_Take_Success							= 16,	///< (0) completed successfully
-	GECKO_Take_Error_TurnOffSensor				= 17,	///< (-1) could not turn off sensor
-	GECKO_Take_Error_Set_ADC_Gain				= 18,	///< (-2) could not set ADC gain
-	GECKO_Take_Error_Set_PGA_Gain				= 19,	///< (-3) could not set PGA gain
-	GECKO_Take_Error_setExposure				= 20,	///< (-4) could not set exposure
-	GECKO_Take_Error_setFrameAmount				= 21,	///< (-5) could not set frame amount
-	GECKO_Take_Error_setFrameRate				= 22,	///< (-6) could not set frame rate
-	GECKO_Take_Error_turnOnSensor				= 23,	///< (-7) could not turn on sensor
-	GECKO_Take_sensorTurnOnTimeout				= 24,	///< (-8) sensor turn on timeout
-	GECKO_Take_trainingTimeout					= 25, 	///< (-9) training timeout
-	GECKO_Take_trainingError					= 26,	///< (-10) training error
-	GECKO_Take_Error_notInitialiseFlash			= 27,	///< (-11) could not initialize flash
-	GECKO_Take_Error_setImageID					= 28,	///< (-12) could not set image ID
-	GECKO_Take_Error_disableTestPattern			= 29,	///< (-13) could not disable test pattern
-	GECKO_Take_Error_startSampling				= 30,	///< (-14) could not start sampling
-	GECKO_Take_samplingTimeout					= 31,	///< (-15) sampling timeout
-	GECKO_Take_Error_clearSampleFlag			= 32,	///< (-16) could not clear sample flag
-	GECKO_Take_Error_turnOfSensor				= 33,	///< (-17) could not turn of sensor
+	GECKO_Take_Success								= 16,	///< (0) completed successfully
+	GECKO_Take_Error_TurnOffSensor					= 17,	///< (-1) could not turn off sensor
+	GECKO_Take_Error_Set_ADC_Gain					= 18,	///< (-2) could not set ADC gain
+	GECKO_Take_Error_Set_PGA_Gain					= 19,	///< (-3) could not set PGA gain
+	GECKO_Take_Error_setExposure					= 20,	///< (-4) could not set exposure
+	GECKO_Take_Error_setFrameAmount					= 21,	///< (-5) could not set frame amount
+	GECKO_Take_Error_setFrameRate					= 22,	///< (-6) could not set frame rate
+	GECKO_Take_Error_turnOnSensor					= 23,	///< (-7) could not turn on sensor
+	GECKO_Take_sensorTurnOnTimeout					= 24,	///< (-8) sensor turn on timeout
+	GECKO_Take_trainingTimeout						= 25, 	///< (-9) training timeout
+	GECKO_Take_trainingError						= 26,	///< (-10) training error
+	GECKO_Take_Error_notInitialiseFlash				= 27,	///< (-11) could not initialize flash
+	GECKO_Take_Error_setImageID						= 28,	///< (-12) could not set image ID
+	GECKO_Take_Error_disableTestPattern				= 29,	///< (-13) could not disable test pattern
+	GECKO_Take_Error_startSampling					= 30,	///< (-14) could not start sampling
+	GECKO_Take_samplingTimeout						= 31,	///< (-15) sampling timeout
+	GECKO_Take_Error_clearSampleFlag				= 32,	///< (-16) could not clear sample flag
+	GECKO_Take_Error_turnOfSensor					= 33,	///< (-17) could not turn of sensor
 
 	// Gecko Drivers Image Reading Error Messages:
-	GECKO_Read_Success							= 34,	///< (0) completed successfully
-	GECKO_Read_Error_InitialiseFlash			= 35,	///< (-1) could not initialize flash
-	GECKO_Read_Error_SetImageID					= 36,	///< (-2) could not set image ID
-	GECKO_Read_Error_StartReadout				= 37,	///< (-3) could not start readout
-	GECKO_Read_readTimeout						= 38,	///< (-4) data read timeout
-	GECKO_Read_wordCountMismatch				= 39,	///< (-5) word count mismatch during read
-	GECKO_Read_pageCountMismatch				= 40,	///< (-6) page count mismatch during read
-	GECKO_Read_readDoneFlagNotSet				= 41,	///< (-7) read done flag not set
-	GECKO_Read_Error_ClearReadDoneFlag			= 42,	///< (-8) could not clear read done flag
+	GECKO_Read_Success								= 34,	///< (0) completed successfully
+	GECKO_Read_Error_InitialiseFlash				= 35,	///< (-1) could not initialize flash
+	GECKO_Read_Error_SetImageID						= 36,	///< (-2) could not set image ID
+	GECKO_Read_Error_StartReadout					= 37,	///< (-3) could not start readout
+	GECKO_Read_readTimeout							= 38,	///< (-4) data read timeout
+	GECKO_Read_wordCountMismatch					= 39,	///< (-5) word count mismatch during read
+	GECKO_Read_pageCountMismatch					= 40,	///< (-6) page count mismatch during read
+	GECKO_Read_readDoneFlagNotSet					= 41,	///< (-7) read done flag not set
+	GECKO_Read_Error_ClearReadDoneFlag				= 42,	///< (-8) could not clear read done flag
+
+	GECKO_Read_CouldNotReadStopFlag					= 43,	///< (-9)
+	GECKO_Read_StoppedAsPerRequest					= 44,	///< (-10)
 
 	// Gecko Drivers Image Erasing Error Messages:
-	GECKO_Erase_Success							= 43,	///< (0) completed successfully
-	GECKO_Erase_Error_SetImageID				= 44,	///< (-1) could not set image ID
-	GECKO_Erase_StartErase						= 45,	///< (-2) could not start erase
-	GECKO_Erase_Timeout							= 46,	///< (-3) erase timeout
-	GECKO_Erase_Error_ClearEraseDoneFlag		= 47,	///< (-4) could not clear erase done flag
+	GECKO_Erase_Success								= 45,	///< (0) completed successfully
+	GECKO_Erase_Error_SetImageID					= 46,	///< (-1) could not set image ID
+	GECKO_Erase_StartErase							= 47,	///< (-2) could not start erase
+	GECKO_Erase_Timeout								= 48,	///< (-3) erase timeout
+	GECKO_Erase_Error_ClearEraseDoneFlag			= 49,	///< (-4) could not clear erase done flag
 
 	// Butcher Error Messages:
-	Butcher_Success								= 48,
-	Butcher_Null_Pointer						= 49,
-	Butcher_Parameter_Value						= 50,
-	Butcher_Out_of_Bounds						= 51,
-	Butcher_Undefined_Error						= 52,
+	Butcher_Success									= 50,
+	Butcher_Null_Pointer							= 51,
+	Butcher_Parameter_Value							= 52,
+	Butcher_Out_of_Bounds							= 53,
+	Butcher_Undefined_Error							= 54,
 
 	// JPEG Error Messages:
-	JpegCompression_Success						= 53,
-	JpegCompression_Failure						= 54,
-	JpegCompression_qualityFactor_outOfRange	= 55
+	JpegCompression_Success							= 55,
+	JpegCompression_Failure							= 56,
+	JpegCompression_qualityFactor_outOfRange		= 57
 } ImageDataBaseResult;
 
 uint8_t imageBuffer[BMP_FILE_DATA_SIZE];
@@ -170,7 +173,7 @@ ImageDataBaseResult resetImageDataBase(ImageDataBase database);
 imageid getLatestID(ImageDataBase database);
 unsigned int getNumberOfFrames(ImageDataBase database);
 
-ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled);
+ImageDataBaseResult handleMarkedPictures();
 
 /*!
  * takes a picture and writes info about it
@@ -245,9 +248,11 @@ ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buff
 ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type);
 ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type);
 ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address);
+ImageDataBaseResult SearchDataBase_forLatestMarkedImage(ImageMetadata* image_metadata);
 void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
 uint32_t GetImageFactor(fileType image_type);
 uint32_t getDataBaseSize();
 void setAutoThumbnailCreation(ImageDataBase database, Boolean8bit new_AutoThumbnailCreation);
+void Gecko_TroubleShooter(ImageDataBaseResult error);
 
 #endif /* ImageDataBase_H_ */

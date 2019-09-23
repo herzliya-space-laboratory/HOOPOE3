@@ -51,8 +51,7 @@ typedef enum{
 	turn_on_future_AutoThumbnailCreation,
 	turn_off_AutoThumbnailCreation,
 	turn_on_AutoThumbnailCreation,
-	number_of_request_types,
-	Handle_Mark
+	number_of_request_types
 }cam_Request_id_t;
 
 typedef struct __attribute__ ((__packed__))

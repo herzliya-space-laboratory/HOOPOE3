@@ -28,6 +28,9 @@
 
 #include "imageDump.h"
 
+#define CameraDumpTask_Name ("Camera Dump Task")
+#define CameraDumpTask_StackDepth (8192)
+
 uint16_t chunk_width;
 uint16_t chunk_height;
 
@@ -366,4 +369,10 @@ void imageDump_task(void* param)
 	set_system_state(dump_param, SWITCH_OFF);
 	f_managed_releaseFS();
 	vTaskDelete(NULL);
+}
+
+void KickStartImageDumpTask(void* request)
+{
+	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraDumpTask_StackDepth, &request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
+	vTaskDelay(SYSTEM_DEALY);
 }
