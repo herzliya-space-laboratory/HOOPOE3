@@ -13,6 +13,23 @@
 #include <satellite-subsystems/GomEPS.h>
 #include "../Global/TLM_management.h"
 
+typedef enum
+{
+	CUF_SUCCESS,
+	CUF_INIT_ERROR,
+	CUF_GENERATE_SSH_FAIL,
+	CUF_AUTHENTICATE_FAIL,
+	CUF_SAVE_PERMINANTE_FAIL,
+	CUF_LOAD_PERMINANTE_FAIL,
+	CUF_MANAGE_RESTART_FAIL,
+	CUF_UPDATE_PERMINANTE_FAIL,
+	CUF_REMOVE_FAIL,
+	CUF_EXECUTE_FAIL,
+	CUF_EXECUTE_unauthenticated,
+	CUF_INTEGRATED_FAIL,
+	CUF_INTEGRATED_unauthenticated
+} CUF_ERROR_CODES;
+
 #define TEMPORARYCUFSTORAGESIZE 50000 //size of the array that accumilates the temporary CUFs data
 #define CUFARRSTORAGE 1000 //size of the array that accumilates the CUF functions
 #define PERMINANTCUFLENGTH 100 //size of the array that accumilates the perminant CUF names
