@@ -114,7 +114,7 @@ int deploye_ants(ISISantsSide side)
 		return error;
 	}
 
-	//error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
+	error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
 	if (error)
 		WriteErrorLog((log_errors)LOG_ERR_DEPLOY_ANTS, SYSTEM_ANTS, error);
 	check_int("IsisAntS_autoDeployment, side A", error);

@@ -1,6 +1,24 @@
 src/sub-systemCode/CUF/CUF.d: ../src/sub-systemCode/CUF/CUF.c \
  ../src/sub-systemCode/CUF/CUF.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/boolean.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Storage/FRAM.h \
+ C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/GomEPS.h \
+ ../src/sub-systemCode/CUF/../Global/TLM_management.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h \
+ ../src/sub-systemCode/CUF/../Global/../Global/Global.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/Time.h \
+ C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/HoopoeTestingConfigurations.h \
+ ../src/sub-systemCode/CUF/../Global/../Global/FRAMadress.h \
+ ../src/sub-systemCode/CUF/../Global/../Global/sizes.h \
+ ../src/sub-systemCode/CUF/../Global/Global.h \
+ ../src/sub-systemCode/CUF/../Global/logger.h \
+ ../src/sub-systemCode/CUF/../Global/TLM_management.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/projdefs.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOSConfig.h \
@@ -20,18 +38,47 @@ src/sub-systemCode/CUF/CUF.d: ../src/sub-systemCode/CUF/CUF.c \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/queue.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/task.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/list.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/storage/FRAM.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/storage/FRAM.h
 
 ../src/sub-systemCode/CUF/CUF.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/boolean.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Storage/FRAM.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/include/satellite-subsystems/GomEPS.h:
+
+../src/sub-systemCode/CUF/../Global/TLM_management.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:
+
+../src/sub-systemCode/CUF/../Global/../Global/Global.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/Time.h:
+
+C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/HoopoeTestingConfigurations.h:
+
+../src/sub-systemCode/CUF/../Global/../Global/FRAMadress.h:
+
+../src/sub-systemCode/CUF/../Global/../Global/sizes.h:
+
+../src/sub-systemCode/CUF/../Global/Global.h:
+
+../src/sub-systemCode/CUF/../Global/logger.h:
+
+../src/sub-systemCode/CUF/../Global/TLM_management.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h:
 
@@ -72,17 +119,3 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/task.h
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/list.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/storage/FRAM.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fat.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/config_fat.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../config/../version/ver_fat.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_mdriver.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_mdriver.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/../version/ver_fat.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/include/hcc/api_fs_err.h:

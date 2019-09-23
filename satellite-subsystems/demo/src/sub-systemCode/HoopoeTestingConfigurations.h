@@ -2,13 +2,13 @@
 #ifndef HOOPOETESTINGCONFIGURATIONS_H_
 #define HOOPOETESTINGCONFIGURATIONS_H_
 
-#define TESTING
-#define PRINTTLM
+//#define TESTING
+//#define PRINTTLM
 
 // ---- ANTENNAS
 
-//#define ANTS_ON
-#define ANTS_DO_NOT_DEPLOY
+#define ANTS_ON
+//#define ANTS_DO_NOT_DEPLOY
 #define PRINT_IN_CHECK_FUNCTION			0
 
 //#define NOT_USE_ACK_HK
