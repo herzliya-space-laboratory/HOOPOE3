@@ -107,13 +107,8 @@ void CameraManagerTaskMain()
 
 		Take_pictures_with_time_in_between();
 
-		if ( !get_ground_conn() && auto_thumbnail_creation )
-		{
-			/*
-			Camera_Request request = { .cmd_id = 0, .id = Handle_Mark, .keepOnCamera = 10 };
-			act_upon_request(request);
-			*/
-		}
+		Camera_Request request = { .cmd_id = 0, .id = 70, .keepOnCamera = 10 };
+		act_upon_request(request);
 
 		vTaskDelay(SYSTEM_DEALY);
 	}
@@ -239,6 +234,7 @@ void act_upon_request(Camera_Request request)
 			handleErrors(auto_handler_error);
 
 			Time_getUnixEpoch(&turnedOnCamera);
+
 			error = TakePicture(imageDataBase, request.data);
 
 			auto_handler_error = resumeAction();
@@ -386,6 +382,9 @@ void act_upon_request(Camera_Request request)
 		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
 		break;
 
+	case (cam_Request_id_t)70:
+		break;
+
 	default:
 		return;
 		break;
@@ -395,7 +394,7 @@ void act_upon_request(Camera_Request request)
 
 	if ( !CouldNotExecute )
 	{
-		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
+		//save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 
 		if (error != DataBaseSuccess)
 		{

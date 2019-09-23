@@ -22,23 +22,28 @@
 #define AutomaticImageHandlerTask_Name ("Automatic Image Handling Task")
 #define AutomaticImageHandlerTask_StackDepth 8192
 
-#define NUMBER_OF_PICTURES_TO_BE_HANDLED_AT_A_TIME 2
+Boolean8bit current_auto_thumbnail_creation;
 
 Boolean finished;
+Boolean previus_state;
 
 void AutomaticImageHandlerTaskMain()
 {
 	int error = f_managed_enterFS();
-	check_int("CameraManagerTaskMain, enter FS", error);
+	check_int("AutoImageHandler, enter FS", error);
 
 	while(TRUE)
 	{
-		if ( !get_ground_conn() && auto_thumbnail_creation )
+		error = 0;
+
+		if ( !get_ground_conn() && get_system_state(cam_operational_param) && current_auto_thumbnail_creation )
 		{
 			finished = FALSE;
 			error = handleMarkedPictures();
 			finished = TRUE;
 		}
+
+		current_auto_thumbnail_creation = auto_thumbnail_creation;
 
 		Gecko_TroubleShooter(error);
 
@@ -61,41 +66,51 @@ void KickStartAutomaticImageHandlerTask()
 {
 	xTaskCreate(AutomaticImageHandlerTaskMain, (const signed char*)AutomaticImageHandlerTask_Name, AutomaticImageHandlerTask_StackDepth, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(SYSTEM_DEALY);
+
+	setStopFlag(FALSE_8BIT);
+	auto_thumbnail_creation = TRUE_8BIT;
 }
 
 int stopAction()
 {
-	// Stopping Future Thumbnail Creation:
-	auto_thumbnail_creation = FALSE_8BIT;
-
-	int error = setStopFlag(TRUE_8BIT);
-	CMP_AND_RETURN(error, 0, -1);
-
-	Boolean8bit stop_flag = TRUE_8BIT;
-
-	do
+	if (current_auto_thumbnail_creation)
 	{
-		vTaskDelay(SYSTEM_DEALY);
-	} while ( finished != TRUE );
+		previus_state = auto_thumbnail_creation;
 
-	error = setStopFlag(FALSE_8BIT);
-	CMP_AND_RETURN(error, 0, -1);
+		// Stopping Future Thumbnail Creation:
+		auto_thumbnail_creation = FALSE_8BIT;
+		current_auto_thumbnail_creation = auto_thumbnail_creation;
+
+		int error = setStopFlag(TRUE_8BIT);
+		CMP_AND_RETURN(error, 0, -1);
+
+		do
+		{
+			vTaskDelay(SYSTEM_DEALY);
+		} while ( finished != TRUE );
+
+		error = setStopFlag(FALSE_8BIT);
+		CMP_AND_RETURN(error, 0, -1);
+	}
 
 	return 0;
 }
 
 int resumeAction()
 {
-	auto_thumbnail_creation = TRUE_8BIT;
+	if (previus_state)
+	{
+		auto_thumbnail_creation = previus_state;
 
-	int error = setStopFlag(FALSE_8BIT);
-	CMP_AND_RETURN(error, 0, -1);
+		int error = setStopFlag(FALSE_8BIT);
+		CMP_AND_RETURN(error, 0, -1);
+	}
 
 	return 0;
 }
 
 void handleErrors(int error)
 {
-	if (error != 0)
+	if (error != 0 && auto_thumbnail_creation)
 		WriteErrorLog(error, SYSTEM_PAYLOAD_AUTO_HANDLING, (uint32_t)-1);
 }
