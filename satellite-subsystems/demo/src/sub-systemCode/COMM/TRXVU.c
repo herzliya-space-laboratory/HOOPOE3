@@ -231,7 +231,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 
 				if (FS_result != FS_SUCCSESS && FS_result != FS_BUFFER_OVERFLOW)
 				{
-					WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_READ_FS, (int)FS_result);
+					WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_READ_FS, SYSTEM_TRXVU, (int)FS_result);
 					break;
 				}
 				else if (FS_result == FS_BUFFER_OVERFLOW)
@@ -300,7 +300,7 @@ void Dump_task(void *arg)
 	{
 		int f_error = f_managed_enterFS();
 		if (f_error != 0)
-			WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_ENTER_FS, (int)f_error);
+			WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_ENTER_FS, SYSTEM_TRXVU, (int)f_error);
 		check_int("enter FS, dump task", f_error);// task enter 5
 		set_system_state(dump_param, SWITCH_ON);
 	}

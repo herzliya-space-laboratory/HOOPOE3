@@ -17,6 +17,8 @@
 #include "../../TRXVU.h"
 #include "../../Ants.h"
 
+#include "../../Global/logger.h"
+
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
 void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
@@ -108,6 +110,7 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_WRITE_FAIL;
 		 break;
 	default:
+		WriteErrorLog(LOG_ERR_DELETE_TM, SYSTEM_OBC, errorRes);
 		*err = ERR_FAIL;
 		break;
 	}
@@ -285,10 +288,12 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 	// 1. converting to time_unix
 	time_unix new_time = BigEnE_raw_to_uInt(cmd.data);
 	// 2. update time on satellite
-	if (Time_setUnixEpoch(new_time))
+	int error = Time_setUnixEpoch(new_time);
+	if (error)
 	{
 		printf("fuckeddddddd\n");
 		printf("I gues we need to stay on this time forever\n");
+		WriteErrorLog(LOG_ERR_SET_TIME, SYSTEM_OBC, error);
 		*type = ACK_SYSTEM;
 		*err = ERR_FAIL;
 	}

@@ -16,6 +16,7 @@
 
 #include "freertosExtended.h"
 #include "OnlineTM.h"
+#include "logger.h"
 
 xSemaphoreHandle xSD_state;
 FS_HK SD_A;
@@ -77,6 +78,10 @@ int HK_collect_FS_A(unsigned char index, void* param)
 		xSemaphoreGive_extended(xSD_state);
 		return 0;
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SEMAPHORE_SD, SYSTEM_OBC, -1);
+	}
 	return -1;
 }
 int HK_collect_FS_B(unsigned char index, void* param)
@@ -87,6 +92,10 @@ int HK_collect_FS_B(unsigned char index, void* param)
 		memcpy(param, SD_B.raw, FS_HK_SIZE);
 		xSemaphoreGive_extended(xSD_state);
 		return 0;
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SEMAPHORE_SD, SYSTEM_OBC, -1);
 	}
 	return -1;
 }
@@ -497,10 +506,10 @@ void save_onlineTM_logic()
 		else if (offline_TM_list[i].period + offline_TM_list[i].lastSave <= time_now)
 		{
 			i_error = save_onlineTM_param(offline_TM_list[i].type);
-			if (i_error)
-				printf("error in collecting TM: %d, ERROR: %d\n", offline_TM_list[i].type, i_error);
-			else
+			if (i_error == 0)
 				offline_TM_list[i].lastSave = time_now;
+			else if (i_error != COLLECTING_HK_CODE_ERROR)
+				WriteErrorLog(LOG_ERR_SAVE_HK, SYSTEM_OBC, i_error);
 		}
 	}
 }
@@ -525,6 +534,10 @@ void updateSD_state()
 		SD_B.fields.total = parameter.total;
 		SD_B.fields.used = parameter.used;*/
 		xSemaphoreGive_extended(xSD_state);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SEMAPHORE_SD, SYSTEM_OBC, -1);
 	}
 }
 

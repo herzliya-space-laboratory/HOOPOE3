@@ -100,26 +100,34 @@ void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 int SP_HK_collect(SP_HK* hk_out)
 {
 	if (get_system_state(cam_param))
-		return -33;
+		return COLLECTING_HK_CODE_ERROR;
 	int errors[NUMBER_OF_SOLAR_PANNELS];
 	int error_combine = 1;
-	IsisSolarPanelv2_wakeup();
+	int error = IsisSolarPanelv2_wakeup();
+	if (error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_SP_WAKE, SYSTEM_EPS, error);
 	int32_t paneltemp;
 	uint8_t status = 0;
 	for(int i = 0; i < NUMBER_OF_SOLAR_PANNELS; i++)
 	{
 		errors[i] = IsisSolarPanelv2_getTemperature(i, &paneltemp, &status);
+		if (errors[i])
+			WriteErrorLog((log_errors)LOG_ERR_EPS_SP_WAKE, SYSTEM_EPS, errors[i]);
 		check_int("EPS_HK_collect, IsisSolarPanelv2_getTemperature", errors[i]);
 		hk_out->fields.SP_temp[i] = paneltemp;
 		error_combine &= errors[i];
 	}
-	IsisSolarPanelv2_sleep();
+	error = IsisSolarPanelv2_sleep();
+	if (error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_SP_SLEEP, SYSTEM_EPS, error);
 	return error_combine;
 }
 int EPS_HK_collect(EPS_HK* hk_out)
 {
 	gom_eps_hk_t gom_hk;
 	int error = GomEpsGetHkData_general(0, &gom_hk);
+	if (error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_GET_TLM, SYSTEM_EPS, error);
 	check_int("EPS_HK_collect, GomEpsGetHkData_param", error);
 
 	hk_out->fields.photoVoltaic3 = gom_hk.fields.vboost[2];
@@ -157,7 +165,7 @@ int EPS_HK_collect(EPS_HK* hk_out)
 int CAM_HK_collect(CAM_HK* hk_out)
 {
 	if (get_system_state(cam_param) == SWITCH_OFF)
-		return -1;
+		return COLLECTING_HK_CODE_ERROR;
 	hk_out->fields.VoltageInput5V = (voltage_t)(GECKO_GetVoltageInput5V() * 1000);
 	hk_out->fields.CurrentInput5V = (current_t)(GECKO_GetCurrentInput5V() * 1000);
 	hk_out->fields.VoltageFPGA1V = (voltage_t)(GECKO_GetVoltageFPGA1V() * 1000);
@@ -193,6 +201,8 @@ int COMM_HK_collect(COMM_HK* hk_out)
 	ISIStrxvuRxTelemetry_revC telemetry_Rx;
 	int error_Rx = -1, error_antA = -1, error_antB = -1, error_Tx = -1;
 	error_Rx = IsisTrxvu_rcGetTelemetryAll_revC(0, &telemetry_Rx);
+	if (error_Rx)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_GET_TLM, SYSTEM_TRXVU, error_Rx);
 	check_int("COMM_HK_collect, IsisTrxvu_rcGetTelemetryAll_revC", error_Rx);
 	hk_out->fields.bus_vol = telemetry_Rx.fields.bus_volt;
 	hk_out->fields.total_curr = telemetry_Rx.fields.total_current;
@@ -202,13 +212,19 @@ int COMM_HK_collect(COMM_HK* hk_out)
 
 	ISIStrxvuTxTelemetry_revC telemetry_Tx;
 	error_Tx = IsisTrxvu_tcGetTelemetryAll_revC(0, &telemetry_Tx);
+	if (error_Tx)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_GET_TLM, SYSTEM_TRXVU, error_Tx);
 	hk_out->fields.tx_fwrdpwr = telemetry_Tx.fields.tx_fwrdpwr;
 	hk_out->fields.tx_reflpwr = telemetry_Tx.fields.tx_reflpwr;
 #ifdef ANTS_ON
 	error_antA = IsisAntS_getTemperature(0, isisants_sideA, &(hk_out->fields.ant_A_temp));
+	if (error_antA)
+		WriteErrorLog((log_errors)LOG_ERR_ANTS_GET_TLM_A, SYSTEM_ANTS, error_antA);
 	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antA);
 
 	error_antB = IsisAntS_getTemperature(0, isisants_sideB, &(hk_out->fields.ant_B_temp));
+	if (error_antB)
+		WriteErrorLog((log_errors)LOG_ERR_ANTS_GET_TLM_B, SYSTEM_ANTS, error_antB);
 	check_int("COMM_HK_collect ,IsisAntS_getTemperature", error_antB);
 #endif
 
@@ -221,7 +237,10 @@ int FS_HK_collect(FS_HK* hk_out, int SD_num)
 	F_SPACE parameter;
 	int error = f_getfreespace(SD_num, &parameter);
 	if (error != 0)
+	{
+		WriteErrorLog(LOG_ERR_READ_SD_TLM, SYSTEM_OBC, error);
 		return error;
+	}
 	hk_out->fields.bad = parameter.bad;
 	hk_out->fields.free = parameter.free;
 	hk_out->fields.total = parameter.total;

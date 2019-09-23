@@ -10,6 +10,8 @@
 
 #include <hal/Storage/FRAM.h>
 
+#include "../../Global/logger.h"
+
 #include "COMM_CMD.h"
 #include "../../TRXVU.h"
 #include "../../COMM/APRS.h"
@@ -120,6 +122,8 @@ void cmd_change_trans_rssi(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	change_trans_RSSI(cmd.data);
 	int error = FRAM_write_exte(cmd.data, TRANSPONDER_RSSI_ADDR, 2);
+	if (error != 0)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_TRANSPONDER_FRAM_WRITE, SYSTEM_TRXVU, error);
 	check_int("cmd_change_trans_rssi, FRAM_write", error);
 	if (error == 0)
 	{
@@ -172,15 +176,20 @@ void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 	}
 	//2. update time in FRAM
-	else if (FRAM_writeAndVerify_exte(&cmd.data[0], BEACON_TIME_ADDR, 1))
-	{
-		*type = ACK_FRAM;
-		*err = ERR_WRITE_FAIL;
-	}
 	else
 	{
-		*type = ACK_NOTHING;
-		*err = ERR_SUCCESS;
+		int error = FRAM_writeAndVerify_exte(&cmd.data[0], BEACON_TIME_ADDR, 1);
+		if (error == 0)
+		{
+			*type = ACK_NOTHING;
+			*err = ERR_SUCCESS;
+		}
+		else
+		{
+		    WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, error);
+		    *type = ACK_FRAM;
+		    *err = ERR_WRITE_FAIL;
+		}
 	}
 }
 void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
@@ -210,6 +219,7 @@ void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
 		check_int("FRAM_write, cmd_change_def_bit_rate", error);
 		if (error)
 		{
+			WriteErrorLog(LOG_ERR_FRAM_WRITE, SYSTEM_TRXVU, error);
 			*type = ACK_FRAM;
 			*err = ERR_WRITE_FAIL;
 			return;
@@ -218,6 +228,7 @@ void cmd_change_def_bit_rate(Ack_type* type, ERR_type* err, TC_spl cmd)
 		check_int("IsisTrxvu_tcSetAx25Bitrate, cmd_change_def_bit_rate", error);
 		if (error)
 		{
+			WriteErrorLog((log_errors)LOG_ERR_COMM_SET_BIT_RATE, SYSTEM_TRXVU, error);
 			*type = ACK_TRXVU;
 			*err = ERR_DRIVER;
 			return;
