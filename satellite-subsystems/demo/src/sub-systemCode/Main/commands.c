@@ -36,6 +36,8 @@
 #include "CMD/payload_CMD.h"
 #include "CMD/ADCS_CMD.h"
 
+#include "../Global/logger.h"
+
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
@@ -85,6 +87,8 @@ int init_command()
 		return 1;
 	// 1. create semaphore
 	vSemaphoreCreateBinary(xCTE);
+	if (xCTE == NULL)
+		WriteErrorLog(LOG_ERR_SEMAPHORE_CMD, SYSTEM_OBC, -1);
 	// 2. set place in list to 0
 	place_in_list = 0;
 	// 3. allocate memory for data in command
@@ -115,6 +119,10 @@ int add_command(TC_spl command)
 		// 5. return semaphore
 		error = xSemaphoreGive_extended(xCTE);
 		check_portBASE_TYPE("cold not return xCTE in add_command", error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SEMAPHORE_CMD, SYSTEM_OBC, -1);
 	}
 
 	return 0;
@@ -147,6 +155,10 @@ int get_command(TC_spl* command)
 		// 6. return semaphore
 		error = xSemaphoreGive_extended(xCTE);
 		check_portBASE_TYPE("get_command, xSemaphoreGive_extended(xCTE)", error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SEMAPHORE_CMD, SYSTEM_OBC, -1);
 	}
 	return 0;
 }

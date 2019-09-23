@@ -10,6 +10,8 @@
 
 #include "EPS_CMD.h"
 
+#include "../../Global/logger.h"
+
 void cmd_upload_volt_logic(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	if (cmd.length != 8 * 2)

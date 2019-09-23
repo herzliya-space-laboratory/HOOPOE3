@@ -16,6 +16,8 @@
 #include "../../COMM/DelayedCommand_list.h"
 #include "../../Ants.h"
 
+#include "../../Global/logger.h"
+
 void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err)
 {
 	reset_delayCommand(FALSE);

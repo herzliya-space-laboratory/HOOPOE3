@@ -38,6 +38,8 @@
 #define FS_HK_FILE_NAME "FSf"
 #define ADCS_HK_FILE_NAME "ADCf"// ADCS
 
+#define COLLECTING_HK_CODE_ERROR 333
+
 typedef enum HK_dump_types{
 	ACK_T = 0,
 	log_files_events_T = 1,

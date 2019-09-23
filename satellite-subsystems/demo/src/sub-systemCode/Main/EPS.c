@@ -66,12 +66,16 @@ Boolean8bit  get_shut_ADCS()
 {
 	Boolean8bit mode;
 	int error = FRAM_read_exte(&mode, SHUT_ADCS_ADDR, 1);
+	if (error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_FRAM_OVERRIDE_VALUE, SYSTEM_EPS, error);
 	check_int("shut_ADCS, FRAM_read", error);
 	return mode;
 }
 void shut_ADCS(Boolean mode)
 {
 	int error = FRAM_write_exte((byte*)&mode, SHUT_ADCS_ADDR, 1);
+	if (error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_FRAM_OVERRIDE_VALUE, SYSTEM_EPS, error);
 	check_int("shut_ADCS, FRAM_write", error);
 }
 
@@ -79,12 +83,16 @@ Boolean8bit  get_shut_CAM()
 {
 	Boolean8bit mode;
 	int error = FRAM_read_exte(&mode, SHUT_CAM_ADDR, 1);
+	if (error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_FRAM_OVERRIDE_VALUE, SYSTEM_EPS, error);
 	check_int("shut_CAM, FRAM_read", error);
 	return mode;
 }
 void shut_CAM(Boolean mode)
 {
 	int error = FRAM_write_exte((byte*)&mode, SHUT_CAM_ADDR, 1);
+	if (error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_FRAM_OVERRIDE_VALUE, SYSTEM_EPS, error);
 	check_int("shut_CAM, FRAM_write", error);
 }
 
@@ -100,9 +108,13 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 	if (CHECK_CHANNEL_CHANGE(newState, eps_tlm))
 	{
 		i_error = GomEpsSetOutput(0, switches_states);
+		if (i_error)
+			WriteErrorLog((log_errors)LOG_ERR_EPS_UPDATE_POWER_LINES, SYSTEM_EPS, i_error);
 		check_int("can't set channel state in EPS_Conditioning", i_error);
 
 		i_error = FRAM_write_exte(&switches_states.raw, EPS_STATES_ADDR, 1);
+		if (i_error)
+			WriteErrorLog((log_errors)LOG_ERR_EPS_WRITE_STATE, SYSTEM_EPS, i_error);
 		check_int("EPS_Conditioning, FRAM_write", i_error);
 
 		return TRUE;
@@ -187,14 +199,22 @@ void reset_FRAM_EPS()
 	//reset EPS_STATES_ADDR
 	byte data = 0;
 	i_error = FRAM_write_exte(&data, EPS_STATES_ADDR, 1);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_RESET_FRAM, SYSTEM_EPS, i_error);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	data = SWITCH_OFF;
 	i_error = FRAM_write_exte(&data, SHUT_ADCS_ADDR, 1);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_RESET_FRAM, SYSTEM_EPS, i_error);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	i_error = FRAM_write_exte(&data, SHUT_CAM_ADDR, 1);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_RESET_FRAM, SYSTEM_EPS, i_error);
 	check_int("reset_FRAM_EPS, FRAM_write", i_error);
 	alpha = EPS_ALPHA_DEFFAULT_VALUE;
 	i_error = FRAM_write_exte((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_RESET_FRAM, SYSTEM_EPS, i_error);
 	check_int("can't FRAM_write_exte(EPS_ALPHA_ADDR), reset_FRAM_EPS", i_error);
 }
 
@@ -206,12 +226,18 @@ void reset_EPS_voltages()
 	voltage_t comm_voltage  = 7250;
 
 	i_error = FRAM_write_exte((byte*)voltages, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_RESET_FRAM, SYSTEM_EPS, i_error);
 	check_int("reset_FRAM_EPS, FRAM_read", i_error);
 
 	i_error = FRAM_write_exte((byte*)&comm_voltage, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_RESET_FRAM, SYSTEM_EPS, i_error);
 	check_int("reset_FRAM_EPS, FRAM_read", i_error);
 
 	i_error = FRAM_write_exte((byte*)&comm_voltage, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_RESET_FRAM, SYSTEM_EPS, i_error);
 	check_int("reset_FRAM_EPS, FRAM_read", i_error);
 }
 
@@ -243,6 +269,8 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read_exte((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_READ_VOLTAGE_TABLE, SYSTEM_EPS, i_error);
 	check_int("FRAM_read, EPS_Init", i_error);
 
 
@@ -263,6 +291,8 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 {
 	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 	int i_error = FRAM_read_exte((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_READ_VOLTAGE_TABLE, SYSTEM_EPS, i_error);
 	check_int("FRAM_read, EPS_Init", i_error);
 
 
@@ -311,10 +341,15 @@ void EPS_Conditioning()
 	int i_error = GomEpsGetHkData_general(0, &eps_tlm);
 	check_int("can't get gom_eps_hk_t for vBatt in EPS_Conditioning", i_error);
 	if (i_error != 0)
+	{
+		WriteErrorLog((log_errors)LOG_ERR_EPS_GET_TLM, SYSTEM_EPS, i_error);
 		return;
+	}
 	set_Vbatt(eps_tlm.fields.vbatt);
 
 	i_error = FRAM_read_exte((byte*)&alpha, EPS_ALPHA_ADDR, 4);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_FRAM_ALPHA, SYSTEM_EPS, i_error);
 	check_int("can't FRAM_read_exte(EPS_ALPHA_ADDR) for vBatt in EPS_Conditioning", i_error);
 	if (!CHECK_EPS_ALPHA_VALUE(alpha))
 	{

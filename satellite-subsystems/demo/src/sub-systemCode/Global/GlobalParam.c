@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "Global.h"
+#include "logger.h"
 #include "GlobalParam.h"
 
 #define TEMP_CALIBRATION		100
@@ -46,6 +47,7 @@ int init_GP()
 	//2. check that the semaphores created succefully
 	if(xCGP_semaphore == NULL)
 	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 		return 1;
 	}
 	//3. read the system state before the restart
@@ -158,6 +160,10 @@ Boolean get_system_state(systems_state_parameters param)
 		portBASE_TYPE lu_check = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCST_semaphore in get_system_state", lu_check);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 
@@ -226,6 +232,10 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCST_semaphore in set_system_state", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 
 systems_state get_systems_state_param()
@@ -236,6 +246,10 @@ systems_state get_systems_state_param()
 		return_value = current_global_param.state;
 		portBASE_TYPE lu_check = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCST_semaphore in get_system_state", lu_check);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 	return return_value;
 }
@@ -281,6 +295,10 @@ void get_current_global_param(global_param* param_out)
 		portBASE_TYPE lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_current_global_param", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 //	CGP-> Vbatt
 void set_Vbatt(voltage_t param)
@@ -292,7 +310,10 @@ void set_Vbatt(voltage_t param)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_Vbatt_previous", lu_error);
 	}
-
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 voltage_t get_Vbatt()
 {
@@ -303,6 +324,10 @@ voltage_t get_Vbatt()
 		return_value = current_global_param.Vbatt;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_Vbatt", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 	return return_value;
 }
@@ -317,6 +342,10 @@ current_t get_curBat()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_curBat(current_t param)
@@ -327,6 +356,10 @@ void set_curBat(current_t param)
 		current_global_param.curBat = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> cur3V3
@@ -340,6 +373,10 @@ current_t get_cur3V3()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur3V3", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_cur3V3(current_t param)
@@ -350,6 +387,10 @@ void set_cur3V3(current_t param)
 		current_global_param.cur3V3 = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> cur5V
@@ -363,6 +404,10 @@ current_t get_cur5V()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_cur5V(current_t param)
@@ -373,6 +418,10 @@ void set_cur5V(current_t param)
 		current_global_param.cur3V3 = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> tempComm_LO
@@ -386,6 +435,10 @@ temp_t get_tempComm_LO()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_tempComm_LO(unsigned short param)
@@ -396,6 +449,10 @@ void set_tempComm_LO(unsigned short param)
 		current_global_param.tempComm_LO = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> tempComm_PA
@@ -409,6 +466,10 @@ temp_t get_tempComm_PA()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_tempComm_PA(unsigned short param)
@@ -419,6 +480,10 @@ void set_tempComm_PA(unsigned short param)
 		current_global_param.tempComm_PA = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> tempEPS
@@ -437,6 +502,10 @@ temp_t get_tempEPS(int index)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_tempEPS(int index, short param)
@@ -452,6 +521,10 @@ void set_tempEPS(int index, short param)
 		current_global_param.tempEPS[index] = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> tempBatt
@@ -470,6 +543,10 @@ temp_t get_tempBatt(int index)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_tempBatt(int index, short param)
@@ -486,6 +563,10 @@ void set_tempBatt(int index, short param)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 // CGP-> RxDoppler
 unsigned short get_RxDoppler()
@@ -498,6 +579,10 @@ unsigned short get_RxDoppler()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_RxDoppler", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_RxDoppler(unsigned short param)
@@ -508,6 +593,10 @@ void set_RxDoppler(unsigned short param)
 		current_global_param.RxDoppler = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_RxDoppler", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> RxRSSI
@@ -521,6 +610,10 @@ unsigned short get_RxRSSI()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_RxRSSI", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_RxRSSI(unsigned short param)
@@ -531,6 +624,10 @@ void set_RxRSSI(unsigned short param)
 		current_global_param.RxRSSI = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_RxRSSI", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> TxRefl
@@ -544,6 +641,10 @@ unsigned short get_TxRefl()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_TxRefl", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_TxRefl(unsigned short param)
@@ -554,6 +655,10 @@ void set_TxRefl(unsigned short param)
 		current_global_param.TxRefl = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_TxRefl", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> TxFrow
@@ -567,6 +672,10 @@ unsigned short get_TxForw()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_TxForw", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_TxForw(unsigned short param)
@@ -577,6 +686,10 @@ void set_TxForw(unsigned short param)
 		current_global_param.TxForw = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_TxForw", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> Attitude
@@ -595,6 +708,10 @@ short get_Attitude(int index)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_Attitude(int index, short param)
@@ -611,6 +728,10 @@ void set_Attitude(int index, short param)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 // CGP-> numOfPics
 uint8_t get_numOfPics()
@@ -623,6 +744,10 @@ uint8_t get_numOfPics()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_numOfPics", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_numOfPics(uint8_t param)
@@ -633,6 +758,10 @@ void set_numOfPics(uint8_t param)
 		current_global_param.numOfPics = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_numOfPics", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> numOfAPRS
@@ -646,6 +775,10 @@ uint8_t get_numOfAPRS()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_numOfAPRS", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_numOfAPRS(uint8_t param)
@@ -656,6 +789,10 @@ void set_numOfAPRS(uint8_t param)
 		current_global_param.numOfAPRS = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_numOfAPRS", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> numOfDelayedCommand
@@ -669,6 +806,10 @@ uint8_t get_numOfDelayedCommand()
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_numOfDelayedCommand", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 	return return_value;
 }
 void set_numOfDelayedCommand(uint8_t param)
@@ -679,6 +820,10 @@ void set_numOfDelayedCommand(uint8_t param)
 		current_global_param.numOfDelayedCommand = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_numOfDelayedCommand", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
 // CGP-> numOfResets
@@ -691,6 +836,10 @@ void set_numOfResets(unsigned int num)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_numOfResets", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 unsigned int get_numOfResets()
 {
@@ -701,6 +850,10 @@ unsigned int get_numOfResets()
 		num = current_global_param.numOfResets;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_numOfResets", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 	return num;
 }
@@ -714,6 +867,10 @@ void set_lastReset(time_unix param)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 time_unix get_lastReset()
 {
@@ -724,6 +881,10 @@ time_unix get_lastReset()
 		return_value = current_global_param.lastReset;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 	return return_value;
 }
@@ -737,6 +898,10 @@ void set_ground_conn(Boolean param)
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_curBat", lu_error);
 	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
+	}
 }
 Boolean get_ground_conn()
 {
@@ -747,6 +912,10 @@ Boolean get_ground_conn()
 		return_value = current_global_param.ground_conn;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_cur5V", lu_error);
+	}
+	else
+	{
+		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 	return return_value;
 }

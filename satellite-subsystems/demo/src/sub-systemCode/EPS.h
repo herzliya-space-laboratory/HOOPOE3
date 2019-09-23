@@ -36,7 +36,11 @@
 
 #define EPS_ROUNDING_FACTOR	5
 
+#ifdef TESTING
 #define EPS_ALPHA_DEFFAULT_VALUE 0.3
+#else
+#define EPS_ALPHA_DEFFAULT_VALUE 0.8
+#endif
 
 #define CHECK_EPS_ALPHA_VALUE(alpha) (alpha < 1 && alpha > 0)
 
