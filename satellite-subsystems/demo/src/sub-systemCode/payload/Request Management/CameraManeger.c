@@ -380,9 +380,6 @@ void act_upon_request(Camera_Request request)
 		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
 		break;
 
-	case (cam_Request_id_t)70:
-		break;
-
 	default:
 		return;
 		break;
