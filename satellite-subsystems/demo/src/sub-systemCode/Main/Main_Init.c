@@ -198,7 +198,7 @@ int InitSubsystems()
 
 	InitializeFS(activation);
 
-	//CUFManageRestart();
+	CUFManageRestart(TRUE); //test - true value is activation
 
 	EPS_Init();
 

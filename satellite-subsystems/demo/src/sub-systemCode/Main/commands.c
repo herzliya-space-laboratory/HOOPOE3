@@ -506,34 +506,34 @@ void AUC_CUF(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	case 0:
+	case CUF_HEADER_ST:
 		headerHandle(decode);
 		break;
-	case 1:
+	case CUF_ARRAY_ST:
 		addToArray(decode, castCharPointerToInt(decode.data));
 		break;
-	case 2:
+	case CUF_INTEGRATE_ST:
 		startCUFintegration();
 		break;
-	case 3:
+	case CUF_EXECUTE_ST:
 		ExecuteCUF((char*)decode.data);
 		break;
-	case 4:
+	case CUF_SAVEBACKUP_ST:
 		saveBackup();
 		break;
-	case 5:
+	case CUF_LOADBACKUP_ST:
 		loadBackup();
 		break;
-	case 6:
+	case CUF_REMOVEFILES_ST:
 		removeFiles();
 		break;
-	case 7:
+	case CUF_REMOVE_ST:
 		RemoveCUF((char*)decode.data);
 		break;
-	case 8:
+	case CUF_DISABLE_ST:
 		DisableCUF((char*)decode.data);
 		break;
-	case 9:
+	case CUF_ENABLE_ST:
 		EnableCUF((char*)decode.data);
 		break;
 	default:

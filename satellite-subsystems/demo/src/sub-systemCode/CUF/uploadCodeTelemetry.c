@@ -30,23 +30,35 @@ void initializeUpload()
 void removeFiles()
 {
 	//WARNING DELETE OPENED FILE what happend if i delete not existed file??
-	F_FILE *fp;
-	fp = f_open(fbackupName,"w+");
+	F_FILE *fp = NULL;
+	f_managed_open(fbackupName,"w+",&fp);
 	if (fp != NULL)
 		f_delete(fbackupName);
 	else
 		saveAck("Failed to open file on removeFiles codeArray");
 
-	fp = f_open(fboolBackupName,"w+");
+	f_managed_open(fboolBackupName,"w+",&fp);
 	if (fp != NULL)
 		f_delete(fboolBackupName);
 	else
 	 	saveAck("Failed to open file on removeFiles boolArray");
-	fp = f_open(fheaderName, "w+");
+	f_managed_open(fheaderName, "w+", &fp);
 	if (fp != NULL)
 		f_delete(fheaderName);
 	else
 		saveAck("Failed to open file on removeFiles headerFile");
+	f_delete(PERCUFSAVEFILENAME);
+	F_FIND find;
+	if (!f_findfirst("A:/*.*",&find))
+	{
+		do
+		{
+			if (strstr(find.filename, "cuf") != NULL || strstr(find.filename, "CUF") != NULL)
+				f_delete(find.filename);
+			vTaskDelay(1);
+
+		} while (!f_findnext(&find));
+	}
 }
 
 void loadBackup()
@@ -56,25 +68,25 @@ void loadBackup()
 	{
 		uploadCodeArry[i] = 0;
 	}
-	F_FILE *fp;
-	fp = f_open(fbackupName,"r");
+	F_FILE *fp = NULL;
+	f_managed_open(fbackupName,"r",&fp);
 	if (fp != NULL)
 		f_read(uploadCodeArry,uploadCodeLength,1,fp);//Read to array
 	else
 		saveAck("Failed to open file on loadBackup boolArray");
-	f_close(fp);
+	f_managed_close(&fp);
 
 	i = 0;
 	for( ; i < boolArrayLength;i++)
 	{
 		uploadBoolArray[i] = 0;
 	}
-	fp = f_open(fboolBackupName,"r");
+	f_managed_open(fboolBackupName,"r",&fp);
 	if (fp != NULL)
 		f_read(uploadBoolArray, boolArrayLength, 1, fp);
 	else
 		saveAck("Failed to open file on loadBackup boolArray");
-	f_close(fp);
+	f_managed_close(&fp);
 }
 
 void addToArray(TC_spl decode, int framePlace)
@@ -86,7 +98,6 @@ void addToArray(TC_spl decode, int framePlace)
 		uploadCodeArry[framePlace*frameLength+i-1] = decode.data[i+3];//!!may not be used!!Upload code array (sizeof(int))*2)<is used to pass the frame parameters data
 	}
 	saveAck("Ack(wrote to array)");
-//	printf("Now array is \n %s", uploadCodeArry);
 	saveAck("Finished!!");
 	uploadBoolArray[framePlace] = 1;
 	TRX_sendFrame((byte*)uploadBoolArray, (uint8_t)boolArrayLength);
@@ -95,8 +106,8 @@ void addToArray(TC_spl decode, int framePlace)
 void headerHandle(TC_spl decode)
 {
 	initializeUpload();
-	F_FILE *fp;
-	fp = f_open(fheaderName, "w+");
+	F_FILE *fp = NULL;
+	f_managed_open(fheaderName, "w+", &fp);
 	if (fp != NULL)
 	{
 		int charWrote = f_write(decode.data, 1, decode.length, fp);
@@ -107,40 +118,40 @@ void headerHandle(TC_spl decode)
 	}
 	else
 		saveAck("File wont open headerHandle header");
-	f_close(fp);
+	f_managed_close(&fp);
 }
 
 void startCUFintegration()
 {
-	unsigned char settings[20];
-	F_FILE *fp = f_open(fheaderName, "r");
+	unsigned char settings[19];
+	F_FILE *fp = NULL;
+	f_managed_open(fheaderName, "r", &fp);
 	if (fp != NULL)
-		f_read(settings, 19, 1, fp);
+		f_read(settings, 18, 1, fp);
 	else
 		saveAck("File wont open launch header");
 	int error = f_getlasterror();
 	printf("%d", error);
-	f_close(fp);
-	settings[19] = 0;
+	f_managed_close(&fp);
+	settings[18] = 0;
 	printf("Setting: %s\n", settings);
 	//00-00-00-00-05-00-00-09-00-00-00-00-00-10-0a-ac-aa-aa-aa-aa-aa
-	if (settings[0] <= 2 && settings[1] <= 2 && settings[2] <= 2)
+	if (settings[0] <= 2 && settings[1] <= 2)
 	{
-		printf("Name: %s\n", (char*)(settings+11));
-		printf("SSH: %u\n", castCharPointerToInt(settings+7));
-		printf("Length: %u\n", castCharPointerToInt(settings+3));
+		printf("Name: %s\n", (char*)(settings+10));
+		printf("SSH: %u\n", castCharPointerToInt(settings+6));
+		printf("Length: %u\n", castCharPointerToInt(settings+2));
 		printf("IsTemp: %d\n", settings[0]);
-		printf("isTask: %d\n", settings[1]);
-		printf("disabled: %d\n", settings[2]);
-		IntegrateCUF((char*)(settings+11), castCharArrayToIntArray(uploadCodeArry, castCharPointerToInt(settings+3)*4), castCharPointerToInt(settings+3), GenerateSSH(uploadCodeArry)/*castCharPointerToInt(settings+7)*/, settings[0], settings[1], settings[2]);
+		printf("disabled: %d\n", settings[1]);
+		IntegrateCUF((char*)(settings+10), (int*)castCharArrayToIntArray(uploadCodeArry, castCharPointerToInt(settings+2)*4), castCharPointerToInt(settings+2), castCharPointerToInt(settings+6), settings[0], settings[1]);
 	}
 }
 
 void saveBackup()
 {
 	printf("SAVE BACKUP STARTED"); //----------------------DEBUG
-	F_FILE *fp;
-	fp = f_open(fbackupName, "w+");//The name with its number
+	F_FILE *fp = NULL;
+	f_managed_open(fbackupName, "w+", &fp);//The name with its number
 	int error = f_getlasterror();
 	printf("%d\n", error);
    	if (fp != NULL)
@@ -153,14 +164,14 @@ void saveBackup()
    	}
    	else
    		saveAck("File wont open saveBackup code");
-   	f_close(fp);
+   	f_managed_close(&fp);
 
-   	fp = f_open(fboolBackupName, "w+");
+   	f_managed_open(fboolBackupName, "w+", &fp);
    	if (fp != NULL)
    		f_write(uploadBoolArray, 1, boolArrayLength, fp);
    	else
    		saveAck("File wont open saveBackup boolArray");
-   	f_close(fp);
+   	f_managed_close(&fp);
 }
 
 void saveAck(char* err)

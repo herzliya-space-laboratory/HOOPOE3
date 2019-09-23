@@ -10,17 +10,15 @@
 
 #include "TLM_management.h"
 
-#define ERROR_LOG_FILENAME "error"
-#define EVENT_LOG_FILENAME "event"
+#define ERROR_LOG_FILENAME "Errors.log"
+#define EVENT_LOG_FILENAME "Events.log"
 
 #define EPS_LOG_OFFSET 0
 #define PAYLOAD_LOG_OFFSET 500
 #define TRANSPONDER_LOG_OFFSET 1000
 #define RESETS_LOG_OFFSET 1500
 #define ADCS_LOG_OFFSET 2000
-
-#define ERROR_LOG_FILENAME "error"
-#define EVENT_LOG_FILENAME "event"
+#define CUF_LOG_OFFSET 2500
 
 
 #define LOG_STRUCT_ELEMENT_SIZE sizeof(LogStruct)
@@ -104,6 +102,18 @@ typedef enum _log_errors{
 	LOG_ERR_GECKO_Erase_StartEraseERR = 162,
 	LOG_ERR_GECKO_Erase_TimeoutERR = 163,
 	LOG_ERR_GECKO_Erase_Error_ClearEraseDoneFlag = 164,
+	/*
+	 * CUF Errors
+	 */
+	CUF_GENERATE_SSH_FAIL = 165,
+	CUF_AUTHENTICATE_FAIL = 166,
+	CUF_SAVE_PERMINANTE_FAIL = 167,
+	CUF_LOAD_PERMINANTE_FAIL = 168,
+	CUF_UPDATE_PERMINANTE_FAIL = 169,
+	CUF_EXECUTE_FAIL = 170,
+	CUF_INTEGRATED_FAIL  = 171,
+	CUF_ENABLE_FAIL = 172,
+	CUF_DISABLE_FAIL = 173
 } log_errors;
 
 typedef enum _log_systems{
@@ -112,6 +122,7 @@ typedef enum _log_systems{
 	SYSTEM_PAYLOAD,
 	SYSTEM_OBC,
 	SYSTEM_ADCS,
+	SYSTEM_CUF
 } log_systems;
 
 typedef enum _log_payload{
@@ -158,6 +169,19 @@ typedef enum _log_transponder{
 	TRANSPONDER_DEACTIVATION
 } log_transponder;
 
+typedef enum _log_cuf
+{
+	CUF_EXECUTE_unauthenticated,
+	CUF_INTEGRATED_unauthenticated,
+	CUF_RESET_SUCCESSFULL,
+	CUF_RESET_THRESHOLD_MET,
+	CUF_REMOVED,
+	CUF_EXECUTED,
+	CUF_INTEGRATED,
+	CUF_DISABLED,
+	CUF_ENABLED,
+} log_cuf;
+
 /*
  * @brief writes an error in the error log
  * @param error number from enum
@@ -200,5 +224,12 @@ FileSystemResult WriteTransponderLog(log_transponder log_num, int info);
  * @param description of error
  */
 FileSystemResult WriteAdcsLog(log_adcs log_num, int info);
+
+/*
+ * @brief writes a CUF event in the event log
+ * @param number of event from enum
+ * @param description of error
+ */
+FileSystemResult WriteCUFLog(log_cuf log_num, int info);
 
 #endif /* LOGGER_H_ */

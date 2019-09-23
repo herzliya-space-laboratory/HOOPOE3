@@ -76,3 +76,11 @@ FileSystemResult WriteAdcsLog(log_adcs log_num, int info)
 	log.log_num = log_num + ADCS_LOG_OFFSET;
 	return WriteLog(&log, EVENT_LOG_FILENAME);
 }
+
+FileSystemResult WriteCUFLog(log_cuf log_num, int info)
+{
+	LogStruct log;
+	log.info = info;
+	log.log_num = log_num + ADCS_LOG_OFFSET;
+	return WriteLog(&log, EVENT_LOG_FILENAME);
+}
