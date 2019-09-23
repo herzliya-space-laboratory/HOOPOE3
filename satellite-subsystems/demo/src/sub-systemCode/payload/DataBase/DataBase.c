@@ -201,6 +201,69 @@ ImageDataBaseResult SearchDataBase_byMark(uint32_t database_current_address, Ima
 	return DataBaseIdNotFound;
 }
 
+ImageDataBaseResult SearchDataBase_forLatestMarkedImage(ImageMetadata* image_metadata)
+{
+	uint32_t image_address;
+	return SearchDataBase_byMark(DATABASE_FRAM_START, image_metadata, &image_address);
+}
+
+ImageDataBaseResult SearchDataBase_byTimeRange(time_unix lower_barrier, time_unix higher_barrier, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address)
+{
+	int result;
+
+	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
+	{
+		result = FRAM_read_exte((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
+		CMP_AND_RETURN(result, 0, DataBaseFramFail);
+
+		if ( (image_metadata->timestamp >= lower_barrier && image_metadata->timestamp <= higher_barrier) && image_metadata->cameraId != 0)
+		{
+			memcpy(image_address, &database_current_address, sizeof(uint32_t));
+			return DataBaseSuccess;
+		}
+		else
+		{
+			database_current_address += sizeof(ImageMetadata);
+		}
+	}
+
+	return DataBaseIdNotFound;
+}
+
+//---------------------------------------------------------------
+
+ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType reductionLevel);
+
+ImageDataBaseResult SearchDataBase_forImageFileType_byTimeRange(time_unix lower_barrier, time_unix higher_barrier, fileType file_type, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_starting_address)
+{
+	uint32_t database_current_address = database_starting_address;
+	ImageDataBaseResult error;
+	ImageMetadata current_image_metadata;
+	uint32_t current_image_address;
+
+	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
+	{
+		error = SearchDataBase_byTimeRange(lower_barrier, higher_barrier, &current_image_metadata, &current_image_address, database_current_address);
+		database_current_address = current_image_address += sizeof(ImageMetadata);
+
+		if (error == DataBaseSuccess)
+		{
+			if (checkForFileType(current_image_metadata, file_type) == DataBaseSuccess)
+			{
+				memcpy(image_metadata, &current_image_metadata, sizeof(ImageMetadata));
+				memcpy(image_address, &current_image_address, sizeof(uint32_t));
+				return DataBaseSuccess;
+			}
+		}
+		else
+		{
+			return error;
+		}
+	}
+
+	return DataBaseIdNotFound;
+}
+
 //---------------------------------------------------------------
 
 ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType reductionLevel)
@@ -553,65 +616,54 @@ ImageDataBaseResult clearImageDataBase(void)
 
 //---------------------------------------------------------------
 
-ImageDataBaseResult handleMarkedPictures(uint32_t nuberOfPicturesToBeHandled)
+ImageDataBaseResult handleMarkedPictures()
 {
 	ImageMetadata image_metadata;
 	uint32_t image_address;
 
-	uint32_t database_current_address = DATABASE_FRAM_START;
+	ImageDataBaseResult DB_result = SearchDataBase_byMark(DATABASE_FRAM_START, &image_metadata, &image_address);
 
-	ImageDataBaseResult DB_result;
+	Boolean already_transferred_raw = FALSE;
 
-	for (uint32_t i = 0; i < nuberOfPicturesToBeHandled; i++)
+	if ( DB_result == 0 )
 	{
-		DB_result = SearchDataBase_byMark(database_current_address, &image_metadata, &image_address);
-		database_current_address = image_address + sizeof(ImageMetadata);
-
-		if (database_current_address == DATABASE_FRAM_END)
-			break;
-
-		Boolean already_transferred_raw = FALSE;
-
-		if ( DB_result == 0 )
+		if (checkForFileType(image_metadata, raw) == DataBaseNotInSD)
 		{
-			if (checkForFileType(image_metadata, raw) == DataBaseNotInSD)
-			{
-				TurnOnGecko();
+			TurnOnGecko();
 
-				DB_result = transferImageToSD_withoutSearch(image_metadata.cameraId, image_address, image_metadata);
-				if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
-					return DB_result;
+			DB_result = transferImageToSD_withoutSearch(image_metadata.cameraId, image_address, image_metadata);
+			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
+				return DB_result;
 
-				TurnOffGecko();
+			TurnOffGecko();
 
-				vTaskDelay(DELAY);
-			}
-			else
-			{
-				already_transferred_raw = TRUE;
-			}
-
-			if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
-			{
-				DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, DEFAULT_REDUCTION_LEVEL, TRUE, image_address, image_metadata);
-				if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
-					return DB_result;
-
-				vTaskDelay(DELAY);
-			}
-
-			if (!already_transferred_raw)
-			{
-				DB_result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, raw, image_address, image_metadata);
-				DB_RETURN_ERROR(DB_result);
-			}
-
-			// making sure i wont lose the data written in the functions above to the FRAM:
-			FRAM_read_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
-
-			image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
-			FRAM_write_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+			vTaskDelay(DELAY);
 		}
+		else
+		{
+			already_transferred_raw = TRUE;
+		}
+
+		if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
+		{
+			DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, DEFAULT_REDUCTION_LEVEL, TRUE, image_address, image_metadata);
+			if (DB_result != DataBaseSuccess && DB_result != DataBasealreadyInSD)
+				return DB_result;
+
+			vTaskDelay(DELAY);
+		}
+
+		if (!already_transferred_raw)
+		{
+			DB_result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, raw, image_address, image_metadata);
+			DB_RETURN_ERROR(DB_result);
+		}
+
+		// making sure i wont lose the data written in the functions above to the FRAM:
+		FRAM_read_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+
+		image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
+		FRAM_write_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
 	}
 
 	return DataBaseSuccess;
@@ -728,6 +780,19 @@ ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, ui
 
 //---------------------------------------------------------------
 
+ImageDataBaseResult GetImageFileName_withSpecialParameters(ImageMetadata image_metadata, fileType fileType, char fileName[FILE_NAME_SIZE])
+{
+	if (fileType != bmp)
+	{
+		int result = checkForFileType(image_metadata, fileType);
+		DB_RETURN_ERROR(result);
+	}
+
+	getFileName(image_metadata.cameraId, fileType, fileName);
+
+	return DataBaseSuccess;
+}
+
 ImageDataBaseResult GetImageFileName(imageid id, fileType fileType, char fileName[FILE_NAME_SIZE])
 {
 	ImageMetadata image_metadata;
@@ -736,15 +801,7 @@ ImageDataBaseResult GetImageFileName(imageid id, fileType fileType, char fileNam
 	ImageDataBaseResult result = SearchDataBase_byID(id, &image_metadata, &image_address, DATABASE_FRAM_START);
 	DB_RETURN_ERROR(result);
 
-	if (fileType != bmp)
-	{
-		result = checkForFileType(image_metadata, fileType);
-		DB_RETURN_ERROR(result);
-	}
-
-	getFileName(id, fileType, fileName);
-
-	return DataBaseSuccess;
+	return GetImageFileName_withSpecialParameters(image_metadata, fileType, fileName);
 }
 
 //---------------------------------------------------------------
@@ -809,4 +866,20 @@ ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buff
 void setAutoThumbnailCreation(ImageDataBase database, Boolean8bit new_AutoThumbnailCreation)
 {
 	database->AutoThumbnailCreation = new_AutoThumbnailCreation;
+}
+
+//---------------------------------------------------------------
+
+void Gecko_TroubleShooter(ImageDataBaseResult error)
+{
+	Boolean should_reset_take = error > GECKO_Take_Success && error < GECKO_Read_Success;
+	Boolean should_reset_read = error > GECKO_Read_Success && error < GECKO_Erase_Success;
+	Boolean should_reset_erase = error > GECKO_Erase_Success && error <= GECKO_Erase_Error_ClearEraseDoneFlag;
+
+	Boolean should_reset = should_reset_take || should_reset_read || should_reset_erase;
+
+	if (should_reset)
+	{
+		TurnOffGecko();
+	}
 }

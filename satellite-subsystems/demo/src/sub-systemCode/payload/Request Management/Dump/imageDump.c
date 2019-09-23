@@ -28,6 +28,9 @@
 
 #include "imageDump.h"
 
+#define CameraDumpTask_Name ("Camera Dump Task")
+#define CameraDumpTask_StackDepth (8192)
+
 uint16_t chunk_width;
 uint16_t chunk_height;
 
@@ -43,7 +46,6 @@ ImageDataBaseResult readChunkDimentionsFromFRAM(void)
 
 	return DataBaseSuccess;
 }
-
 ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height)
 {
 	if (width * height > MAX_CHUNK_SIZE)
@@ -60,6 +62,39 @@ ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height)
 
 	CMP_AND_RETURN(chunk_width, width, DataBaseFail);
 	CMP_AND_RETURN(chunk_height, height, DataBaseFail);
+
+	return DataBaseSuccess;
+}
+
+ImageDataBaseResult getLastImageChunkIndex(ImageMetadata image_metadata, fileType comprasionType, uint16_t* chunk_index)
+{
+	uint32_t image_size = 0;
+
+	if (comprasionType == jpg)
+	{
+		char file_name[FILE_NAME_SIZE];
+		ImageDataBaseResult error = GetImageFileName(image_metadata.cameraId, comprasionType, file_name);
+		if (error != DataBaseSuccess)
+			return error;
+
+		F_FILE* current_file = NULL;
+		error = f_managed_open(file_name, "r", &current_file);
+		CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
+		image_size = f_filelength(file_name);
+		byte* buffer = imageBuffer;
+
+		error = f_managed_close(&current_file);
+		CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+	}
+	else
+	{
+		uint32_t compf = GetImageFactor(comprasionType);
+		image_size = IMAGE_SIZE / (compf * compf);
+	}
+
+	uint16_t last_index = ceil( (double)image_size / (chunk_width * chunk_height) );
+	memcpy(chunk_index, &last_index, sizeof(uint16_t));
 
 	return DataBaseSuccess;
 }
@@ -172,71 +207,6 @@ ImageDataBaseResult buildAndSend_chunck(pixel_t* chunk_data, unsigned short chun
 	return TRX_sendFrame(rawPacket, rawPacket_length);
 }
 
-/*
- * @brief		send image according to a bit field from ground
- * @param[in]	the id of the image in the database
- * @param[in]	the type of image requested
- * @param[in]	the id of the command who started the dump, just in case the dump stopped in the middle
- * @param[in]	the first chunk in the bit field array
- * @param[in]	the bit field. every bit represent a chunk, 1 means send this chunk 0 means skip this chunk.
- * 				the first bit is for @firstChunk_index.
- */
-ImageDataBaseResult bitField_imageDump(imageid image_id, fileType comprasionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[BIT_FIELD_SIZE])
-{
-	char file_name[FILE_NAME_SIZE];
-	GetImageFileName(image_id, comprasionType, file_name);
-
-	F_FILE *file = NULL;
-	int error = f_managed_open(file_name, "r", &file);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	uint32_t image_size = f_filelength(file_name);
-	byte* buffer = imageBuffer;
-
-	error = ReadFromFile(file, buffer, image_size, 1);
-	check_int("f_read in bitField_imageDump", error);
-
-	error = f_managed_close(&file);
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
-
-	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
-	{
-		if (getBitValueByIndex(packetsToSend, BIT_FIELD_SIZE, i))
-		{
-			error = GetChunkFromImage(chunk, chunk_width, chunk_height, i + firstChunk_index, imageBuffer, comprasionType, image_size);
-			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
-
-			error = buildAndSend_chunck(chunk, (unsigned short)(i + firstChunk_index), comprasionType, image_id, image_size, TRUE_8BIT);
-			CMP_AND_RETURN(error, 0, -1);
-
-			lookForRequestToDelete_dump(cmdId);
-			vTaskDelay(SYSTEM_DEALY);
-		}
-	}
-
-	return 0;
-}
-
-ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], uint32_t size)
-{
-	int error;
-
-	uint32_t image_packet_data_field_size = CHUNK_SIZE(chunk_height, chunk_width);
-
-	for (unsigned short j = 0; (unsigned int)(j*image_packet_data_field_size) < size; j++)
-	{
-		error = SimpleButcher(buffer, chunk, size, image_packet_data_field_size, (unsigned int)j);
-		CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
-
-		error = buildAndSend_chunck(chunk, j, 0, 0, size, FALSE_8BIT);
-		CMP_AND_RETURN(error, 0, -1);
-
-		lookForRequestToDelete_dump(request.cmd_id);
-	}
-
-	return 0;
-}
-
 ImageDataBaseResult chunkField_imageDump(Camera_Request request, imageid image_id, fileType comprasionType, uint16_t firstIndex, uint16_t lastIndex)
 {
 	char file_name[FILE_NAME_SIZE];
@@ -270,6 +240,108 @@ ImageDataBaseResult chunkField_imageDump(Camera_Request request, imageid image_i
 	}
 
 	return DataBaseSuccess;
+}
+
+/*
+ * @brief		send image according to a bit field from ground
+ * @param[in]	the id of the image in the database
+ * @param[in]	the type of image requested
+ * @param[in]	the id of the command who started the dump, just in case the dump stopped in the middle
+ * @param[in]	the first chunk in the bit field array
+ * @param[in]	the bit field. every bit represent a chunk, 1 means send this chunk 0 means skip this chunk.
+ * 				the first bit is for @firstChunk_index.
+ */
+ImageDataBaseResult bitField_imageDump(imageid image_id, fileType compressionType, command_id cmdId, unsigned int firstChunk_index, byte packetsToSend[BIT_FIELD_SIZE])
+{
+	char file_name[FILE_NAME_SIZE];
+	GetImageFileName(image_id, compressionType, file_name);
+
+	F_FILE *file = NULL;
+	int error = f_managed_open(file_name, "r", &file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
+	uint32_t image_size = f_filelength(file_name);
+	byte* buffer = imageBuffer;
+
+	error = ReadFromFile(file, buffer, image_size, 1);
+	check_int("f_read in bitField_imageDump", error);
+
+	error = f_managed_close(&file);
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+
+	for (unsigned int i = 0; i < NUMBER_OF_CHUNKS_IN_CMD; i++)
+	{
+		if (getBitValueByIndex(packetsToSend, BIT_FIELD_SIZE, i))
+		{
+			error = GetChunkFromImage(chunk, chunk_width, chunk_height, i + firstChunk_index, imageBuffer, compressionType, image_size);
+			CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
+
+			error = buildAndSend_chunck(chunk, (unsigned short)(i + firstChunk_index), compressionType, image_id, image_size, TRUE_8BIT);
+			CMP_AND_RETURN(error, 0, -1);
+
+			lookForRequestToDelete_dump(cmdId);
+			vTaskDelay(SYSTEM_DEALY);
+		}
+	}
+
+	return 0;
+}
+
+ImageDataBaseResult fileTypeDump(Camera_Request request, time_unix starting_time, time_unix end_time, fileType compressionType)
+{
+	ImageDataBaseResult error;
+	uint32_t current_position = getDataBaseStart();
+
+	ImageMetadata image_metadata;
+	uint32_t image_address;
+
+	while ( current_position < getDataBaseEnd() )
+	{
+		error = SearchDataBase_forImageFileType_byTimeRange(starting_time, end_time, compressionType, &image_metadata, &image_address, current_position);
+		current_position = image_address + sizeof(ImageMetadata);
+
+		if (error == DataBaseIdNotFound)
+		{
+			break;
+		}
+		else if (error != DataBaseSuccess)
+		{
+			return error;
+		}
+		else // (error == DataBaseSuccess) --> found a file
+		{
+			uint16_t last_index = 0;
+			error = getLastImageChunkIndex(image_metadata, compressionType, &last_index);
+			CMP_AND_RETURN(error, DataBaseSuccess, error);
+
+			error = chunkField_imageDump(request, image_metadata.cameraId, compressionType, 0, last_index);
+			CMP_AND_RETURN(error, DataBaseSuccess, error);
+		}
+
+		lookForRequestToDelete_dump(request.cmd_id);
+	}
+
+	return DataBaseSuccess;
+}
+
+ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], uint32_t size)
+{
+	int error;
+
+	uint32_t image_packet_data_field_size = CHUNK_SIZE(chunk_height, chunk_width);
+
+	for (unsigned short j = 0; (unsigned int)(j*image_packet_data_field_size) < size; j++)
+	{
+		error = SimpleButcher(buffer, chunk, size, image_packet_data_field_size, (unsigned int)j);
+		CMP_AND_RETURN(error, BUTCHER_SUCCSESS, Butcher_Success + error);
+
+		error = buildAndSend_chunck(chunk, j, 0, 0, size, FALSE_8BIT);
+		CMP_AND_RETURN(error, 0, -1);
+
+		lookForRequestToDelete_dump(request.cmd_id);
+	}
+
+	return 0;
 }
 
 void imageDump_task(void* param)
@@ -308,7 +380,7 @@ void imageDump_task(void* param)
 	{
 		imageid image_id;
 		memcpy(&image_id, request.data, sizeof(imageid));
-		fileType comprasionType;
+		fileType comprasionType = 0;
 		memcpy(&comprasionType, request.data + sizeof(imageid), sizeof(byte));
 		uint16_t firstIndex;
 		memcpy(&firstIndex, request.data + sizeof(imageid) + sizeof(byte), sizeof(uint16_t));
@@ -330,20 +402,20 @@ void imageDump_task(void* param)
 	{
 		imageid image_id;
 		memcpy(&image_id, request.data, sizeof(imageid));
-		fileType comprasionType;
+		fileType comprasionType = 0;
 		memcpy(&comprasionType, request.data + sizeof(imageid), sizeof(byte));
-		unsigned short firstIndex;
+		uint16_t firstIndex;
 		memcpy(&firstIndex, request.data + sizeof(imageid)+sizeof(byte), sizeof(short));
-		unsigned short lastIndex;
+		uint16_t lastIndex;
 		memcpy(&lastIndex, request.data + sizeof(imageid)+sizeof(byte)+sizeof(short), sizeof(short));
 
 		error = chunkField_imageDump(request, image_id, comprasionType, firstIndex, lastIndex);
 	}
 	else if (request.id == DataBase_Dump)
 	{
-		time_unix startingTime = *((time_unix*)request.data);
+		time_unix startingTime;
 		memcpy(&startingTime, request.data, sizeof(time_unix));
-		time_unix endTime = *((time_unix*)request.data + 4);
+		time_unix endTime;
 		memcpy(&endTime, request.data + 4, sizeof(time_unix));
 
 		byte DataBaseBuffer[getDataBaseSize()];
@@ -359,6 +431,17 @@ void imageDump_task(void* param)
 			error = DataBaseNullPointer;
 		}
 	}
+	else if (request.id == fileType_Dump)
+	{
+		time_unix startingTime;
+		memcpy(&startingTime, request.data, sizeof(time_unix));
+		time_unix endTime;
+		memcpy(&endTime, request.data + 4, sizeof(time_unix));
+		fileType compressionType = 0;
+		memcpy(&endTime, request.data + 8, sizeof(byte));
+
+		error = fileTypeDump(request, startingTime, endTime, compressionType);
+	}
 
 	if (error != DataBaseSuccess)
 		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
@@ -366,4 +449,10 @@ void imageDump_task(void* param)
 	set_system_state(dump_param, SWITCH_OFF);
 	f_managed_releaseFS();
 	vTaskDelete(NULL);
+}
+
+void KickStartImageDumpTask(void* request)
+{
+	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraDumpTask_StackDepth, &request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
+	vTaskDelay(SYSTEM_DEALY);
 }

@@ -42,6 +42,7 @@ typedef enum{
 	image_Dump_chunkField,
 	image_Dump_bitField,
 	DataBase_Dump,
+	fileType_Dump,
 	update_defult_duration,
 	set_chunk_size,
 	stop_take_image_with_time_intervals,
@@ -51,8 +52,7 @@ typedef enum{
 	turn_on_future_AutoThumbnailCreation,
 	turn_off_AutoThumbnailCreation,
 	turn_on_AutoThumbnailCreation,
-	number_of_request_types,
-	Handle_Mark
+	number_of_request_types
 }cam_Request_id_t;
 
 typedef struct __attribute__ ((__packed__))
