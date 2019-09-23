@@ -13,30 +13,14 @@
 #include <satellite-subsystems/GomEPS.h>
 #include "../Global/TLM_management.h"
 
-typedef enum
-{
-	CUF_SUCCESS,
-	CUF_INIT_ERROR,
-	CUF_GENERATE_SSH_FAIL,
-	CUF_AUTHENTICATE_FAIL,
-	CUF_SAVE_PERMINANTE_FAIL,
-	CUF_LOAD_PERMINANTE_FAIL,
-	CUF_MANAGE_RESTART_FAIL,
-	CUF_UPDATE_PERMINANTE_FAIL,
-	CUF_REMOVE_FAIL,
-	CUF_EXECUTE_FAIL,
-	CUF_EXECUTE_unauthenticated,
-	CUF_INTEGRATED_FAIL,
-	CUF_INTEGRATED_unauthenticated
-} CUF_ERROR_CODES;
-
 #define TEMPORARYCUFSTORAGESIZE 50000 //size of the array that accumilates the temporary CUFs data
 #define CUFARRSTORAGE 1000 //size of the array that accumilates the CUF functions
 #define PERMINANTCUFLENGTH 100 //size of the array that accumilates the perminant CUF names
 #define CUFNAMELENGTH 12 //length of the name of a CUF
 #define uploadCodeLength 33120 //180 packets
-#define PERCUFSAVEFILENAME "CUFPer" //name of file to save cuf slot array to
+#define PERCUFSAVEFILENAME "CUFPer.cuf" //name of file to save cuf slot array to
 #define RESETSTHRESHOLD 5 //resets threshold before failsafe
+#define CUFRAMADRESS 10 //The FRAM adress for the CUF data
 //#define VTASKDELAY_CUF(xTicksToDelay) ((void (*)(portTickType))(CUFSwitch(0)))(xTicksToDelay)
 
 //defines for AUC_CUF switch for ground commands
@@ -120,8 +104,7 @@ int UpdatePerminantCUF(CUF* code);
 /*!
  * Function remove a CUF
  * @param[in] name the name of the cuf to be removed
- * @return 0 if successful
- * -1 if failed
+ * @return 0 on success
  */
 int RemoveCUF(char* name);
 

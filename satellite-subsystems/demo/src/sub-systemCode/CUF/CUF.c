@@ -10,6 +10,7 @@
 //////////////////////includes//////////////////////
 
 #include "CUF.h"
+#include "../Global/Global.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
@@ -65,7 +66,10 @@ int SavePerminantCUF()
 	f_delete(PERCUFSAVEFILENAME);
 	F_FILE* PerminantCUFData = NULL;
 	if (f_managed_open(PERCUFSAVEFILENAME, "w+", &PerminantCUFData) != 0)
+	{
+		WriteErrorLog(CUF_SAVE_PERMINANTE_FAIL, SYSTEM_CUF, 0);
 		return -1; //return -1 on fail
+	}
 	//write all data members of all perminant CUFs
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 	{
@@ -87,7 +91,10 @@ int LoadPerminantCUF()
 	int i = 0;
 	F_FILE* PerminantCUFData = NULL;
 	if (f_managed_open(PERCUFSAVEFILENAME, "r", &PerminantCUFData) != 0)
+	{
+		WriteErrorLog(CUF_LOAD_PERMINANTE_FAIL, SYSTEM_CUF, 0);
 		return -1; //return -1 on fail
+	}
 	//read all data members of all perminant CUFs
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 	{
@@ -112,11 +119,11 @@ Boolean CheckResetThreashold(Boolean isFirst)
 	int gret = GomEpsGetHkData_wdt(0, &resets);
 	if (isFirst)
 	{
-		FRAM_write((unsigned char*)&resets, 10, sizeof(gom_eps_hk_wdt_t));
+		FRAM_write_exte((unsigned char*)&resets, CUFRAMADRESS, sizeof(gom_eps_hk_wdt_t));
 		return TRUE;
 	}
 	gom_eps_hk_wdt_t savedresets;
-	int fret = FRAM_read((unsigned char*)&savedresets, 10, sizeof(gom_eps_hk_wdt_t));
+	int fret = FRAM_read_exte((unsigned char*)&savedresets, CUFRAMADRESS, sizeof(gom_eps_hk_wdt_t));
 	if (fret != 0 || gret != 0)
 		return TRUE;
 	if ((resets.fields.counter_wdt_i2c - savedresets.fields.counter_wdt_i2c) % RESETSTHRESHOLD == 0 || (resets.fields.counter_wdt_gnd - savedresets.fields.counter_wdt_gnd) % RESETSTHRESHOLD == 0 || (resets.fields.counter_wdt_csp[0] - savedresets.fields.counter_wdt_csp[0]) % RESETSTHRESHOLD == 0 || (resets.fields.counter_wdt_csp[1] - savedresets.fields.counter_wdt_csp[1]) % RESETSTHRESHOLD == 0)
@@ -126,6 +133,7 @@ Boolean CheckResetThreashold(Boolean isFirst)
 
 int CUFManageRestart(Boolean isFirst)
 {
+	WriteResetLog(SYSTEM_CUF, 0);
 	if (isFirst)
 	{
 		f_delete(PERCUFSAVEFILENAME);
@@ -146,6 +154,7 @@ int CUFManageRestart(Boolean isFirst)
 	int i = 0;
 	if (!CheckResetThreashold(isFirst)) //check for reset threshold
 	{
+		WriteCUFLog(CUF_RESET_THRESHOLD_MET, 0);
 		for (i = 0; i < PERMINANTCUFLENGTH; i++)
 			if (PerminantCUF[i]->length != 0)
 				PerminantCUF[i]->disabled = TRUE;
@@ -154,6 +163,7 @@ int CUFManageRestart(Boolean isFirst)
 	for (i = 0; i < PERMINANTCUFLENGTH; i++)
 		if (PerminantCUF[i]->length != 0 && !PerminantCUF[i]->disabled) //check if CUF slot is empty
 			ExecuteCUF(PerminantCUF[i]->name); //run CUF in slot if not empty
+	WriteCUFLog(CUF_RESET_SUCCESSFULL, 0);
 	return 0; //return 0 on success
 }
 
@@ -197,6 +207,9 @@ unsigned long GenerateSSH(unsigned char* data)
 		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 	}
 
+    if (hash == 0)
+    	WriteErrorLog(CUF_GENERATE_SSH_FAIL, SYSTEM_CUF, 0);
+
     return hash; //return the completed hash
 }
 
@@ -213,12 +226,16 @@ int AuthenticateCUF(CUF* code)
 	unsigned long newSSH;
 	newSSH = GenerateSSH((unsigned char*)code->data); //generate an ssh for the data
 	if (newSSH == 0) //check generation
+	{
+		WriteErrorLog(CUF_AUTHENTICATE_FAIL, SYSTEM_CUF, 0);
 		return -1; //return -1 on fail
+	}
 	if (newSSH == code->SSH) //authenticate the ssh with the pre-made one
 		return 1; //return 1 if authenticated
 	else
 		return 0; //return 0 if not authenticated
-	return -1;
+	WriteErrorLog(CUF_AUTHENTICATE_FAIL, SYSTEM_CUF, 0);
+	return -1; //return -1 on fail
 }
 
 int UpdatePerminantCUF(CUF* code)
@@ -234,6 +251,7 @@ int UpdatePerminantCUF(CUF* code)
 			return 0; //return 0 on success
 		}
 	}
+	WriteErrorLog(CUF_UPDATE_PERMINANTE_FAIL, SYSTEM_CUF, 0);
 	return -3; //return -3 if failed
 }
 
@@ -272,6 +290,7 @@ int RemoveCUF(char* name)
 			return 0; //return 0 on success
 		}
 	}
+	WriteCUFLog(CUF_REMOVED, 0);
 	return 0; //return 0 on success
 }
 
@@ -284,12 +303,19 @@ int ExecuteCUF(char* name)
 	unsigned char* CUFDataStorage = (unsigned char*) code->data;
 	int (*CUFFunction)(void* (*CUFSwitch)(int)) = (int (*)(void* (*CUFSwitch)(int))) CUFDataStorage; //convert the CUF data to a function
 	if (CUFFunction == NULL)
-		return -200; //return -2 on fail
+	{
+		WriteErrorLog(CUF_EXECUTE_FAIL, SYSTEM_CUF, 0);
+		return -200; //return -200 on fail
+	}
 	int auth = AuthenticateCUF(code);
 	if (auth != 1)
-		return -300;
+	{
+		WriteCUFLog(CUF_EXECUTE_unauthenticated, 0);
+		return -300; //return -300 on un-authenticated
+	}
 	int ret = CUFFunction(CUFSwitch); //call the CUF function with the test function as its parameter and return its output
 	printf("\n\nCUF RET: %d\n\n", ret);
+	WriteCUFLog(CUF_EXECUTED, 0);
 	return ret;
 }
 
@@ -305,6 +331,7 @@ int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, 
 	if (cuf->SSH == 0 || cuf->length == 0 || cuf->data == NULL || cuf->length == 0)
 	{
 		printf("Invalid Paramiters\n");
+		WriteErrorLog(CUF_INTEGRATED_FAIL, SYSTEM_CUF, 0);
 		return -1; //return -1 on fail
 	}
 	int auth = AuthenticateCUF(cuf);
@@ -312,11 +339,13 @@ int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, 
 	if (auth == -1)
 	{
 		printf("Failed To Generate Authentication SSH\n");
+		WriteErrorLog(CUF_INTEGRATED_FAIL, SYSTEM_CUF, 0);
 		return -1; //return -1 on fail
 	}
 	else if (auth == 0)
 	{
 		printf("SSH Un-Authenticated\n");
+		WriteCUFLog(CUF_INTEGRATED_unauthenticated, 0);
 		return -2; //return -2 on un-authenticated
 	}
 	printf("SSH Authenticated\n");
@@ -324,6 +353,7 @@ int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, 
 	if (cuf->isTemporary == FALSE)
 		return UpdatePerminantCUF(cuf);
 	printf("CUF Added To Arrays\n");
+	WriteCUFLog(CUF_INTEGRATED, 0);
 	return 0;
 }
 
@@ -370,9 +400,11 @@ void DisableCUF(char* name)
 		{
 			PerminantCUF[i]->disabled = TRUE;
 			SavePerminantCUF();
+			WriteCUFLog(CUF_DISABLED, 0);
 			return;
 		}
 	}
+	WriteErrorLog(CUF_DISABLE_FAIL, SYSTEM_CUF, 0);
 }
 
 void EnableCUF(char* name)
@@ -385,9 +417,11 @@ void EnableCUF(char* name)
 		{
 			PerminantCUF[i]->disabled = FALSE;
 			SavePerminantCUF();
+			WriteCUFLog(CUF_ENABLED, 0);
 			return;
 		}
 	}
+	WriteErrorLog(CUF_ENABLE_FAIL, SYSTEM_CUF, 0);
 }
 
 Boolean CUFTest(int* testCUFData)
