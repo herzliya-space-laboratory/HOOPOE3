@@ -61,10 +61,11 @@ void* CUFSwitch(int index);
 /*!
  * Function to generate an ssh to a data sample
  * @param[in] data the data to generate the ssh from
+ * @param[in] len the length of the data (in bytes)
  * @return the generated ssh
  * 0 on fail
  */
-unsigned long GenerateSSH(unsigned char* data);
+unsigned long GenerateSSH(char* data, int len);
 
 /*!
  * Function to authenticate a CUF
