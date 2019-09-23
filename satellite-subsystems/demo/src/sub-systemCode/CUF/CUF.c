@@ -12,6 +12,7 @@
 #include "CUF.h"
 #include "../Global/Global.h"
 #include "../Global/logger.h"
+#include "../EPS.h"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/FreeRTOSConfig.h>
@@ -117,7 +118,7 @@ int LoadPerminantCUF()
 Boolean CheckResetThreashold(Boolean isFirst)
 {
 	gom_eps_hk_wdt_t resets;
-	int gret = GomEpsGetHkData_wdt(I2C_BUS_ADDR, &resets);
+	int gret = GomEpsGetHkData_wdt(EPS_I2C_ADDR, &resets);
 	if (isFirst)
 	{
 		FRAM_write_exte((unsigned char*)&resets, CUFRAMADRESS, sizeof(gom_eps_hk_wdt_t));
