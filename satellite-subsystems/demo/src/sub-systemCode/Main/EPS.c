@@ -320,8 +320,39 @@ void sanityCheck_EPS(voltage_t current_VBatt)
 	check_int("FRAM_read, EPS_Init", i_error);
 
 	Boolean check = FALSE;
-	for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
+	if (batteryLastMode == full_mode)
 	{
+		if (voltage_table[0][2] <= current_VBatt)
+		{
+			check = TRUE;
+		}
+	}
+	else if (batteryLastMode == cruise_mode)
+	{
+		if (voltage_table[0][1] <= current_VBatt && current_VBatt <= voltage_table[1][0])
+		{
+			check = TRUE;
+		}
+	}
+	else if (batteryLastMode == safe_mode)
+	{
+		if (voltage_table[0][0] <= current_VBatt && current_VBatt <= voltage_table[1][1])
+		{
+			check = TRUE;
+		}
+	}
+	else if (batteryLastMode == critical_mode)
+	{
+		if (current_VBatt <= voltage_table[1][2])
+		{
+			check = TRUE;
+		}
+	}
+
+	if (check == FALSE)
+	{
+		printf("The EPS logic failed us all\n");
+		battery_upward(current_VBatt, 0);
 	}
 }
 
