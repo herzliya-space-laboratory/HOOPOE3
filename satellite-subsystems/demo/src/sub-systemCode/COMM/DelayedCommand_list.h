@@ -15,7 +15,7 @@
 
 #define NOT_DELAYED_COMMAND 0
 #define EXPIRED_TIME_DC (15 * 60)
-#define MAX_NUMBER_OF_DELAY_COMMAND			100 //the max number of delayed commands in the FRAM
+#define MAX_NUMBER_OF_DELAY_COMMAND			255 //the max number of delayed commands in the FRAM
 
 
 /**
