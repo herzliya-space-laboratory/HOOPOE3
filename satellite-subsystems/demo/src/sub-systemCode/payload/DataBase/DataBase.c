@@ -103,8 +103,6 @@ static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 	}
 
 	strcpy(string, baseString);
-
-//	printf("file name = %s\n", string);
 }
 
 /*
