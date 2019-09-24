@@ -26,12 +26,13 @@
 
 #include "TLM_management.h"
 
-#define SKIP_FILE_TIME_SEC (60*60*24)
-#define _SD_CARD 0
-#define FIRST_TIME -1
-#define FILE_NAME_WITH_INDEX_SIZE MAX_F_FILE_NAME_SIZE+sizeof(int)*2
-#define MAX_ELEMENT_SIZE MAX_SIZE_TM_PACKET+sizeof(int)
-#define FS_TAKE_SEMPH_DELAY	1000 * 30
+#define SKIP_FILE_TIME_SEC ((60*60*24)/100)
+#define _SD_CARD (0)
+#define FIRST_TIME (-1)
+
+#define FILE_NAME_WITH_INDEX_SIZE (MAX_F_FILE_NAME_SIZE+sizeof(int)*2)
+#define MAX_ELEMENT_SIZE (MAX_SIZE_TM_PACKET+sizeof(int))
+#define FS_TAKE_SEMPH_DELAY	(1000 * 30)
 char allocked_write_element[MAX_ELEMENT_SIZE];
 char allocked_read_element[MAX_ELEMENT_SIZE];
 char allocked_delete_element[MAX_ELEMENT_SIZE];
@@ -279,7 +280,7 @@ FileSystemResult c_fileCreate(char* c_file_name,
 //write element with timestamp to file
 static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int time)
 {
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		int number_of_writes;
 		number_of_writes = f_write( &time,sizeof(unsigned int),1, file );
@@ -585,7 +586,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 					return FS_BUFFER_OVERFLOW;
 				}
 
-				if (element_time > (time_unix)resolution + lastCopy_time)
+				//if (element_time > (time_unix)resolution + lastCopy_time)
 				{
 					(*read)++;
 					memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
