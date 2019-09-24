@@ -453,6 +453,6 @@ void imageDump_task(void* param)
 
 void KickStartImageDumpTask(void* request)
 {
-	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraDumpTask_StackDepth, &request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
+	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraDumpTask_StackDepth, request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(SYSTEM_DEALY);
 }

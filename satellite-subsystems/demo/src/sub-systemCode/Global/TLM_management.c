@@ -590,7 +590,8 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			return FS_COULD_NOT_GIVE_SEMAPHORE;
 		if (error != F_NO_ERROR)
 			return FS_FAIL;
-	} while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current);
+	} while(getFileIndex(c_file.creation_time,c_file.last_time_modified)>=index_current&&
+			getFileIndex(c_file.creation_time,to_time)>=index_current);
 
 	return FS_SUCCSESS;
 }

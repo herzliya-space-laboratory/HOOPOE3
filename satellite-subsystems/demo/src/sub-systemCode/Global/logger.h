@@ -10,8 +10,8 @@
 
 #include "TLM_management.h"
 
-#define ERROR_LOG_FILENAME "Errors.log"
-#define EVENT_LOG_FILENAME "Events.log"
+#define ERROR_LOG_FILENAME "Err"
+#define EVENT_LOG_FILENAME "Eve"
 
 #define EPS_LOG_OFFSET 0
 #define PAYLOAD_LOG_OFFSET 500

@@ -151,7 +151,7 @@ int checkDeployAttempt(int attemptNumber)
 		return -2;// there is time for the deploy
 
 	printf("\n\n\n       deploy ants!!!!!!!\n\n\n");
-	//deploye_ants(nextDeploy);
+	deploye_ants(nextDeploy);
 	attempt.isAtemptDone = ATTEMPT_DONE;
 	i_error = FRAM_write_exte((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
 	if (i_error)
