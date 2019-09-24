@@ -282,6 +282,8 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 			{
 				batteryLastMode = enterMode[i].type;
 				writeState_log(batteryLastMode, current_VBatt);
+				printf("EPS voltage: %u, previous voltage:%u\n", current_VBatt, previuosVBatt);
+				writeState_log(batteryLastMode);
 			}
 		}
 	}
@@ -304,6 +306,8 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 			{
 				batteryLastMode = enterMode[NUM_BATTERY_MODE - 1 - i].type;
 				writeState_log(batteryLastMode, current_VBatt);
+				printf("EPS voltage: %u, previous voltage:%u\n", current_VBatt, previuosVBatt);
+				writeState_log(batteryLastMode);
 			}
 		}
 	}

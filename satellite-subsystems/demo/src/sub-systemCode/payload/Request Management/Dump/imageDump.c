@@ -82,7 +82,6 @@ ImageDataBaseResult getLastImageChunkIndex(ImageMetadata image_metadata, fileTyp
 		CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 		image_size = f_filelength(file_name);
-		byte* buffer = imageBuffer;
 
 		error = f_managed_close(&current_file);
 		CMP_AND_RETURN(error, 0, DataBaseFileSystemError);

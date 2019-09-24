@@ -254,5 +254,6 @@ uint32_t GetImageFactor(fileType image_type);
 uint32_t getDataBaseSize();
 void setAutoThumbnailCreation(ImageDataBase database, Boolean8bit new_AutoThumbnailCreation);
 void Gecko_TroubleShooter(ImageDataBaseResult error);
+ImageDataBaseResult SearchDataBase_forImageFileType_byTimeRange(time_unix lower_barrier, time_unix higher_barrier, fileType file_type, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_starting_address);
 
 #endif /* ImageDataBase_H_ */

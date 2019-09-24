@@ -195,24 +195,14 @@ void* CUFSwitch(int index)
 	return CUFArr[index]; //return the function at index
 }
 
-unsigned long GenerateSSH(unsigned char* data)
+unsigned long GenerateSSH(char* data, int len)
 {
-    unsigned char* str = (unsigned char*)data;
-    unsigned long hash = 5381;
-    int c;
-
-    while (1)
-	{
-		c = *str++;
-		if(!c)
-			break;
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-	}
-
-    if (hash == 0)
-    	WriteErrorLog(CUF_GENERATE_SSH_FAIL, SYSTEM_CUF, 0);
-
-    return hash; //return the completed hash
+	int hash = 0, i = 0;
+	for (hash = len, i = 0; i < len; ++i)
+		hash = (hash << 4) ^ (hash >> 28) ^ data[i];
+	if (hash == 0 || i == 0)
+		WriteErrorLog(CUF_GENERATE_SSH_FAIL, SYSTEM_CUF, 0);
+	return (hash % 31); //return the hash
 }
 
 char* getExtendedName(char* name)
@@ -226,7 +216,7 @@ char* getExtendedName(char* name)
 int AuthenticateCUF(CUF* code)
 {
 	unsigned long newSSH;
-	newSSH = GenerateSSH((unsigned char*)code->data); //generate an ssh for the data
+	newSSH = GenerateSSH((char*)code->data, code->length*4); //generate an ssh for the data
 	if (newSSH == 0) //check generation
 	{
 		WriteErrorLog(CUF_AUTHENTICATE_FAIL, SYSTEM_CUF, 0);
@@ -440,7 +430,7 @@ Boolean CUFTest(int* testCUFData)
 			printf("%d, %d, %d\n", testCUFDataCheck[i], testCUFData[i], i);
 		}
 	}
-	int intret = IntegrateCUF("CUF001.cuf", testCUFData, 28, GenerateSSH((unsigned char*)testCUFData), TRUE, FALSE);
+	int intret = IntegrateCUF("CUF001.cuf", testCUFData, 28, GenerateSSH((char*)testCUFData, 112), TRUE, FALSE);
 	CUF* testFile = GetFromCUFTempArray("CUF001.cuf");
 	if (intret != 0 || testFile == NULL)
 	{
