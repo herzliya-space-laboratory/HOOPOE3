@@ -281,6 +281,7 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 			if (previuosVBatt > voltage_table[0][i])
 			{
 				batteryLastMode = enterMode[i].type;
+				printf("EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
 				writeState_log(batteryLastMode, current_VBatt);
 			}
 		}
@@ -303,9 +304,24 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 			if (previuosVBatt < voltage_table[1][i])
 			{
 				batteryLastMode = enterMode[NUM_BATTERY_MODE - 1 - i].type;
+				printf("EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
 				writeState_log(batteryLastMode, current_VBatt);
 			}
 		}
+	}
+}
+
+void sanityCheck_EPS(voltage_t current_VBatt)
+{
+	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
+	int i_error = FRAM_read_exte((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
+	if (i_error)
+		WriteErrorLog((log_errors)LOG_ERR_EPS_READ_VOLTAGE_TABLE, SYSTEM_EPS, i_error);
+	check_int("FRAM_read, EPS_Init", i_error);
+
+	Boolean check = FALSE;
+	for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
+	{
 	}
 }
 
@@ -371,8 +387,10 @@ void EPS_Conditioning()
 		battery_upward(VBatt_filtered, VBatt_previous);
 	}
 
-	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
+	sanityCheck_EPS(VBatt_filtered);
 
+	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
+	set_EPSState((uint8_t)batteryLastMode);
 	update_powerLines(switches_states);
 	VBatt_previous = VBatt_filtered;
 }

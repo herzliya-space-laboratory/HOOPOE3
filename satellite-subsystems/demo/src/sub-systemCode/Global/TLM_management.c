@@ -102,6 +102,7 @@ static int getNumOfFilesInFS()
 	return fs.num_of_files;
 }
 //return -1 on fail
+
 static int setNumOfFilesInFS(int new_num_of_files)
 {
 	FS fs;
@@ -136,19 +137,22 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 			vTaskDelay(100);
 		}
 		lastError = f_getlasterror();
+		if (fileHandler == NULL || lastError != 0)
+			xSemaphoreGive_extended(xFileOpenHandler);
 		printf("file open: %s FS last error: %d\n", file_name, lastError);
 		vTaskDelay(SYSTEM_DEALY);
 	}
 	else
 	{
 		printf("\n\n\n\n\n\n\n\n!!!!!could not Take the xFileOpenHandler!!!!!!\n");
-		printf("FS last error: %d\n", lastError);
 		return COULD_NOT_TAKE_SEMAPHORE_ERROR;
 	}
 	return lastError;
 }
 int f_managed_close(F_FILE** fileHandler)
 {
+	if (fileHandler == NULL)
+		return FILE_NULL_ERROR;
 	int error = f_close(*fileHandler);
 	if (error != 0)
 	{
@@ -350,9 +354,9 @@ FileSystemResult c_fileReset(char* c_file_name)
 	{
 		int j=0;
 		get_file_name_by_index(c_file_name,i,curr_file_name);
+		err = f_delete(curr_file_name);
 		do
 		{
-			err = f_delete(curr_file_name);
 			if(err!=0)
 			{
 				printf("c_fileReset  f_delete: %d\n",err);
@@ -384,7 +388,7 @@ FileSystemResult c_fileWrite(char* c_file_name, void* element)
 	int error = f_managed_open(curr_file_name, "a+", &file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
-	if (file == NULL)
+	if (file == NULL || error != 0)
 		return FS_FAIL;
 	if(error!=0)
 	{
@@ -418,14 +422,14 @@ static FileSystemResult deleteElementsFromFile(char* file_name,unsigned long fro
 	int error = f_managed_open(file_name,"r", &file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
-	else if (error != 0)
+	else if (error != 0 || file == NULL)
 		return FS_FAIL;
 
 	F_FILE* temp_file = NULL;
 	error = f_managed_open("temp","a+", &temp_file);
 	if (error == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
-	else if (error != 0)
+	else if (error != 0 || file == NULL)
 		return FS_FAIL;
 	char* buffer = allocked_delete_element;
 	for(int i = 0; i<f_filelength(file_name); i+=full_element_size)
@@ -548,7 +552,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
 		int error = f_managed_open(curr_file_name, "r", &current_file);
-		if (current_file == NULL)
+		if (error != 0 || curr_file_name == NULL)
 			continue;
 		unsigned int length =f_filelength(curr_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
 		int err_fread=0;
@@ -615,7 +619,7 @@ void print_file(char* c_file_name)
 		printf("file %d:\n",i);//print file index
 		get_file_name_by_index(c_file_name,i,curr_file_name);
 		int error = f_managed_open(curr_file_name, "r", &current_file);
-		if (error != 0)
+		if (error != 0 || curr_file_name == NULL)
 			return;
 		for(int j=0;j<f_filelength(curr_file_name)/((int)c_file.size_of_element+(int)sizeof(unsigned int));j++)
 		{

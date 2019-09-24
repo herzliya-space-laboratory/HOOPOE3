@@ -89,9 +89,17 @@ int init_GP()
 
 	current_global_param.numOfPics = 0;
 	current_global_param.numOfDelayedCommand = 0;
-	current_global_param.numOfAPRS = 0;
+	current_global_param.EPS_state = 0;
 	current_global_param.numOfResets = 0;
-	current_global_param.lastReset = 0;
+
+	time_unix set_time;
+	byte raw_time[TIME_SIZE];
+	FRAM_read_exte(raw_time, TIME_ADDR, TIME_SIZE);
+	set_time = (time_unix)raw_time[0];
+	set_time += (time_unix)(raw_time[1] << 8);
+	set_time += (time_unix)(raw_time[2] << 16);
+	set_time += (time_unix)(raw_time[3] << 24);
+	current_global_param.lastReset = set_time - TIME_RESET_SEC;
 
 	current_global_param.ground_conn = FALSE;
 
@@ -287,7 +295,7 @@ void get_current_global_param(global_param* param_out)
 
 		param_out->numOfPics = current_global_param.numOfPics;
 		param_out->numOfDelayedCommand = current_global_param.numOfDelayedCommand;
-		param_out->numOfAPRS = current_global_param.numOfAPRS;
+		param_out->EPS_state = current_global_param.EPS_state;
 		param_out->numOfResets = current_global_param.numOfResets;
 		param_out->lastReset = current_global_param.lastReset;
 
@@ -764,14 +772,14 @@ void set_numOfPics(uint8_t param)
 		WriteErrorLog(LOG_ERR_SAMAPHORE_GLOBAL_PARAM, SYSTEM_OBC, -1);
 	}
 }
-// CGP-> numOfAPRS
-uint8_t get_numOfAPRS()
+// CGP-> eps_state
+uint8_t get_EPSState()
 {
 	portBASE_TYPE lu_error;
 	uint8_t return_value = 0;
 	if(xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		return_value = current_global_param.numOfAPRS;
+		return_value = current_global_param.EPS_state;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_numOfAPRS", lu_error);
 	}
@@ -781,12 +789,12 @@ uint8_t get_numOfAPRS()
 	}
 	return return_value;
 }
-void set_numOfAPRS(uint8_t param)
+void set_EPSState(uint8_t param)
 {
 	portBASE_TYPE lu_error;
 	if(xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		current_global_param.numOfAPRS = param;
+		current_global_param.EPS_state = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_numOfAPRS", lu_error);
 	}

@@ -164,6 +164,9 @@ void resetSD()
 	{
 		do
 		{
+			gom_eps_hk_t eps_tlm;
+			GomEpsGetHkData_general(0, &eps_tlm);
+
 			printf ("filename:%s\n ",find.filename);
 			printf("\t 0) next file \n\r");
 			printf("\t 1) delete and next file \n\r");
@@ -202,6 +205,8 @@ int InitSubsystems()
 	CUFManageRestart(activation);
 
 	EPS_Init();
+
+	//resetSD();
 
 #ifdef ANTS_ON
 	init_Ants(activation);

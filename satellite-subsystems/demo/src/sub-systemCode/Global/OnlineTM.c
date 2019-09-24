@@ -560,5 +560,6 @@ void save_onlineTM_task()
 		updateSD_state();
 		save_onlineTM_logic();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
+		xLastWakeTime = xTaskGetTickCount();
 	}
 }

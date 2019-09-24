@@ -236,7 +236,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 				}
 				else if (FS_result == FS_BUFFER_OVERFLOW)
 					printf("overflow from reading data!!!!!\n");
-
+				lookForRequestToDelete_dump(cmdID);
 				for (int l = 0; l < numberOfParameters; l++)
 				{
 					build_HK_spl_packet(HK[i], Dump_buffer + l * parameterSize, &packet);
@@ -755,7 +755,7 @@ void buildAndSend_beacon()
 	}
 	// 4.5. stats
 	beacon.data[38] = beacon_param.numOfPics;
-	beacon.data[39] = beacon_param.numOfAPRS;
+	beacon.data[39] = beacon_param.EPS_state;
 	beacon.data[40] = beacon_param.numOfDelayedCommand;
 	raw_param = (byte*)&beacon_param.numOfResets;
 	for(i = 0; i < 4; i++)

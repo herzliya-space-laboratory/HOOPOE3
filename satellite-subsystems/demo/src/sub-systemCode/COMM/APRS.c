@@ -32,7 +32,7 @@ void reset_APRS_list(Boolean firstActivation)
 	//  if its not init, update the number of APRS commands
 	if (!firstActivation)
 	{
-		set_numOfAPRS(numberOfPackets);
+		//set_numOfAPRS(numberOfPackets);
 	}
 }
 
@@ -146,5 +146,5 @@ void get_APRS_list()
 	error = FRAM_read_exte(&num_of_APRS_save, NUMBER_PACKET_APRS_ADDR, 1);
 	check_int("get_APRS_list, FRAM_read_exte(NUMBER_PACKET_APRS_ADDR)", error);
 
-	set_numOfAPRS(num_of_APRS_save);
+	//set_numOfAPRS(num_of_APRS_save);
 }
