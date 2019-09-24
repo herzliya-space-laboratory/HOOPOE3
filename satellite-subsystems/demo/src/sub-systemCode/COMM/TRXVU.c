@@ -77,20 +77,24 @@ void update_FRAM_bitRate()
 	check_int("IsisTrxvu_tcSetAx25Bitrate, update_FRAM_bitRate", error);
 	vTaskDelay(1000);
 }
+
+void idle_state_(ISIStrxvuIdleState state)
+{
+	if (get_system_state(mute_param))
+		return;
+	int retValInt = IsisTrxvu_tcSetIdlestate(0, state);
+	if (retValInt != 0)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
+	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
+}
 void toggle_idle_state()
 {
 	for (int i = 0; i < 2; i++)
 	{
 		vTaskDelay(500);
-		int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_on);
-		if (retValInt != 0)
-			WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
-		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
+		idle_state_(trxvu_idle_state_on);
 		vTaskDelay(1000);
-		retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
-		if (retValInt != 0)
-			WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
-		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, off", retValInt);
+		idle_state_(trxvu_idle_state_off);
 		vTaskDelay(1500);
 	}
 }
@@ -514,6 +518,7 @@ void Rx_logic()
 				if (i_error != 0)
 					WriteErrorLog((log_errors)LOG_ERR_EPS_GRD_WDT, SYSTEM_EPS, i_error);
 				update_stopDeploy_FRAM();
+				idle_state_(trxvu_idle_state_on);
 				set_ground_conn(TRUE);
 				// 1.3. sends receive ACK
 				byte rawACK[ACK_RAW_SIZE];
@@ -559,6 +564,7 @@ void pass_above_Ground()
 		if (i_error != 0)
 			WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_TRXVU, i_error);
 		check_int("connection_toGround, Time_getUnixEpoch", i_error);
+		idle_state_(trxvu_idle_state_on);
 
 		return;
 	}
@@ -572,6 +578,9 @@ void pass_above_Ground()
 		check_int("connection_toGround, Time_getUnixEpoch", i_error);
 		if (currentTime > started_time + GROUND_PASSING_TIME)
 		{
+			idle_state_(trxvu_idle_state_off);
+			vTaskDelay(100);
+			idle_state_(trxvu_idle_state_off);
 			groundConnectionStarted = FALSE;
 			set_ground_conn(FALSE);
 		}
@@ -933,6 +942,10 @@ void mute_Tx()
 {
 	sendRequestToStop_dump();
 	sendRequestToStop_transponder();
+	int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
+	if (retValInt != 0)
+		WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
+	check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
 	set_system_state(mute_param, SWITCH_ON);
 }
 
