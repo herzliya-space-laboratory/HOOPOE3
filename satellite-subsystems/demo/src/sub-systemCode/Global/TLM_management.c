@@ -26,7 +26,7 @@
 
 #include "TLM_management.h"
 
-#define SKIP_FILE_TIME_SEC 1000000
+#define SKIP_FILE_TIME_SEC (60*60*24)
 #define _SD_CARD 0
 #define FIRST_TIME -1
 #define FILE_NAME_WITH_INDEX_SIZE MAX_F_FILE_NAME_SIZE+sizeof(int)*2
@@ -268,6 +268,11 @@ FileSystemResult c_fileCreate(char* c_file_name,
 	{
 		return FS_FRAM_FAIL;
 	}
+	if(f_mkdir(c_file_name)!=0)
+	{
+		printf("f_mkdir fail");
+		return FS_FAIL;
+	}
 
 	return FS_SUCCSESS;
 }
@@ -333,7 +338,7 @@ static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 void get_file_name_by_index(char* c_file_name,int index,char* curr_file_name)
 {
 	PLZNORESTART();
-	sprintf(curr_file_name,"%s%d.%s", c_file_name, index, FS_FILE_ENDING);
+	sprintf(curr_file_name,"a:/%s/%d.tlm", c_file_name, index, FS_FILE_ENDING);
 }
 FileSystemResult c_fileReset(char* c_file_name)
 {
