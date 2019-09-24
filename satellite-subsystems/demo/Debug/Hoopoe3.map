@@ -552,6 +552,10 @@ Discarded input sections
  .text          0x00000000        0x0 ./src/sub-systemCode/Main/CMD/SW_CMD.o
  .data          0x00000000        0x0 ./src/sub-systemCode/Main/CMD/SW_CMD.o
  .bss           0x00000000        0x0 ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .text.cmd_FRAM_read
+                0x00000000      0x22c ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .text.cmd_FRAM_write
+                0x00000000      0x114 ./src/sub-systemCode/Main/CMD/SW_CMD.o
  .text          0x00000000        0x0 ./src/sub-systemCode/Main/CMD/payload_CMD.o
  .data          0x00000000        0x0 ./src/sub-systemCode/Main/CMD/payload_CMD.o
  .bss           0x00000000        0x0 ./src/sub-systemCode/Main/CMD/payload_CMD.o
@@ -5666,7 +5670,7 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .comment       0x00000000       0x71 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
  .comment       0x00000000       0x71 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
 
-.debug_frame    0x00000000     0xa918
+.debug_frame    0x00000000     0xa95c
  .debug_frame   0x00000000       0x80 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfprintf_float.o)
  .debug_frame   0x00000080       0x5c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfprintf_i.o)
  .debug_frame   0x000000dc       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfscanf_float.o)
@@ -5718,113 +5722,113 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_frame   0x00001c84      0x11c ./src/sub-systemCode/Main/CMD/COMM_CMD.o
  .debug_frame   0x00001da0      0x110 ./src/sub-systemCode/Main/CMD/EPS_CMD.o
  .debug_frame   0x00001eb0      0x278 ./src/sub-systemCode/Main/CMD/General_CMD.o
- .debug_frame   0x00002128       0x68 ./src/sub-systemCode/Main/CMD/SW_CMD.o
- .debug_frame   0x00002190      0x10c ./src/sub-systemCode/Main/Ants.o
- .debug_frame   0x0000229c      0x2c8 ./src/sub-systemCode/Main/EPS.o
- .debug_frame   0x00002564      0x184 ./src/sub-systemCode/Main/HouseKeeping.o
- .debug_frame   0x000026e8      0x10c ./src/sub-systemCode/Main/Main_Init.o
- .debug_frame   0x000027f4      0x1ec ./src/sub-systemCode/Main/commands.o
- .debug_frame   0x000029e0       0x68 ./src/sub-systemCode/Global/GenericTaskSave.o
- .debug_frame   0x00002a48      0x1dc ./src/sub-systemCode/Global/Global.o
- .debug_frame   0x00002c24      0x4c4 ./src/sub-systemCode/Global/GlobalParam.o
- .debug_frame   0x000030e8      0x300 ./src/sub-systemCode/Global/OnlineTM.o
- .debug_frame   0x000033e8      0x294 ./src/sub-systemCode/Global/TLM_management.o
- .debug_frame   0x0000367c       0x48 ./src/sub-systemCode/Global/freertosExtended.o
- .debug_frame   0x000036c4       0xf0 ./src/sub-systemCode/Global/logger.o
- .debug_frame   0x000037b4      0x270 ./src/sub-systemCode/CUF/CUF.o
- .debug_frame   0x00003a24       0xfc ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
- .debug_frame   0x00003b20       0x70 ./src/sub-systemCode/COMM/APRS.o
- .debug_frame   0x00003b90      0x10c ./src/sub-systemCode/COMM/DelayedCommand_list.o
- .debug_frame   0x00003c9c       0xe4 ./src/sub-systemCode/COMM/GSC.o
- .debug_frame   0x00003d80      0x37c ./src/sub-systemCode/COMM/TRXVU.o
- .debug_frame   0x000040fc       0x8c ./src/sub-systemCode/ADCS/AdcsCommands.o
- .debug_frame   0x00004188      0x1d0 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
- .debug_frame   0x00004358       0x64 ./src/sub-systemCode/ADCS/AdcsMain.o
- .debug_frame   0x000043bc       0x28 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
- .debug_frame   0x000043e4       0x40 ./src/sub-systemCode/ADCS/StateMachine.o
- .debug_frame   0x00004424       0x80 ./src/main.o
- .debug_frame   0x000044a4      0x2b4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
- .debug_frame   0x00004758      0x198 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
- .debug_frame   0x000048f0      0x1c4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
- .debug_frame   0x00004ab4      0x30c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
- .debug_frame   0x00004dc0      0x848 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
- .debug_frame   0x00005608      0x830 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
- .debug_frame   0x00005e38      0x1b4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
- .debug_frame   0x00005fec       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_ceil.o)
- .debug_frame   0x00006024       0x34 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-w_log.o)
- .debug_frame   0x00006058       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-w_pow.o)
- .debug_frame   0x00006090       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-e_log.o)
- .debug_frame   0x000060c8       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-e_pow.o)
- .debug_frame   0x00006100       0x34 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-e_sqrt.o)
- .debug_frame   0x00006134       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_fabs.o)
- .debug_frame   0x00006154       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_finite.o)
- .debug_frame   0x00006174       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_matherr.o)
- .debug_frame   0x00006194       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_nan.o)
- .debug_frame   0x000061b4       0x34 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_rint.o)
- .debug_frame   0x000061e8       0x30 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_scalbn.o)
- .debug_frame   0x00006218       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_copysign.o)
- .debug_frame   0x00006240      0xc40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
- .debug_frame   0x00006e80      0x614 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
- .debug_frame   0x00007494      0x638 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
- .debug_frame   0x00007acc      0x1c4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
- .debug_frame   0x00007c90       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
- .debug_frame   0x00007d10       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
- .debug_frame   0x00007d3c       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
- .debug_frame   0x00007dbc       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
- .debug_frame   0x00007de8      0x228 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
- .debug_frame   0x00008010      0x47c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
- .debug_frame   0x0000848c       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
- .debug_frame   0x000084cc      0x264 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
- .debug_frame   0x00008730      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
- .debug_frame   0x00008890      0x194 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
- .debug_frame   0x00008a24      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
- .debug_frame   0x00008bb0       0x64 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
- .debug_frame   0x00008c14       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
- .debug_frame   0x00008c94       0xd0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
- .debug_frame   0x00008d64      0x11c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
- .debug_frame   0x00008e80       0x8c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
- .debug_frame   0x00008f0c      0x2b0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
- .debug_frame   0x000091bc      0x404 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
- .debug_frame   0x000095c0       0x44 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
- .debug_frame   0x00009604       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
- .debug_frame   0x0000967c      0x10c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
- .debug_frame   0x00009788       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
- .debug_frame   0x00009810      0x1e0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
- .debug_frame   0x000099f0       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
- .debug_frame   0x00009a48      0x10c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
- .debug_frame   0x00009b54       0xcc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
- .debug_frame   0x00009c20      0x104 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
- .debug_frame   0x00009d24       0xe8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
- .debug_frame   0x00009e0c       0xe4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
- .debug_frame   0x00009ef0       0xe8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
- .debug_frame   0x00009fd8      0x1a8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
- .debug_frame   0x0000a180       0x9c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
- .debug_frame   0x0000a21c       0x98 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
- .debug_frame   0x0000a2b4       0x74 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
- .debug_frame   0x0000a328       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4\libgcc.a(_udivsi3.o)
- .debug_frame   0x0000a348       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4\libgcc.a(_divsi3.o)
- .debug_frame   0x0000a368       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-errno.o)
- .debug_frame   0x0000a388       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-memcmp.o)
- .debug_frame   0x0000a3b0       0x60 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-printf.o)
- .debug_frame   0x0000a410       0x48 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-puts.o)
- .debug_frame   0x0000a458       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-strcpy.o)
- .debug_frame   0x0000a478       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-strstr.o)
- .debug_frame   0x0000a4a0       0x8c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfprintf.o)
- .debug_frame   0x0000a52c       0x3c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-wbuf.o)
- .debug_frame   0x0000a568       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-wsetup.o)
- .debug_frame   0x0000a594       0x48 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-fflush.o)
- .debug_frame   0x0000a5dc      0x140 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-findfp.o)
- .debug_frame   0x0000a71c       0x30 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-makebuf.o)
- .debug_frame   0x0000a74c       0x3c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-putc.o)
- .debug_frame   0x0000a788       0x88 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-stdio.o)
- .debug_frame   0x0000a810       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-writer.o)
- .debug_frame   0x0000a83c       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-closer.o)
- .debug_frame   0x0000a868       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-fstatr.o)
- .debug_frame   0x0000a894       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-isattyr.o)
- .debug_frame   0x0000a8c0       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-lseekr.o)
- .debug_frame   0x0000a8ec       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-readr.o)
+ .debug_frame   0x00002128       0xac ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .debug_frame   0x000021d4      0x10c ./src/sub-systemCode/Main/Ants.o
+ .debug_frame   0x000022e0      0x2c8 ./src/sub-systemCode/Main/EPS.o
+ .debug_frame   0x000025a8      0x184 ./src/sub-systemCode/Main/HouseKeeping.o
+ .debug_frame   0x0000272c      0x10c ./src/sub-systemCode/Main/Main_Init.o
+ .debug_frame   0x00002838      0x1ec ./src/sub-systemCode/Main/commands.o
+ .debug_frame   0x00002a24       0x68 ./src/sub-systemCode/Global/GenericTaskSave.o
+ .debug_frame   0x00002a8c      0x1dc ./src/sub-systemCode/Global/Global.o
+ .debug_frame   0x00002c68      0x4c4 ./src/sub-systemCode/Global/GlobalParam.o
+ .debug_frame   0x0000312c      0x300 ./src/sub-systemCode/Global/OnlineTM.o
+ .debug_frame   0x0000342c      0x294 ./src/sub-systemCode/Global/TLM_management.o
+ .debug_frame   0x000036c0       0x48 ./src/sub-systemCode/Global/freertosExtended.o
+ .debug_frame   0x00003708       0xf0 ./src/sub-systemCode/Global/logger.o
+ .debug_frame   0x000037f8      0x270 ./src/sub-systemCode/CUF/CUF.o
+ .debug_frame   0x00003a68       0xfc ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+ .debug_frame   0x00003b64       0x70 ./src/sub-systemCode/COMM/APRS.o
+ .debug_frame   0x00003bd4      0x10c ./src/sub-systemCode/COMM/DelayedCommand_list.o
+ .debug_frame   0x00003ce0       0xe4 ./src/sub-systemCode/COMM/GSC.o
+ .debug_frame   0x00003dc4      0x37c ./src/sub-systemCode/COMM/TRXVU.o
+ .debug_frame   0x00004140       0x8c ./src/sub-systemCode/ADCS/AdcsCommands.o
+ .debug_frame   0x000041cc      0x1d0 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+ .debug_frame   0x0000439c       0x64 ./src/sub-systemCode/ADCS/AdcsMain.o
+ .debug_frame   0x00004400       0x28 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+ .debug_frame   0x00004428       0x40 ./src/sub-systemCode/ADCS/StateMachine.o
+ .debug_frame   0x00004468       0x80 ./src/main.o
+ .debug_frame   0x000044e8      0x2b4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+ .debug_frame   0x0000479c      0x198 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+ .debug_frame   0x00004934      0x1c4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+ .debug_frame   0x00004af8      0x30c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+ .debug_frame   0x00004e04      0x848 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+ .debug_frame   0x0000564c      0x830 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+ .debug_frame   0x00005e7c      0x1b4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+ .debug_frame   0x00006030       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_ceil.o)
+ .debug_frame   0x00006068       0x34 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-w_log.o)
+ .debug_frame   0x0000609c       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-w_pow.o)
+ .debug_frame   0x000060d4       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-e_log.o)
+ .debug_frame   0x0000610c       0x38 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-e_pow.o)
+ .debug_frame   0x00006144       0x34 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-e_sqrt.o)
+ .debug_frame   0x00006178       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_fabs.o)
+ .debug_frame   0x00006198       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_finite.o)
+ .debug_frame   0x000061b8       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_matherr.o)
+ .debug_frame   0x000061d8       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_nan.o)
+ .debug_frame   0x000061f8       0x34 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_rint.o)
+ .debug_frame   0x0000622c       0x30 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_scalbn.o)
+ .debug_frame   0x0000625c       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libm.a(lib_a-s_copysign.o)
+ .debug_frame   0x00006284      0xc40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+ .debug_frame   0x00006ec4      0x614 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+ .debug_frame   0x000074d8      0x638 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+ .debug_frame   0x00007b10      0x1c4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+ .debug_frame   0x00007cd4       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+ .debug_frame   0x00007d54       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+ .debug_frame   0x00007d80       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+ .debug_frame   0x00007e00       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+ .debug_frame   0x00007e2c      0x228 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+ .debug_frame   0x00008054      0x47c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+ .debug_frame   0x000084d0       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+ .debug_frame   0x00008510      0x264 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+ .debug_frame   0x00008774      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+ .debug_frame   0x000088d4      0x194 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+ .debug_frame   0x00008a68      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+ .debug_frame   0x00008bf4       0x64 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+ .debug_frame   0x00008c58       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+ .debug_frame   0x00008cd8       0xd0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+ .debug_frame   0x00008da8      0x11c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+ .debug_frame   0x00008ec4       0x8c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+ .debug_frame   0x00008f50      0x2b0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+ .debug_frame   0x00009200      0x404 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+ .debug_frame   0x00009604       0x44 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+ .debug_frame   0x00009648       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+ .debug_frame   0x000096c0      0x10c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+ .debug_frame   0x000097cc       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+ .debug_frame   0x00009854      0x1e0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+ .debug_frame   0x00009a34       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+ .debug_frame   0x00009a8c      0x10c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+ .debug_frame   0x00009b98       0xcc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+ .debug_frame   0x00009c64      0x104 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+ .debug_frame   0x00009d68       0xe8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+ .debug_frame   0x00009e50       0xe4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+ .debug_frame   0x00009f34       0xe8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+ .debug_frame   0x0000a01c      0x1a8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+ .debug_frame   0x0000a1c4       0x9c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+ .debug_frame   0x0000a260       0x98 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+ .debug_frame   0x0000a2f8       0x74 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+ .debug_frame   0x0000a36c       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4\libgcc.a(_udivsi3.o)
+ .debug_frame   0x0000a38c       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4\libgcc.a(_divsi3.o)
+ .debug_frame   0x0000a3ac       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-errno.o)
+ .debug_frame   0x0000a3cc       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-memcmp.o)
+ .debug_frame   0x0000a3f4       0x60 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-printf.o)
+ .debug_frame   0x0000a454       0x48 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-puts.o)
+ .debug_frame   0x0000a49c       0x20 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-strcpy.o)
+ .debug_frame   0x0000a4bc       0x28 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-strstr.o)
+ .debug_frame   0x0000a4e4       0x8c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-vfprintf.o)
+ .debug_frame   0x0000a570       0x3c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-wbuf.o)
+ .debug_frame   0x0000a5ac       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-wsetup.o)
+ .debug_frame   0x0000a5d8       0x48 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-fflush.o)
+ .debug_frame   0x0000a620      0x140 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-findfp.o)
+ .debug_frame   0x0000a760       0x30 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-makebuf.o)
+ .debug_frame   0x0000a790       0x3c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-putc.o)
+ .debug_frame   0x0000a7cc       0x88 c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-stdio.o)
+ .debug_frame   0x0000a854       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-writer.o)
+ .debug_frame   0x0000a880       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-closer.o)
+ .debug_frame   0x0000a8ac       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-fstatr.o)
+ .debug_frame   0x0000a8d8       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-isattyr.o)
+ .debug_frame   0x0000a904       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-lseekr.o)
+ .debug_frame   0x0000a930       0x2c c:/isis/application/toolchain/bin/../lib/gcc/arm-none-eabi/4.7.4/../../../../arm-none-eabi/lib\libc_s.a(lib_a-readr.o)
 
-.debug_info     0x00000000    0x3b313
+.debug_info     0x00000000    0x3b4af
  .debug_info    0x00000000      0x343 ./src/sub-systemCode/payload/Request Management/Dump/Butchering.o
  .debug_info    0x00000343      0xeba ./src/sub-systemCode/payload/Request Management/Dump/imageDump.o
  .debug_info    0x000011fd      0x4b0 ./src/sub-systemCode/payload/Request Management/AutomaticImageHandler.o
@@ -5848,80 +5852,80 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_info    0x00007956      0x8e8 ./src/sub-systemCode/Main/CMD/COMM_CMD.o
  .debug_info    0x0000823e      0x6e7 ./src/sub-systemCode/Main/CMD/EPS_CMD.o
  .debug_info    0x00008925      0xeaa ./src/sub-systemCode/Main/CMD/General_CMD.o
- .debug_info    0x000097cf      0x39d ./src/sub-systemCode/Main/CMD/SW_CMD.o
- .debug_info    0x00009b6c      0x71b ./src/sub-systemCode/Main/Ants.o
- .debug_info    0x0000a287      0xe46 ./src/sub-systemCode/Main/EPS.o
- .debug_info    0x0000b0cd     0x14f0 ./src/sub-systemCode/Main/HouseKeeping.o
- .debug_info    0x0000c5bd      0x7f9 ./src/sub-systemCode/Main/Main_Init.o
- .debug_info    0x0000cdb6      0xa31 ./src/sub-systemCode/Main/commands.o
- .debug_info    0x0000d7e7      0x20d ./src/sub-systemCode/Global/GenericTaskSave.o
- .debug_info    0x0000d9f4      0xa58 ./src/sub-systemCode/Global/Global.o
- .debug_info    0x0000e44c     0x1112 ./src/sub-systemCode/Global/GlobalParam.o
- .debug_info    0x0000f55e     0x1084 ./src/sub-systemCode/Global/OnlineTM.o
- .debug_info    0x000105e2     0x10c3 ./src/sub-systemCode/Global/TLM_management.o
- .debug_info    0x000116a5      0x105 ./src/sub-systemCode/Global/freertosExtended.o
- .debug_info    0x000117aa      0x7de ./src/sub-systemCode/Global/logger.o
- .debug_info    0x00011f88      0xce1 ./src/sub-systemCode/CUF/CUF.o
- .debug_info    0x00012c69      0x583 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
- .debug_info    0x000131ec      0x2f0 ./src/sub-systemCode/COMM/APRS.o
- .debug_info    0x000134dc      0x725 ./src/sub-systemCode/COMM/DelayedCommand_list.o
- .debug_info    0x00013c01      0x4e4 ./src/sub-systemCode/COMM/GSC.o
- .debug_info    0x000140e5     0x1882 ./src/sub-systemCode/COMM/TRXVU.o
- .debug_info    0x00015967     0x2df5 ./src/sub-systemCode/ADCS/AdcsCommands.o
- .debug_info    0x0001875c      0xb81 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
- .debug_info    0x000192dd      0x361 ./src/sub-systemCode/ADCS/AdcsMain.o
- .debug_info    0x0001963e      0x13e ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
- .debug_info    0x0001977c      0x147 ./src/sub-systemCode/ADCS/StateMachine.o
- .debug_info    0x000198c3      0x216 ./src/main.o
- .debug_info    0x00019ad9     0x16bc C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
- .debug_info    0x0001b195      0xa44 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
- .debug_info    0x0001bbd9      0xbd2 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
- .debug_info    0x0001c7ab     0x1059 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
- .debug_info    0x0001d804     0x4647 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
- .debug_info    0x00021e4b     0x1533 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
- .debug_info    0x0002337e      0x72c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
- .debug_info    0x00023aaa     0x4751 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
- .debug_info    0x000281fb     0x19f9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
- .debug_info    0x00029bf4     0x2750 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
- .debug_info    0x0002c344      0xd43 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
- .debug_info    0x0002d087      0x1aa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
- .debug_info    0x0002d231       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
- .debug_info    0x0002d2e1      0x4c6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
- .debug_info    0x0002d7a7      0x1ba C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
- .debug_info    0x0002d961      0xd35 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
- .debug_info    0x0002e696     0x28dd C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
- .debug_info    0x00030f73      0x1ad C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
- .debug_info    0x00031120     0x106f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
- .debug_info    0x0003218f      0xdf5 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
- .debug_info    0x00032f84      0x832 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
- .debug_info    0x000337b6      0x5cf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
- .debug_info    0x00033d85      0x3f1 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
- .debug_info    0x00034176      0x1ab C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
- .debug_info    0x00034321      0x506 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
- .debug_info    0x00034827      0x654 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
- .debug_info    0x00034e7b      0x185 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
- .debug_info    0x00035000      0xadf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
- .debug_info    0x00035adf      0xede C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
- .debug_info    0x000369bd       0xde C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
- .debug_info    0x00036a9b      0x110 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
- .debug_info    0x00036bab      0x330 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
- .debug_info    0x00036edb      0x2aa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
- .debug_info    0x00037185      0x628 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
- .debug_info    0x000377ad      0x287 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
- .debug_info    0x00037a34      0x1f7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
- .debug_info    0x00037c2b      0xc6e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
- .debug_info    0x00038899      0x734 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
- .debug_info    0x00038fcd      0x1ae C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
- .debug_info    0x0003917b      0x2fd C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
- .debug_info    0x00039478      0x576 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
- .debug_info    0x000399ee      0x63d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
- .debug_info    0x0003a02b      0x22e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
- .debug_info    0x0003a259       0x92 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
- .debug_info    0x0003a2eb       0x81 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
- .debug_info    0x0003a36c      0x651 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
- .debug_info    0x0003a9bd      0x956 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+ .debug_info    0x000097cf      0x539 ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .debug_info    0x00009d08      0x71b ./src/sub-systemCode/Main/Ants.o
+ .debug_info    0x0000a423      0xe46 ./src/sub-systemCode/Main/EPS.o
+ .debug_info    0x0000b269     0x14f0 ./src/sub-systemCode/Main/HouseKeeping.o
+ .debug_info    0x0000c759      0x7f9 ./src/sub-systemCode/Main/Main_Init.o
+ .debug_info    0x0000cf52      0xa31 ./src/sub-systemCode/Main/commands.o
+ .debug_info    0x0000d983      0x20d ./src/sub-systemCode/Global/GenericTaskSave.o
+ .debug_info    0x0000db90      0xa58 ./src/sub-systemCode/Global/Global.o
+ .debug_info    0x0000e5e8     0x1112 ./src/sub-systemCode/Global/GlobalParam.o
+ .debug_info    0x0000f6fa     0x1084 ./src/sub-systemCode/Global/OnlineTM.o
+ .debug_info    0x0001077e     0x10c3 ./src/sub-systemCode/Global/TLM_management.o
+ .debug_info    0x00011841      0x105 ./src/sub-systemCode/Global/freertosExtended.o
+ .debug_info    0x00011946      0x7de ./src/sub-systemCode/Global/logger.o
+ .debug_info    0x00012124      0xce1 ./src/sub-systemCode/CUF/CUF.o
+ .debug_info    0x00012e05      0x583 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+ .debug_info    0x00013388      0x2f0 ./src/sub-systemCode/COMM/APRS.o
+ .debug_info    0x00013678      0x725 ./src/sub-systemCode/COMM/DelayedCommand_list.o
+ .debug_info    0x00013d9d      0x4e4 ./src/sub-systemCode/COMM/GSC.o
+ .debug_info    0x00014281     0x1882 ./src/sub-systemCode/COMM/TRXVU.o
+ .debug_info    0x00015b03     0x2df5 ./src/sub-systemCode/ADCS/AdcsCommands.o
+ .debug_info    0x000188f8      0xb81 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+ .debug_info    0x00019479      0x361 ./src/sub-systemCode/ADCS/AdcsMain.o
+ .debug_info    0x000197da      0x13e ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+ .debug_info    0x00019918      0x147 ./src/sub-systemCode/ADCS/StateMachine.o
+ .debug_info    0x00019a5f      0x216 ./src/main.o
+ .debug_info    0x00019c75     0x16bc C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+ .debug_info    0x0001b331      0xa44 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+ .debug_info    0x0001bd75      0xbd2 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+ .debug_info    0x0001c947     0x1059 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+ .debug_info    0x0001d9a0     0x4647 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+ .debug_info    0x00021fe7     0x1533 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+ .debug_info    0x0002351a      0x72c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+ .debug_info    0x00023c46     0x4751 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+ .debug_info    0x00028397     0x19f9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+ .debug_info    0x00029d90     0x2750 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+ .debug_info    0x0002c4e0      0xd43 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+ .debug_info    0x0002d223      0x1aa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+ .debug_info    0x0002d3cd       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+ .debug_info    0x0002d47d      0x4c6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+ .debug_info    0x0002d943      0x1ba C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+ .debug_info    0x0002dafd      0xd35 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+ .debug_info    0x0002e832     0x28dd C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+ .debug_info    0x0003110f      0x1ad C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+ .debug_info    0x000312bc     0x106f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+ .debug_info    0x0003232b      0xdf5 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+ .debug_info    0x00033120      0x832 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+ .debug_info    0x00033952      0x5cf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+ .debug_info    0x00033f21      0x3f1 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+ .debug_info    0x00034312      0x1ab C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+ .debug_info    0x000344bd      0x506 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+ .debug_info    0x000349c3      0x654 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+ .debug_info    0x00035017      0x185 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+ .debug_info    0x0003519c      0xadf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+ .debug_info    0x00035c7b      0xede C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+ .debug_info    0x00036b59       0xde C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+ .debug_info    0x00036c37      0x110 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+ .debug_info    0x00036d47      0x330 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+ .debug_info    0x00037077      0x2aa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+ .debug_info    0x00037321      0x628 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+ .debug_info    0x00037949      0x287 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+ .debug_info    0x00037bd0      0x1f7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+ .debug_info    0x00037dc7      0xc6e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+ .debug_info    0x00038a35      0x734 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+ .debug_info    0x00039169      0x1ae C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+ .debug_info    0x00039317      0x2fd C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+ .debug_info    0x00039614      0x576 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+ .debug_info    0x00039b8a      0x63d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+ .debug_info    0x0003a1c7      0x22e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+ .debug_info    0x0003a3f5       0x92 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
+ .debug_info    0x0003a487       0x81 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
+ .debug_info    0x0003a508      0x651 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+ .debug_info    0x0003ab59      0x956 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
 
-.debug_abbrev   0x00000000     0x864d
+.debug_abbrev   0x00000000     0x865c
  .debug_abbrev  0x00000000       0xf0 ./src/sub-systemCode/payload/Request Management/Dump/Butchering.o
  .debug_abbrev  0x000000f0      0x1ff ./src/sub-systemCode/payload/Request Management/Dump/imageDump.o
  .debug_abbrev  0x000002ef      0x12f ./src/sub-systemCode/payload/Request Management/AutomaticImageHandler.o
@@ -5945,80 +5949,80 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_abbrev  0x00001835      0x144 ./src/sub-systemCode/Main/CMD/COMM_CMD.o
  .debug_abbrev  0x00001979      0x160 ./src/sub-systemCode/Main/CMD/EPS_CMD.o
  .debug_abbrev  0x00001ad9      0x1a1 ./src/sub-systemCode/Main/CMD/General_CMD.o
- .debug_abbrev  0x00001c7a      0x110 ./src/sub-systemCode/Main/CMD/SW_CMD.o
- .debug_abbrev  0x00001d8a      0x151 ./src/sub-systemCode/Main/Ants.o
- .debug_abbrev  0x00001edb      0x2b6 ./src/sub-systemCode/Main/EPS.o
- .debug_abbrev  0x00002191      0x24f ./src/sub-systemCode/Main/HouseKeeping.o
- .debug_abbrev  0x000023e0      0x16e ./src/sub-systemCode/Main/Main_Init.o
- .debug_abbrev  0x0000254e      0x1f1 ./src/sub-systemCode/Main/commands.o
- .debug_abbrev  0x0000273f      0x115 ./src/sub-systemCode/Global/GenericTaskSave.o
- .debug_abbrev  0x00002854      0x1e5 ./src/sub-systemCode/Global/Global.o
- .debug_abbrev  0x00002a39      0x21b ./src/sub-systemCode/Global/GlobalParam.o
- .debug_abbrev  0x00002c54      0x273 ./src/sub-systemCode/Global/OnlineTM.o
- .debug_abbrev  0x00002ec7      0x278 ./src/sub-systemCode/Global/TLM_management.o
- .debug_abbrev  0x0000313f       0x85 ./src/sub-systemCode/Global/freertosExtended.o
- .debug_abbrev  0x000031c4      0x144 ./src/sub-systemCode/Global/logger.o
- .debug_abbrev  0x00003308      0x1f6 ./src/sub-systemCode/CUF/CUF.o
- .debug_abbrev  0x000034fe      0x133 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
- .debug_abbrev  0x00003631      0x133 ./src/sub-systemCode/COMM/APRS.o
- .debug_abbrev  0x00003764      0x15e ./src/sub-systemCode/COMM/DelayedCommand_list.o
- .debug_abbrev  0x000038c2      0x121 ./src/sub-systemCode/COMM/GSC.o
- .debug_abbrev  0x000039e3      0x2b4 ./src/sub-systemCode/COMM/TRXVU.o
- .debug_abbrev  0x00003c97      0x240 ./src/sub-systemCode/ADCS/AdcsCommands.o
- .debug_abbrev  0x00003ed7      0x262 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
- .debug_abbrev  0x00004139      0x132 ./src/sub-systemCode/ADCS/AdcsMain.o
- .debug_abbrev  0x0000426b       0x7a ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
- .debug_abbrev  0x000042e5       0x69 ./src/sub-systemCode/ADCS/StateMachine.o
- .debug_abbrev  0x0000434e       0xcd ./src/main.o
- .debug_abbrev  0x0000441b      0x1bc C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
- .debug_abbrev  0x000045d7      0x1b8 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
- .debug_abbrev  0x0000478f      0x22b C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
- .debug_abbrev  0x000049ba      0x19e C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
- .debug_abbrev  0x00004b58      0x221 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
- .debug_abbrev  0x00004d79      0x1aa C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
- .debug_abbrev  0x00004f23      0x16d C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
- .debug_abbrev  0x00005090      0x2c0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
- .debug_abbrev  0x00005350      0x1c9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
- .debug_abbrev  0x00005519      0x265 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
- .debug_abbrev  0x0000577e      0x22f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
- .debug_abbrev  0x000059ad       0xb3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
- .debug_abbrev  0x00005a60       0x5a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
- .debug_abbrev  0x00005aba      0x13e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
- .debug_abbrev  0x00005bf8       0xb4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
- .debug_abbrev  0x00005cac      0x1fb C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
- .debug_abbrev  0x00005ea7      0x2ce C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
- .debug_abbrev  0x00006175       0xb3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
- .debug_abbrev  0x00006228      0x2e0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
- .debug_abbrev  0x00006508      0x242 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
- .debug_abbrev  0x0000674a      0x257 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
- .debug_abbrev  0x000069a1      0x1ed C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
- .debug_abbrev  0x00006b8e       0xf6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
- .debug_abbrev  0x00006c84       0xd3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
- .debug_abbrev  0x00006d57      0x163 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
- .debug_abbrev  0x00006eba      0x180 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
- .debug_abbrev  0x0000703a       0xf6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
- .debug_abbrev  0x00007130      0x1af C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
- .debug_abbrev  0x000072df      0x1e9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
- .debug_abbrev  0x000074c8       0x8a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
- .debug_abbrev  0x00007552       0xc6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
- .debug_abbrev  0x00007618      0x1dc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
- .debug_abbrev  0x000077f4       0xc0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
- .debug_abbrev  0x000078b4      0x152 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
- .debug_abbrev  0x00007a06       0xc3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
- .debug_abbrev  0x00007ac9       0x89 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
- .debug_abbrev  0x00007b52      0x1f7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
- .debug_abbrev  0x00007d49      0x185 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
- .debug_abbrev  0x00007ece       0xd3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
- .debug_abbrev  0x00007fa1      0x115 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
- .debug_abbrev  0x000080b6       0xff C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
- .debug_abbrev  0x000081b5      0x180 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
- .debug_abbrev  0x00008335       0xbf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
- .debug_abbrev  0x000083f4       0x12 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
- .debug_abbrev  0x00008406       0x14 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
- .debug_abbrev  0x0000841a       0xea C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
- .debug_abbrev  0x00008504      0x149 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+ .debug_abbrev  0x00001c7a      0x11f ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .debug_abbrev  0x00001d99      0x151 ./src/sub-systemCode/Main/Ants.o
+ .debug_abbrev  0x00001eea      0x2b6 ./src/sub-systemCode/Main/EPS.o
+ .debug_abbrev  0x000021a0      0x24f ./src/sub-systemCode/Main/HouseKeeping.o
+ .debug_abbrev  0x000023ef      0x16e ./src/sub-systemCode/Main/Main_Init.o
+ .debug_abbrev  0x0000255d      0x1f1 ./src/sub-systemCode/Main/commands.o
+ .debug_abbrev  0x0000274e      0x115 ./src/sub-systemCode/Global/GenericTaskSave.o
+ .debug_abbrev  0x00002863      0x1e5 ./src/sub-systemCode/Global/Global.o
+ .debug_abbrev  0x00002a48      0x21b ./src/sub-systemCode/Global/GlobalParam.o
+ .debug_abbrev  0x00002c63      0x273 ./src/sub-systemCode/Global/OnlineTM.o
+ .debug_abbrev  0x00002ed6      0x278 ./src/sub-systemCode/Global/TLM_management.o
+ .debug_abbrev  0x0000314e       0x85 ./src/sub-systemCode/Global/freertosExtended.o
+ .debug_abbrev  0x000031d3      0x144 ./src/sub-systemCode/Global/logger.o
+ .debug_abbrev  0x00003317      0x1f6 ./src/sub-systemCode/CUF/CUF.o
+ .debug_abbrev  0x0000350d      0x133 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+ .debug_abbrev  0x00003640      0x133 ./src/sub-systemCode/COMM/APRS.o
+ .debug_abbrev  0x00003773      0x15e ./src/sub-systemCode/COMM/DelayedCommand_list.o
+ .debug_abbrev  0x000038d1      0x121 ./src/sub-systemCode/COMM/GSC.o
+ .debug_abbrev  0x000039f2      0x2b4 ./src/sub-systemCode/COMM/TRXVU.o
+ .debug_abbrev  0x00003ca6      0x240 ./src/sub-systemCode/ADCS/AdcsCommands.o
+ .debug_abbrev  0x00003ee6      0x262 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+ .debug_abbrev  0x00004148      0x132 ./src/sub-systemCode/ADCS/AdcsMain.o
+ .debug_abbrev  0x0000427a       0x7a ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+ .debug_abbrev  0x000042f4       0x69 ./src/sub-systemCode/ADCS/StateMachine.o
+ .debug_abbrev  0x0000435d       0xcd ./src/main.o
+ .debug_abbrev  0x0000442a      0x1bc C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+ .debug_abbrev  0x000045e6      0x1b8 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+ .debug_abbrev  0x0000479e      0x22b C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+ .debug_abbrev  0x000049c9      0x19e C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+ .debug_abbrev  0x00004b67      0x221 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+ .debug_abbrev  0x00004d88      0x1aa C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+ .debug_abbrev  0x00004f32      0x16d C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+ .debug_abbrev  0x0000509f      0x2c0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+ .debug_abbrev  0x0000535f      0x1c9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+ .debug_abbrev  0x00005528      0x265 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+ .debug_abbrev  0x0000578d      0x22f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+ .debug_abbrev  0x000059bc       0xb3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+ .debug_abbrev  0x00005a6f       0x5a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+ .debug_abbrev  0x00005ac9      0x13e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+ .debug_abbrev  0x00005c07       0xb4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+ .debug_abbrev  0x00005cbb      0x1fb C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+ .debug_abbrev  0x00005eb6      0x2ce C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+ .debug_abbrev  0x00006184       0xb3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+ .debug_abbrev  0x00006237      0x2e0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+ .debug_abbrev  0x00006517      0x242 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+ .debug_abbrev  0x00006759      0x257 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+ .debug_abbrev  0x000069b0      0x1ed C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+ .debug_abbrev  0x00006b9d       0xf6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+ .debug_abbrev  0x00006c93       0xd3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+ .debug_abbrev  0x00006d66      0x163 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+ .debug_abbrev  0x00006ec9      0x180 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+ .debug_abbrev  0x00007049       0xf6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+ .debug_abbrev  0x0000713f      0x1af C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+ .debug_abbrev  0x000072ee      0x1e9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+ .debug_abbrev  0x000074d7       0x8a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+ .debug_abbrev  0x00007561       0xc6 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+ .debug_abbrev  0x00007627      0x1dc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+ .debug_abbrev  0x00007803       0xc0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+ .debug_abbrev  0x000078c3      0x152 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+ .debug_abbrev  0x00007a15       0xc3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+ .debug_abbrev  0x00007ad8       0x89 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+ .debug_abbrev  0x00007b61      0x1f7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+ .debug_abbrev  0x00007d58      0x185 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+ .debug_abbrev  0x00007edd       0xd3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+ .debug_abbrev  0x00007fb0      0x115 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+ .debug_abbrev  0x000080c5       0xff C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+ .debug_abbrev  0x000081c4      0x180 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+ .debug_abbrev  0x00008344       0xbf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+ .debug_abbrev  0x00008403       0x12 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
+ .debug_abbrev  0x00008415       0x14 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
+ .debug_abbrev  0x00008429       0xea C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+ .debug_abbrev  0x00008513      0x149 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
 
-.debug_loc      0x00000000     0xe878
+.debug_loc      0x00000000     0xe8e8
  .debug_loc     0x00000000       0x58 ./src/sub-systemCode/payload/Request Management/Dump/Butchering.o
  .debug_loc     0x00000058      0x214 ./src/sub-systemCode/payload/Request Management/Dump/imageDump.o
  .debug_loc     0x0000026c       0xdc ./src/sub-systemCode/payload/Request Management/AutomaticImageHandler.o
@@ -6042,78 +6046,78 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_loc     0x00001bcc      0x1c8 ./src/sub-systemCode/Main/CMD/COMM_CMD.o
  .debug_loc     0x00001d94      0x1c0 ./src/sub-systemCode/Main/CMD/EPS_CMD.o
  .debug_loc     0x00001f54      0x40c ./src/sub-systemCode/Main/CMD/General_CMD.o
- .debug_loc     0x00002360       0x90 ./src/sub-systemCode/Main/CMD/SW_CMD.o
- .debug_loc     0x000023f0      0x18c ./src/sub-systemCode/Main/Ants.o
- .debug_loc     0x0000257c      0x458 ./src/sub-systemCode/Main/EPS.o
- .debug_loc     0x000029d4      0x248 ./src/sub-systemCode/Main/HouseKeeping.o
- .debug_loc     0x00002c1c      0x18c ./src/sub-systemCode/Main/Main_Init.o
- .debug_loc     0x00002da8      0x30c ./src/sub-systemCode/Main/commands.o
- .debug_loc     0x000030b4       0x90 ./src/sub-systemCode/Global/GenericTaskSave.o
- .debug_loc     0x00003144      0x318 ./src/sub-systemCode/Global/Global.o
- .debug_loc     0x0000345c      0x764 ./src/sub-systemCode/Global/GlobalParam.o
- .debug_loc     0x00003bc0      0x4a4 ./src/sub-systemCode/Global/OnlineTM.o
- .debug_loc     0x00004064      0x3f4 ./src/sub-systemCode/Global/TLM_management.o
- .debug_loc     0x00004458       0x58 ./src/sub-systemCode/Global/freertosExtended.o
- .debug_loc     0x000044b0      0x160 ./src/sub-systemCode/Global/logger.o
- .debug_loc     0x00004610      0x3c8 ./src/sub-systemCode/CUF/CUF.o
- .debug_loc     0x000049d8      0x178 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
- .debug_loc     0x00004b50       0xb0 ./src/sub-systemCode/COMM/APRS.o
- .debug_loc     0x00004c00      0x198 ./src/sub-systemCode/COMM/DelayedCommand_list.o
- .debug_loc     0x00004d98      0x158 ./src/sub-systemCode/COMM/GSC.o
- .debug_loc     0x00004ef0      0x554 ./src/sub-systemCode/COMM/TRXVU.o
- .debug_loc     0x00005444       0xb0 ./src/sub-systemCode/ADCS/AdcsCommands.o
- .debug_loc     0x000054f4      0x2c0 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
- .debug_loc     0x000057b4       0x84 ./src/sub-systemCode/ADCS/AdcsMain.o
- .debug_loc     0x00005838       0x2c ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
- .debug_loc     0x00005864       0x58 ./src/sub-systemCode/ADCS/StateMachine.o
- .debug_loc     0x000058bc       0xb0 ./src/main.o
- .debug_loc     0x0000596c      0x420 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
- .debug_loc     0x00005d8c      0x268 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
- .debug_loc     0x00005ff4      0x2c0 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
- .debug_loc     0x000062b4      0x4a4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
- .debug_loc     0x00006758      0xce4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
- .debug_loc     0x0000743c      0xc8c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
- .debug_loc     0x000080c8      0x294 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
- .debug_loc     0x0000835c     0x1398 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
- .debug_loc     0x000096f4      0x974 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
- .debug_loc     0x0000a068      0x9cc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
- .debug_loc     0x0000aa34      0x2c0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
- .debug_loc     0x0000acf4       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
- .debug_loc     0x0000ada4       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
- .debug_loc     0x0000add0       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
- .debug_loc     0x0000ae80       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
- .debug_loc     0x0000aeac      0x370 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
- .debug_loc     0x0000b21c      0x70c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
- .debug_loc     0x0000b928       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
- .debug_loc     0x0000b980      0x3c8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
- .debug_loc     0x0000bd48      0x210 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
- .debug_loc     0x0000bf58      0x268 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
- .debug_loc     0x0000c1c0      0x268 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
- .debug_loc     0x0000c428       0x84 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
- .debug_loc     0x0000c4ac       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
- .debug_loc     0x0000c55c      0x134 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
- .debug_loc     0x0000c690      0x1b8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
- .debug_loc     0x0000c848       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
- .debug_loc     0x0000c924      0x420 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
- .debug_loc     0x0000cd44      0x65c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
- .debug_loc     0x0000d3a0       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
- .debug_loc     0x0000d3f8       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
- .debug_loc     0x0000d4a8      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
- .debug_loc     0x0000d608       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
- .debug_loc     0x0000d6e4      0x324 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
- .debug_loc     0x0000da08       0x84 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
- .debug_loc     0x0000da8c      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
- .debug_loc     0x0000dc18      0x134 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
- .debug_loc     0x0000dd4c      0x1b8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
- .debug_loc     0x0000df04      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
- .debug_loc     0x0000e090      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
- .debug_loc     0x0000e1f0      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
- .debug_loc     0x0000e37c      0x294 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
- .debug_loc     0x0000e610       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
- .debug_loc     0x0000e6ec       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
- .debug_loc     0x0000e7c8       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+ .debug_loc     0x00002360      0x100 ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .debug_loc     0x00002460      0x18c ./src/sub-systemCode/Main/Ants.o
+ .debug_loc     0x000025ec      0x458 ./src/sub-systemCode/Main/EPS.o
+ .debug_loc     0x00002a44      0x248 ./src/sub-systemCode/Main/HouseKeeping.o
+ .debug_loc     0x00002c8c      0x18c ./src/sub-systemCode/Main/Main_Init.o
+ .debug_loc     0x00002e18      0x30c ./src/sub-systemCode/Main/commands.o
+ .debug_loc     0x00003124       0x90 ./src/sub-systemCode/Global/GenericTaskSave.o
+ .debug_loc     0x000031b4      0x318 ./src/sub-systemCode/Global/Global.o
+ .debug_loc     0x000034cc      0x764 ./src/sub-systemCode/Global/GlobalParam.o
+ .debug_loc     0x00003c30      0x4a4 ./src/sub-systemCode/Global/OnlineTM.o
+ .debug_loc     0x000040d4      0x3f4 ./src/sub-systemCode/Global/TLM_management.o
+ .debug_loc     0x000044c8       0x58 ./src/sub-systemCode/Global/freertosExtended.o
+ .debug_loc     0x00004520      0x160 ./src/sub-systemCode/Global/logger.o
+ .debug_loc     0x00004680      0x3c8 ./src/sub-systemCode/CUF/CUF.o
+ .debug_loc     0x00004a48      0x178 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+ .debug_loc     0x00004bc0       0xb0 ./src/sub-systemCode/COMM/APRS.o
+ .debug_loc     0x00004c70      0x198 ./src/sub-systemCode/COMM/DelayedCommand_list.o
+ .debug_loc     0x00004e08      0x158 ./src/sub-systemCode/COMM/GSC.o
+ .debug_loc     0x00004f60      0x554 ./src/sub-systemCode/COMM/TRXVU.o
+ .debug_loc     0x000054b4       0xb0 ./src/sub-systemCode/ADCS/AdcsCommands.o
+ .debug_loc     0x00005564      0x2c0 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+ .debug_loc     0x00005824       0x84 ./src/sub-systemCode/ADCS/AdcsMain.o
+ .debug_loc     0x000058a8       0x2c ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+ .debug_loc     0x000058d4       0x58 ./src/sub-systemCode/ADCS/StateMachine.o
+ .debug_loc     0x0000592c       0xb0 ./src/main.o
+ .debug_loc     0x000059dc      0x420 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+ .debug_loc     0x00005dfc      0x268 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+ .debug_loc     0x00006064      0x2c0 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+ .debug_loc     0x00006324      0x4a4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+ .debug_loc     0x000067c8      0xce4 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+ .debug_loc     0x000074ac      0xc8c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+ .debug_loc     0x00008138      0x294 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+ .debug_loc     0x000083cc     0x1398 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+ .debug_loc     0x00009764      0x974 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+ .debug_loc     0x0000a0d8      0x9cc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+ .debug_loc     0x0000aaa4      0x2c0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+ .debug_loc     0x0000ad64       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+ .debug_loc     0x0000ae14       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+ .debug_loc     0x0000ae40       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+ .debug_loc     0x0000aef0       0x2c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+ .debug_loc     0x0000af1c      0x370 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+ .debug_loc     0x0000b28c      0x70c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+ .debug_loc     0x0000b998       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+ .debug_loc     0x0000b9f0      0x3c8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+ .debug_loc     0x0000bdb8      0x210 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+ .debug_loc     0x0000bfc8      0x268 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+ .debug_loc     0x0000c230      0x268 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+ .debug_loc     0x0000c498       0x84 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+ .debug_loc     0x0000c51c       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+ .debug_loc     0x0000c5cc      0x134 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+ .debug_loc     0x0000c700      0x1b8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+ .debug_loc     0x0000c8b8       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+ .debug_loc     0x0000c994      0x420 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+ .debug_loc     0x0000cdb4      0x65c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+ .debug_loc     0x0000d410       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+ .debug_loc     0x0000d468       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+ .debug_loc     0x0000d518      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+ .debug_loc     0x0000d678       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+ .debug_loc     0x0000d754      0x324 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+ .debug_loc     0x0000da78       0x84 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+ .debug_loc     0x0000dafc      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+ .debug_loc     0x0000dc88      0x134 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+ .debug_loc     0x0000ddbc      0x1b8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+ .debug_loc     0x0000df74      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+ .debug_loc     0x0000e100      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+ .debug_loc     0x0000e260      0x18c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+ .debug_loc     0x0000e3ec      0x294 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+ .debug_loc     0x0000e680       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+ .debug_loc     0x0000e75c       0xdc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+ .debug_loc     0x0000e838       0xb0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
 
-.debug_aranges  0x00000000     0x32e0
+.debug_aranges  0x00000000     0x32f0
  .debug_aranges
                 0x00000000       0x28 ./src/sub-systemCode/payload/Request Management/Dump/Butchering.o
  .debug_aranges
@@ -6161,151 +6165,151 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_aranges
                 0x00000790       0xb8 ./src/sub-systemCode/Main/CMD/General_CMD.o
  .debug_aranges
-                0x00000848       0x30 ./src/sub-systemCode/Main/CMD/SW_CMD.o
+                0x00000848       0x40 ./src/sub-systemCode/Main/CMD/SW_CMD.o
  .debug_aranges
-                0x00000878       0x60 ./src/sub-systemCode/Main/Ants.o
+                0x00000888       0x60 ./src/sub-systemCode/Main/Ants.o
  .debug_aranges
-                0x000008d8       0xe0 ./src/sub-systemCode/Main/EPS.o
+                0x000008e8       0xe0 ./src/sub-systemCode/Main/EPS.o
  .debug_aranges
-                0x000009b8       0x80 ./src/sub-systemCode/Main/HouseKeeping.o
+                0x000009c8       0x80 ./src/sub-systemCode/Main/HouseKeeping.o
  .debug_aranges
-                0x00000a38       0x60 ./src/sub-systemCode/Main/Main_Init.o
+                0x00000a48       0x60 ./src/sub-systemCode/Main/Main_Init.o
  .debug_aranges
-                0x00000a98       0x90 ./src/sub-systemCode/Main/commands.o
+                0x00000aa8       0x90 ./src/sub-systemCode/Main/commands.o
  .debug_aranges
-                0x00000b28       0x30 ./src/sub-systemCode/Global/GenericTaskSave.o
+                0x00000b38       0x30 ./src/sub-systemCode/Global/GenericTaskSave.o
  .debug_aranges
-                0x00000b58       0xa8 ./src/sub-systemCode/Global/Global.o
+                0x00000b68       0xa8 ./src/sub-systemCode/Global/Global.o
  .debug_aranges
-                0x00000c00      0x170 ./src/sub-systemCode/Global/GlobalParam.o
+                0x00000c10      0x170 ./src/sub-systemCode/Global/GlobalParam.o
  .debug_aranges
-                0x00000d70       0xf0 ./src/sub-systemCode/Global/OnlineTM.o
+                0x00000d80       0xf0 ./src/sub-systemCode/Global/OnlineTM.o
  .debug_aranges
-                0x00000e60       0xd0 ./src/sub-systemCode/Global/TLM_management.o
+                0x00000e70       0xd0 ./src/sub-systemCode/Global/TLM_management.o
  .debug_aranges
-                0x00000f30       0x28 ./src/sub-systemCode/Global/freertosExtended.o
+                0x00000f40       0x28 ./src/sub-systemCode/Global/freertosExtended.o
  .debug_aranges
-                0x00000f58       0x58 ./src/sub-systemCode/Global/logger.o
+                0x00000f68       0x58 ./src/sub-systemCode/Global/logger.o
  .debug_aranges
-                0x00000fb0       0xc8 ./src/sub-systemCode/CUF/CUF.o
+                0x00000fc0       0xc8 ./src/sub-systemCode/CUF/CUF.o
  .debug_aranges
-                0x00001078       0x58 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+                0x00001088       0x58 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
  .debug_aranges
-                0x000010d0       0x38 ./src/sub-systemCode/COMM/APRS.o
+                0x000010e0       0x38 ./src/sub-systemCode/COMM/APRS.o
  .debug_aranges
-                0x00001108       0x60 ./src/sub-systemCode/COMM/DelayedCommand_list.o
+                0x00001118       0x60 ./src/sub-systemCode/COMM/DelayedCommand_list.o
  .debug_aranges
-                0x00001168       0x50 ./src/sub-systemCode/COMM/GSC.o
+                0x00001178       0x50 ./src/sub-systemCode/COMM/GSC.o
  .debug_aranges
-                0x000011b8      0x110 ./src/sub-systemCode/COMM/TRXVU.o
+                0x000011c8      0x110 ./src/sub-systemCode/COMM/TRXVU.o
  .debug_aranges
-                0x000012c8       0x38 ./src/sub-systemCode/ADCS/AdcsCommands.o
+                0x000012d8       0x38 ./src/sub-systemCode/ADCS/AdcsCommands.o
  .debug_aranges
-                0x00001300       0x98 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+                0x00001310       0x98 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
  .debug_aranges
-                0x00001398       0x30 ./src/sub-systemCode/ADCS/AdcsMain.o
+                0x000013a8       0x30 ./src/sub-systemCode/ADCS/AdcsMain.o
  .debug_aranges
-                0x000013c8       0x20 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+                0x000013d8       0x20 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
  .debug_aranges
-                0x000013e8       0x28 ./src/sub-systemCode/ADCS/StateMachine.o
+                0x000013f8       0x28 ./src/sub-systemCode/ADCS/StateMachine.o
  .debug_aranges
-                0x00001410       0x38 ./src/main.o
+                0x00001420       0x38 ./src/main.o
  .debug_aranges
-                0x00001448       0xd8 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+                0x00001458       0xd8 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
  .debug_aranges
-                0x00001520       0x88 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+                0x00001530       0x88 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
  .debug_aranges
-                0x000015a8       0x98 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+                0x000015b8       0x98 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
  .debug_aranges
-                0x00001640       0xf0 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+                0x00001650       0xf0 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
  .debug_aranges
-                0x00001730      0x270 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+                0x00001740      0x270 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
  .debug_aranges
-                0x000019a0      0x260 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+                0x000019b0      0x260 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
  .debug_aranges
-                0x00001c00       0x90 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+                0x00001c10       0x90 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
  .debug_aranges
-                0x00001c90      0x3a8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+                0x00001ca0      0x3a8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
  .debug_aranges
-                0x00002038      0x1d0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+                0x00002048      0x1d0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
  .debug_aranges
-                0x00002208      0x1e0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+                0x00002218      0x1e0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
  .debug_aranges
-                0x000023e8       0x98 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+                0x000023f8       0x98 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
  .debug_aranges
-                0x00002480       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+                0x00002490       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
  .debug_aranges
-                0x000024b8       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+                0x000024c8       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
  .debug_aranges
-                0x000024d8       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+                0x000024e8       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
  .debug_aranges
-                0x00002510       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+                0x00002520       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
  .debug_aranges
-                0x00002530       0xb8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+                0x00002540       0xb8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
  .debug_aranges
-                0x000025e8      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+                0x000025f8      0x160 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
  .debug_aranges
-                0x00002748       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+                0x00002758       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
  .debug_aranges
-                0x00002770       0xc8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+                0x00002780       0xc8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
  .debug_aranges
-                0x00002838       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+                0x00002848       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
  .debug_aranges
-                0x000028b0       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+                0x000028c0       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
  .debug_aranges
-                0x00002938       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+                0x00002948       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
  .debug_aranges
-                0x000029c0       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+                0x000029d0       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
  .debug_aranges
-                0x000029f0       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+                0x00002a00       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
  .debug_aranges
-                0x00002a28       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+                0x00002a38       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
  .debug_aranges
-                0x00002a78       0x68 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+                0x00002a88       0x68 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
  .debug_aranges
-                0x00002ae0       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+                0x00002af0       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
  .debug_aranges
-                0x00002b20       0xd8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+                0x00002b30       0xd8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
  .debug_aranges
-                0x00002bf8      0x140 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+                0x00002c08      0x140 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
  .debug_aranges
-                0x00002d38       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+                0x00002d48       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
  .debug_aranges
-                0x00002d60       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+                0x00002d70       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
  .debug_aranges
-                0x00002d98       0x70 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+                0x00002da8       0x70 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
  .debug_aranges
-                0x00002e08       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+                0x00002e18       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
  .debug_aranges
-                0x00002e48       0xa8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+                0x00002e58       0xa8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
  .debug_aranges
-                0x00002ef0       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+                0x00002f00       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
  .debug_aranges
-                0x00002f20       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+                0x00002f30       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
  .debug_aranges
-                0x00002f80       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+                0x00002f90       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
  .debug_aranges
-                0x00002fd0       0x68 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+                0x00002fe0       0x68 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
  .debug_aranges
-                0x00003038       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+                0x00003048       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
  .debug_aranges
-                0x00003098       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+                0x000030a8       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
  .debug_aranges
-                0x000030f0       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+                0x00003100       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
  .debug_aranges
-                0x00003150       0x90 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+                0x00003160       0x90 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
  .debug_aranges
-                0x000031e0       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+                0x000031f0       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
  .debug_aranges
-                0x00003220       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
+                0x00003230       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
  .debug_aranges
-                0x00003248       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
+                0x00003258       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
  .debug_aranges
-                0x00003268       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+                0x00003278       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
  .debug_aranges
-                0x000032a8       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+                0x000032b8       0x38 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
 
-.debug_ranges   0x00000000     0x2e20
+.debug_ranges   0x00000000     0x2e30
  .debug_ranges  0x00000000       0x18 ./src/sub-systemCode/payload/Request Management/Dump/Butchering.o
  .debug_ranges  0x00000018       0x78 ./src/sub-systemCode/payload/Request Management/Dump/imageDump.o
  .debug_ranges  0x00000090       0x30 ./src/sub-systemCode/payload/Request Management/AutomaticImageHandler.o
@@ -6329,79 +6333,79 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_ranges  0x000005c8       0x50 ./src/sub-systemCode/Main/CMD/COMM_CMD.o
  .debug_ranges  0x00000618       0x48 ./src/sub-systemCode/Main/CMD/EPS_CMD.o
  .debug_ranges  0x00000660       0xa8 ./src/sub-systemCode/Main/CMD/General_CMD.o
- .debug_ranges  0x00000708       0x20 ./src/sub-systemCode/Main/CMD/SW_CMD.o
- .debug_ranges  0x00000728       0x50 ./src/sub-systemCode/Main/Ants.o
- .debug_ranges  0x00000778       0xd0 ./src/sub-systemCode/Main/EPS.o
- .debug_ranges  0x00000848       0x70 ./src/sub-systemCode/Main/HouseKeeping.o
- .debug_ranges  0x000008b8       0x50 ./src/sub-systemCode/Main/Main_Init.o
- .debug_ranges  0x00000908       0x80 ./src/sub-systemCode/Main/commands.o
- .debug_ranges  0x00000988       0x20 ./src/sub-systemCode/Global/GenericTaskSave.o
- .debug_ranges  0x000009a8       0x98 ./src/sub-systemCode/Global/Global.o
- .debug_ranges  0x00000a40      0x160 ./src/sub-systemCode/Global/GlobalParam.o
- .debug_ranges  0x00000ba0       0xe0 ./src/sub-systemCode/Global/OnlineTM.o
- .debug_ranges  0x00000c80       0xf0 ./src/sub-systemCode/Global/TLM_management.o
- .debug_ranges  0x00000d70       0x18 ./src/sub-systemCode/Global/freertosExtended.o
- .debug_ranges  0x00000d88       0x48 ./src/sub-systemCode/Global/logger.o
- .debug_ranges  0x00000dd0       0xb8 ./src/sub-systemCode/CUF/CUF.o
- .debug_ranges  0x00000e88       0x48 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
- .debug_ranges  0x00000ed0       0x28 ./src/sub-systemCode/COMM/APRS.o
- .debug_ranges  0x00000ef8       0x50 ./src/sub-systemCode/COMM/DelayedCommand_list.o
- .debug_ranges  0x00000f48       0x40 ./src/sub-systemCode/COMM/GSC.o
- .debug_ranges  0x00000f88      0x100 ./src/sub-systemCode/COMM/TRXVU.o
- .debug_ranges  0x00001088       0x28 ./src/sub-systemCode/ADCS/AdcsCommands.o
- .debug_ranges  0x000010b0       0x88 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
- .debug_ranges  0x00001138       0x20 ./src/sub-systemCode/ADCS/AdcsMain.o
- .debug_ranges  0x00001158       0x10 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
- .debug_ranges  0x00001168       0x18 ./src/sub-systemCode/ADCS/StateMachine.o
- .debug_ranges  0x00001180       0x28 ./src/main.o
- .debug_ranges  0x000011a8       0xc8 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
- .debug_ranges  0x00001270       0x78 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
- .debug_ranges  0x000012e8       0x88 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
- .debug_ranges  0x00001370       0xe0 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
- .debug_ranges  0x00001450      0x260 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
- .debug_ranges  0x000016b0      0x250 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
- .debug_ranges  0x00001900       0x80 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
- .debug_ranges  0x00001980      0x3b0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
- .debug_ranges  0x00001d30      0x1c0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
- .debug_ranges  0x00001ef0      0x1e8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
- .debug_ranges  0x000020d8       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
- .debug_ranges  0x00002160       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
- .debug_ranges  0x00002188       0x10 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
- .debug_ranges  0x00002198       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
- .debug_ranges  0x000021c0       0x10 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
- .debug_ranges  0x000021d0       0xc0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
- .debug_ranges  0x00002290      0x1c8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
- .debug_ranges  0x00002458       0x18 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
- .debug_ranges  0x00002470       0xb8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
- .debug_ranges  0x00002528       0x68 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
- .debug_ranges  0x00002590       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
- .debug_ranges  0x00002608       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
- .debug_ranges  0x00002680       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
- .debug_ranges  0x000026a0       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
- .debug_ranges  0x000026c8       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
- .debug_ranges  0x00002708       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
- .debug_ranges  0x00002760       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
- .debug_ranges  0x00002790       0xc8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
- .debug_ranges  0x00002858      0x148 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
- .debug_ranges  0x000029a0       0x18 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
- .debug_ranges  0x000029b8       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
- .debug_ranges  0x000029e0       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
- .debug_ranges  0x00002a40       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
- .debug_ranges  0x00002a70       0x98 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
- .debug_ranges  0x00002b08       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
- .debug_ranges  0x00002b28       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
- .debug_ranges  0x00002b78       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
- .debug_ranges  0x00002bb8       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
- .debug_ranges  0x00002c10       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
- .debug_ranges  0x00002c60       0x48 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
- .debug_ranges  0x00002ca8       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
- .debug_ranges  0x00002cf8       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
- .debug_ranges  0x00002d78       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
- .debug_ranges  0x00002da8       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
- .debug_ranges  0x00002dc8       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
- .debug_ranges  0x00002df8       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+ .debug_ranges  0x00000708       0x30 ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .debug_ranges  0x00000738       0x50 ./src/sub-systemCode/Main/Ants.o
+ .debug_ranges  0x00000788       0xd0 ./src/sub-systemCode/Main/EPS.o
+ .debug_ranges  0x00000858       0x70 ./src/sub-systemCode/Main/HouseKeeping.o
+ .debug_ranges  0x000008c8       0x50 ./src/sub-systemCode/Main/Main_Init.o
+ .debug_ranges  0x00000918       0x80 ./src/sub-systemCode/Main/commands.o
+ .debug_ranges  0x00000998       0x20 ./src/sub-systemCode/Global/GenericTaskSave.o
+ .debug_ranges  0x000009b8       0x98 ./src/sub-systemCode/Global/Global.o
+ .debug_ranges  0x00000a50      0x160 ./src/sub-systemCode/Global/GlobalParam.o
+ .debug_ranges  0x00000bb0       0xe0 ./src/sub-systemCode/Global/OnlineTM.o
+ .debug_ranges  0x00000c90       0xf0 ./src/sub-systemCode/Global/TLM_management.o
+ .debug_ranges  0x00000d80       0x18 ./src/sub-systemCode/Global/freertosExtended.o
+ .debug_ranges  0x00000d98       0x48 ./src/sub-systemCode/Global/logger.o
+ .debug_ranges  0x00000de0       0xb8 ./src/sub-systemCode/CUF/CUF.o
+ .debug_ranges  0x00000e98       0x48 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+ .debug_ranges  0x00000ee0       0x28 ./src/sub-systemCode/COMM/APRS.o
+ .debug_ranges  0x00000f08       0x50 ./src/sub-systemCode/COMM/DelayedCommand_list.o
+ .debug_ranges  0x00000f58       0x40 ./src/sub-systemCode/COMM/GSC.o
+ .debug_ranges  0x00000f98      0x100 ./src/sub-systemCode/COMM/TRXVU.o
+ .debug_ranges  0x00001098       0x28 ./src/sub-systemCode/ADCS/AdcsCommands.o
+ .debug_ranges  0x000010c0       0x88 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+ .debug_ranges  0x00001148       0x20 ./src/sub-systemCode/ADCS/AdcsMain.o
+ .debug_ranges  0x00001168       0x10 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+ .debug_ranges  0x00001178       0x18 ./src/sub-systemCode/ADCS/StateMachine.o
+ .debug_ranges  0x00001190       0x28 ./src/main.o
+ .debug_ranges  0x000011b8       0xc8 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+ .debug_ranges  0x00001280       0x78 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+ .debug_ranges  0x000012f8       0x88 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+ .debug_ranges  0x00001380       0xe0 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+ .debug_ranges  0x00001460      0x260 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+ .debug_ranges  0x000016c0      0x250 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+ .debug_ranges  0x00001910       0x80 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+ .debug_ranges  0x00001990      0x3b0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+ .debug_ranges  0x00001d40      0x1c0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+ .debug_ranges  0x00001f00      0x1e8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+ .debug_ranges  0x000020e8       0x88 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+ .debug_ranges  0x00002170       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+ .debug_ranges  0x00002198       0x10 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+ .debug_ranges  0x000021a8       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+ .debug_ranges  0x000021d0       0x10 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+ .debug_ranges  0x000021e0       0xc0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+ .debug_ranges  0x000022a0      0x1c8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+ .debug_ranges  0x00002468       0x18 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+ .debug_ranges  0x00002480       0xb8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+ .debug_ranges  0x00002538       0x68 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+ .debug_ranges  0x000025a0       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+ .debug_ranges  0x00002618       0x78 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+ .debug_ranges  0x00002690       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+ .debug_ranges  0x000026b0       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+ .debug_ranges  0x000026d8       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+ .debug_ranges  0x00002718       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+ .debug_ranges  0x00002770       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+ .debug_ranges  0x000027a0       0xc8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+ .debug_ranges  0x00002868      0x148 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+ .debug_ranges  0x000029b0       0x18 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+ .debug_ranges  0x000029c8       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+ .debug_ranges  0x000029f0       0x60 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+ .debug_ranges  0x00002a50       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+ .debug_ranges  0x00002a80       0x98 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+ .debug_ranges  0x00002b18       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+ .debug_ranges  0x00002b38       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+ .debug_ranges  0x00002b88       0x40 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+ .debug_ranges  0x00002bc8       0x58 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+ .debug_ranges  0x00002c20       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+ .debug_ranges  0x00002c70       0x48 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+ .debug_ranges  0x00002cb8       0x50 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+ .debug_ranges  0x00002d08       0x80 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+ .debug_ranges  0x00002d88       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+ .debug_ranges  0x00002db8       0x20 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
+ .debug_ranges  0x00002dd8       0x30 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+ .debug_ranges  0x00002e08       0x28 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
 
-.debug_line     0x00000000    0x16783
+.debug_line     0x00000000    0x167e1
  .debug_line    0x00000000      0x1a3 ./src/sub-systemCode/payload/Request Management/Dump/Butchering.o
  .debug_line    0x000001a3      0x6ea ./src/sub-systemCode/payload/Request Management/Dump/imageDump.o
  .debug_line    0x0000088d      0x29f ./src/sub-systemCode/payload/Request Management/AutomaticImageHandler.o
@@ -6425,80 +6429,80 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
  .debug_line    0x00004437      0x3c9 ./src/sub-systemCode/Main/CMD/COMM_CMD.o
  .debug_line    0x00004800      0x2ee ./src/sub-systemCode/Main/CMD/EPS_CMD.o
  .debug_line    0x00004aee      0x5a7 ./src/sub-systemCode/Main/CMD/General_CMD.o
- .debug_line    0x00005095      0x20c ./src/sub-systemCode/Main/CMD/SW_CMD.o
- .debug_line    0x000052a1      0x30f ./src/sub-systemCode/Main/Ants.o
- .debug_line    0x000055b0      0x567 ./src/sub-systemCode/Main/EPS.o
- .debug_line    0x00005b17      0x4fb ./src/sub-systemCode/Main/HouseKeeping.o
- .debug_line    0x00006012      0x4e8 ./src/sub-systemCode/Main/Main_Init.o
- .debug_line    0x000064fa      0x54c ./src/sub-systemCode/Main/commands.o
- .debug_line    0x00006a46      0x149 ./src/sub-systemCode/Global/GenericTaskSave.o
- .debug_line    0x00006b8f      0x36b ./src/sub-systemCode/Global/Global.o
- .debug_line    0x00006efa      0x743 ./src/sub-systemCode/Global/GlobalParam.o
- .debug_line    0x0000763d      0x85e ./src/sub-systemCode/Global/OnlineTM.o
- .debug_line    0x00007e9b      0x5f7 ./src/sub-systemCode/Global/TLM_management.o
- .debug_line    0x00008492      0x14f ./src/sub-systemCode/Global/freertosExtended.o
- .debug_line    0x000085e1      0x14f ./src/sub-systemCode/Global/logger.o
- .debug_line    0x00008730      0x4f5 ./src/sub-systemCode/CUF/CUF.o
- .debug_line    0x00008c25      0x388 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
- .debug_line    0x00008fad      0x20e ./src/sub-systemCode/COMM/APRS.o
- .debug_line    0x000091bb      0x28b ./src/sub-systemCode/COMM/DelayedCommand_list.o
- .debug_line    0x00009446      0x1d8 ./src/sub-systemCode/COMM/GSC.o
- .debug_line    0x0000961e      0x95d ./src/sub-systemCode/COMM/TRXVU.o
- .debug_line    0x00009f7b      0x505 ./src/sub-systemCode/ADCS/AdcsCommands.o
- .debug_line    0x0000a480      0x478 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
- .debug_line    0x0000a8f8      0x2ef ./src/sub-systemCode/ADCS/AdcsMain.o
- .debug_line    0x0000abe7       0x7f ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
- .debug_line    0x0000ac66       0x85 ./src/sub-systemCode/ADCS/StateMachine.o
- .debug_line    0x0000aceb      0x1ee ./src/main.o
- .debug_line    0x0000aed9      0x67c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
- .debug_line    0x0000b555      0x310 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
- .debug_line    0x0000b865      0x466 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
- .debug_line    0x0000bccb      0x48a C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
- .debug_line    0x0000c155      0x9d2 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
- .debug_line    0x0000cb27      0xb96 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
- .debug_line    0x0000d6bd      0x279 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
- .debug_line    0x0000d936     0x1b99 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
- .debug_line    0x0000f4cf      0x637 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
- .debug_line    0x0000fb06      0xcb9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
- .debug_line    0x000107bf      0x574 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
- .debug_line    0x00010d33      0x14d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
- .debug_line    0x00010e80       0x92 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
- .debug_line    0x00010f12      0x18b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
- .debug_line    0x0001109d      0x132 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
- .debug_line    0x000111cf      0x5b7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
- .debug_line    0x00011786     0x1081 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
- .debug_line    0x00012807      0x133 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
- .debug_line    0x0001293a      0x4fa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
- .debug_line    0x00012e34      0x3d7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
- .debug_line    0x0001320b      0x352 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
- .debug_line    0x0001355d      0x379 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
- .debug_line    0x000138d6       0xe3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
- .debug_line    0x000139b9      0x147 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
- .debug_line    0x00013b00      0x1fa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
- .debug_line    0x00013cfa      0x26f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
- .debug_line    0x00013f69       0xe8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
- .debug_line    0x00014051      0x5ae C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
- .debug_line    0x000145ff      0x82a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
- .debug_line    0x00014e29       0x77 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
- .debug_line    0x00014ea0       0xf9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
- .debug_line    0x00014f99      0x1ea C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
- .debug_line    0x00015183      0x10e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
- .debug_line    0x00015291      0x356 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
- .debug_line    0x000155e7       0xb2 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
- .debug_line    0x00015699      0x101 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
- .debug_line    0x0001579a      0x2cc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
- .debug_line    0x00015a66      0x1b7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
- .debug_line    0x00015c1d      0x136 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
- .debug_line    0x00015d53      0x145 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
- .debug_line    0x00015e98      0x14e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
- .debug_line    0x00015fe6      0x2e9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
- .debug_line    0x000162cf       0xda C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
- .debug_line    0x000163a9      0x109 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
- .debug_line    0x000164b2       0x6f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
- .debug_line    0x00016521      0x122 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
- .debug_line    0x00016643      0x140 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+ .debug_line    0x00005095      0x26a ./src/sub-systemCode/Main/CMD/SW_CMD.o
+ .debug_line    0x000052ff      0x30f ./src/sub-systemCode/Main/Ants.o
+ .debug_line    0x0000560e      0x567 ./src/sub-systemCode/Main/EPS.o
+ .debug_line    0x00005b75      0x4fb ./src/sub-systemCode/Main/HouseKeeping.o
+ .debug_line    0x00006070      0x4e8 ./src/sub-systemCode/Main/Main_Init.o
+ .debug_line    0x00006558      0x54c ./src/sub-systemCode/Main/commands.o
+ .debug_line    0x00006aa4      0x149 ./src/sub-systemCode/Global/GenericTaskSave.o
+ .debug_line    0x00006bed      0x36b ./src/sub-systemCode/Global/Global.o
+ .debug_line    0x00006f58      0x743 ./src/sub-systemCode/Global/GlobalParam.o
+ .debug_line    0x0000769b      0x85e ./src/sub-systemCode/Global/OnlineTM.o
+ .debug_line    0x00007ef9      0x5f7 ./src/sub-systemCode/Global/TLM_management.o
+ .debug_line    0x000084f0      0x14f ./src/sub-systemCode/Global/freertosExtended.o
+ .debug_line    0x0000863f      0x14f ./src/sub-systemCode/Global/logger.o
+ .debug_line    0x0000878e      0x4f5 ./src/sub-systemCode/CUF/CUF.o
+ .debug_line    0x00008c83      0x388 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+ .debug_line    0x0000900b      0x20e ./src/sub-systemCode/COMM/APRS.o
+ .debug_line    0x00009219      0x28b ./src/sub-systemCode/COMM/DelayedCommand_list.o
+ .debug_line    0x000094a4      0x1d8 ./src/sub-systemCode/COMM/GSC.o
+ .debug_line    0x0000967c      0x95d ./src/sub-systemCode/COMM/TRXVU.o
+ .debug_line    0x00009fd9      0x505 ./src/sub-systemCode/ADCS/AdcsCommands.o
+ .debug_line    0x0000a4de      0x478 ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+ .debug_line    0x0000a956      0x2ef ./src/sub-systemCode/ADCS/AdcsMain.o
+ .debug_line    0x0000ac45       0x7f ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+ .debug_line    0x0000acc4       0x85 ./src/sub-systemCode/ADCS/StateMachine.o
+ .debug_line    0x0000ad49      0x1ee ./src/main.o
+ .debug_line    0x0000af37      0x67c C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+ .debug_line    0x0000b5b3      0x310 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+ .debug_line    0x0000b8c3      0x466 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+ .debug_line    0x0000bd29      0x48a C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+ .debug_line    0x0000c1b3      0x9d2 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+ .debug_line    0x0000cb85      0xb96 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+ .debug_line    0x0000d71b      0x279 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+ .debug_line    0x0000d994     0x1b99 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+ .debug_line    0x0000f52d      0x637 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+ .debug_line    0x0000fb64      0xcb9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+ .debug_line    0x0001081d      0x574 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+ .debug_line    0x00010d91      0x14d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+ .debug_line    0x00010ede       0x92 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+ .debug_line    0x00010f70      0x18b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+ .debug_line    0x000110fb      0x132 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+ .debug_line    0x0001122d      0x5b7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+ .debug_line    0x000117e4     0x1081 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+ .debug_line    0x00012865      0x133 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+ .debug_line    0x00012998      0x4fa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+ .debug_line    0x00012e92      0x3d7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+ .debug_line    0x00013269      0x352 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+ .debug_line    0x000135bb      0x379 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+ .debug_line    0x00013934       0xe3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+ .debug_line    0x00013a17      0x147 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+ .debug_line    0x00013b5e      0x1fa C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+ .debug_line    0x00013d58      0x26f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+ .debug_line    0x00013fc7       0xe8 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+ .debug_line    0x000140af      0x5ae C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+ .debug_line    0x0001465d      0x82a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+ .debug_line    0x00014e87       0x77 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+ .debug_line    0x00014efe       0xf9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+ .debug_line    0x00014ff7      0x1ea C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+ .debug_line    0x000151e1      0x10e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+ .debug_line    0x000152ef      0x356 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+ .debug_line    0x00015645       0xb2 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+ .debug_line    0x000156f7      0x101 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+ .debug_line    0x000157f8      0x2cc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+ .debug_line    0x00015ac4      0x1b7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+ .debug_line    0x00015c7b      0x136 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+ .debug_line    0x00015db1      0x145 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+ .debug_line    0x00015ef6      0x14e C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+ .debug_line    0x00016044      0x2e9 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+ .debug_line    0x0001632d       0xda C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+ .debug_line    0x00016407      0x109 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_cstartup.o)
+ .debug_line    0x00016510       0x6f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15_asm.o)
+ .debug_line    0x0001657f      0x122 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+ .debug_line    0x000166a1      0x140 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
 
-.debug_str      0x00000000    0x10f2a
+.debug_str      0x00000000    0x10f50
  .debug_str     0x00000000      0x320 ./src/sub-systemCode/payload/Request Management/Dump/Butchering.o
                                 0x388 (size before relaxing)
  .debug_str     0x00000320      0xea1 ./src/sub-systemCode/payload/Request Management/Dump/imageDump.o
@@ -6545,143 +6549,143 @@ OUTPUT(Hoopoe3.elf elf32-littlearm)
                                 0x4db (size before relaxing)
  .debug_str     0x00003e56      0x530 ./src/sub-systemCode/Main/CMD/General_CMD.o
                                0x132b (size before relaxing)
- .debug_str     0x00004386       0x6a ./src/sub-systemCode/Main/CMD/SW_CMD.o
-                                0x40e (size before relaxing)
- .debug_str     0x000043f0      0x2bb ./src/sub-systemCode/Main/Ants.o
+ .debug_str     0x00004386       0xa5 ./src/sub-systemCode/Main/CMD/SW_CMD.o
+                                0x474 (size before relaxing)
+ .debug_str     0x0000442b      0x2bb ./src/sub-systemCode/Main/Ants.o
                                 0xe1d (size before relaxing)
- .debug_str     0x000046ab      0x59f ./src/sub-systemCode/Main/EPS.o
+ .debug_str     0x000046e6      0x59f ./src/sub-systemCode/Main/EPS.o
                                0x11fb (size before relaxing)
- .debug_str     0x00004c4a      0x58f ./src/sub-systemCode/Main/HouseKeeping.o
+ .debug_str     0x00004c85      0x58f ./src/sub-systemCode/Main/HouseKeeping.o
                                0x1adb (size before relaxing)
- .debug_str     0x000051d9      0x15c ./src/sub-systemCode/Main/Main_Init.o
+ .debug_str     0x00005214      0x15c ./src/sub-systemCode/Main/Main_Init.o
                                 0x5aa (size before relaxing)
- .debug_str     0x00005335      0x121 ./src/sub-systemCode/Main/commands.o
+ .debug_str     0x00005370      0x121 ./src/sub-systemCode/Main/commands.o
                                0x1115 (size before relaxing)
- .debug_str     0x00005456       0x92 ./src/sub-systemCode/Global/GenericTaskSave.o
+ .debug_str     0x00005491       0x92 ./src/sub-systemCode/Global/GenericTaskSave.o
                                 0x2db (size before relaxing)
- .debug_str     0x000054e8      0x261 ./src/sub-systemCode/Global/Global.o
+ .debug_str     0x00005523      0x261 ./src/sub-systemCode/Global/Global.o
                                 0xebb (size before relaxing)
- .debug_str     0x00005749      0x2eb ./src/sub-systemCode/Global/GlobalParam.o
+ .debug_str     0x00005784      0x2eb ./src/sub-systemCode/Global/GlobalParam.o
                                 0xfaf (size before relaxing)
- .debug_str     0x00005a34      0x39a ./src/sub-systemCode/Global/OnlineTM.o
+ .debug_str     0x00005a6f      0x39a ./src/sub-systemCode/Global/OnlineTM.o
                                0x1465 (size before relaxing)
- .debug_str     0x00005dce      0x3a9 ./src/sub-systemCode/Global/TLM_management.o
+ .debug_str     0x00005e09      0x3a9 ./src/sub-systemCode/Global/TLM_management.o
                                 0x7fc (size before relaxing)
- .debug_str     0x00006177       0x7d ./src/sub-systemCode/Global/freertosExtended.o
+ .debug_str     0x000061b2       0x7d ./src/sub-systemCode/Global/freertosExtended.o
                                 0x1ae (size before relaxing)
- .debug_str     0x000061f4      0x30d ./src/sub-systemCode/Global/logger.o
+ .debug_str     0x0000622f      0x30d ./src/sub-systemCode/Global/logger.o
                                0x10da (size before relaxing)
- .debug_str     0x00006501      0x240 ./src/sub-systemCode/CUF/CUF.o
+ .debug_str     0x0000653c      0x240 ./src/sub-systemCode/CUF/CUF.o
                                 0xefc (size before relaxing)
- .debug_str     0x00006741       0xd4 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
+ .debug_str     0x0000677c       0xd4 ./src/sub-systemCode/CUF/uploadCodeTelemetry.o
                                 0x346 (size before relaxing)
- .debug_str     0x00006815       0xa9 ./src/sub-systemCode/COMM/APRS.o
+ .debug_str     0x00006850       0xa9 ./src/sub-systemCode/COMM/APRS.o
                                 0x295 (size before relaxing)
- .debug_str     0x000068be      0x140 ./src/sub-systemCode/COMM/DelayedCommand_list.o
+ .debug_str     0x000068f9      0x140 ./src/sub-systemCode/COMM/DelayedCommand_list.o
                                 0xf64 (size before relaxing)
- .debug_str     0x000069fe       0xaf ./src/sub-systemCode/COMM/GSC.o
+ .debug_str     0x00006a39       0xaf ./src/sub-systemCode/COMM/GSC.o
                                 0x40c (size before relaxing)
- .debug_str     0x00006aad      0x600 ./src/sub-systemCode/COMM/TRXVU.o
+ .debug_str     0x00006ae8      0x600 ./src/sub-systemCode/COMM/TRXVU.o
                                0x1d9b (size before relaxing)
- .debug_str     0x000070ad     0x2065 ./src/sub-systemCode/ADCS/AdcsCommands.o
+ .debug_str     0x000070e8     0x2065 ./src/sub-systemCode/ADCS/AdcsCommands.o
                                0x2bc7 (size before relaxing)
- .debug_str     0x00009112      0x2cb ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
+ .debug_str     0x0000914d      0x2cb ./src/sub-systemCode/ADCS/AdcsGetDataAndTlm.o
                                 0x8b4 (size before relaxing)
- .debug_str     0x000093dd       0xbd ./src/sub-systemCode/ADCS/AdcsMain.o
+ .debug_str     0x00009418       0xbd ./src/sub-systemCode/ADCS/AdcsMain.o
                                 0x42f (size before relaxing)
- .debug_str     0x0000949a       0x45 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
+ .debug_str     0x000094d5       0x45 ./src/sub-systemCode/ADCS/AdcsTroubleShooting.o
                                 0x2be (size before relaxing)
- .debug_str     0x000094df       0x52 ./src/sub-systemCode/ADCS/StateMachine.o
+ .debug_str     0x0000951a       0x52 ./src/sub-systemCode/ADCS/StateMachine.o
                                 0x2c6 (size before relaxing)
- .debug_str     0x00009531       0x34 ./src/main.o
+ .debug_str     0x0000956c       0x34 ./src/main.o
                                 0x1e0 (size before relaxing)
- .debug_str     0x00009565      0x608 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
+ .debug_str     0x000095a0      0x608 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(GomEPS.o)
                                 0xafc (size before relaxing)
- .debug_str     0x00009b6d      0x26e C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
+ .debug_str     0x00009ba8      0x26e C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisAntS.o)
                                 0x6bd (size before relaxing)
- .debug_str     0x00009ddb      0x40e C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
+ .debug_str     0x00009e16      0x40e C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisSolarPanelv2.o)
                                 0x8dd (size before relaxing)
- .debug_str     0x0000a1e9      0x424 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
+ .debug_str     0x0000a224      0x424 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXVU.o)
                                 0xa97 (size before relaxing)
- .debug_str     0x0000a60d      0xab3 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
+ .debug_str     0x0000a648      0xab3 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(cspaceADCS.o)
                                0x33a2 (size before relaxing)
- .debug_str     0x0000b0c0      0x653 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
+ .debug_str     0x0000b0fb      0x653 C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(gecko_driver.o)
                                 0xa12 (size before relaxing)
- .debug_str     0x0000b713      0x1ee C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
+ .debug_str     0x0000b74e      0x1ee C:/HOOPOE3/satellite-subsystems/demo/..//satellite-subsystems/lib\libSatelliteSubsystemsD.a(IsisTRXCommon.o)
                                 0x436 (size before relaxing)
- .debug_str     0x0000b901     0x11fb C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
+ .debug_str     0x0000b93c     0x11fb C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_common.o)
                                0x1610 (size before relaxing)
- .debug_str     0x0000cafc      0x2f7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
+ .debug_str     0x0000cb37      0x2f7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat_m.o)
                                 0x7fd (size before relaxing)
- .debug_str     0x0000cdf3      0x540 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
+ .debug_str     0x0000ce2e      0x540 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(safefat.o)
                                 0xdcf (size before relaxing)
- .debug_str     0x0000d333      0x342 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
+ .debug_str     0x0000d36e      0x342 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc.o)
                                 0x643 (size before relaxing)
- .debug_str     0x0000d675       0x8d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
+ .debug_str     0x0000d6b0       0x8d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_mutex.o)
                                 0x1df (size before relaxing)
- .debug_str     0x0000d702       0x27 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
+ .debug_str     0x0000d73d       0x27 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(oalp_task.o)
                                 0x154 (size before relaxing)
- .debug_str     0x0000d729       0xc0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
+ .debug_str     0x0000d764       0xc0 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(atmel_mcipdc_hw.o)
                                 0x3bb (size before relaxing)
- .debug_str     0x0000d7e9       0x34 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
+ .debug_str     0x0000d824       0x34 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_rtc.o)
                                 0x1b2 (size before relaxing)
- .debug_str     0x0000d81d      0x2eb C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
+ .debug_str     0x0000d858      0x2eb C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(hcc_mem.o)
                                 0x4fa (size before relaxing)
- .debug_str     0x0000db08      0x2e4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
+ .debug_str     0x0000db43      0x2e4 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(fat.o)
                                 0xd16 (size before relaxing)
- .debug_str     0x0000ddec       0x7a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
+ .debug_str     0x0000de27       0x7a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hcc/lib\libHCCD.a(psp_hcc_mem.o)
                                 0x1d7 (size before relaxing)
- .debug_str     0x0000de66      0x5f3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
+ .debug_str     0x0000dea1      0x5f3 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(I2C.o)
                                 0xa1c (size before relaxing)
- .debug_str     0x0000e459      0x369 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
+ .debug_str     0x0000e494      0x369 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(SPI.o)
                                 0x8be (size before relaxing)
- .debug_str     0x0000e7c2      0x197 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
+ .debug_str     0x0000e7fd      0x182 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(FRAM.o)
                                 0x58b (size before relaxing)
- .debug_str     0x0000e959      0x1ee C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
+ .debug_str     0x0000e97f      0x1ee C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(Time.o)
                                 0x398 (size before relaxing)
- .debug_str     0x0000eb47       0x6b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
+ .debug_str     0x0000eb6d       0x6b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerNoOS.o)
                                 0x2f3 (size before relaxing)
- .debug_str     0x0000ebb2       0xef C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
+ .debug_str     0x0000ebd8       0xef C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(WatchDogTimerOS.o)
                                 0x22e (size before relaxing)
- .debug_str     0x0000eca1       0x6c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
+ .debug_str     0x0000ecc7       0x6c C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(LED.o)
                                 0x31d (size before relaxing)
- .debug_str     0x0000ed0d       0xfc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
+ .debug_str     0x0000ed33       0xfc C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTC.o)
                                 0x4eb (size before relaxing)
- .debug_str     0x0000ee09       0x4b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
+ .debug_str     0x0000ee2f       0x4b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/lib\libHALD.a(RTT.o)
                                 0x1b5 (size before relaxing)
- .debug_str     0x0000ee54      0x50b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
+ .debug_str     0x0000ee7a      0x50b C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(queue.o)
                                 0x643 (size before relaxing)
- .debug_str     0x0000f35f      0x734 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
+ .debug_str     0x0000f385      0x734 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(tasks.o)
                                 0x96e (size before relaxing)
- .debug_str     0x0000fa93       0x3a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
+ .debug_str     0x0000fab9       0x3a C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(hooks.o)
                                 0x17e (size before relaxing)
- .debug_str     0x0000facd       0x6f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
+ .debug_str     0x0000faf3       0x6f C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(standardMemMang.o)
                                 0x18e (size before relaxing)
- .debug_str     0x0000fb3c      0x155 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
+ .debug_str     0x0000fb62      0x155 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(port.o)
                                 0x2f6 (size before relaxing)
- .debug_str     0x0000fc91       0xa1 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
+ .debug_str     0x0000fcb7       0xa1 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/lib\libFreeRTOSD.a(list.o)
                                 0x257 (size before relaxing)
- .debug_str     0x0000fd32      0x1b7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
+ .debug_str     0x0000fd58      0x1b7 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(syscalls.o)
                                 0x30e (size before relaxing)
- .debug_str     0x0000fee9       0xf5 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
+ .debug_str     0x0000ff0f       0xf5 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(aic.o)
                                 0x1be (size before relaxing)
- .debug_str     0x0000ffde       0xcd C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
+ .debug_str     0x00010004       0xcd C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(cp15.o)
                                 0x1e9 (size before relaxing)
- .debug_str     0x000100ab      0x4ba C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
+ .debug_str     0x000100d1      0x4ba C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(dbgu.o)
                                 0x65a (size before relaxing)
- .debug_str     0x00010565       0xde C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
+ .debug_str     0x0001058b       0xde C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pio.o)
                                 0x408 (size before relaxing)
- .debug_str     0x00010643       0x94 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
+ .debug_str     0x00010669       0x94 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pit.o)
                                 0x17c (size before relaxing)
- .debug_str     0x000106d7       0xcf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
+ .debug_str     0x000106fd       0xcf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(pmc.o)
                                 0x2ac (size before relaxing)
- .debug_str     0x000107a6       0xaf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
+ .debug_str     0x000107cc       0xaf C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(spi_at91.o)
                                 0x2f4 (size before relaxing)
- .debug_str     0x00010855      0x161 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
+ .debug_str     0x0001087b      0x161 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(twi_at91.o)
                                 0x3b0 (size before relaxing)
- .debug_str     0x000109b6      0x127 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
+ .debug_str     0x000109dc      0x127 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(ExitHandler.o)
                                 0x24e (size before relaxing)
- .debug_str     0x00010add      0x23d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
+ .debug_str     0x00010b03      0x23d C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_lowlevel.o)
                                 0x4c6 (size before relaxing)
- .debug_str     0x00010d1a      0x210 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
+ .debug_str     0x00010d40      0x210 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/lib\libAt91D.a(board_memories.o)
                                 0x641 (size before relaxing)

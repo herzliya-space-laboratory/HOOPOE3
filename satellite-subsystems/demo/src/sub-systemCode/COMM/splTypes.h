@@ -233,6 +233,8 @@
 #define RESET_DELAYED_CM_LIST_ST 			32
 #define RESET_APRS_LIST_ST					15
 #define RESET_FRAM_ST						42
+#define FRAM_WRITE_ST						43
+#define FRAM_READ_ST						44
 
 //online TM
 #define GET_ONLINE_TM_INDEX_ST				0
