@@ -188,7 +188,7 @@ void TRXVU_task()
 }
 
 
-void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[5])
+void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[NUM_FILES_IN_DUMP])
 {
 	char fileName[MAX_F_FILE_NAME_SIZE];
 	Ack_type ack = ACK_NOTHING;
@@ -224,7 +224,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 				if (HK[i] == ACK_T || HK[i] == log_files_erorrs_T || HK[i] == log_files_events_T)
 				{
 					FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
-							&numberOfParameters, &last_read, (uint)1);
+							&numberOfParameters, &last_read, (uint)0);
 				}
 				else
 				{
@@ -285,14 +285,14 @@ void Dump_task(void *arg)
 	time_unix endTime;
 	command_id id;
 	uint8_t resulotion;
-	HK_types HK_dump_type[5];
+	HK_types HK_dump_type[NUM_FILES_IN_DUMP];
 
 	id = BigEnE_raw_to_uInt(&dump_param_data[0]);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		HK_dump_type[i] = (HK_types)dump_param_data[4 + i];
-	resulotion = dump_param_data[9];
-	startTime = BigEnE_raw_to_uInt(&dump_param_data[10]);
-	endTime = BigEnE_raw_to_uInt(&dump_param_data[14]);
+	resulotion = dump_param_data[4 + NUM_FILES_IN_DUMP];
+	startTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 5]);
+	endTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 9]);
 
 	if (get_system_state(dump_param))
 	{

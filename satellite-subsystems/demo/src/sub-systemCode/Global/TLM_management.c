@@ -586,7 +586,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 					return FS_BUFFER_OVERFLOW;
 				}
 
-				if (element_time > (time_unix)resolution + lastCopy_time)
+				if (element_time >= (time_unix)resolution + lastCopy_time)
 				{
 					(*read)++;
 					memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
