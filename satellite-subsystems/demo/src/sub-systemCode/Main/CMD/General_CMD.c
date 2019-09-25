@@ -121,7 +121,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 
-	if (cmd.length != NUM_FILES_IN_DUMP)
+	if (cmd.length != 5)
 	{
 		*type = ACK_CMD_FAIL;
 		*err = ERR_LENGTH;
@@ -130,7 +130,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	char file_name[MAX_F_FILE_NAME_SIZE];
 	FileSystemResult reslt = FS_SUCCSESS;
-	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		if ((HK_types)cmd.data[i] == this_is_not_the_file_you_are_looking_for)
 			continue;
