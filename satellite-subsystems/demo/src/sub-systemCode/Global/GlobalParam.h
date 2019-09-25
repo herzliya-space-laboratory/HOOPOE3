@@ -11,6 +11,8 @@
 #include "sizes.h"
 #include "Global.h"
 
+#define TIME_RESET_SEC	2
+
 typedef enum
 {
 	mute_param,
@@ -61,7 +63,7 @@ typedef struct __attribute__ ((__packed__))
 	short Attitude[3];
 
 	uint8_t numOfPics;//number of pictures saved in the file system of the satellite
-	uint8_t numOfAPRS;//number of APRS packet saved in the FRAM
+	uint8_t EPS_state;//number of APRS packet saved in the FRAM
 	uint8_t numOfDelayedCommand;//number of delayed command saved on the FRAM
 	unsigned int numOfResets;
 	time_unix lastReset;
@@ -126,8 +128,8 @@ void set_Attitude(int index, short param);
 uint8_t get_numOfPics();
 void set_numOfPics(uint8_t param);
 // CGP-> numOfAPRS
-uint8_t get_numOfAPRS();
-void set_numOfAPRS(uint8_t param);
+uint8_t get_EPSState();
+void set_EPSState(uint8_t param);
 // CGP-> numOfDelayedCommand
 uint8_t get_numOfDelayedCommand();
 void set_numOfDelayedCommand(uint8_t param);

@@ -29,7 +29,7 @@
 
 //ADCS
 #define ADCS_INDEX 1
-#define COMMAND_LIST_SIZE 20
+#define COMMAND_LIST_SIZE 40
 
 /**
  *@
