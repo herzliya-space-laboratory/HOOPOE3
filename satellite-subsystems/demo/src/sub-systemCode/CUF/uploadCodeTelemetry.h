@@ -1,12 +1,12 @@
 #include "../COMM/GSC.h"
 #include "CUF.h"
 
-#define fbackupName "CUFback"
-#define fboolBackupName "BAback"
-#define fheaderName "headCUF"
+#define fbackupName "CUFback.cuf"
+#define fboolBackupName "BAback.cuf"
+#define fheaderName "headCUF.cuf"
 
 #define uploadNameLength 10
-#define uploadName "UPLOAD"
+#define uploadName "UPLOAD.cuf"
 
 #define frameLength 184
 #define boolArrayLength (uploadCodeLength/frameLength)

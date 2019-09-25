@@ -65,7 +65,7 @@ void* CUFSwitch(int index);
  * @return the generated ssh
  * 0 on fail
  */
-unsigned long GenerateSSH(char* data, int len);
+unsigned int GenerateSSH(char* data, int len);
 
 /*!
  * Function to authenticate a CUF

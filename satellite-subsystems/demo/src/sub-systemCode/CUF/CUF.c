@@ -195,14 +195,14 @@ void* CUFSwitch(int index)
 	return CUFArr[index]; //return the function at index
 }
 
-unsigned long GenerateSSH(char* data, int len)
+unsigned int GenerateSSH(char* data, int len)
 {
 	int hash = 0, i = 0;
 	for (hash = len, i = 0; i < len; ++i)
 		hash = (hash << 4) ^ (hash >> 28) ^ data[i];
 	if (hash == 0 || i == 0)
 		WriteErrorLog(CUF_GENERATE_SSH_FAIL, SYSTEM_CUF, 0);
-	return (hash % 31); //return the hash
+	return hash; //return the hash
 }
 
 char* getExtendedName(char* name)
@@ -220,8 +220,7 @@ char* getExtendedName(char* name)
 
 int AuthenticateCUF(CUF* code)
 {
-	unsigned long newSSH;
-	newSSH = GenerateSSH((char*)code->data, code->length*4); //generate an ssh for the data
+	unsigned int newSSH = GenerateSSH((char*)code->data, code->length*4); //generate an ssh for the data
 	if (newSSH == 0) //check generation
 	{
 		WriteErrorLog(CUF_AUTHENTICATE_FAIL, SYSTEM_CUF, 0);
@@ -312,7 +311,7 @@ int ExecuteCUF(char* name)
 	}
 	int ret = CUFFunction(CUFSwitch); //call the CUF function with the test function as its parameter and return its output
 	printf("\n\nCUF RET: %d\n\n", ret);
-	WriteCUFLog(CUF_EXECUTED, 0);
+	WriteCUFLog(CUF_EXECUTED, ret);
 	return ret;
 }
 

@@ -11,7 +11,6 @@
 static unsigned char uploadCodeArry[uploadCodeLength]; //Set global code array
 static Boolean uploadBoolArray[uploadCodeLength/frameLength];
 
-
 void initializeUpload()
 {
 	int i = 0;
@@ -22,7 +21,7 @@ void initializeUpload()
 	i=0;
 	for( ; i < boolArrayLength;i++)
 	{
-		uploadBoolArray[i] = 0;
+		uploadBoolArray[i] = FALSE;
 	}
 	saveBackup();
 }
@@ -79,7 +78,7 @@ void loadBackup()
 	i = 0;
 	for( ; i < boolArrayLength;i++)
 	{
-		uploadBoolArray[i] = 0;
+		uploadBoolArray[i] = FALSE;
 	}
 	f_managed_open(fboolBackupName,"r",&fp);
 	if (fp != NULL)
@@ -99,8 +98,7 @@ void addToArray(TC_spl decode, int framePlace)
 	}
 	saveAck("Ack(wrote to array)");
 	saveAck("Finished!!");
-	uploadBoolArray[framePlace] = 1;
-	TRX_sendFrame((byte*)uploadBoolArray, (uint8_t)boolArrayLength);
+	uploadBoolArray[framePlace] = TRUE;
 }
 
 void headerHandle(TC_spl decode)
@@ -136,6 +134,7 @@ void startCUFintegration()
 	settings[18] = 0;
 	printf("Setting: %s\n", settings);
 	//00-00-00-00-05-00-00-09-00-00-00-00-00-10-0a-ac-aa-aa-aa-aa-aa
+	TRX_sendFrame((byte*)uploadBoolArray, (uint8_t)boolArrayLength);
 	if (settings[0] <= 2 && settings[1] <= 2)
 	{
 		printf("Name: %s\n", (char*)(settings+10));
