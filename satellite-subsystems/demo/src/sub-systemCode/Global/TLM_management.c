@@ -26,7 +26,8 @@
 
 #include "TLM_management.h"
 
-#define SKIP_FILE_TIME_SEC ((60*60*24)/100)
+#define NUMBER_OF_WRITES 1
+#define SKIP_FILE_TIME_SEC ((60*60*24)/NUMBER_OF_WRITES)
 #define _SD_CARD (0)
 #define FIRST_TIME (-1)
 
@@ -280,7 +281,7 @@ FileSystemResult c_fileCreate(char* c_file_name,
 //write element with timestamp to file
 static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int time)
 {
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < NUMBER_OF_WRITES; i++)
 	{
 		int number_of_writes;
 		number_of_writes = f_write( &time,sizeof(unsigned int),1, file );
