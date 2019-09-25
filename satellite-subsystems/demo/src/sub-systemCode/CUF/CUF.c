@@ -178,12 +178,12 @@ int InitCUF()
 	{
 		TempCUF[i] = malloc(sizeof(CUF));
 		TempCUF[i]->data = NULL;
-		TempCUF[i]->name = NULL;
+		TempCUF[i]->name[0] = 0;
 		TempCUF[i]->SSH = 0;
 		TempCUF[i]->length = 0;
 		PerminantCUF[i] = malloc(sizeof(CUF));
 		PerminantCUF[i]->data = NULL;
-		PerminantCUF[i]->name = NULL;
+		PerminantCUF[i]->name[0] = 0;
 		PerminantCUF[i]->SSH = 0;
 		PerminantCUF[i]->length = 0;
 	}
@@ -207,9 +207,14 @@ unsigned long GenerateSSH(char* data, int len)
 
 char* getExtendedName(char* name)
 {
-	char* extended = malloc(strlen(name)+5);
-	strcpy(extended, name);
-	strcat(extended, ".cuf");
+	char* extended = malloc(13);
+	for (int i = 0; i < 8; i++)
+		extended[i] = name[i];
+	extended[8] = '.';
+	extended[9] = 'c';
+	extended[10] = 'u';
+	extended[11] = 'f';
+	extended[12] = 0;
 	return extended;
 }
 
@@ -262,7 +267,7 @@ int RemoveCUF(char* name)
 			{
 				//remove CUF
 				PerminantCUF[i]->data = NULL;
-				PerminantCUF[i]->name = NULL;
+				PerminantCUF[i]->name[0] = 0;
 				PerminantCUF[i]->SSH = 0;
 				PerminantCUF[i]->length = 0;
 				SavePerminantCUF();
@@ -276,7 +281,7 @@ int RemoveCUF(char* name)
 		{
 			//remove CUF from temp array
 			TempCUF[i]->data = NULL;
-			TempCUF[i]->name = NULL;
+			TempCUF[i]->name[0] = 0;
 			TempCUF[i]->SSH = 0;
 			TempCUF[i]->length = 0;
 			return 0; //return 0 on success
@@ -314,7 +319,7 @@ int ExecuteCUF(char* name)
 int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, Boolean isTemporary, Boolean disabled)
 {
 	CUF* cuf = malloc(sizeof(CUF));
-	cuf->name = getExtendedName(name);
+	strcpy(cuf->name, getExtendedName(name));
 	cuf->data = data;
 	cuf->length = length;
 	cuf->SSH = SSH;

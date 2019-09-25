@@ -37,7 +37,7 @@
 
 //the struct of a CUF
 typedef struct {
-	char* name; //name of the CUF
+	char name[13]; //name of the CUF
 	int* data; //its data
 	unsigned int length; //the length of its data (in 4-byte int elements, not bytes!)
 	unsigned long SSH; //the ssh associated with the CUF
