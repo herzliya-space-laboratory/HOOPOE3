@@ -339,7 +339,7 @@ static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 void get_file_name_by_index(char* c_file_name,int index,char* curr_file_name)
 {
 	PLZNORESTART();
-	sprintf(curr_file_name,"a:/%s/%d.tlm", c_file_name, index, FS_FILE_ENDING);
+	sprintf(curr_file_name,"a:/%s/%d.%s", c_file_name, index, FS_FILE_ENDING);
 }
 FileSystemResult c_fileReset(char* c_file_name)
 {
@@ -531,7 +531,7 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	return FS_SUCCSESS;
 }
 FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
-		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time, unsigned int resolution)
+		time_unix from_time, time_unix to_time, int* read, time_unix* last_read_time, unsigned int resolution)
 {
 	time_unix lastCopy_time = 0;
 	C_FILE c_file;
@@ -586,7 +586,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 					return FS_BUFFER_OVERFLOW;
 				}
 
-				//if (element_time > (time_unix)resolution + lastCopy_time)
+				if (element_time > (time_unix)resolution + lastCopy_time)
 				{
 					(*read)++;
 					memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);

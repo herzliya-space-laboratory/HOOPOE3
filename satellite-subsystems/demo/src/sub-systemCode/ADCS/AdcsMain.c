@@ -123,7 +123,8 @@ void AdcsTask()
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
 	//TODO: log start task
-	int f_err = 0;
+	int f_err = f_managed_enterFS();
+	//TODO: log f_err if error
 	vTaskDelay(ADCS_INIT_DELAY);
 	while(TRUE)
 	{
@@ -144,14 +145,10 @@ void AdcsTask()
 			}
 			//todo: log cmd received
 		}
-		f_err = f_managed_enterFS();
-		//TODO: log f_err if error
 		trbl = GatherTlmAndData();
 		if(TRBL_SUCCESS != trbl){
 			AdcsTroubleShooting(trbl);
 		}
-		f_err = f_managed_releaseFS();
-		//TODO: log f_err if error
 		vTaskDelay(delay_loop);
 	}
 }
