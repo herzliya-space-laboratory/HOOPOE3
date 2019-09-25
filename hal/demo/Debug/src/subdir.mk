@@ -20,7 +20,7 @@ C_DEPS += \
 src/%.o: ../src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: Cross ARM C Compiler'
-	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra -Werror  -g -Dsdram -Dat91sam9g20 -DTRACE_LEVEL=5 -DDEBUG=1 -D'BASE_REVISION_NUMBER=$(REV)' -D'BASE_REVISION_HASH_SHORT=$(REVHASH_SHORT)' -D'BASE_REVISION_HASH=$(REVHASH)' -I"C:\HOOPOE3\hal\demo\src" -I"C:/HOOPOE3/hal/demo/..//freertos/include" -I"C:/HOOPOE3/hal/demo/..//hal/include" -I"C:/HOOPOE3/hal/demo/..//at91/include" -I"C:/HOOPOE3/hal/demo/..//hcc/include" -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -c -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra -Werror  -g -Dsdram -Dat91sam9g20 -DTRACE_LEVEL=5 -DDEBUG=1 -D'BASE_REVISION_NUMBER=$(REV)' -D'BASE_REVISION_HASH_SHORT=$(REVHASH_SHORT)' -D'BASE_REVISION_HASH=$(REVHASH)' -I"C:\ISIS\workspace\HOOPOE3\hal\demo\src" -I"C:/ISIS/workspace/HOOPOE3/hal/demo/..//freertos/include" -I"C:/ISIS/workspace/HOOPOE3/hal/demo/..//hal/include" -I"C:/ISIS/workspace/HOOPOE3/hal/demo/..//at91/include" -I"C:/ISIS/workspace/HOOPOE3/hal/demo/..//hcc/include" -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

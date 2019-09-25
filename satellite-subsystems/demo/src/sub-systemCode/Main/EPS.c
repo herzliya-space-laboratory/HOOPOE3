@@ -284,7 +284,6 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 				printf("EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
 				writeState_log(batteryLastMode, current_VBatt);
 				printf("EPS voltage: %u, previous voltage:%u\n", current_VBatt, previuosVBatt);
-				writeState_log(batteryLastMode);
 			}
 		}
 	}
@@ -309,7 +308,6 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 				printf("EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
 				writeState_log(batteryLastMode, current_VBatt);
 				printf("EPS voltage: %u, previous voltage:%u\n", current_VBatt, previuosVBatt);
-				writeState_log(batteryLastMode);
 			}
 		}
 	}

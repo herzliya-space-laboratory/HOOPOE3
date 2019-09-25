@@ -43,7 +43,7 @@ all: hal-demo.elf secondary-outputs
 hal-demo.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C Linker'
-	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra -Werror  -g -T C:/HOOPOE3/hal/demo/..//at91/linker-scripts/sdram.lds -nostartfiles -Xlinker --gc-sections -L"C:/HOOPOE3/hal/demo/..//at91/lib" -L"C:/HOOPOE3/hal/demo/..//freertos/lib" -L"C:/HOOPOE3/hal/demo/..//hal/lib" -L"C:/HOOPOE3/hal/demo/..//hcc/lib" -Wl,-Map,"hal-demo.map" --specs=nano.specs -lc -u _printf_float -u _scanf_float -o "hal-demo.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -mcpu=arm926ej-s -O0 -fmessage-length=0 -ffunction-sections -Wall -Wextra -Werror  -g -T C:/ISIS/workspace/HOOPOE3/hal/demo/..//at91/linker-scripts/sdram.lds -nostartfiles -Xlinker --gc-sections -L"C:/ISIS/workspace/HOOPOE3/hal/demo/..//at91/lib" -L"C:/ISIS/workspace/HOOPOE3/hal/demo/..//freertos/lib" -L"C:/ISIS/workspace/HOOPOE3/hal/demo/..//hal/lib" -L"C:/ISIS/workspace/HOOPOE3/hal/demo/..//hcc/lib" -Wl,-Map,"hal-demo.map" --specs=nano.specs -lc -u _printf_float -u _scanf_float -o "hal-demo.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
