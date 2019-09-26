@@ -60,38 +60,54 @@ typedef struct
 } C_FILE;
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
 
-void delete_allTMFilesFromSD()
+Boolean TLMfile(char* filename)
+{
+	int count = 0;
+	while (filename[count] != '.' && filename[count] != '\0' && count < 30)
+		count++;
+	count++;
+	if (!memcmp(filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
+	{
+		int err = 0;
+		for(int i = 0; i < 20; i++)
+		{
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+void deleteDir(char* name, Boolean delete_folder)
 {
 	F_FIND find;
-	printf("\n        delete files\n\n\n");
-	int numm = 0;
-	if (!f_findfirst("A:/*.*",&find))
+	char temp_name[256];
+	if (!f_findfirst(name,&find))
 	{
 		do
 		{
-			int count = 0;
-			while (find.filename[count] != '.' && find.filename[count] != '\0' && count < 30)
-				count++;
-			count++;
-			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
+			printf ("filename:%s",find.filename);
+			if (find.attr&F_ATTR_DIR)
 			{
-				int err = 0;
-				for(int i = 0; i < 20; i++)
+				strcpy(name,temp_name);
+				sprintf(temp_name,"%s/%s",name,find.filename);
+				if(delete_folder)
 				{
-					err = f_delete(find.filename);
-					numm++;
-					if (err == 0)
-						break;
-					else
-						printf("f_delete in delete_allTMFilesFromSD: %d\n", err);
-					vTaskDelay(1);
+					deleteDir(temp_name,TRUE);
 				}
+				f_rmdir(temp_name);
 			}
-
+			else
+			{
+				sprintf(temp_name,"%s/%s",name,find.filename);
+				if (TLMfile(temp_name))
+					f_delete(temp_name);
+				strcpy(temp_name,name);
+			}
 		} while (!f_findnext(&find));
 	}
-	printf("\n        FINISH: delete files, files: %d\n\n\n", numm);
 }
+
 // return -1 for FRAM fail
 static int getNumOfFilesInFS()
 {
@@ -216,7 +232,9 @@ FileSystemResult InitializeFS(Boolean first_time)
 	}
 	if(first_time)
 	{
-		delete_allTMFilesFromSD();
+		char names[256];
+		strcpy(names, "A:/");
+		deleteDir(names, FALSE);
 		FS fs = {0};
 		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{

@@ -155,7 +155,9 @@ void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
 {
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
-	delete_allTMFilesFromSD();
+	char names[256];
+	strcpy(names, "A:/");
+	deleteDir(names, FALSE);
 }
 
 void cmd_stop_TM(Ack_type* type, ERR_type* err)
