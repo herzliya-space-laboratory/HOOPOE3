@@ -111,12 +111,55 @@ void CameraManagerTaskMain()
 	}
 }
 
+int createFolders()
+{
+	char path[11];
+	int error = 0;
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	return 0;
+}
+
 int initCamera(Boolean first_activation)
 {
 	int error = initGecko();
 	CMP_AND_RETURN(error, 0, error);
 
 	Initialized_GPIO();
+
+	error = createFolders();
+	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
 	imageDataBase = initImageDataBase(first_activation);
 	if (imageDataBase == NULL)
