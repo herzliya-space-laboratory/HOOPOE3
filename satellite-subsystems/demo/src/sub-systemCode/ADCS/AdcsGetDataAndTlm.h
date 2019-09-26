@@ -9,14 +9,6 @@
 //TODO: update this number to the correct number of telemetries
 #define NUM_OF_ADCS_TLM 18						//<! states the maximum number of telemetries the ADCS can save
 
-#ifndef TLM_SAVE_VECTOR_START_ADDR
-	#define TLM_SAVE_VECTOR_START_ADDR (0x6242)
-#endif
-
-#ifndef TLM_SAVE_VECTOR_END_ADDR
-	#define ADCS_TLM_SAVE_VECTOR_END_ADDR ((ADCS_TLM_SAVE_VECTOR_START_ADDR) + (NUM_OF_ADCS_TLM) * sizeof(Boolean8bit))
-#endif
-
 #define ADCS_MAX_TLM_SIZE 272
 
 

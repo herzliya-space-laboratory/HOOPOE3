@@ -39,14 +39,14 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 	switch(param)
 	{
 	case DELAY_LOOP:
-		addr = ADCS_LOOP_DELAY_FRAM_ADDR;
-		size = ADCS_LOOP_DELAY_FRAM_SIZE;
+		addr = ADCS_LOOP_DELAY_ADDR;
+		size = ADCS_LOOP_DELAY_SIZE;
 		ptr = (void*)&delay_loop;
 		break;
 
 	case QUEUE_WAIT_TIME:
-		addr = ADCS_LOOP_DELAY_FRAM_ADDR;
-		size = ADCS_LOOP_DELAY_FRAM_SIZE;
+		addr = ADCS_LOOP_DELAY_ADDR;
+		size = ADCS_LOOP_DELAY_SIZE;
 		ptr = (void*)getAdcsQueueWaitPointer();
 		break;
 
@@ -100,14 +100,14 @@ TroubleErrCode AdcsInit()
 	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 
-	if(0 != FRAM_read_exte((byte*)&delay_loop,ADCS_LOOP_DELAY_FRAM_ADDR,ADCS_LOOP_DELAY_FRAM_SIZE)){
+	if(0 != FRAM_read_exte((byte*)&delay_loop,ADCS_LOOP_DELAY_ADDR,ADCS_LOOP_DELAY_SIZE)){
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 		//todo: log error
 	}
 	if(0 != FRAM_read_exte((unsigned char*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
-	if(0 != FRAM_read_exte((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_FRAM_ADDR,ADCS_QUEUE_WAIT_TIME_FRAM_SIZE)){
+	if(0 != FRAM_read_exte((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_ADDR,ADCS_QUEUE_WAIT_TIME_SIZE)){
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 		//todo: log error
 	}

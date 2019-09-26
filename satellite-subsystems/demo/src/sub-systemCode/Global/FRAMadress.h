@@ -46,22 +46,21 @@
 
 
 //ADCS
-#define ADCS_LOOP_DELAY_FRAM_ADDR 0X6542			// main loop delay
-#define ADCS_LOOP_DELAY_FRAM_SIZE 4
+#define ADCS_LOOP_DELAY_ADDR 	(0X500)			// main loop delay
+#define ADCS_LOOP_DELAY_SIZE 	(4)
 
-#define ADCS_SYS_OFF_DELAY_ADDR 0x6546				// delay incase the system is off- wait to wakeup
-#define ADCS_SYS_OFF_DELAY_SIZE	4
+#define ADCS_SYS_OFF_DELAY_ADDR 	(0x510)			// delay in case the system is off- wait to wakeup
+#define ADCS_SYS_OFF_DELAY_SIZE		(4)
 
-#define ADCS_QUEUE_WAIT_TIME_FRAM_ADDR 0X6552		// max wait time for the adcs cmd queue
-#define ADCS_QUEUE_WAIT_TIME_FRAM_SIZE 4
+#define ADCS_QUEUE_WAIT_TIME_ADDR 	(0x520)		// max wait time for the adcs cmd queue
+#define ADCS_QUEUE_WAIT_TIME_SIZE 	(4)
 
-#define ADCS_TLM_SAVE_VECTOR_START_ADDR 	(0x6242)		//<! FRAM start address
+#define ADCS_TLM_SAVE_VECTOR_ADDR 	(0x530)		//<! FRAM start address
 
-#define ADCS_TLM_PERIOD_VECTOR_START_ADDR 		(ADCS_TLM_SAVE_VECTOR_START_ADDR + NUM_OF_ADCS_TLM + 1)	//<! FRAM start address
-#define ADCS_TLM_PERIOD_VECTOR_END_ADDR 		(ADCS_TLM_PERIOD_VECTOR_START_ADDR + NUM_OF_ADCS_TLM) 	//<! FRAM end address
+#define ADCS_TLM_PERIOD_VECTOR_ADDR (ADCS_TLM_SAVE_VECTOR_ADDR + NUM_OF_ADCS_TLM + 1)	//<! FRAM start address
 
-#define ADCS_OVERRIDE_SAVE_TLM_ADDR				(0X6300)
-#define ADCS_OVERRIDE_SAVE_TLM_SIZE				(4)
+#define ADCS_OVERRIDE_SAVE_TLM_ADDR	(0X580)
+#define ADCS_OVERRIDE_SAVE_TLM_SIZE	(4)
 
 //CAMERA
 #define IMAGE_CHUNK_WIDTH_ADDR 0xD000
