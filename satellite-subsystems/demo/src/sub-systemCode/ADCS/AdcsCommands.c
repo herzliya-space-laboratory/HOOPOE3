@@ -145,9 +145,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	cspace_adcs_savimag_t savimag_param;
 
 	adcs_i2c_cmd i2c_cmd = {0};
-#ifdef TESTING
-	printf("\n\nExecuting CMD with subtype:	%d\n\n",sub_type);
-#endif
 	switch(sub_type)
 	{
 		//generic I2C command
@@ -197,12 +194,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			break;
 		case ADCS_DEPLOY_MAG_BOOM_ST:
-		#ifndef TESTING
-			//err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);//TODO:remove comment
-		#endif
-		#ifdef TESTING
-			printf("Magnetometer not deployed \t-----BOOM\n");
-		#endif
+			err = cspaceADCS_deployMagBoomADCS(ADCS_ID,cmd->data[0]);
 			break;
 		case ADCS_RUN_MODE_ST:
 			memcpy(&runmode,cmd->data,sizeof(runmode));
@@ -210,19 +202,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_SET_PWR_CTRL_DEVICE_ST:
 			err = cspaceADCS_setPwrCtrlDevice(ADCS_ID, (cspace_adcs_powerdev_t*)cmd->data);
-
-#ifdef TESTING
-			printf("\nSet Current Power Control:\n");
-			printf("signal_cubecontrol: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.signal_cubecontrol);
-			printf("motor_cubecontrol: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.motor_cubecontrol);
-			printf("pwr_cubesense: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubesense);
-			printf("pwr_cubestar: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubestar);
-			printf("pwr_cubewheel1: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel1);
-			printf("pwr_cubewheel2: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel2);
-			printf("pwr_cubewheel3: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel3);
-			printf("pwr_mot: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_motor);
-			printf("pwr_gps: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_gps);
-#endif
 			break;
 		case ADCS_CLEAR_ERRORS_ST:
 			memcpy(&clear,cmd->data,sizeof(clear));
@@ -230,21 +209,11 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			break;
 		case ADCS_SET_ATT_CTRL_MODE_ST:
 			err = cspaceADCS_setAttCtrlMode(ADCS_ID, (cspace_adcs_attctrl_mod_t*)cmd->data);
-#ifdef TESTING
-			printf("\n Set Current Control Mode:\n");
-			printf("ctrl_mode: %d\n",((cspace_adcs_attctrl_mod_t*)cmd->data)->fields.ctrl_mode);
-			printf("override_flag: %d\n",((cspace_adcs_attctrl_mod_t*)cmd->data)->fields.override_flag);
-			printf("timeout: %d\n",((cspace_adcs_attctrl_mod_t*)cmd->data)->fields.timeout);
-#endif
 			break;
 
 		case ADCS_SET_EST_MODE_ST:
 			memcpy(&att_est,cmd->data,sizeof(att_est));//copy for ENUM?
 			err = cspaceADCS_setAttEstMode(ADCS_ID,att_est);
-#ifdef TESTING
-			printf("\nSet Estimation Mode:\n");
-			printf("Estimation: %d\n",att_est);
-#endif
 			break;
 
 		case ADCS_SET_MAG_OUTPUT_ST:
@@ -597,18 +566,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_PWR_CTRL_DEVICE_ST:
 			err = cspaceADCS_getPwrCtrlDevice(ADCS_ID,(cspace_adcs_powerdev_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_powerdev_t),ADCS_GET_PWR_CTRL_DEVICE_ST);
-#ifdef TESTING
-			printf("\nSet Current Power Control:\n");
-			printf("signal_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.signal_cubecontrol);
-			printf("motor_cubecontr: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.motor_cubecontrol);
-			printf("pwr_cubesen: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubesense);
-			printf("pwr_cubest: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubestar);
-			printf("pwr_cubewhee: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel1);
-			printf("pwr_cubewheel2: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel2);
-			printf("pwr_cubewheel3: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_cubewheel3);
-			printf("pwr_mot: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_motor);
-			printf("pwr_gps: %d\n",((cspace_adcs_powerdev_t*)cmd->data)->fields.pwr_gps);
-#endif
 			break;
 		case ADCS_GET_MISC_CURRENT_MEAS_ST:
 			err = cspaceADCS_getMiscCurrentMeas(ADCS_ID,(cspace_adcs_misccurr_t*)data);
@@ -665,12 +622,6 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			//TODO: return unknown subtype
 			break;
 	}
-
-#ifdef TESTING
-	if(0 != err || 0!= i2c_cmd.ack){
-		printf("Error in Subtype %d: err = %d; I2C.ack = %d",sub_type,(unsigned int)err,(unsigned int)i2c_cmd.ack);
-	}
-#endif
 	unsigned int error_codes[] = {sub_type,err,i2c_cmd.ack};
 	SendAdcsTlm((byte*)error_codes,sizeof(error_codes),ADCS_ACK_DATA_ST);
 //TODO: save ACK with 'err' value
