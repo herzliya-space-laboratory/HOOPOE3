@@ -628,6 +628,14 @@ void check_TRXVUState()
 	{
 		update_FRAM_bitRate();
 	}
+
+	if (TxState.fields.transmitter_idle_state && (!get_system_state(Tx_param) || get_system_state(mute_param)))
+	{
+		int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
+		if (retValInt != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
+		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
+	}
 }
 
 void trxvu_logic()

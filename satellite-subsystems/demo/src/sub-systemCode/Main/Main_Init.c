@@ -207,11 +207,11 @@ int InitSubsystems()
 
 	numberOfRestarts();
 
+	EPS_Init();
+
 	InitializeFS(activation);
 
 	CUFManageRestart(activation);
-
-	EPS_Init();
 
 	//resetSD();
 

@@ -26,7 +26,7 @@
 
 #include "TLM_management.h"
 
-#define NUMBER_OF_WRITES 1
+#define NUMBER_OF_WRITES 100
 #define SKIP_FILE_TIME_SEC ((60*60*24)/NUMBER_OF_WRITES)
 #define _SD_CARD (0)
 #define FIRST_TIME (-1)
@@ -62,47 +62,46 @@ typedef struct
 
 Boolean TLMfile(char* filename)
 {
-	int count = 0;
-	while (filename[count] != '.' && filename[count] != '\0' && count < 30)
-		count++;
-	count++;
-	if (!memcmp(filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
+	int len = strlen(filename);
+	if(strcmp(".TLM",filename+len-4)==0)
 	{
-		int err = 0;
-		for(int i = 0; i < 20; i++)
-		{
-			return TRUE;
-		}
+		return TRUE;
 	}
-
 	return FALSE;
 }
 
 void deleteDir(char* name, Boolean delete_folder)
 {
 	F_FIND find;
-	char temp_name[256];
+	int format_err = f_format(0,F_FAT32_MEDIA);
+	if(format_err !=0)
+	{
+		printf("format_err: %d",format_err);
+	}
+	return;
+	char temp_name[256]={0};
 	if (!f_findfirst(name,&find))
 	{
 		do
 		{
-			printf ("filename:%s",find.filename);
+			PLZNORESTART();
+			printf ("filename:%s\n",find.filename);
 			if (find.attr&F_ATTR_DIR)
 			{
-				strcpy(name,temp_name);
 				sprintf(temp_name,"%s/%s",name,find.filename);
+				deleteDir(temp_name,TRUE);
 				if(delete_folder)
 				{
-					deleteDir(temp_name,TRUE);
+					f_rmdir(temp_name);
 				}
-				f_rmdir(temp_name);
 			}
 			else
 			{
 				sprintf(temp_name,"%s/%s",name,find.filename);
 				if (TLMfile(temp_name))
+				{
 					f_delete(temp_name);
-				strcpy(temp_name,name);
+				}
 			}
 		} while (!f_findnext(&find));
 	}
@@ -233,8 +232,8 @@ FileSystemResult InitializeFS(Boolean first_time)
 	if(first_time)
 	{
 		char names[256];
-		strcpy(names, "A:/");
-		deleteDir(names, FALSE);
+		strcpy(names, "*.*");
+		deleteDir(names, TRUE);
 		FS fs = {0};
 		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
