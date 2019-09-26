@@ -26,7 +26,7 @@
 
 #include "TLM_management.h"
 
-#define NUMBER_OF_WRITES 100
+#define NUMBER_OF_WRITES 1
 #define SKIP_FILE_TIME_SEC ((60*60*24)/NUMBER_OF_WRITES)
 #define _SD_CARD (0)
 #define FIRST_TIME (-1)

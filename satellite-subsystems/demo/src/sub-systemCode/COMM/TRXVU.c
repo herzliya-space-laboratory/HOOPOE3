@@ -404,7 +404,6 @@ void Transponder_task(void *arg)
 		xQueueReset(xTransponderQueue);
 		transponder_logic(time, cmdId);
 		save_ACK(ACK_NOTHING, ERR_SUCCESS, cmdId);
-		vTaskDelete(NULL);
 	}
 	if (get_system_state(mute_param))
 		save_ACK(ACK_TRXVU, ERR_MUTE, cmdId);
