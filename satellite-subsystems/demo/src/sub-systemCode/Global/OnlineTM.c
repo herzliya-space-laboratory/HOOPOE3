@@ -488,11 +488,16 @@ int delete_onlineTM_param_from_offline(TM_struct_types TM_index)
 	return -2;
 }
 
-void save_onlineTM_logic()
+time_unix save_onlineTM_logic()
 {
 	int i_error;
 	time_unix time_now;
 	i_error = Time_getUnixEpoch(&time_now);
+	if (i_error != 0)
+	{
+		WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_OBC, i_error);
+		return 0;
+	}
 	check_int("Time_getUnixEpoch, save_onlineTM_logic", i_error);
 	printf("       time now: %u\n", time_now);
 	for (int i = 0; i < MAX_ITEMS_OFFLINE_LIST; i++)
@@ -512,6 +517,7 @@ void save_onlineTM_logic()
 				WriteErrorLog(LOG_ERR_SAVE_HK, SYSTEM_OBC, i_error);
 		}
 	}
+	return time_now;
 }
 
 void updateSD_state()
@@ -541,6 +547,19 @@ void updateSD_state()
 	}
 }
 
+static inline void sleepRTC_second(time_unix enterTime)
+{
+	int error;
+	time_unix timeNow = 0;
+	do
+	{
+		vTaskDelay(20);
+		error = Time_getUnixEpoch(&timeNow);
+		if (error != 0)
+			WriteErrorLog(LOG_ERR_GET_TIME, SYSTEM_OBC, error);
+	}while (timeNow <= enterTime);
+}
+
 void save_onlineTM_task()
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
@@ -555,11 +574,13 @@ void save_onlineTM_task()
 
 	int f_error = f_managed_enterFS();//4 enter FS
 	check_int("save online TM, enter FS", f_error);
+	time_unix last_write;
 	while(TRUE)
 	{
 		updateSD_state();
-		save_onlineTM_logic();
+		last_write = save_onlineTM_logic();
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 		xLastWakeTime = xTaskGetTickCount();
+		sleepRTC_second(last_write);
 	}
 }
