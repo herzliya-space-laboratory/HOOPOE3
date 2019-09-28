@@ -18,7 +18,16 @@
 #define DELAY 100
 #define CAMERA_DELAY 1000
 
-#define FILE_NAME_SIZE 11	///< The size of the filename parameter. i00001.raw (+1 for '\0')
+#define FILE_NAME_SIZE							(8 + 1 + 3 + 7 + 3)	///< The size of the filename parameter. i00001.raw (+1 for '\0')
+#define GENERAL_PAYLOAD_FOLDER_NAME				"PAYLOAD"
+#define RAW_IMAGES_FOLDER_NAME					"RAW"
+#define THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME	"T02"
+#define THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME	"T04"
+#define THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME	"T08"
+#define THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME	"T16"
+#define THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME	"T32"
+#define THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME	"T64"
+#define JPEG_IMAGES_FOLDER_NAME					"JPG"
 
 #define MAX_NUMBER_OF_PICTURES 1000	///< The maximum number of pictures the database supports
 
@@ -249,6 +258,7 @@ ImageDataBaseResult readImageFromBuffer(imageid id, fileType image_type);
 ImageDataBaseResult saveImageToBuffer(imageid id, fileType image_type);
 ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_current_address);
 ImageDataBaseResult SearchDataBase_forLatestMarkedImage(ImageMetadata* image_metadata);
+ImageDataBaseResult SearchDataBase_forImageFileType_byTimeRange(time_unix lower_barrier, time_unix higher_barrier, fileType file_type, ImageMetadata* image_metadata, uint32_t* image_address, uint32_t database_starting_address);
 void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value);
 uint32_t GetImageFactor(fileType image_type);
 uint32_t getDataBaseSize();

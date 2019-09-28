@@ -70,7 +70,7 @@ void update_FRAM_bitRate()
 		}
 	}
 	vTaskDelay(2000);
-	printf("new bit rate value: %d\n", newParam);
+	//printf("new bit rate value: %d\n", newParam);
 	error = IsisTrxvu_tcSetAx25Bitrate(0, newParam);
 	if (error != 0)
 		WriteErrorLog((log_errors)LOG_ERR_COMM_SET_BIT_RATE, SYSTEM_TRXVU, error);
@@ -152,11 +152,11 @@ void TRXVU_init_softWare()
 		WriteErrorLog((log_errors)LOG_ERR_COMM_TRANSPONDER_QUEUE, SYSTEM_TRXVU, -1);
 	vTaskDelay(SYSTEM_DEALY);
 	//2. check if the queues and the semaphore successfully created
-	if (xDumpQueue == NULL || xTransponderQueue == NULL || xIsTransmitting == NULL)
+	/*if (xDumpQueue == NULL || xTransponderQueue == NULL || xIsTransmitting == NULL)
 	{
 		//2.1. in case the semaphore and queues are damaged
 		printf("abort! abort!!!\n");
-	}
+	}*/
 }
 
 void init_trxvu(void)
@@ -188,7 +188,7 @@ void TRXVU_task()
 }
 
 
-void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[5])
+void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[NUM_FILES_IN_DUMP])
 {
 	char fileName[MAX_F_FILE_NAME_SIZE];
 	Ack_type ack = ACK_NOTHING;
@@ -206,7 +206,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 	vTaskDelay(SYSTEM_DEALY);
 
 	int i_error;
-	int numberOfPackets = 0;
+	//int numberOfPackets = 0;
 
 	if (CHECK_STARTING_DUMP_ABILITY)
 	{
@@ -224,7 +224,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 				if (HK[i] == ACK_T || HK[i] == log_files_erorrs_T || HK[i] == log_files_events_T)
 				{
 					FS_result = c_fileRead(fileName, Dump_buffer, DUMP_BUFFER_SIZE, last_read, end_time,
-							&numberOfParameters, &last_read, (uint)1);
+							&numberOfParameters, &last_read, (uint)0);
 				}
 				else
 				{
@@ -238,8 +238,8 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 					WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_READ_FS, SYSTEM_TRXVU, (int)FS_result);
 					break;
 				}
-				else if (FS_result == FS_BUFFER_OVERFLOW)
-					printf("overflow from reading data!!!!!\n");
+				/*else if (FS_result == FS_BUFFER_OVERFLOW)
+					printf("overflow from reading data!!!!!\n");*/
 				lookForRequestToDelete_dump(cmdID);
 				for (int l = 0; l < numberOfParameters; l++)
 				{
@@ -248,7 +248,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 
 					i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
 					check_int("TRX_sendFrame, dump_logic", i_error);
-					printf("number of packets: %d\n", numberOfPackets++);
+					//printf("number of packets: %d\n", numberOfPackets++);
 
 					if (i_error == 4)
 					{
@@ -285,14 +285,14 @@ void Dump_task(void *arg)
 	time_unix endTime;
 	command_id id;
 	uint8_t resulotion;
-	HK_types HK_dump_type[5];
+	HK_types HK_dump_type[NUM_FILES_IN_DUMP];
 
 	id = BigEnE_raw_to_uInt(&dump_param_data[0]);
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		HK_dump_type[i] = (HK_types)dump_param_data[4 + i];
-	resulotion = dump_param_data[9];
-	startTime = BigEnE_raw_to_uInt(&dump_param_data[10]);
-	endTime = BigEnE_raw_to_uInt(&dump_param_data[14]);
+	resulotion = dump_param_data[4 + NUM_FILES_IN_DUMP];
+	startTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 5]);
+	endTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 9]);
 
 	if (get_system_state(dump_param))
 	{
@@ -404,7 +404,6 @@ void Transponder_task(void *arg)
 		xQueueReset(xTransponderQueue);
 		transponder_logic(time, cmdId);
 		save_ACK(ACK_NOTHING, ERR_SUCCESS, cmdId);
-		vTaskDelete(NULL);
 	}
 	if (get_system_state(mute_param))
 		save_ACK(ACK_TRXVU, ERR_MUTE, cmdId);
@@ -523,7 +522,7 @@ void Rx_logic()
 				// 1.3. sends receive ACK
 				byte rawACK[ACK_RAW_SIZE];
 				build_raw_ACK(ACK_RECEIVE_COMM, ERR_SUCCESS, packet.id, rawACK);
-				printf("Send ACK\n");
+				//printf("Send ACK\n");
 				TRX_sendFrame(rawACK, ACK_RAW_SIZE);
 
 				i_error = Time_getUnixEpoch(&time_now);
@@ -620,13 +619,21 @@ void check_TRXVUState()
 	if (error)
 	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_READ_TRXVU_STATE, SYSTEM_TRXVU, error);
-		printf("error in IsisTrxvu_tcGetState\n");
+		//printf("error in IsisTrxvu_tcGetState\n");
 		return;
 	}
 
 	if (TxState.fields.transmitter_bitrate != FRAMBitRate)
 	{
 		update_FRAM_bitRate();
+	}
+
+	if (TxState.fields.transmitter_idle_state && (!get_system_state(Tx_param) || get_system_state(mute_param)))
+	{
+		int retValInt = IsisTrxvu_tcSetIdlestate(0, trxvu_idle_state_off);
+		if (retValInt != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_IDLE, SYSTEM_TRXVU, retValInt);
+		check_int("init_trxvu, IsisTrxvu_tcSetIdlestate, on", retValInt);
 	}
 }
 
@@ -653,12 +660,12 @@ void Beacon_task()
 	voltage_t low_v_beacon;
 	while(1)
 	{
-		printf("\n         Beacon logic\n\n");
+		//printf("\n         Beacon logic\n\n");
 		// 1. check if Tx on, transponder off mute Tx off, dunp is off
 		if (CHECK_SENDING_BEACON_ABILITY)
 			buildAndSend_beacon();
-		else
-			printf("skip beacon\n");
+		/*else
+			printf("skip beacon\n");*/
 
 		i_error = FRAM_read_exte(&delayBaecon, BEACON_TIME_ADDR, 1);
 		if (i_error != 0)
@@ -763,7 +770,7 @@ void buildAndSend_beacon()
 		}
 	}
 	// 4.5. stats
-	beacon.data[38] = beacon_param.numOfPics;
+	beacon.data[38] = beacon_param.FS_failFlag;
 	beacon.data[39] = beacon_param.EPS_state;
 	beacon.data[40] = beacon_param.numOfDelayedCommand;
 	raw_param = (byte*)&beacon_param.numOfResets;
@@ -876,7 +883,7 @@ int TRX_sendFrame(byte* data, uint8_t length)
 				vTaskDelay(200);
 			if (count % 10 == 1)
 			{
-				printf("Tx buffer is full\n");
+				//printf("Tx buffer is full\n");
 				retVal = -1;
 			}
 			count++;
@@ -1011,12 +1018,12 @@ temp_t check_Tx_temp()
 	int rv;
 
 	// Telemetry values are presented as raw values
-	printf("\r\nGet all Telemetry at once in raw values \r\n\r\n");
+	//printf("\r\nGet all Telemetry at once in raw values \r\n\r\n");
 	rv = IsisTrxvu_tcGetTelemetryAll_revC(0, &telemetry);
 	if(rv)
 	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_GET_TLM, SYSTEM_TRXVU, rv);
-		printf("Subsystem call failed. rv = %d", rv);
+		///printf("Subsystem call failed. rv = %d", rv);
 	}
 
 	return ((float)telemetry.fields.locosc_temp) * -0.07669 + 195.6037;
@@ -1038,7 +1045,7 @@ void change_TRXVU_state(Boolean state)
 		check_int("change_TRXVU_state, FRAM_read", i_error);
 		change_trans_RSSI(rssiData);
 		//nominal mode
-		printf("\tTransponder is disabled\n\n");
+		//printf("\tTransponder is disabled\n\n");
 		data[1] = 0x01;
 		set_system_state(transponder_active_param, SWITCH_OFF);
 		vTaskDelay(10000);
@@ -1047,7 +1054,7 @@ void change_TRXVU_state(Boolean state)
 	else
 	{
 		//transponder mode
-		printf("\tTransponder enabled\n\n");
+		//printf("\tTransponder enabled\n\n");
 		data[1] = 0x02;
 		set_system_state(transponder_active_param, SWITCH_ON);
 	}

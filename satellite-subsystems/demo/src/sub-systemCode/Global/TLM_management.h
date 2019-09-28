@@ -55,7 +55,7 @@ int f_managed_close(F_FILE** fileHandler);
 /*
  *
  */
-void delete_allTMFilesFromSD();
+void deleteDir(char* name, Boolean delete_folder);
 /*!
  * Initializes the file system.
  * @note call once for boot and after DeInitializeFS.

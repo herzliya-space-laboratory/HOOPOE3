@@ -18,7 +18,7 @@ void reset_APRS_list(Boolean firstActivation)
 {
 	return;
 	int i_error = 0;
-	uint8_t numberOfPackets = 0;	//get number of packets in the FRAM
+	//uint8_t numberOfPackets = 0;	//get number of packets in the FRAM
 
 	memset(APRS_list, 0, APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS);	//sets all slots in the array to zero for later write to the FRAM
 
@@ -146,7 +146,7 @@ void get_APRS_list()
 	//error = FRAM_read_exte(APRS_list, APRS_PACKETS_ADDR, APRS_SIZE_WITH_TIME * MAX_NAMBER_OF_APRS_PACKETS);
 	check_int("get_APRS_list, FRAM_read_exte(APRS_PACKETS_ADDR)", error);
 
-	uint8_t num_of_APRS_save;
+	//uint8_t num_of_APRS_save;
 	//error = FRAM_read_exte(&num_of_APRS_save, NUMBER_PACKET_APRS_ADDR, 1);
 	check_int("get_APRS_list, FRAM_read_exte(NUMBER_PACKET_APRS_ADDR)", error);
 

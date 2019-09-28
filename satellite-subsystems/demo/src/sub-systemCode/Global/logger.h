@@ -186,6 +186,7 @@ typedef enum _log_errors_EPS{
 	LOG_ERR_EPS_SP_WAKE = 18,
 	LOG_ERR_EPS_SP_SLEEP = 19,
 	LOG_ERR_EPS_SP_COLLECT_TEMP = 20,
+	LOG_ERR_EPS_VOLTAGE = 21,
 } log_errors_EPS;
 
 typedef enum _log_systems{

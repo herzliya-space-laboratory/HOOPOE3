@@ -22,7 +22,7 @@ static FileSystemResult WriteLog(void *log, char filename[5])
 	error = add_GenericElement_queue(element);
 	if (error == -1)
 	{
-		printf("could not write to queue LOG\n\n");
+		//printf("could not write to queue LOG\n\n");
 		return -1;
 	}
 

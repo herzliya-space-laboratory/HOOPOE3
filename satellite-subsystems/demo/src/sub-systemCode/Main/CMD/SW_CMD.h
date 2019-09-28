@@ -17,4 +17,7 @@ void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err);
 
 void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd);
 
+void cmd_FRAM_read(Ack_type* type, ERR_type* err, TC_spl cmd);
+
+void cmd_FRAM_write(Ack_type* type, ERR_type* err, TC_spl cmd);
 #endif /* SW_CMD_H_ */

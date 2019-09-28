@@ -62,7 +62,7 @@ typedef struct __attribute__ ((__packed__))
 
 	short Attitude[3];
 
-	uint8_t numOfPics;//number of pictures saved in the file system of the satellite
+	uint8_t FS_failFlag;
 	uint8_t EPS_state;//number of APRS packet saved in the FRAM
 	uint8_t numOfDelayedCommand;//number of delayed command saved on the FRAM
 	unsigned int numOfResets;
@@ -125,8 +125,8 @@ void set_TxForw(unsigned short param);
 short get_Attitude(int index);
 void set_Attitude(int index, short param);
 // CGP-> numOfPics
-uint8_t get_numOfPics();
-void set_numOfPics(uint8_t param);
+uint8_t get_FS_failFlag();
+void set_FS_failFlag(uint8_t param);
 // CGP-> numOfAPRS
 uint8_t get_EPSState();
 void set_EPSState(uint8_t param);

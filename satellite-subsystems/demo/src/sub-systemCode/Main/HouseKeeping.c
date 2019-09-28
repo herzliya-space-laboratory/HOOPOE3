@@ -57,7 +57,7 @@ int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
 	error = add_GenericElement_queue(element);
 	if (error == -1)
 	{
-		printf("could not write to queue ACK\n\n");
+		//printf("could not write to queue ACK\n\n");
 		return -1;
 	}
 

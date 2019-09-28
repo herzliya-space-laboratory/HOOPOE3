@@ -42,16 +42,16 @@ void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_dump(TC_spl cmd)
 {
-	if (cmd.length != 2 * TIME_SIZE + 5 + 1)
+	if (cmd.length != 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1)
 	{
 		return;
 	}
 	//1. build combine data with command_id
-	unsigned char raw[2 * TIME_SIZE + 5 + 4 + 1] = {0};
+	unsigned char raw[2 * TIME_SIZE + NUM_FILES_IN_DUMP + 4 + 1] = {0};
 	// 1.1. copying command id
 	BigEnE_uInt_to_raw(cmd.id, &raw[0]);
 	// 1.2. copying command data
-	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + 5 + 1);
+	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1);
 	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), xDumpHandle);
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
@@ -121,7 +121,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 
-	if (cmd.length != NUM_FILES_IN_DUMP)
+	if (cmd.length != 5)
 	{
 		*type = ACK_CMD_FAIL;
 		*err = ERR_LENGTH;
@@ -130,7 +130,7 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	char file_name[MAX_F_FILE_NAME_SIZE];
 	FileSystemResult reslt = FS_SUCCSESS;
-	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		if ((HK_types)cmd.data[i] == this_is_not_the_file_you_are_looking_for)
 			continue;
@@ -155,7 +155,9 @@ void cmd_reset_TLM_SD(Ack_type* type, ERR_type* err)
 {
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
-	delete_allTMFilesFromSD();
+	char names[256];
+	strcpy(names, "A:/");
+	deleteDir(names, FALSE);
 }
 
 void cmd_stop_TM(Ack_type* type, ERR_type* err)

@@ -164,6 +164,13 @@ void resetSD()
 	{
 		do
 		{
+			printf ("filename:%s\n ",find.filename);
+		} while (!f_findnext(&find));
+	}
+	if (!f_findfirst("A:/*.*",&find))
+	{
+		do
+		{
 			gom_eps_hk_t eps_tlm;
 			GomEpsGetHkData_general(0, &eps_tlm);
 
@@ -200,11 +207,11 @@ int InitSubsystems()
 
 	numberOfRestarts();
 
+	EPS_Init();
+
 	InitializeFS(activation);
 
 	CUFManageRestart(activation);
-
-	EPS_Init();
 
 	//resetSD();
 

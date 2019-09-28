@@ -24,7 +24,7 @@
 #define TRXVU_FROM_CALSIGN "4x4HSL1"
 
 #define VALUE_TX_BUFFER_FULL 0xff
-#define NUM_FILES_IN_DUMP	5
+#define NUM_FILES_IN_DUMP	7
 
 #define DEFAULT_BIT_RATE	trxvu_bitrate_9600
 

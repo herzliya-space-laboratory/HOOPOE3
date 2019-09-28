@@ -467,6 +467,12 @@ void AUC_SW(TC_spl decode)
 	case (RESET_FRAM_ST):
 		cmd_reset_FRAM(&type, &err, decode);
 		break;
+	case (FRAM_WRITE_ST):
+		cmd_FRAM_write(&type, &err, decode);
+		break;
+	case (FRAM_READ_ST):
+		cmd_FRAM_read(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;

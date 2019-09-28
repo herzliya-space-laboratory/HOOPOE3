@@ -87,7 +87,7 @@ int init_GP()
 		current_global_param.Attitude[i] = 0;
 	}
 
-	current_global_param.numOfPics = 0;
+	current_global_param.FS_failFlag = 0;
 	current_global_param.numOfDelayedCommand = 0;
 	current_global_param.EPS_state = 0;
 	current_global_param.numOfResets = 0;
@@ -293,7 +293,7 @@ void get_current_global_param(global_param* param_out)
 			param_out->Attitude[i] = current_global_param.Attitude[i];
 		}
 
-		param_out->numOfPics = current_global_param.numOfPics;
+		param_out->FS_failFlag = current_global_param.FS_failFlag;
 		param_out->numOfDelayedCommand = current_global_param.numOfDelayedCommand;
 		param_out->EPS_state = current_global_param.EPS_state;
 		param_out->numOfResets = current_global_param.numOfResets;
@@ -742,13 +742,13 @@ void set_Attitude(int index, short param)
 	}
 }
 // CGP-> numOfPics
-uint8_t get_numOfPics()
+uint8_t get_FS_failFlag()
 {
 	portBASE_TYPE lu_error;
 	uint8_t return_value = 0;
 	if(xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		return_value = current_global_param.numOfPics;
+		return_value = current_global_param.FS_failFlag;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in get_numOfPics", lu_error);
 	}
@@ -758,12 +758,12 @@ uint8_t get_numOfPics()
 	}
 	return return_value;
 }
-void set_numOfPics(uint8_t param)
+void set_FS_failFlag(uint8_t param)
 {
 	portBASE_TYPE lu_error;
 	if(xSemaphoreTake_extended(xCGP_semaphore, MAX_DELAY) == pdTRUE)
 	{
-		current_global_param.numOfPics = param;
+		current_global_param.FS_failFlag = param;
 		lu_error = xSemaphoreGive_extended(xCGP_semaphore);
 		check_portBASE_TYPE("can't return xCGP_semaphore in set_numOfPics", lu_error);
 	}

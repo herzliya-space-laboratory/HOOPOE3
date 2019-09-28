@@ -26,12 +26,14 @@
 
 #include "TLM_management.h"
 
-#define SKIP_FILE_TIME_SEC 1000000
-#define _SD_CARD 0
-#define FIRST_TIME -1
-#define FILE_NAME_WITH_INDEX_SIZE MAX_F_FILE_NAME_SIZE+sizeof(int)*2
-#define MAX_ELEMENT_SIZE MAX_SIZE_TM_PACKET+sizeof(int)
-#define FS_TAKE_SEMPH_DELAY	1000 * 30
+#define NUMBER_OF_WRITES 1
+#define SKIP_FILE_TIME_SEC ((60*60*24)/NUMBER_OF_WRITES)
+#define _SD_CARD (0)
+#define FIRST_TIME (-1)
+
+#define FILE_NAME_WITH_INDEX_SIZE (MAX_F_FILE_NAME_SIZE+sizeof(int)*2)
+#define MAX_ELEMENT_SIZE (MAX_SIZE_TM_PACKET+sizeof(int))
+#define FS_TAKE_SEMPH_DELAY	(1000 * 30)
 char allocked_write_element[MAX_ELEMENT_SIZE];
 char allocked_read_element[MAX_ELEMENT_SIZE];
 char allocked_delete_element[MAX_ELEMENT_SIZE];
@@ -58,38 +60,53 @@ typedef struct
 } C_FILE;
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
 
-void delete_allTMFilesFromSD()
+Boolean TLMfile(char* filename)
+{
+	int len = strlen(filename);
+	if(strcmp(".TLM",filename+len-4)==0)
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void deleteDir(char* name, Boolean delete_folder)
 {
 	F_FIND find;
-	printf("\n        delete files\n\n\n");
-	int numm = 0;
-	if (!f_findfirst("A:/*.*",&find))
+	int format_err = f_format(0,F_FAT32_MEDIA);
+	if(format_err !=0)
+	{
+		printf("format_err: %d",format_err);
+	}
+	return;
+	char temp_name[256]={0};
+	if (!f_findfirst(name,&find))
 	{
 		do
 		{
-			int count = 0;
-			while (find.filename[count] != '.' && find.filename[count] != '\0' && count < 30)
-				count++;
-			count++;
-			if (!memcmp(find.filename + count, FS_FILE_ENDING, (int)FS_FILE_ENDING_SIZE))
+			PLZNORESTART();
+			printf ("filename:%s\n",find.filename);
+			if (find.attr&F_ATTR_DIR)
 			{
-				int err = 0;
-				for(int i = 0; i < 20; i++)
+				sprintf(temp_name,"%s/%s",name,find.filename);
+				deleteDir(temp_name,TRUE);
+				if(delete_folder)
 				{
-					err = f_delete(find.filename);
-					numm++;
-					if (err == 0)
-						break;
-					else
-						printf("f_delete in delete_allTMFilesFromSD: %d\n", err);
-					vTaskDelay(1);
+					f_rmdir(temp_name);
 				}
 			}
-
+			else
+			{
+				sprintf(temp_name,"%s/%s",name,find.filename);
+				if (TLMfile(temp_name))
+				{
+					f_delete(temp_name);
+				}
+			}
 		} while (!f_findnext(&find));
 	}
-	printf("\n        FINISH: delete files, files: %d\n\n\n", numm);
 }
+
 // return -1 for FRAM fail
 static int getNumOfFilesInFS()
 {
@@ -214,7 +231,9 @@ FileSystemResult InitializeFS(Boolean first_time)
 	}
 	if(first_time)
 	{
-		delete_allTMFilesFromSD();
+		char names[256];
+		strcpy(names, "*.*");
+		deleteDir(names, TRUE);
 		FS fs = {0};
 		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
@@ -268,13 +287,18 @@ FileSystemResult c_fileCreate(char* c_file_name,
 	{
 		return FS_FRAM_FAIL;
 	}
+	if(f_mkdir(c_file_name)!=0)
+	{
+		printf("f_mkdir fail");
+		return FS_FAIL;
+	}
 
 	return FS_SUCCSESS;
 }
 //write element with timestamp to file
 static void writewithEpochtime(F_FILE* file, byte* data, int size,unsigned int time)
 {
-	for (int i = 0; i < 1; i++)
+	for (int i = 0; i < NUMBER_OF_WRITES; i++)
 	{
 		int number_of_writes;
 		number_of_writes = f_write( &time,sizeof(unsigned int),1, file );
@@ -333,7 +357,7 @@ static int getFileIndex(unsigned int creation_time, unsigned int current_time)
 void get_file_name_by_index(char* c_file_name,int index,char* curr_file_name)
 {
 	PLZNORESTART();
-	sprintf(curr_file_name,"%s%d.%s", c_file_name, index, FS_FILE_ENDING);
+	sprintf(curr_file_name,"a:/%s/%d.%s", c_file_name, index, FS_FILE_ENDING);
 }
 FileSystemResult c_fileReset(char* c_file_name)
 {
@@ -525,7 +549,7 @@ FileSystemResult fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	return FS_SUCCSESS;
 }
 FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
-		time_unix from_time, time_unix to_time, int* read,time_unix* last_read_time, unsigned int resolution)
+		time_unix from_time, time_unix to_time, int* read, time_unix* last_read_time, unsigned int resolution)
 {
 	time_unix lastCopy_time = 0;
 	C_FILE c_file;
@@ -580,7 +604,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 					return FS_BUFFER_OVERFLOW;
 				}
 
-				if (element_time > (time_unix)resolution + lastCopy_time)
+				if (element_time >= (time_unix)resolution + lastCopy_time)
 				{
 					(*read)++;
 					memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);

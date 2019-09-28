@@ -78,12 +78,12 @@ TroubleErrCode AdcsInit()
 	unsigned char adcs_i2c = ADCS_I2C_ADRR;
 	int rv;
 	int init_err_flag = 0;
-	FRAM_write_exte(&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
+	FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 
 	rv = cspaceADCS_initialize(&adcs_i2c, 1);
 	if(rv != E_NO_SS_ERR && rv != E_IS_INITIALIZED){
 		init_err_flag = 1;
-		FRAM_write_exte(&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
+		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 		return TRBL_ADCS_INIT_ERR;
 	}
 
@@ -91,19 +91,19 @@ TroubleErrCode AdcsInit()
 	trbl = AdcsCmdQueueInit();
 	if (trbl != TRBL_SUCCESS){
 		init_err_flag = 2;
-		FRAM_write_exte(&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
+		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 		return trbl;
 	}
 	trbl = InitTlmElements();
 	if (trbl != TRBL_SUCCESS){
 		init_err_flag = 3;
-		FRAM_write_exte(&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
+		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 		return trbl;
 	}
 	Boolean b = CreateTlmElementFiles();
 	if (b != TRUE){
 		init_err_flag = 4;
-		FRAM_write_exte(&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
+		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 	}
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 
@@ -121,7 +121,7 @@ TroubleErrCode AdcsInit()
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
 	init_err_flag = TRUE;
-	FRAM_write_exte(&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
+	FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 	return TRBL_SUCCESS;
 }
 
@@ -129,7 +129,9 @@ void AdcsTask()
 {
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
-	int f_err = 0;
+	//TODO: log start task
+	int f_err = f_managed_enterFS();
+	//TODO: log f_err if error
 	vTaskDelay(ADCS_INIT_DELAY);
 	while(TRUE)
 	{
@@ -159,7 +161,6 @@ void AdcsTask()
 		if(TRBL_SUCCESS != trbl){
 			AdcsTroubleShooting(trbl);
 		}
-		f_managed_releaseFS();
 		vTaskDelay(delay_loop);
 	}
 }
