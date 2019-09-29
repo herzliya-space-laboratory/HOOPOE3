@@ -283,6 +283,7 @@ void AUC_general(TC_spl decode)
 		cmd_reset_TLM_SD(&type, &err);
 		break;
 	case (REDEPLOY):
+		cmd_deploy_ants(&type, &err, decode);
 		break;
 	case (ARM_DISARM):
 		cmd_ARM_DIARM(&type, &err, decode);

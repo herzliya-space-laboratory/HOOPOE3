@@ -362,13 +362,12 @@ void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	*err = ERR_SUCCESS;
 
 }
-void cmd_deploy_ants(Ack_type* type, ERR_type* err)
+void cmd_deploy_ants(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	(void)type;
 	(void)err;
-	/*type = ACK_REDEPLOY;
 #ifndef ANTS_DO_NOT_DEPLOY
-	int error = deploye_ants();
+	int error = deploye_ants(cmd.data[0]);
 	if (error == -2)
 	{
 		*type = ACK_ANTS;
@@ -385,13 +384,13 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 	}
 	else
 	{
-	 	 *type = ACK_CMD_FAIL;
+	 	*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 	}
 
 #else
 	printf("sho! sho!, get out before i kill you\n");
-#endif*/
+#endif
 }
 
 void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)
