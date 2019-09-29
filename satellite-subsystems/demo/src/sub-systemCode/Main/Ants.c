@@ -110,10 +110,11 @@ int deploye_ants(ISISantsSide side)
 
 	if (error != 0)
 	{
-		printf("error in Arm sequence: %d\n", error);
+		//printf("error in Arm sequence: %d\n", error);
 		return error;
 	}
 
+	WriteTransponderLog(ANTS_DEPLOY, 0);
 	error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
 	if (error)
 		WriteErrorLog((log_errors)LOG_ERR_DEPLOY_ANTS, SYSTEM_ANTS, error);

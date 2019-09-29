@@ -248,6 +248,7 @@ typedef enum _log_transponder{
 	TRXVU_HARD_ESET,
 	ANTS_A_HARD_RESET,
 	ANTS_B_HARD_RESET,
+	ANTS_DEPLOY,
 } log_transponder;
 
 typedef enum _log_cuf
