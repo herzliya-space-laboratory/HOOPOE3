@@ -92,10 +92,11 @@ void cmd_FRAM_read(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 
 	TM_spl packet;
-	packet.length = (unsigned short)read_size;
+	packet.length = (unsigned short)(SIZE_TXFRAME - SPL_TM_HEADER_SIZE);
 	packet.type = SOFTWARE_T;
 	packet.subType = FRAM_READ_ST;
 	Time_getUnixEpoch(&packet.time);
+	memset(packet.data, 0, SIZE_TXFRAME - SPL_TM_HEADER_SIZE);
 	int error = FRAM_read_exte(packet.data, address, read_size);
 	if (error != 0)
 	{
