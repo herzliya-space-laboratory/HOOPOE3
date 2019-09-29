@@ -196,9 +196,6 @@ void act_upon_command(TC_spl decode)
 	case (TC_ONLINE_TM_T):
 		AUC_onlineTM(decode);
 		break;
-	default:
-		printf("wrong type: %d\n", decode.type);
-		break;
 	}
 }
 

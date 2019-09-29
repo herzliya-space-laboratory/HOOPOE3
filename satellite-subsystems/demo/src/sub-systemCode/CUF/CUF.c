@@ -310,7 +310,6 @@ int ExecuteCUF(char* name)
 		return -300; //return -300 on un-authenticated
 	}
 	int ret = CUFFunction(CUFSwitch); //call the CUF function with the test function as its parameter and return its output
-	printf("\n\nCUF RET: %d\n\n", ret);
 	WriteCUFLog(CUF_EXECUTED, ret);
 	return ret;
 }
@@ -326,7 +325,6 @@ int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, 
 	cuf->disabled = disabled;
 	if (cuf->SSH == 0 || cuf->length == 0 || cuf->data == NULL || cuf->length == 0)
 	{
-		printf("Invalid Paramiters\n");
 		WriteErrorLog(CUF_INTEGRATED_FAIL, SYSTEM_CUF, 0);
 		return -1; //return -1 on fail
 	}
@@ -334,21 +332,17 @@ int IntegrateCUF(char* name, int* data, unsigned int length, unsigned long SSH, 
 	//check SSH
 	if (auth == -1)
 	{
-		printf("Failed To Generate Authentication SSH\n");
 		WriteErrorLog(CUF_INTEGRATED_FAIL, SYSTEM_CUF, 0);
 		return -1; //return -1 on fail
 	}
 	else if (auth == 0)
 	{
-		printf("SSH Un-Authenticated\n");
 		WriteCUFLog(CUF_INTEGRATED_unauthenticated, 0);
 		return -2; //return -2 on un-authenticated
 	}
-	printf("SSH Authenticated\n");
 	AddToCUFTempArray(cuf);
 	if (cuf->isTemporary == FALSE)
 		return UpdatePerminantCUF(cuf);
-	printf("CUF Added To Arrays\n");
 	WriteCUFLog(CUF_INTEGRATED, 0);
 	return 0;
 }
@@ -425,35 +419,34 @@ Boolean CUFTest(int* testCUFData)
 	int i;
 	if (InitCUF(TRUE) != 0) //initiate the CUF architecture and check fail
 		return TRUE; //return TRUE on fail
-	printf("initiated switch\n");
 	int testCUFDataCheck[] = { 0xe92d4800, 0xe28db004, 0xe24dd008, 0xe50b0008, 0xe51b3008, 0xe3a00000, 0xe12fff33, 0xe1a03000, 0xe59f001c, 0xe12fff33, 0xe3a00005, 0xeb000005, 0xe1a03000, 0xe2833001, 0xe1a00003, 0xe24bd004, 0xe8bd8800, 0x00001388, 0xe52db004, 0xe28db000, 0xe24dd00c, 0xe50b0008, 0xe51b3008, 0xe2833001, 0xe1a00003, 0xe28bd000, 0xe8bd0800, 0xe12fff1e }; //data for CUF test file
 	for (i = 0; i < 28; i++)
 	{
 		if (testCUFDataCheck[i] != testCUFData[i])
 		{
-			printf("%d, %d, %d\n", testCUFDataCheck[i], testCUFData[i], i);
+			//printf("%d, %d, %d\n", testCUFDataCheck[i], testCUFData[i], i);
 		}
 	}
 	int intret = IntegrateCUF("CUF001.cuf", testCUFData, 28, GenerateSSH((char*)testCUFData, 112), TRUE, FALSE);
 	CUF* testFile = GetFromCUFTempArray("CUF001.cuf");
 	if (intret != 0 || testFile == NULL)
 	{
-		printf("Failed To Integrate CUF\n");
+		//printf("Failed To Integrate CUF\n");
 		return TRUE; //return TRUE on fail
 	}
 	int CUFreturnData = ExecuteCUF(testFile->name); //execute the test CUF
 	if (CUFreturnData == -2) //check fail
 	{
-		printf("Failed To Execute CUF\n");
+		//printf("Failed To Execute CUF\n");
 		return TRUE; //return TRUE on fail
 	}
-	printf("CUF Executed: ");
-	printf("%d\n", CUFreturnData); //print the test CUFs return data
+	//printf("CUF Executed: ");
+	//printf("%d\n", CUFreturnData); //print the test CUFs return data
 	if (RemoveCUF(testFile->name) == -1) //remove the CUF once done and check fail
 	{
-		printf("Failed To Remove CUF\n");
+		//printf("Failed To Remove CUF\n");
 		return TRUE; //return TRUE on fail
 	}
-	printf("CUF Removed\n");
+	//printf("CUF Removed\n");
 	return TRUE; //return TRUE on success
 }

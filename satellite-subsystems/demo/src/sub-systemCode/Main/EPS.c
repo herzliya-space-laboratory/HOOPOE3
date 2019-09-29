@@ -247,19 +247,19 @@ void writeState_log(EPS_mode_t mode, voltage_t vol)
 	switch(mode)
 	{
 	case full_mode:
-		printf("Enter Full Mode\n");
+		//printf("Enter Full Mode\n");
 		WriteEpsLog(EPS_ENTER_FULL_MODE, (int)vol);
 		break;
 	case cruise_mode:
-		printf("Enter Cruise Mode\n");
+		//printf("Enter Cruise Mode\n");
 		WriteEpsLog(EPS_ENTER_CRUISE_MODE, (int)vol);
 		break;
 	case safe_mode:
-		printf("Enter Safe Mode\n");
+		//printf("Enter Safe Mode\n");
 		WriteEpsLog(EPS_ENTER_SAFE_MODE, (int)vol);
 		break;
 	case critical_mode:
-		printf("Enter Critical Mode\n");
+		//printf("Enter Critical Mode\n");
 		WriteEpsLog(EPS_ENTER_CRITICAL_MODE, (int)vol);
 		break;
 	}
@@ -281,7 +281,7 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 			if (previuosVBatt > voltage_table[0][i])
 			{
 				batteryLastMode = enterMode[i].type;
-				printf("down,, EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
+				//printf("down,, EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
 				writeState_log(batteryLastMode, current_VBatt);
 			}
 		}
@@ -304,7 +304,7 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 			if (previuosVBatt < voltage_table[1][i])
 			{
 				batteryLastMode = enterMode[NUM_BATTERY_MODE - 1 - i].type;
-				printf("up,, EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
+				//printf("up,, EPS voltage: %u, previouse voltage: %u\n", current_VBatt, previuosVBatt);
 				writeState_log(batteryLastMode, current_VBatt);
 			}
 		}
@@ -351,7 +351,7 @@ void sanityCheck_EPS(voltage_t current_VBatt)
 
 	if (check == FALSE)
 	{
-		printf("The EPS logic failed us all\n");
+		//printf("The EPS logic failed us all\n");
 		battery_upward(current_VBatt, 0);
 	}
 }

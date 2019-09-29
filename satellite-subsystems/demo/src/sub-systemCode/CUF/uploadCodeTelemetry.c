@@ -129,30 +129,30 @@ void startCUFintegration()
 	else
 		saveAck("File wont open launch header");
 	int error = f_getlasterror();
-	printf("%d", error);
+	//printf("%d", error);
 	f_managed_close(&fp);
 	settings[18] = 0;
-	printf("Setting: %s\n", settings);
+	//printf("Setting: %s\n", settings);
 	//00-00-00-00-05-00-00-09-00-00-00-00-00-10-0a-ac-aa-aa-aa-aa-aa
 	TRX_sendFrame((byte*)uploadBoolArray, (uint8_t)boolArrayLength);
 	if (settings[0] <= 2 && settings[1] <= 2)
 	{
-		printf("Name: %s\n", (char*)(settings+10));
-		printf("SSH: %u\n", castCharPointerToInt(settings+6));
-		printf("Length: %u\n", castCharPointerToInt(settings+2));
-		printf("IsTemp: %d\n", settings[0]);
-		printf("disabled: %d\n", settings[1]);
+		//printf("Name: %s\n", (char*)(settings+10));
+		//printf("SSH: %u\n", castCharPointerToInt(settings+6));
+		//printf("Length: %u\n", castCharPointerToInt(settings+2));
+		//printf("IsTemp: %d\n", settings[0]);
+		//printf("disabled: %d\n", settings[1]);
 		IntegrateCUF((char*)(settings+10), (int*)castCharArrayToIntArray(uploadCodeArry, castCharPointerToInt(settings+2)*4), castCharPointerToInt(settings+2), castCharPointerToInt(settings+6), settings[0], settings[1]);
 	}
 }
 
 void saveBackup()
 {
-	printf("SAVE BACKUP STARTED"); //----------------------DEBUG
+	//printf("SAVE BACKUP STARTED"); //----------------------DEBUG
 	F_FILE *fp = NULL;
 	f_managed_open(fbackupName, "w+", &fp);//The name with its number
 	int error = f_getlasterror();
-	printf("%d\n", error);
+	//printf("%d\n", error);
    	if (fp != NULL)
    	{
    		int charWrote = f_write(uploadCodeArry, 1, uploadCodeLength, fp);
@@ -175,5 +175,6 @@ void saveBackup()
 
 void saveAck(char* err)
 {
-    printf("%s", err);
+	(void)err;
+    //printf("%s", err);
 }

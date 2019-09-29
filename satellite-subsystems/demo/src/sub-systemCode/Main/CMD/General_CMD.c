@@ -164,7 +164,7 @@ void cmd_format_SD(Ack_type* type, ERR_type* err)
 }
 void cmd_dummy_func(Ack_type* type, ERR_type* err)
 {
-	printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
+	//printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
@@ -310,8 +310,8 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 	int error = Time_setUnixEpoch(new_time);
 	if (error)
 	{
-		printf("fuckeddddddd\n");
-		printf("I gues we need to stay on this time forever\n");
+		//printf("fuckeddddddd\n");
+		//printf("I gues we need to stay on this time forever\n");
 		WriteErrorLog(LOG_ERR_SET_TIME, SYSTEM_OBC, error);
 		*type = ACK_SYSTEM;
 		*err = ERR_FAIL;
