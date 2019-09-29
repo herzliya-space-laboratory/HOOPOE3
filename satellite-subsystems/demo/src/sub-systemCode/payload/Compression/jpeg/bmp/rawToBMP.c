@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <string.h> 	// for memcpy
 #include <stdio.h>		// for printf
-#include <stdlib.h>		// for exit
 
 #include "../../../Misc/FileSystem.h"
 
@@ -44,14 +43,12 @@ void TransformRawToBMP(char * inputF_FILE, char * outputF_FILE, int compfact)
 	f_managed_open(inputF_FILE, "r+", &input_fd);
 	if (input_fd == NULL)
 	{
-		printf("Failed to f_open intput F_FILE\n");
 		return;
 	}
 	F_FILE* output_fd = NULL;
 	f_managed_open(outputF_FILE, "w", &output_fd);
 	if (output_fd == NULL)
 	{
-		printf("Failed to f_open output F_FILE\n");
 		f_managed_close(&input_fd);
 		return;
 	}
@@ -87,8 +84,6 @@ void TransformRawToBMP(char * inputF_FILE, char * outputF_FILE, int compfact)
 
 	f_managed_close(&output_fd);
 	f_managed_close(&input_fd);
-
-	printf("Done!\n");
 }
 
 void interpolate(F_FILE* input_fd, int row, int col, int compfact)
@@ -252,30 +247,20 @@ int getInputAt(F_FILE* input_fd, int row, int col, int compfact)
 	{
 		if (row > 2)
 		{
-			printf("ERROR - first request of data was not from row 0,1  or 2\n");
 			return 0;
 		}
 
 		int test = f_read(row1Data, 1, IMG_WIDTH(compfact), input_fd);
 		if (test != IMG_WIDTH(compfact))
 		{
-			printf("get input at %d, %d\n", row, col);
-			printf("Failed to f_read a full row of data\n");
-			exit(1);
 			return 0;
 		}
 		if (f_read(row2Data, 1, IMG_WIDTH(compfact), input_fd) != IMG_WIDTH(compfact))
 		{
-			printf("get input at %d, %d\n", row, col);
-			printf("Failed to f_read a full row of data\n");
-			exit(2);
 			return 0;
 		}
 		if (f_read(row3Data, 1, IMG_WIDTH(compfact), input_fd) != IMG_WIDTH(compfact))
 		{
-			printf("get input at %d, %d\n", row, col);
-			printf("Failed to f_read a full row of data\n");
-			exit(3);
 			return 0;
 		}
 		rowIndexInArray1 = 0;
@@ -292,16 +277,12 @@ int getInputAt(F_FILE* input_fd, int row, int col, int compfact)
 
 		if (f_read(rowsInMem[2], 1, IMG_WIDTH(compfact), input_fd) != IMG_WIDTH(compfact))
 		{
-			printf("get input at %d, %d\n", row, col);
-			printf("Failed to f_read a full row of data\n");
-			exit(4);
 			return 0;
 		}
 		++rowIndexInArray1;
 	}
 	else if (row < rowIndexInArray1 || rowIndexInArray1 > rowIndexInArray1 + 2)	// not in the 3 loaded rows
 	{
-		printf("Attempted to get a row of data not loaded to memory\n");
 		return 0;
 	}
 
@@ -312,7 +293,6 @@ unsigned char f_writeF_FILEHeader(F_FILE* output_fd, int compfact)
 {
 	if (output_fd == NULL)
 	{
-		printf("output F_FILE was not f_open, so failed to f_write header\n");
 		return 1;
 	}
 
@@ -353,7 +333,6 @@ unsigned char f_writeF_FILEHeader(F_FILE* output_fd, int compfact)
 
 	if (f_write(headerBuf, 1, 14 + 40, output_fd) != 54)
 	{
-		printf("Failed to f_write header to F_FILE\n");
 		return 1;
 	}
 	return 0;
@@ -363,13 +342,11 @@ unsigned char f_writeOutputRow(F_FILE* output_fd, int compfact)
 {
 	if (output_fd == NULL)
 	{
-		printf("output F_FILE was not f_open, so failed to f_write data row\n");
 		return 1;
 	}
 
 	if (f_write(rowOutput, 1, IMG_WIDTH(compfact) * 3, output_fd) != IMG_WIDTH(compfact) * 3)
 	{
-		printf("Failed to f_write data row to F_FILE\n");
 		return 1;
 	}
 	return 0;

@@ -148,17 +148,6 @@ ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadat
 		result = FRAM_read_exte((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
-		// printing for tests:
-		printf("cameraId: %d, timestamp: %u, ", image_metadata->cameraId, image_metadata->timestamp);
-		bit fileTypes[8];
-		char2bits(image_metadata->fileTypes, fileTypes);
-		printf("files types:");
-		for (int j = 0; j < 8; j++) {
-			printf(" %u", fileTypes[j].value);
-		}
-		printf(", angles: %u %u %u, marked = %u\n",
-				image_metadata->angle_rates[0], image_metadata->angle_rates[1], image_metadata->angle_rates[2], image_metadata->markedFor_TumbnailCreation);
-
 		if (image_metadata->cameraId == id)
 		{
 			memcpy(image_address, &database_current_address, sizeof(uint32_t));
@@ -376,12 +365,6 @@ ImageDataBaseResult setDataBaseValues(ImageDataBase database)
 	ImageDataBaseResult result = updateGeneralDataBaseParameters(database);
 	DB_RETURN_ERROR(result);
 
-	printf("\nRe: database->numberOfPictures = %u, database->nextId = %u; CameraParameters: frameAmount = %lu,"
-			" frameRate = %lu, adcGain = %u, pgaGain = %u, sensor offset = %u, exposure = %lu\n", database->numberOfPictures,
-			database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate,
-			database->cameraParameters.adcGain, database->cameraParameters.pgaGain,
-			database->cameraParameters.sensorOffset, database->cameraParameters.exposure);
-
 	return DataBaseSuccess;
 }
 
@@ -395,8 +378,6 @@ ImageDataBase initImageDataBase(Boolean first_activation)
 		free(database);
 		return NULL;
 	}
-
-	printf("numberOfPictures = %u, nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, sensor offset = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure);
 
 	ImageDataBaseResult error;
 
@@ -455,7 +436,6 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 	error = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
 	if( error )
 	{
-		printf("\ntransferImageToSD Error = (%d) reading image!\n\r", error);
 		return (GECKO_Read_Success - error);
 	}
 
@@ -537,7 +517,6 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 	int err = GECKO_EraseBlock(id);
 	if( err )
 	{
-		printf("Error (%d) erasing image!\n\r",err);
 		return (GECKO_Erase_Success - err);
 	}
 
@@ -829,17 +808,6 @@ ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buff
 		if (image_metadata.cameraId != 0 && (image_metadata.cameraId >= start && image_metadata.cameraId <= end))
 		{
 			database_size += sizeof(ImageMetadata);
-
-			// printing for tests:
-			printf("cameraId: %d, timestamp: %u, inOBC:", image_metadata.cameraId, image_metadata.timestamp);
-			bit fileTypes[8];
-			char2bits(image_metadata.fileTypes, fileTypes);
-			printf(", files:");
-			for (int j = 0; j < 8; j++) {
-				printf(" %u", fileTypes[j].value);
-			}
-			printf(", angles: %u %u %u, markedFor_4thTumbnailCreation = %u\n",
-					image_metadata.angle_rates[0], image_metadata.angle_rates[1], image_metadata.angle_rates[2], image_metadata.markedFor_TumbnailCreation);
 		}
 		else
 		{
