@@ -69,7 +69,14 @@ Boolean TLMfile(char* filename)
 	}
 	return FALSE;
 }
-
+void sd_format(int index)
+{
+	int format_err = f_format(index,F_FAT32_MEDIA);
+	if(format_err !=0)
+	{
+		printf("format_err: %d",format_err);
+	}
+}
 void deleteDir(char* name, Boolean delete_folder)
 {
 	F_FIND find;
@@ -149,11 +156,13 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 		for (int i = 0; i < 3; i++)
 		{
 			*fileHandler = f_open(file_name, config);
-			if (*fileHandler != NULL)
+			lastError = f_getlasterror();
+
+			if (*fileHandler != NULL||lastError==5)
 				return 0;
 			vTaskDelay(100);
 		}
-		lastError = f_getlasterror();
+
 		if (fileHandler == NULL || lastError != 0)
 			xSemaphoreGive_extended(xFileOpenHandler);
 		printf("file open: %s FS last error: %d\n", file_name, lastError);
@@ -233,7 +242,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 	{
 		char names[256];
 		strcpy(names, "*.*");
-		deleteDir(names, TRUE);
+		sd_format(0);
 		FS fs = {0};
 		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
@@ -381,6 +390,11 @@ FileSystemResult c_fileReset(char* c_file_name)
 		err = f_delete(curr_file_name);
 		do
 		{
+			err = f_delete(curr_file_name);
+			if(err==5)
+			{
+				break;
+			}
 			if(err!=0)
 			{
 				printf("c_fileReset  f_delete: %d\n",err);
