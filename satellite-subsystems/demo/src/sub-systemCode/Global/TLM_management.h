@@ -53,6 +53,8 @@ int f_managed_releaseFS();
 int f_managed_open(char* file_name, char* config, F_FILE** fileHandler);
 int f_managed_close(F_FILE** fileHandler);
 
+FileSystemResult reset_FRAM_FS();
+
 void sd_format(int index);
 /*
  *

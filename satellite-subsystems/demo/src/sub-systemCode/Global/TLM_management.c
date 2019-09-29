@@ -60,6 +60,16 @@ typedef struct
 } C_FILE;
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
 
+FileSystemResult reset_FRAM_FS()
+{
+	FS fs = {0};
+	if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+	{
+		return FS_FAT_API_FAIL;
+	}
+	return FS_SUCCSESS;
+}
+
 Boolean TLMfile(char* filename)
 {
 	int len = strlen(filename);
@@ -373,36 +383,33 @@ FileSystemResult c_fileReset(char* c_file_name)
 	C_FILE c_file;
 	unsigned int addr;//FRAM ADDRESS
 	//F_FILE *file;
-	char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
+	//char curr_file_name[MAX_F_FILE_NAME_SIZE+sizeof(int)*2];
 	PLZNORESTART();
 	unsigned int curr_time;
 	Time_getUnixEpoch(&curr_time);
-	int err;
 	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
 	{
 		return FS_NOT_EXIST;
 	}
-	int last_index = getFileIndex(c_file.creation_time,c_file.last_time_modified);
-	for(int i =0; i<last_index+1;i++)
+	F_FIND find;
+	char temp_name[256];
+	sprintf(temp_name,"A:/%s/*.*",c_file_name);
+	if (!f_findfirst(temp_name,&find))
 	{
-		int j=0;
-		get_file_name_by_index(c_file_name,i,curr_file_name);
-		err = f_delete(curr_file_name);
 		do
 		{
-			err = f_delete(curr_file_name);
-			if(err==5)
-			{
-				break;
-			}
-			if(err!=0)
-			{
-				printf("c_fileReset  f_delete: %d\n",err);
-			}
-			vTaskDelay(100);
-		}
-		while(err !=0 &&(j++)<20);
+			sprintf(temp_name,"A:/%s/%s", c_file_name, find.filename);
+			f_delete(temp_name);
+		} while (!f_findnext(&find));
 	}
+	//if (!f_findfirst(temp_name,&find))
+	//{
+		//do
+		//{
+			//sprintf(temp_name,"*.*/%s/%s",find.filename,find.filename);
+			//f_delete(temp_name);
+		//} while (!f_findnext(&find));
+	//}
 	c_file.last_time_modified=curr_time;
 	c_file.creation_time =curr_time;
 	return FS_SUCCSESS;

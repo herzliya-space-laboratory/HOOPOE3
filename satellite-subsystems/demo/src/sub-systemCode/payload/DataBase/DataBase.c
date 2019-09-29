@@ -582,7 +582,7 @@ ImageDataBaseResult clearImageDataBase(void)
 
 	while(image_address < DATABASE_FRAM_END && image_address >= DATABASE_FRAM_START)
 	{
-		vTaskDelay(DELAY);
+		//vTaskDelay(DELAY);
 
 		result = FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);

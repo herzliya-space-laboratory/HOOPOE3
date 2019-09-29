@@ -7,6 +7,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include <at91/utility/exithandler.h>
+
 #include <hal/Drivers/I2C.h>
 #include <hal/Timing/Time.h>
 
@@ -16,6 +18,7 @@
 #include "../../Main/HouseKeeping.h"
 #include "../../TRXVU.h"
 #include "../../Ants.h"
+#include "../../payload/DataBase/DataBase.h"
 
 #include "../../Global/logger.h"
 
@@ -150,6 +153,14 @@ void cmd_format_SD(Ack_type* type, ERR_type* err)
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 	sd_format(0);
+	FileSystemResult resFS = reset_FRAM_FS();
+	if (resFS != FS_SUCCSESS)
+	{
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
+	}
+	clearImageDataBase();
+	gracefulReset();
 }
 void cmd_dummy_func(Ack_type* type, ERR_type* err)
 {
