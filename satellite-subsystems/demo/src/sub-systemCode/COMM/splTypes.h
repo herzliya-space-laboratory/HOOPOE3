@@ -74,6 +74,7 @@
 #define GENERIC_I2C_ST						0
 #define DUMP_ST								33
 #define DELETE_PACKETS_ST					35
+#define FORMAT_SD_ST						36
 #define RESET_FILE_ST						45
 #define RESTSRT_FS_ST						46
 #define DUMMY_FUNC_ST						122

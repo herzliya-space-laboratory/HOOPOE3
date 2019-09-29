@@ -15,6 +15,8 @@ void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd);
 
+void cmd_format_SD(Ack_type* type, ERR_type* err);
+
 void cmd_dummy_func(Ack_type* type, ERR_type* err);
 
 void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd);

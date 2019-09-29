@@ -145,6 +145,12 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 		}
 	}
 }
+void cmd_format_SD(Ack_type* type, ERR_type* err)
+{
+	*type = ACK_NOTHING;
+	*err = ERR_SUCCESS;
+	sd_format(0);
+}
 void cmd_dummy_func(Ack_type* type, ERR_type* err)
 {
 	printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
