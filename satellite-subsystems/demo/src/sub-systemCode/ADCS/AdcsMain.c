@@ -135,7 +135,6 @@ void AdcsTask()
 	vTaskDelay(ADCS_INIT_DELAY);
 	while(TRUE)
 	{
-		f_managed_enterFS();
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
 			//TODO: log system is off
 			vTaskDelay(system_off_delay);

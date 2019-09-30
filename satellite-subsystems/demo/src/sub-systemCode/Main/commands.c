@@ -80,7 +80,7 @@ void reset_command(TC_spl *command)
 	memset((void*)command, 0, SIZE_OF_COMMAND);
 }
 
-//todo: change name to more sugnifficent
+//todo: change name to more significant
 int init_command()
 {
 	if (xCTE != NULL)
@@ -185,7 +185,7 @@ void act_upon_command(TC_spl decode)
 		AUC_EPS(decode);
 		break;
 	case (TC_ADCS_T):
-		AdcsCmdQueueAdd(&decode); // TODO: save ACK
+		AdcsCmdQueueAdd(&decode);
 		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
@@ -523,8 +523,6 @@ void AUC_CUF(TC_spl decode)
 {
 	Ack_type type;
 	ERR_type err;
-
-	f_managed_enterFS();
 
 	switch (decode.subType)
 	{
