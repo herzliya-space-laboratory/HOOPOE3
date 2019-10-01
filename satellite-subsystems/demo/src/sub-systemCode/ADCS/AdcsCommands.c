@@ -10,7 +10,7 @@
 #include <satellite-subsystems/cspaceADCS.h>
 #include "../COMM/GSC.h"
 #include "../TRXVU.h"
-
+#include "sub-systemCode/Global/logger.h"
 #include "sub-systemCode/COMM/splTypes.h"	// for ADCS command subtypes
 #include "sub-systemCode/ADCS/AdcsGetDataAndTlm.h"
 

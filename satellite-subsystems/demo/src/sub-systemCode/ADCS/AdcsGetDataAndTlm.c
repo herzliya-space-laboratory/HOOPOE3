@@ -10,6 +10,7 @@
 #include "sub-systemCode/Global/FRAMadress.h"
 
 #include "sub-systemCode/Global/Global.h"
+#include "sub-systemCode/Global/logger.h"
 #include "AdcsCommands.h"
 #include "AdcsGetDataAndTlm.h"
 
@@ -422,9 +423,9 @@ TroubleErrCode GatherTlmAndData()
 		err = SaveElementTlmAtIndex(i);
 		if (TRBL_SUCCESS != err) {
 			err_occured = TRBL_TLM_ERR;
-			TlmElements[i].ToSave = FALSE_8BIT;			// stop saving tlm if error
+			TlmElements[i].ToSave = FALSE_8BIT;			// stop saving TLM if error
 			TlmElements[i].OperatingFlag = FALSE_8BIT;	// raise the 'not operating correctly' flag
-			WriteAdcsLog(LOG_ADCS_TLM_SAVE_ERR,i);
+			WriteAdcsLog(LOG_ADCS_TLM_SAVE_ERR,i);			// save error in TLM index 'i'
 		}
 	}
 	return err_occured;
