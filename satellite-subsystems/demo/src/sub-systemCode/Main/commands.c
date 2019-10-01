@@ -561,8 +561,6 @@ void AUC_CUF(TC_spl decode)
 		break;
 	}
 
-	f_managed_releaseFS();
-
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK
 	save_ACK(type, err, decode.id);

@@ -130,7 +130,7 @@ void AdcsTask()
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
 	//TODO: log start task
-	int f_err = f_managed_enterFS();
+	int f_err = f_managed_enterFS();//task 2 enter fs
 	//TODO: log f_err if error
 	vTaskDelay(ADCS_INIT_DELAY);
 	while(TRUE)

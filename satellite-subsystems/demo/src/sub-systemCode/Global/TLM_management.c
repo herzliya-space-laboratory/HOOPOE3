@@ -209,7 +209,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 		return FS_FAT_API_FAIL;
 	}
 
-	ret = f_managed_enterFS(); /* Register this task with filesystem 1*/
+	ret = f_managed_enterFS(); /* Register this task with filesystem *///task 1 enter fs
 	if (ret == COULD_NOT_TAKE_SEMAPHORE_ERROR)
 		return FS_COULD_NOT_TAKE_SEMAPHORE;
 	if( ret != F_NO_ERROR)

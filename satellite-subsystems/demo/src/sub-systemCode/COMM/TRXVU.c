@@ -302,10 +302,10 @@ void Dump_task(void *arg)
 	}
 	else
 	{
-		int f_error = f_managed_enterFS();
+		int f_error = f_managed_enterFS();// task enter 3
 		if (f_error != 0)
 			WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_ENTER_FS, SYSTEM_TRXVU, (int)f_error);
-		check_int("enter FS, dump task", f_error);// task enter 5
+		check_int("enter FS, dump task", f_error);
 		set_system_state(dump_param, SWITCH_ON);
 	}
 

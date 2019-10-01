@@ -356,7 +356,7 @@ void imageDump_task(void* param)
 	}
 	else
 	{
-		int f_error = f_managed_enterFS();// task enter 5
+		int f_error = f_managed_enterFS();// task enter 3
 		check_int("enter FS, in imageDump_task", f_error);
 		set_system_state(dump_param, SWITCH_ON);
 	}
