@@ -6,7 +6,6 @@
 #include "sub-systemCode/Global/Global.h"
 #include "AdcsTroubleShooting.h"
 
-//TODO: update this number to the correct number of telemetries
 #define NUM_OF_ADCS_TLM 18						//<! states the maximum number of telemetries the ADCS can save
 
 #define ADCS_MAX_TLM_SIZE 272

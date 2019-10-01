@@ -115,7 +115,6 @@ TroubleErrCode AdcsInit()
 	}
 	if(0 != FRAM_read_exte((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_ADDR,ADCS_QUEUE_WAIT_TIME_SIZE)){
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
-		//todo: log error
 	}
 	if(0 != FRAM_read_exte((byte*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
@@ -137,7 +136,7 @@ void AdcsTask()
 	{
 		f_managed_enterFS();
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
-			//TODO: log system is off
+			WriteAdcsLog(LOG_ADCS_CHANNEL_OFF,-1);
 			vTaskDelay(system_off_delay);
 			continue;
 		}
@@ -146,19 +145,19 @@ void AdcsTask()
 		if(!AdcsCmdQueueIsEmpty()){
 			trbl = AdcsCmdQueueGet(&cmd);
 			if(TRBL_SUCCESS != trbl){
-				//TODO: log queue error
+				WriteAdcsLog(LOG_ADCS_QUEUE_ERR,trbl);
 				AdcsTroubleShooting(trbl);
 			}
 			trbl = AdcsExecuteCommand(&cmd);
 			if(TRBL_SUCCESS != trbl){
-				//TODO: log command execution error
+				WriteAdcsLog(LOG_ADCS_CMD_ERR,trbl);
 				AdcsTroubleShooting(trbl);
 			}
-			//todo: log cmd received
+			WriteAdcsLog(LOG_ADCS_CMD_RECEIVED,0);
 		}
-		//TODO: log f_err if error
 		trbl = GatherTlmAndData();
 		if(TRBL_SUCCESS != trbl){
+			WriteAdcsLog(LOG_ADCS_TLM_ERR,trbl);
 			AdcsTroubleShooting(trbl);
 		}
 		vTaskDelay(delay_loop);

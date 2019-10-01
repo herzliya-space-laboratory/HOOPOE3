@@ -20,7 +20,6 @@
 #define MAX_CONFIG_PARAM_LENGTH 64
 
 
-//TODO: define as enum
 #define ADCS_ACK_PROCESSED_FLAG_INDEX 1
 #define ADCS_ACK_TC_ERR_INDEX 2
 
@@ -70,15 +69,13 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	if(NULL == i2c_cmd){
 		return E_INPUT_POINTER_NULL;
 	}
-
-
 	char is_tlm = (i2c_cmd->id & 0x80); // if MSB is 1 then it is TLM. if 0 then TC
 	if(!is_tlm){ // is command
 		memcpy(&i2c_cmd->data[1],i2c_cmd->data,i2c_cmd->length);	// data bytes of the CMD(length can be 0)
 		i2c_cmd->data[0] = i2c_cmd->id;								// first byte is the CMD ID
 		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length + 1); // +1 in case of 0 length CMD
 		if(0 != err){
-			//TODO: log I2c write Err
+			WriteAdcsLog(LOG_ADCS_I2C_WRITE_ERR,err);
 			return err;
 		}
 		err = AdcsReadI2cAck(&i2c_cmd->ack);
@@ -86,12 +83,12 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	}else{ // is tlm
 		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)&i2c_cmd->id, sizeof(i2c_cmd->id));
 		if(0 != err){
-			//TODO: log I2c write Err
+			WriteAdcsLog(LOG_ADCS_I2C_WRITE_ERR,err);
 			return err;
 		}
 		err = I2C_read(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length);
 		if(0 != err){
-			//TODO: log I2c write Err
+			WriteAdcsLog(LOG_ADCS_I2C_READ_ERR,err);
 			return err;
 		}
 		err = AdcsReadI2cAck(&i2c_cmd->ack);
@@ -126,7 +123,7 @@ void SendAdcsTlm(byte *info, unsigned int length, int subType){
 TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 {
 	if(NULL == cmd || NULL == cmd->data){
-		//TODO: log err
+		WriteAdcsLog(LOG_ADCS_NULL_DATA,-1);
 		return TRBL_NULL_DATA;
 	}
 	int err = TRBL_SUCCESS;
@@ -174,7 +171,7 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 						SendAdcsTlm((byte*)i2c_cmd.data,ADCS_CMD_MAX_DATA_LENGTH/2, ADCS_I2C_GENRIC_ST);
 					}
 				}
-				//TODO: log 'i2c_cmd.ack'. maybe send it in ACK form
+				WriteAdcsLog(LOG_ADCS_GENERIC_I2C_ACK,i2c_cmd.ack);
 				break;
 		
 		//ADCS telecommand
@@ -433,21 +430,21 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 		case ADCS_GET_EST_ANG_ST:
 			i2c_cmd.id = GET_ADCS_EST_ANG_CMD_ID;
 			i2c_cmd.length = GET_ADCS_EST_ANG_DATA_LENGTH;
-			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length); //TODO: check implementation
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(i2c_cmd.data,GET_ADCS_EST_ANG_DATA_LENGTH,ADCS_GET_EST_ANG_ST);
 			break;
 		case ADCS_GET_EST_ANG_RATE_ST: 
 			i2c_cmd.id = GET_ADCS_EST_ANG_CMD_ID;
 			i2c_cmd.length = GET_ADCS_EST_ANG_DATA_LENGTH;
-			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length); //TODO: check implementation
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(i2c_cmd.data,i2c_cmd.length,ADCS_GET_EST_ANG_RATE_ST);
 			break;
 		case ADCS_GET_SATELLITE_POSITION_ST:
 			i2c_cmd.id = ADCS_GET_SATELLITE_POSITION_CMD_ID;
 			i2c_cmd.length = ADCS_GET_SATELLITE_POSITION_DATA_LENGTH;
-			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length); //TODO: check implementation
+			memcpy(i2c_cmd.data,cmd->data,i2c_cmd.length);
 			err = AdcsGenericI2cCmd(&i2c_cmd);
 			SendAdcsTlm(i2c_cmd.data,i2c_cmd.length,ADCS_GET_SATELLITE_POSITION_ST);
 			break;
@@ -624,6 +621,5 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 	}
 	unsigned int error_codes[] = {sub_type,err,i2c_cmd.ack};
 	SendAdcsTlm((byte*)error_codes,sizeof(error_codes),ADCS_ACK_DATA_ST);
-//TODO: save ACK with 'err' value
 	return err;
 }
