@@ -8,6 +8,7 @@
 #include "sub-systemCode/Main/commands.h"
 #include "sub-systemCode/Main/CMD/ADCS_CMD.h"
 #include "sub-systemCode/Global/GlobalParam.h"
+#include "sub-systemCode/Global/logger.h"
 
 #include "AdcsMain.h"
 #include "AdcsTroubleShooting.h"
@@ -69,8 +70,6 @@ TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char 
 
 }
 
-#define FIRST_ADCS_ACTIVATION
-
 TroubleErrCode AdcsInit()
 {
 
@@ -115,11 +114,8 @@ TroubleErrCode AdcsInit()
 	}
 	if(0 != FRAM_read_exte((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_ADDR,ADCS_QUEUE_WAIT_TIME_SIZE)){
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
-		//todo: log error
 	}
-	if(0 != FRAM_read_exte((byte*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
-		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
-	}
+
 	init_err_flag = TRUE;
 	FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 	return TRBL_SUCCESS;
@@ -129,14 +125,15 @@ void AdcsTask()
 {
 	TC_spl cmd = {0};
 	TroubleErrCode trbl = TRBL_SUCCESS;
-	//TODO: log start task
-	int f_err = f_managed_enterFS();//task 2 enter fs
-	//TODO: log f_err if error
+	int f_err = f_managed_enterFS();
+	if(0 == f_err){
+		WriteAdcsLog(LOG_ADCS_FS_INIT_ERR,0);// enter success
+	}
 	vTaskDelay(ADCS_INIT_DELAY);
 	while(TRUE)
 	{
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
-			//TODO: log system is off
+			WriteAdcsLog(LOG_ADCS_CHANNEL_OFF,-1);
 			vTaskDelay(system_off_delay);
 			continue;
 		}
@@ -145,19 +142,19 @@ void AdcsTask()
 		if(!AdcsCmdQueueIsEmpty()){
 			trbl = AdcsCmdQueueGet(&cmd);
 			if(TRBL_SUCCESS != trbl){
-				//TODO: log queue error
+				WriteAdcsLog(LOG_ADCS_QUEUE_ERR,trbl);
 				AdcsTroubleShooting(trbl);
 			}
 			trbl = AdcsExecuteCommand(&cmd);
 			if(TRBL_SUCCESS != trbl){
-				//TODO: log command execution error
+				WriteAdcsLog(LOG_ADCS_CMD_ERR,trbl);
 				AdcsTroubleShooting(trbl);
 			}
-			//todo: log cmd received
+			WriteAdcsLog(LOG_ADCS_CMD_RECEIVED,cmd.subType);
 		}
-		//TODO: log f_err if error
 		trbl = GatherTlmAndData();
 		if(TRBL_SUCCESS != trbl){
+			WriteAdcsLog(LOG_ADCS_TLM_ERR,trbl);
 			AdcsTroubleShooting(trbl);
 		}
 		vTaskDelay(delay_loop);

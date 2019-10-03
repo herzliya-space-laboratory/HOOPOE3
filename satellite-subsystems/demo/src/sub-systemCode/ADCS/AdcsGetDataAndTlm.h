@@ -6,7 +6,6 @@
 #include "sub-systemCode/Global/Global.h"
 #include "AdcsTroubleShooting.h"
 
-//TODO: update this number to the correct number of telemetries
 #define NUM_OF_ADCS_TLM 18						//<! states the maximum number of telemetries the ADCS can save
 
 #define ADCS_MAX_TLM_SIZE 272
@@ -82,12 +81,26 @@ TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]);
 int UpdateTlmToSaveVector(Boolean8bit tlm_to_save[NUM_OF_ADCS_TLM]);
 
 /*!
+ * @brief returns flags indicating which TLM's are saved.
+ * @param[out] output buffer
+ * @return	Errors According to TroubleErrCode enum.
+ */
+int GetTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM]);
+
+/*!
  * @brief 	allows the ground to command TLM collection period between TLM saves.
  * @param[in] periods time periods array in [sec].
  * @note	default is 10 seconds between saves(1/10 Hz)
  * @return	Errors According to TroubleErrCode enum.
  */
 int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM]);
+
+/*!
+ * @brief returns the currently used TLM save periods.
+ * @param[out] output buffer
+ * @return	Errors According to TroubleErrCode enum.
+ */
+int GetTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM]);
 
 /*!
  * @brief updates the Tlm element at index with the input parameters
@@ -98,6 +111,20 @@ int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM]);
  * @return	Errors According to TroubleErrCode enum.
  */
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period);
+
+/*!
+ * @brief returns flags indicating which TLM is operating and which had errors.
+ * @param[out] output buffer
+ * @return	Errors According to TroubleErrCode enum.
+ */
+int GetOperationgFlags(unsigned char operating_flags[NUM_OF_ADCS_TLM]);
+
+/*!
+ * @brief returns vector of last time each telemetry has been saved.
+ * @param[out] output buffer
+ * @return	Errors According to TroubleErrCode enum.
+ */
+int GetLastSaveTimes( time_unix last_save_times[NUM_OF_ADCS_TLM]);
 
 /*!
  * @breif return the current state of the override flag.
