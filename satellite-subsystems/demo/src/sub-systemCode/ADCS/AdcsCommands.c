@@ -597,10 +597,31 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			err = cspaceADCS_getACPExecutionState(ADCS_ID,(cspace_adcs_acp_info_t*)data);
 			SendAdcsTlm(data, sizeof(cspace_adcs_acp_info_t),ADCS_GET_ACP_EXECUTION_STATE_ST);
 			break;
+
+		case ADCS_GET_TLM_SAVE_VECTOR_ST:
+			err = GetTlmToSaveVector((Boolean8bit*)data);
+			SendAdcsTlm(data,NUM_OF_ADCS_TLM * sizeof(Boolean8bit),ADCS_GET_TLM_SAVE_VECTOR_ST);
+			break;
+
+		case ADCS_GET_PERIOD_VECTOR_ST:
+			err = GetTlmPeriodVector(data);
+			SendAdcsTlm(data,NUM_OF_ADCS_TLM * sizeof(unsigned char),ADCS_GET_PERIOD_VECTOR_ST);
+			break;
+
+		case ADCS_GET_LAST_SAVE_TIMES_ST:
+			err = GetLastSaveTimes((time_unix*)data);
+			SendAdcsTlm(data,NUM_OF_ADCS_TLM * sizeof(time_unix),ADCS_GET_LAST_SAVE_TIMES_ST);
+			break;
+		case ADCS_GET_OPERATING_FLAGS_ST:
+			err = GetOperationgFlags(data);
+			SendAdcsTlm(data,NUM_OF_ADCS_TLM * sizeof(Boolean8bit),ADCS_GET_OPERATING_FLAGS_ST);
+			break;
+
 		case ADCS_GET_TLM_ELEM_AT_INDEX_ST:
 			GetTlmElementAtIndex((AdcsTlmElement_t*)data,cmd->data[0]);
 			SendAdcsTlm(data, sizeof(AdcsTlmElement_t),ADCS_GET_TLM_ELEM_AT_INDEX_ST);
 			break;
+
 		case ADCS_GET_ADCS_CONFIG_PARAM_ST:
 			i2c_cmd.id = GET_ADCS_FULL_CONFIG_CMD_ID;
 			i2c_cmd.length = ADCS_FULL_CONFIG_DATA_LENGTH;

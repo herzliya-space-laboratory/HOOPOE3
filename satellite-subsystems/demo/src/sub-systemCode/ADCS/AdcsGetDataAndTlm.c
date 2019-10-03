@@ -322,6 +322,16 @@ int UpdateTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM])
 	return 0;
 }
 
+int GetTlmToSaveVector(Boolean8bit save_tlm_flag[NUM_OF_ADCS_TLM]){
+	if(NULL == save_tlm_flag){
+		return TRBL_NULL_DATA;
+	}
+	for(unsigned int i = 0;i < NUM_OF_ADCS_TLM; i++){
+		save_tlm_flag[i] = TlmElements[i].ToSave;
+	}
+	return TRBL_SUCCESS;
+}
+
 int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM])
 {
 	if (NULL == periods) {
@@ -345,6 +355,36 @@ int UpdateTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM])
 		TlmElements[i].SavePeriod = periods[i];
 	}
 	return 0;
+}
+
+int GetTlmPeriodVector(unsigned char periods[NUM_OF_ADCS_TLM]){
+	if(NULL == periods){
+		return TRBL_NULL_DATA;
+	}
+	for(unsigned int i = 0;i < NUM_OF_ADCS_TLM; i++){
+		periods[i] = TlmElements[i].SavePeriod;
+	}
+	return TRBL_SUCCESS;
+}
+
+int GetOperationgFlags(unsigned char operating_flags[NUM_OF_ADCS_TLM]){
+	if(NULL == operating_flags){
+		return TRBL_NULL_DATA;
+	}
+	for(unsigned int i = 0;i < NUM_OF_ADCS_TLM; i++){
+		operating_flags[i] = TlmElements[i].OperatingFlag;
+	}
+	return TRBL_SUCCESS;
+}
+
+int GetLastSaveTimes( time_unix last_save_times[NUM_OF_ADCS_TLM]){
+	if(NULL == last_save_times){
+		return TRBL_NULL_DATA;
+	}
+	for(unsigned int i = 0;i < NUM_OF_ADCS_TLM; i++){
+		last_save_times[i] = TlmElements[i].LastSaveTime;
+	}
+	return TRBL_SUCCESS;
 }
 
 int AdcsGetTlmOverrideFlag(Boolean *override_flag){
