@@ -150,7 +150,7 @@ void AdcsTask()
 				WriteAdcsLog(LOG_ADCS_CMD_ERR,trbl);
 				AdcsTroubleShooting(trbl);
 			}
-			WriteAdcsLog(LOG_ADCS_CMD_RECEIVED,0);
+			WriteAdcsLog(LOG_ADCS_CMD_RECEIVED,cmd.subType);
 		}
 		trbl = GatherTlmAndData();
 		if(TRBL_SUCCESS != trbl){
