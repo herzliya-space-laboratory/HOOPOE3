@@ -721,18 +721,36 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	Time_getUnixEpoch(&currentDate);
 
 	// Getting Sat Angular Rates:
-	/*cspace_adcs_angrate_t sen_rates;
+	cspace_adcs_angrate_t sen_rates;
 
+	ImageDataBaseResult CAM_ADCS_error = DataBaseSuccess;
 	TroubleErrCode ADCS_error = AdcsGetMeasAngSpeed(&sen_rates);
-	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingAngleRates);*/
+	if (ADCS_error != TRBL_SUCCESS)
+	{
+		CAM_ADCS_error = DataBaseAdcsError_gettingAngleRates;
 
-	uint16_t angle_rates[3];/*
-	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);*/
+		for (int i = 0; i < 6; i++)
+		{
+			sen_rates.raw[i] = 0;
+		}
+	}
+
+	uint16_t angle_rates[3];
+	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
 
 	// Getting Course-Sun-Sensor Values:
-	byte raw_css[10];/*
+	byte raw_css[10];
 	ADCS_error = AdcsGetCssVector(raw_css);
-	CMP_AND_RETURN(ADCS_error, TRBL_SUCCESS, DataBaseAdcsError_gettingCssVector);*/
+	if (ADCS_error != TRBL_SUCCESS)
+	{
+		if (CAM_ADCS_error == DataBaseSuccess)
+			CAM_ADCS_error = DataBaseAdcsError_gettingCssVector;
+
+		for (int i = 0; i < 10; i++)
+		{
+			raw_css[i] = 0;
+		}
+	}
 
 	// Taking the Image:
 	err = GECKO_TakeImage( database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->nextId, testPattern);
@@ -741,9 +759,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	vTaskDelay(CAMERA_DELAY);
 
 	// ImageDataBase handling:
-
 	ImageDataBaseResult result;
-
 	for (uint32_t numOfFramesTaken = 0; numOfFramesTaken < database->cameraParameters.frameAmount; numOfFramesTaken++)
 	{
 		vTaskDelay(DELAY);
@@ -758,6 +774,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 
 	WritePayloadLog(PAYLOAD_TOOK_IMAGE, (uint32_t)getLatestID(database));
 
+	DB_RETURN_ERROR(CAM_ADCS_error);
 	return DataBaseSuccess;
 }
 

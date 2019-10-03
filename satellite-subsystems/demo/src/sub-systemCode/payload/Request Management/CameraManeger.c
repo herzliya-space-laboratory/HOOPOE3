@@ -113,38 +113,42 @@ void CameraManagerTaskMain()
 
 int createFolders()
 {
-	char path[11];
+	char path[13];
 	int error = 0;
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s", GENERAL_PAYLOAD_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
-	sprintf(path, "%s\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME);
+	error = f_mkdir(path);
+	CMP_AND_RETURN(error, 0, -1);
+
+	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN(error, 0, -1);
 
@@ -432,7 +436,7 @@ void act_upon_request(Camera_Request request)
 
 	if ( !CouldNotExecute )
 	{
-		//save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
+		save_ACK(ACK_CAMERA, error + 30, request.cmd_id);
 
 		if (error != DataBaseSuccess)
 		{
