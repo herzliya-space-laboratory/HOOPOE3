@@ -375,7 +375,7 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 	else if (error != 0)
 	{
-		if (err == 666)
+		if (error == 666)
 		{
 			printf("FUN FACT: deploy ants when you don't have permission can summon the DEVIL!!!\nerror: %d\n", error);
 		}

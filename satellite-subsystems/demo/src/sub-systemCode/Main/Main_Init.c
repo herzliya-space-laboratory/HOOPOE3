@@ -196,7 +196,7 @@ int InitSubsystems()
 
 	InitializeFS(activation);
 
-	//CUFManageRestart(activation);
+	CUFManageRestart(activation);
 
 	//resetSD();
 
