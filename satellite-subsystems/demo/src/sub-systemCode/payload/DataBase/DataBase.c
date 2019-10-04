@@ -45,7 +45,7 @@ typedef struct __attribute__ ((__packed__))
 
 struct __attribute__ ((__packed__)) ImageDataBase_t
 {
-	// size = 21 bytes
+	// size = 23 bytes
 	unsigned int numberOfPictures;		///< current number of pictures saved on the satellite
 	imageid nextId;						///< the next id we will use for a picture, (camera id)
 	CameraPhotographyValues cameraParameters;
@@ -111,14 +111,13 @@ static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 ImageDataBaseResult zeroImageDataBase()
 {
 	uint32_t database_fram_size = DATABASE_FRAM_END - DATABASEFRAMADDRESS;
-	uint8_t zero[database_fram_size];
 
 	for (uint32_t i = 0; i < database_fram_size; i++)
 	{
-		zero[i] = 0;
+		imageBuffer[i] = 0;
 	}
 
-	int result = FRAM_write_exte((unsigned char*)zero, DATABASEFRAMADDRESS, database_fram_size);
+	int result = FRAM_write_exte((unsigned char*)imageBuffer, DATABASEFRAMADDRESS, database_fram_size);
 	CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 	return DataBaseSuccess;
@@ -623,7 +622,7 @@ ImageDataBaseResult handleMarkedPictures()
 
 	Boolean already_transferred_raw = FALSE;
 
-	if ( DB_result == 0 )
+	if ( DB_result == 0 && image_metadata.cameraId != 0 )
 	{
 		if (checkForFileType(image_metadata, raw) == DataBaseNotInSD)
 		{
@@ -669,7 +668,7 @@ ImageDataBaseResult handleMarkedPictures()
 
 //---------------------------------------------------------------
 
-ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_unix time_image_taken, uint16_t angle_rates[3], byte raw_css[10])
+ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_unix time_image_taken, uint16_t angle_rates[3], uint16_t estimated_angles[3], byte raw_css[10])
 {
 	ImageMetadata image_metadata;
 	uint32_t image_address;
@@ -681,6 +680,7 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 	image_metadata.cameraId = database->nextId;
 	image_metadata.timestamp = time_image_taken;
 	memcpy(&image_metadata.angle_rates, angle_rates, sizeof(uint16_t) * 3);
+	memcpy(&image_metadata.estimated_angles, estimated_angles, sizeof(uint16_t) * 3);
 	memcpy(&image_metadata.raw_css, raw_css, sizeof(byte) * 10);
 	image_metadata.fileTypes = 0;
 
@@ -738,6 +738,19 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	uint16_t angle_rates[3];
 	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
 
+	uint16_t angles[3];
+	ADCS_error = AdcsGetEstAngles(angles);
+	if (ADCS_error != TRBL_SUCCESS)
+	{
+		if (CAM_ADCS_error == DataBaseSuccess)
+			CAM_ADCS_error = DataBaseAdcsError_gettingEstimatedAngles;
+
+		for (int i = 0; i < 3; i++)
+		{
+			angles[i] = 0;
+		}
+	}
+
 	// Getting Course-Sun-Sensor Values:
 	byte raw_css[10];
 	ADCS_error = AdcsGetCssVector(raw_css);
@@ -764,7 +777,7 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	{
 		vTaskDelay(DELAY);
 
-		result = writeNewImageMetaDataToFRAM(database, currentDate, angle_rates, raw_css);
+		result = writeNewImageMetaDataToFRAM(database, currentDate, angle_rates, angles, raw_css);
 		DB_RETURN_ERROR(result);
 
 		currentDate += database->cameraParameters.frameRate;

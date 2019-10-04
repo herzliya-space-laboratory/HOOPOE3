@@ -139,7 +139,6 @@ Boolean first_activation()
 	FRAM_read_exte(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 	if (!dataFRAM)
 	{
-
 		return FALSE;
 	}
 	// 1. reset global FRAM adrees

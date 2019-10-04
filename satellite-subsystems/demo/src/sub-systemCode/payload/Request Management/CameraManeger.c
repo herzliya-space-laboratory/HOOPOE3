@@ -99,7 +99,7 @@ void CameraManagerTaskMain()
 		}
 
 		Time_getUnixEpoch(&timeNow);
-		if (timeNow > ( turnedOnCamera + cameraActivation_duration ) && turnedOnCamera != 0)
+		if ( timeNow > ( turnedOnCamera + cameraActivation_duration ) && turnedOnCamera != 0)
 		{
 			TurnOffGecko();
 			turnedOnCamera = 0;
@@ -118,39 +118,39 @@ int createFolders()
 
 	sprintf(path, "%s", GENERAL_PAYLOAD_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
-	CMP_AND_RETURN(error, 0, -1);
+	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
 	return 0;
 }
@@ -339,12 +339,7 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case transfer_image_to_OBC:
-		if (get_ground_conn() || !get_system_state(cam_operational_param))
-		{
-			addRequestToQueue(request);
-			CouldNotExecute = TRUE;
-		}
-		else
+		if (get_system_state(cam_operational_param))
 		{
 			auto_handler_error = stopAction();
 			handleErrors(auto_handler_error);
@@ -354,6 +349,11 @@ void act_upon_request(Camera_Request request)
 
 			auto_handler_error = resumeAction();
 			handleErrors(auto_handler_error);
+		}
+		else
+		{
+			addRequestToQueue(request);
+			CouldNotExecute = TRUE;
 		}
 		break;
 
@@ -395,7 +395,7 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case turn_on_camera:
-		if (get_system_state(cam_operational_param))
+		if (/*get_system_state(cam_operational_param)*/1)
 		{
 			Time_getUnixEpoch(&turnedOnCamera);
 			TurnOnGecko();

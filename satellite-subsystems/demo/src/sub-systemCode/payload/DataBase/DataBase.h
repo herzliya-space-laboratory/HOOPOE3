@@ -29,7 +29,7 @@
 #define THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME	"T64"
 #define JPEG_IMAGES_FOLDER_NAME					"JPG"
 
-#define MAX_NUMBER_OF_PICTURES 1000	///< The maximum number of pictures the database supports
+#define MAX_NUMBER_OF_PICTURES 4000	///< The maximum number of pictures the database supports
 
 #define DEFAULT_FRAME_RATE 1	///< The frame rate that will be used when taking a picture if the value wasn't updated with an command from the ground
 #define DEFAULT_FRAME_AMOUNT 1	///< The amount of frames that will be taken when taking a picture if the value wasn't updated with an command from the ground
@@ -64,6 +64,7 @@ typedef struct __attribute__ ((__packed__))
 	time_unix timestamp;
 	byte fileTypes;
 	uint16_t angle_rates[3];
+	uint16_t estimated_angles[3];
 	byte raw_css[10];
 	Boolean8bit markedFor_TumbnailCreation;
 } ImageMetadata;
@@ -101,60 +102,61 @@ typedef enum
 	DataBaseFail									= 13,
 
 	DataBaseAdcsError_gettingAngleRates				= 14,
-	DataBaseAdcsError_gettingCssVector				= 15,
+	DataBaseAdcsError_gettingEstimatedAngles		= 15,
+	DataBaseAdcsError_gettingCssVector				= 16,
 
 	// Gecko Drivers Image Taking Error Messages:
-	GECKO_Take_Success								= 16,	///< (0) completed successfully
-	GECKO_Take_Error_TurnOffSensor					= 17,	///< (-1) could not turn off sensor
-	GECKO_Take_Error_Set_ADC_Gain					= 18,	///< (-2) could not set ADC gain
-	GECKO_Take_Error_Set_PGA_Gain					= 19,	///< (-3) could not set PGA gain
-	GECKO_Take_Error_setExposure					= 20,	///< (-4) could not set exposure
-	GECKO_Take_Error_setFrameAmount					= 21,	///< (-5) could not set frame amount
-	GECKO_Take_Error_setFrameRate					= 22,	///< (-6) could not set frame rate
-	GECKO_Take_Error_turnOnSensor					= 23,	///< (-7) could not turn on sensor
-	GECKO_Take_sensorTurnOnTimeout					= 24,	///< (-8) sensor turn on timeout
-	GECKO_Take_trainingTimeout						= 25, 	///< (-9) training timeout
-	GECKO_Take_trainingError						= 26,	///< (-10) training error
-	GECKO_Take_Error_notInitialiseFlash				= 27,	///< (-11) could not initialize flash
-	GECKO_Take_Error_setImageID						= 28,	///< (-12) could not set image ID
-	GECKO_Take_Error_disableTestPattern				= 29,	///< (-13) could not disable test pattern
-	GECKO_Take_Error_startSampling					= 30,	///< (-14) could not start sampling
-	GECKO_Take_samplingTimeout						= 31,	///< (-15) sampling timeout
-	GECKO_Take_Error_clearSampleFlag				= 32,	///< (-16) could not clear sample flag
-	GECKO_Take_Error_turnOfSensor					= 33,	///< (-17) could not turn of sensor
+	GECKO_Take_Success								= 17,	///< (0) completed successfully
+	GECKO_Take_Error_TurnOffSensor					= 18,	///< (-1) could not turn off sensor
+	GECKO_Take_Error_Set_ADC_Gain					= 19,	///< (-2) could not set ADC gain
+	GECKO_Take_Error_Set_PGA_Gain					= 20,	///< (-3) could not set PGA gain
+	GECKO_Take_Error_setExposure					= 21,	///< (-4) could not set exposure
+	GECKO_Take_Error_setFrameAmount					= 22,	///< (-5) could not set frame amount
+	GECKO_Take_Error_setFrameRate					= 23,	///< (-6) could not set frame rate
+	GECKO_Take_Error_turnOnSensor					= 24,	///< (-7) could not turn on sensor
+	GECKO_Take_sensorTurnOnTimeout					= 25,	///< (-8) sensor turn on timeout
+	GECKO_Take_trainingTimeout						= 26, 	///< (-9) training timeout
+	GECKO_Take_trainingError						= 27,	///< (-10) training error
+	GECKO_Take_Error_notInitialiseFlash				= 28,	///< (-11) could not initialize flash
+	GECKO_Take_Error_setImageID						= 29,	///< (-12) could not set image ID
+	GECKO_Take_Error_disableTestPattern				= 30,	///< (-13) could not disable test pattern
+	GECKO_Take_Error_startSampling					= 31,	///< (-14) could not start sampling
+	GECKO_Take_samplingTimeout						= 32,	///< (-15) sampling timeout
+	GECKO_Take_Error_clearSampleFlag				= 33,	///< (-16) could not clear sample flag
+	GECKO_Take_Error_turnOfSensor					= 34,	///< (-17) could not turn of sensor
 
 	// Gecko Drivers Image Reading Error Messages:
-	GECKO_Read_Success								= 34,	///< (0) completed successfully
-	GECKO_Read_Error_InitialiseFlash				= 35,	///< (-1) could not initialize flash
-	GECKO_Read_Error_SetImageID						= 36,	///< (-2) could not set image ID
-	GECKO_Read_Error_StartReadout					= 37,	///< (-3) could not start readout
-	GECKO_Read_readTimeout							= 38,	///< (-4) data read timeout
-	GECKO_Read_wordCountMismatch					= 39,	///< (-5) word count mismatch during read
-	GECKO_Read_pageCountMismatch					= 40,	///< (-6) page count mismatch during read
-	GECKO_Read_readDoneFlagNotSet					= 41,	///< (-7) read done flag not set
-	GECKO_Read_Error_ClearReadDoneFlag				= 42,	///< (-8) could not clear read done flag
+	GECKO_Read_Success								= 35,	///< (0) completed successfully
+	GECKO_Read_Error_InitialiseFlash				= 36,	///< (-1) could not initialize flash
+	GECKO_Read_Error_SetImageID						= 37,	///< (-2) could not set image ID
+	GECKO_Read_Error_StartReadout					= 38,	///< (-3) could not start readout
+	GECKO_Read_readTimeout							= 39,	///< (-4) data read timeout
+	GECKO_Read_wordCountMismatch					= 40,	///< (-5) word count mismatch during read
+	GECKO_Read_pageCountMismatch					= 41,	///< (-6) page count mismatch during read
+	GECKO_Read_readDoneFlagNotSet					= 42,	///< (-7) read done flag not set
+	GECKO_Read_Error_ClearReadDoneFlag				= 43,	///< (-8) could not clear read done flag
 
-	GECKO_Read_CouldNotReadStopFlag					= 43,	///< (-9)
-	GECKO_Read_StoppedAsPerRequest					= 44,	///< (-10)
+	GECKO_Read_CouldNotReadStopFlag					= 44,	///< (-9)
+	GECKO_Read_StoppedAsPerRequest					= 45,	///< (-10)
 
 	// Gecko Drivers Image Erasing Error Messages:
-	GECKO_Erase_Success								= 45,	///< (0) completed successfully
-	GECKO_Erase_Error_SetImageID					= 46,	///< (-1) could not set image ID
-	GECKO_Erase_StartErase							= 47,	///< (-2) could not start erase
-	GECKO_Erase_Timeout								= 48,	///< (-3) erase timeout
-	GECKO_Erase_Error_ClearEraseDoneFlag			= 49,	///< (-4) could not clear erase done flag
+	GECKO_Erase_Success								= 46,	///< (0) completed successfully
+	GECKO_Erase_Error_SetImageID					= 47,	///< (-1) could not set image ID
+	GECKO_Erase_StartErase							= 48,	///< (-2) could not start erase
+	GECKO_Erase_Timeout								= 49,	///< (-3) erase timeout
+	GECKO_Erase_Error_ClearEraseDoneFlag			= 50,	///< (-4) could not clear erase done flag
 
 	// Butcher Error Messages:
-	Butcher_Success									= 50,
-	Butcher_Null_Pointer							= 51,
-	Butcher_Parameter_Value							= 52,
-	Butcher_Out_of_Bounds							= 53,
-	Butcher_Undefined_Error							= 54,
+	Butcher_Success									= 51,
+	Butcher_Null_Pointer							= 52,
+	Butcher_Parameter_Value							= 53,
+	Butcher_Out_of_Bounds							= 54,
+	Butcher_Undefined_Error							= 55,
 
 	// JPEG Error Messages:
-	JpegCompression_Success							= 55,
-	JpegCompression_Failure							= 56,
-	JpegCompression_qualityFactor_outOfRange		= 57
+	JpegCompression_Success							= 56,
+	JpegCompression_Failure							= 57,
+	JpegCompression_qualityFactor_outOfRange		= 58
 } ImageDataBaseResult;
 
 uint8_t imageBuffer[BMP_FILE_DATA_SIZE];

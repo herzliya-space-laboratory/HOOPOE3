@@ -20,7 +20,7 @@
 #define FS_FILE_ENDING_SIZE	3
 
 #ifndef FSFRAM
-#define FSFRAM 0x20000
+#define FSFRAM 0x10000
 #endif
 
 #define FS_MAX_OPENFILES	F_MAXFILES - 2

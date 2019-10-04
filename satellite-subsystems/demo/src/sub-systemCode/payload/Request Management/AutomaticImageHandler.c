@@ -36,7 +36,7 @@ void AutomaticImageHandlerTaskMain()
 	{
 		error = 0;
 
-		if ( !get_ground_conn() && get_system_state(cam_operational_param) && current_auto_thumbnail_creation )
+		if ( get_system_state(cam_operational_param) && current_auto_thumbnail_creation )
 		{
 			finished = FALSE;
 			error = handleMarkedPictures();

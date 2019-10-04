@@ -72,7 +72,7 @@ Boolean TurnOnGecko()
 	PIO_Set(&gpio7);
 	vTaskDelay(10);
 
-	//Initialized_GPIO();
+	Initialized_GPIO();
 
 	set_system_state(cam_param, SWITCH_ON);
 	WritePayloadLog(PAYLOAD_TURNED_GECKO_ON, (int)0);
@@ -96,7 +96,7 @@ Boolean TurnOffGecko()
 	PIO_Clear(&gpio7);
 	vTaskDelay(10);
 
-	//De_Initialized_GPIO();
+	De_Initialized_GPIO();
 
 	set_system_state(cam_param, SWITCH_OFF);
 	WritePayloadLog(PAYLOAD_TURNED_GECKO_OFF, (int)0);

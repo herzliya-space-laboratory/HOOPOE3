@@ -72,6 +72,13 @@ TroubleErrCode AdcsGetMeasAngSpeed(cspace_adcs_angrate_t* sen_rates);
 TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]);
 
 /*!
+ * @brief	returns the estimated angles
+ * @return 	TRBL_FAIL in case of error.
+ * 			TRBL_SUCCSESS in case of success.
+ */
+TroubleErrCode AdcsGetEstAngles(uint16_t angles[3]);
+
+/*!
  * @brief 	allows the ground to command which telemetries will be saved to the SD
  * 			and which will not.
  * @param[in] tlm_to_save a boolean array stating which TLM will be saved.
