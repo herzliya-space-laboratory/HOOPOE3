@@ -26,6 +26,11 @@
 #define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
 #define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
 
+#define VOLTAGE_3V3_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL * 2)
+#define CURRENT_3V3_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL / 2)
+#define VOLTAGE_5V_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL * 3)
+#define CURRENT_5V_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL / 2)
+
 #define Result(value, errorType)	if(value != 0) { return errorType; }
 
 #define _SPI_GECKO_BUS_SPEED MHZ(5)
@@ -53,7 +58,7 @@ void De_Initialized_GPIO()
 	vTaskDelay(10);
 }
 
-int mux_init()
+int gecko_power_mux_init()
 {
 	Pin gpio9 = PIN_GPIO09;
 	Pin gpio10 = PIN_GPIO10;
@@ -71,8 +76,23 @@ int mux_init()
 
 	return 0;
 }
+int gecko_power_mux_deinit()
+{
+	Pin gpio9 = PIN_GPIO09;
+	Pin gpio10 = PIN_GPIO10;
+	Pin gpio11 = PIN_GPIO11;
 
-int mux(Boolean mux0, Boolean mux1)
+	PIO_Clear(&gpio9, 1);/*PIO_LISTSIZE(&gpio9));*/
+	vTaskDelay(10);
+	PIO_Clear(&gpio10, 1);/*PIO_LISTSIZE(&gpio10));*/
+	vTaskDelay(10);
+	PIO_Clear(&gpio11, 1);/*PIO_LISTSIZE(&gpio11));*/
+	vTaskDelay(10);
+
+	return 0;
+}
+
+int gecko_power_mux_get(Boolean mux0, Boolean mux1)
 {
 	Pin gpio10 = PIN_GPIO10;
 	Pin gpio11 = PIN_GPIO11;
@@ -107,6 +127,35 @@ int mux(Boolean mux0, Boolean mux1)
 	return adcSamples[6];
 }
 
+int gecko_get_current_3v3()
+{
+	gecko_power_mux_init();
+	int ret = CURRENT_3V3_CONVERSION (gecko_power_mux_get(FALSE, FALSE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+int gecko_get_voltage_3v3()
+{
+	gecko_power_mux_init();
+	int ret = VOLTAGE_3V3_CONVERSION( gecko_power_mux_get(FALSE, TRUE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+int gecko_get_current_5v()
+{
+	gecko_power_mux_init();
+	int ret = CURRENT_5V_CONVERSION( gecko_power_mux_get(TRUE, FALSE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+int gecko_get_voltage_5v()
+{
+	gecko_power_mux_init();
+	int ret = VOLTAGE_5V_CONVERSION (gecko_power_mux_get(TRUE, TRUE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+
 Boolean TurnOnGecko()
 {
 	printf("turning camera on\n");
@@ -139,6 +188,9 @@ Boolean TurnOnGecko()
 	}
 
 	Initialized_GPIO();
+
+	printf("\n\ncurrent_3v3 = (%d), voltage_3v3 = (%d), current_5v = (%d), voltage_5v = (%d), \n\n",
+			gecko_get_current_3v3(), gecko_get_voltage_3v3(), gecko_get_current_5v(), gecko_get_voltage_5v());
 
 	return TRUE;
 }
