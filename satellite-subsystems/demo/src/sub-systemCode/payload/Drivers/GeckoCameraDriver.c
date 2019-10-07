@@ -35,10 +35,13 @@
 
 #define READ_DELAY_INDEXES 10000
 
+#define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+#define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+
 void Initialized_GPIO()
 {
 	Pin gpio12 = PIN_GPIO12;
-	PIO_Configure(&gpio12, PIO_LISTSIZE(&gpio12));
+	PIO_Configure(&gpio12, 1);/*PIO_LISTSIZE(&gpio12));*/
 	vTaskDelay(10);
 	PIO_Set(&gpio12);
 	vTaskDelay(10);
@@ -50,6 +53,60 @@ void De_Initialized_GPIO()
 	vTaskDelay(10);
 }
 
+int mux_init()
+{
+	Pin gpio9 = PIN_GPIO09;
+	Pin gpio10 = PIN_GPIO10;
+	Pin gpio11 = PIN_GPIO11;
+
+	PIO_Configure(&gpio9, 1);/*PIO_LISTSIZE(&gpio9));*/
+	vTaskDelay(10);
+	PIO_Configure(&gpio10, 1);/*PIO_LISTSIZE(&gpio10));*/
+	vTaskDelay(10);
+	PIO_Configure(&gpio11, 1);/*PIO_LISTSIZE(&gpio11));*/
+	vTaskDelay(10);
+
+	PIO_Set(&gpio9);
+	vTaskDelay(10);
+
+	return 0;
+}
+
+int mux(Boolean mux0, Boolean mux1)
+{
+	Pin gpio10 = PIN_GPIO10;
+	Pin gpio11 = PIN_GPIO11;
+
+	if (mux0)
+		PIO_Set(&gpio10);
+	else
+		PIO_Clear(&gpio10);
+	vTaskDelay(10);
+
+	if (mux1)
+		PIO_Set(&gpio11);
+	else
+		PIO_Clear(&gpio11);
+	vTaskDelay(10);
+
+	unsigned short adcSamples[8];
+	int error = ADC_SingleShot(adcSamples);
+	if (error != 0)
+	{
+		return -1;
+	}
+
+	printf("ADC Samples: ");
+	for (int i = 0; i < 8; i++)
+	{
+		adcSamples[i] = ADC_ConvertRaw10bitToMillivolt(adcSamples[i]);
+		printf("%u, ", adcSamples[i]);
+	}
+	printf("\n\n");
+
+	return adcSamples[6];
+}
+
 Boolean TurnOnGecko()
 {
 	printf("turning camera on\n");
@@ -58,28 +115,30 @@ Boolean TurnOnGecko()
 	Pin gpio6 = PIN_GPIO06_INPUT;
 	Pin gpio7 = PIN_GPIO07_INPUT;
 
-	PIO_Configure(&gpio4, PIO_LISTSIZE(&gpio4));
+	PIO_Configure(&gpio4, 1);/*PIO_LISTSIZE(&gpio4));*/
 	vTaskDelay(10);
-	PIO_Configure(&gpio5, PIO_LISTSIZE(&gpio5));
+	PIO_Configure(&gpio5, 1);/*PIO_LISTSIZE(&gpio5));*/
 	vTaskDelay(10);
-	PIO_Configure(&gpio6, PIO_LISTSIZE(&gpio6));
+	PIO_Configure(&gpio6, 1);/*PIO_LISTSIZE(&gpio6));*/
 	vTaskDelay(10);
-	PIO_Configure(&gpio7, PIO_LISTSIZE(&gpio7));
+	PIO_Configure(&gpio7, 1);/*PIO_LISTSIZE(&gpio7));*/
 	vTaskDelay(10);
 
 	PIO_Set(&gpio4);
 	vTaskDelay(10);
 	PIO_Set(&gpio5);
 	vTaskDelay(10);
-	PIO_Set(&gpio6);
+	int gpio6_get = PIO_Get(&gpio6);
 	vTaskDelay(10);
-	PIO_Set(&gpio7);
+	int gpio7_get = PIO_Get(&gpio7);
 	vTaskDelay(10);
+
+	if (gpio6_get != 1 || gpio7_get != 1)
+	{
+		return FALSE;
+	}
 
 	Initialized_GPIO();
-
-	set_system_state(cam_param, SWITCH_ON);
-	WritePayloadLog(PAYLOAD_TURNED_GECKO_ON, (int)0);
 
 	return TRUE;
 }
@@ -102,8 +161,29 @@ Boolean TurnOffGecko()
 
 	De_Initialized_GPIO();
 
-	set_system_state(cam_param, SWITCH_OFF);
-	WritePayloadLog(PAYLOAD_TURNED_GECKO_OFF, (int)0);
+	return TRUE;
+}
+
+Boolean getPIOs()
+{
+	Pin gpio4 = PIN_GPIO05;
+	Pin gpio5 = PIN_GPIO07;
+	Pin gpio6 = PIN_GPIO06_INPUT;
+	Pin gpio7 = PIN_GPIO07_INPUT;
+	Pin gpio12 = PIN_GPIO12;
+
+	char output;
+
+	output = PIO_Get(&gpio4);
+	printf("gpio get 4 (%d)\n", output);
+	output = PIO_Get(&gpio5);
+	printf("gpio get 5 (%d)\n", output);
+	output = PIO_Get(&gpio6);
+	printf("gpio get 6 (%d)\n", output);
+	output = PIO_Get(&gpio7);
+	printf("gpio get 7 (%d)\n", output);
+	output = PIO_Get(&gpio12);
+	printf("gpio get 12 (%d)\n", output);
 
 	return TRUE;
 }

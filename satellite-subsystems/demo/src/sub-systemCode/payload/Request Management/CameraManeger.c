@@ -120,35 +120,35 @@ int createFolders()
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 
-	sprintf(path, "%s\\%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME);
+	sprintf(path, "%s/%s", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME);
 	error = f_mkdir(path);
 	CMP_AND_RETURN_MULTIPLE(error, 0, 6, -1);
 

@@ -72,31 +72,31 @@ static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 	switch (type)
 	{
 		case raw:
-			sprintf(baseString, "%s\\%s\\i%u.raw", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.raw", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME, id);
 			break;
 		case jpg:
-			sprintf(baseString, "%s\\%s\\i%u.jpg", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.jpg", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
 			break;
 		case bmp:
-			sprintf(baseString, "%s\\%s\\i%u.bmp", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.bmp", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
 			break;
 		case t02:
-			sprintf(baseString, "%s\\%s\\i%u.t02", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t02", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME, id);
 			break;
 		case t04:
-			sprintf(baseString, "%s\\%s\\i%u.t04", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t04", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME, id);
 			break;
 		case t08:
-			sprintf(baseString, "%s\\%s\\i%u.t08", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t08", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME, id);
 			break;
 		case t16:
-			sprintf(baseString, "%s\\%s\\i%u.t16", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t16", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME, id);
 			break;
 		case t32:
-			sprintf(baseString, "%s\\%s\\i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME, id);
 			break;
 		case t64:
-			sprintf(baseString, "%s\\%s\\i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME, id);
 			break;
 		default:
 			break;
