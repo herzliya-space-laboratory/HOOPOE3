@@ -76,7 +76,7 @@ void DownloadFile_Dump(void* param)
 
 		TM_spl packet;
 		packet.type = TM_GENERAL_T;
-		packet.subType = FILE_DUMP_ST;
+		packet.subType = DOWNLOAD_FILE_ST;
 		Time_getUnixEpoch(&packet.time);
 
 		packet.length = chunk_size + sizeof(uint32_t) + sizeof(uint16_t);
