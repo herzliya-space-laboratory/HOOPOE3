@@ -72,8 +72,5 @@
 #define IMAGE_CHUNK_HEIGHT_ADDR (0xD002)
 #define IMAGE_CHUNK_HEIGHT_SIZE (2)
 
-#define GECKO_STOP_TRANSFER_FLAG_ADDR (0xD100)
-#define GECKO_STOP_TRANSFER_FLAG_SIZE (1)
-
 #define DATABASEFRAMADDRESS (0x20000)	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
 #endif /* FRAMADRESS_H_ */
