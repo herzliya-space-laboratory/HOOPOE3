@@ -21,7 +21,7 @@
 #define EPS_I2C_ADDR 0x02
 #endif
 
-#define EPS_VOL_LOGIC_MAX 8100
+#define EPS_VOL_LOGIC_MAX 8900
 #define EPS_VOL_LOGIC_MIN 6400
 
 #define STATE_ADCS_ACT 0x01
