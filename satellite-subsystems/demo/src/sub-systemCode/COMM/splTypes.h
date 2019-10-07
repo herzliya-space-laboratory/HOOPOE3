@@ -20,6 +20,7 @@
 #define ACK_ST								90
 #define TM_ADCS_T 							154
 #define TM_ONLINE_TM_T	        			88
+#define FS_TM_T								9
 
 //Types (TC)
 #define COMM_T 								13
@@ -38,6 +39,8 @@
 #define LOG_EVENTS_ST						49
 #define LOG_ERROR_ST						50
 #define OFFLINE_SETTING_ST					255
+#define FS_FILE_TM_ST						0
+#define FS_FILE_LENGTH_TM_ST				1
 
 //Payload dump subTypes:
 #define IMAGE_DATABASE_DUMP_ST				96
@@ -75,6 +78,8 @@
 #define DUMP_ST								33
 #define DELETE_PACKETS_ST					35
 #define FORMAT_SD_ST						36
+#define FILE_DUMP_TC_ST						37
+#define FILE_SIZE_TC_ST						38
 #define RESET_FILE_ST						45
 #define RESTSRT_FS_ST						46
 #define DUMMY_FUNC_ST						122

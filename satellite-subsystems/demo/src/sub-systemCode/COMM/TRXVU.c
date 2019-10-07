@@ -39,6 +39,7 @@
 #include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
 #include "DelayedCommand_list.h"
+#include "../payload/Request Management/Dump/Butchering.h"
 
 #define FIRST 0
 
@@ -321,6 +322,118 @@ void Dump_task(void *arg)
 		xQueueReset(xDumpQueue);
 		dump_logic(id, startTime, endTime, resulotion, HK_dump_type);
 	}
+
+	set_system_state(dump_param, SWITCH_OFF);
+	f_managed_releaseFS();
+	vTaskDelete(NULL);
+}
+
+
+void fileDump_logic(command_id cmdID, uint startByte, char* fileName)
+{
+	Ack_type ack = ACK_NOTHING;
+	ERR_type err = ERR_SUCCESS;
+	int numberOfParameters;
+
+	TM_spl packet;
+	int length_raw_packet;
+	byte raw_packet[MAX_SIZE_TM_PACKET];
+
+	sendRequestToStop_transponder();
+	vTaskDelay(SYSTEM_DEALY);
+
+	int i_error;
+	if (CHECK_STARTING_DUMP_ABILITY)
+	{
+		unsigned int length = f_filelength(fileName);
+		if (length < startByte)
+		{
+			ack = ACK_CMD_FAIL;
+			err = ERR_PARAMETERS;
+		}
+		else
+		{
+			F_FILE* current_file;
+			i_error = f_managed_open(fileName, "r+", &current_file);
+			if (i_error != 0)
+			{
+				WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_READ_FS, SYSTEM_TRXVU, i_error);
+			}
+			else
+			{
+				lookForRequestToDelete_dump(cmdID);
+				f_seek( current_file, startByte, SEEK_SET );
+				numberOfParameters = f_read(Dump_buffer, 1, DUMP_BUFFER_SIZE, current_file);
+				if (numberOfParameters % SPL_TM_DATA_SIZE == 0)
+					numberOfParameters /= SPL_TM_DATA_SIZE;
+				else
+					numberOfParameters = (numberOfParameters / SPL_TM_DATA_SIZE) + 1;
+				for (int l = 0; l < numberOfParameters; l++)
+				{
+					Time_getUnixEpoch(&packet.time);
+					packet.type = FS_TM_T;
+					packet.subType = FS_FILE_TM_ST;
+					packet.length = SPL_TM_DATA_SIZE;
+					SimpleButcher(Dump_buffer, packet.data, SPL_TM_DATA_SIZE, DUMP_BUFFER_SIZE, l);
+					encode_TMpacket(raw_packet, &length_raw_packet, packet);
+
+					i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
+					check_int("TRX_sendFrame, dump_logic", i_error);
+					if (i_error == 4)
+					{
+						ack = ACK_TRXVU;
+						err = ERR_OFF;
+						break;
+					}
+					else if (i_error == 5)
+					{
+						ack = ACK_TRXVU;
+						err = ERR_MUTE;
+						break;
+					}
+
+					lookForRequestToDelete_dump(cmdID);
+				}
+			}
+		}
+	}
+	else
+	{
+		ack = ACK_TRXVU;
+		err = ERR_FAIL;
+	}
+
+	save_ACK(ack, err, cmdID);
+}
+
+void fileDump_task(void *arg)
+{
+	const int fileNameMaxSize = SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE - 4 - 4;
+	char fileName[fileNameMaxSize];
+	command_id id;
+	uint startByte;
+	memcpy(&id, arg, 4);
+	memcpy(&startByte, arg + 4, 4);
+	memcpy(fileName, arg + 8, fileNameMaxSize);
+
+	if (get_system_state(dump_param))
+	{
+		//	exit dump task and saves ACK
+		save_ACK(ACK_TASK, ERR_ALLREADY_EXIST, id);
+		vTaskDelete(NULL);
+	}
+	else
+	{
+		int f_error = f_managed_enterFS();// task enter 3
+		if (f_error != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_ENTER_FS, SYSTEM_TRXVU, (int)f_error);
+		check_int("enter FS, dump task", f_error);
+		set_system_state(dump_param, SWITCH_ON);
+	}
+
+	vTaskDelay(SYSTEM_DEALY);
+	xQueueReset(xDumpQueue);
+	fileDump_logic(id, startByte, fileName);
 
 	set_system_state(dump_param, SWITCH_OFF);
 	f_managed_releaseFS();

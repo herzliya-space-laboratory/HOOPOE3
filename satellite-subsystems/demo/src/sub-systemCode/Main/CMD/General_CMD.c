@@ -55,7 +55,47 @@ void cmd_dump(TC_spl cmd)
 	BigEnE_uInt_to_raw(cmd.id, &raw[0]);
 	// 1.2. copying command data
 	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1);
+	create_task(fileDump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), xDumpHandle);
+}
+void cmd_fileDump(TC_spl cmd)
+{
+	//1. build combine data with command_id
+	unsigned char raw[SIZE_OF_COMMAND - SPL_TC_HEADER_SIZE + 4] = {0};
+	// 1.1. copying command id
+	memcpy(raw, &cmd.id, 4);
+	memcpy(raw + 4, cmd.data, SPL_TM_DATA_SIZE);
 	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), xDumpHandle);
+}
+void cmd_fileLength(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	*type = ACK_FILE_SYSTEM;
+	*err = ERR_SUCCESS;
+
+	unsigned int length = f_filelength((char*)cmd.data);
+
+	TM_spl packet;
+	int length_raw_packet;
+	byte raw_packet[MAX_SIZE_TM_PACKET];
+
+	Time_getUnixEpoch(&packet.time);
+	packet.type = FS_TM_T;
+	packet.subType = FS_FILE_LENGTH_TM_ST;
+	packet.length = 4;
+	memcpy(packet.data, &length, 4);
+	encode_TMpacket(raw_packet, &length_raw_packet, packet);
+
+	int i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
+	check_int("TRX_sendFrame, dump_logic", i_error);
+	if (i_error == 4)
+	{
+		*type = ACK_TRXVU;
+		*err = ERR_OFF;
+	}
+	else if (i_error == 5)
+	{
+		*type = ACK_TRXVU;
+		*err = ERR_MUTE;
+	}
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
 {

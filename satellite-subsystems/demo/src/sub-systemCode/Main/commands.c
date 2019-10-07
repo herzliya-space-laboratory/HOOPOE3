@@ -276,6 +276,12 @@ void AUC_general(TC_spl decode)
 	case (FORMAT_SD_ST):
 		cmd_format_SD(&type, &err);
 		break;
+	case (FILE_DUMP_TC_ST):
+		cmd_fileDump(decode);
+		break;
+	case (FILE_SIZE_TC_ST):
+		cmd_fileLength(&type, &err, decode);
+		break;
 	case (RESET_FILE_ST):
 		cmd_reset_file(&type, &err, decode);
 		break;

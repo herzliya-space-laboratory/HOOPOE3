@@ -122,6 +122,7 @@ void TRXVU_task();
  */
 void Dump_task(void *arg);
 
+void fileDump_task(void *arg);
 
 /**
  * 	@brief		task function for transponde mode
