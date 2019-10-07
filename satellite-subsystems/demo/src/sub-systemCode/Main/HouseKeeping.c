@@ -43,6 +43,7 @@
 #include "../Global/logger.h"
 #include "../Global/OnlineTM.h"
 #include "../Global/GenericTaskSave.h"
+#include "../payload/Drivers/GeckoCameraDriver.h"
 
 
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
@@ -193,6 +194,11 @@ int CAM_HK_collect(CAM_HK* hk_out)
 	hk_out->fields.TempREGU6 = GECKO_GetTempREGU6();
 	hk_out->fields.TempREGU8 = GECKO_GetTempREGU8();
 	hk_out->fields.TempFlash = GECKO_GetTempFlash();
+
+	hk_out->fields.voltage_5V_DB = gecko_get_voltage_5v();
+	hk_out->fields.current_5V_DB = gecko_get_current_5v();
+	hk_out->fields.voltage_3V3_DB = gecko_get_voltage_3v3();
+	hk_out->fields.current_3V3_DB = gecko_get_current_3v3();
 
 	return 0;
 }
