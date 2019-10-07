@@ -10,6 +10,7 @@
 
 #include <hal/Storage/FRAM.h>
 #include <hal/Timing/Time.h>
+#include <hal/Drivers/ADC.h>
 
 #include <at91/peripherals/pio/pio.h>
 
@@ -82,11 +83,11 @@ int gecko_power_mux_deinit()
 	Pin gpio10 = PIN_GPIO10;
 	Pin gpio11 = PIN_GPIO11;
 
-	PIO_Clear(&gpio9, 1);/*PIO_LISTSIZE(&gpio9));*/
+	PIO_Clear(&gpio9);
 	vTaskDelay(10);
-	PIO_Clear(&gpio10, 1);/*PIO_LISTSIZE(&gpio10));*/
+	PIO_Clear(&gpio10);
 	vTaskDelay(10);
-	PIO_Clear(&gpio11, 1);/*PIO_LISTSIZE(&gpio11));*/
+	PIO_Clear(&gpio11);
 	vTaskDelay(10);
 
 	return 0;
@@ -119,7 +120,7 @@ int gecko_power_mux_get(Boolean mux0, Boolean mux1)
 	printf("ADC Samples: ");
 	for (int i = 0; i < 8; i++)
 	{
-		adcSamples[i] = ADC_ConvertRaw10bitToMillivolt(adcSamples[i]);
+		//adcSamples[i] = ADC_ConvertRaw10bitToMillivolt(adcSamples[i]);
 		printf("%u, ", adcSamples[i]);
 	}
 	printf("\n\n");
