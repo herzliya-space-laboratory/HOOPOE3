@@ -189,7 +189,7 @@ int KickStartCamera(void)
 	lastPicture_time = 0;
 	timeBetweenPictures = 0;
 
-	auto_thumbnail_creation = FALSE_8BIT;
+	stopAction();
 
 	cameraActivation_duration = DEFALT_DURATION;
 
@@ -419,11 +419,11 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case turn_off_AutoThumbnailCreation:
-		auto_thumbnail_creation = FALSE_8BIT;
+		stopAction();
 		setAutoThumbnailCreation(imageDataBase, FALSE_8BIT);
 		break;
 	case turn_on_AutoThumbnailCreation:
-		auto_thumbnail_creation = TRUE_8BIT;
+		resumeAction();
 		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
 		break;
 

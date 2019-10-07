@@ -56,6 +56,7 @@
 
 #include "../payload/Compression/ImageConversion.h"
 #include "../payload/Compression/jpeg/ImgCompressor.h"
+#include "../payload/Request Management/AutomaticImageHandler.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -204,6 +205,8 @@ int InitSubsystems()
 	StartTIME();
 
 	init_GP();
+
+	create_xAIHS();
 
 	numberOfRestarts();
 

@@ -17,10 +17,10 @@
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
 
-#include "../../Global/FRAMadress.h"
-
 #include "../../Global/GlobalParam.h"
 #include "../../Global/logger.h"
+
+#include "../Request Management/AutomaticImageHandler.h"
 
 #include "GeckoCameraDriver.h"
 
@@ -351,23 +351,8 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 	return 0;
 }
 
-int readStopFlag(Boolean8bit* stop_flag)
-{
-	int result = FRAM_read_exte(stop_flag, GECKO_STOP_TRANSFER_FLAG_ADDR, GECKO_STOP_TRANSFER_FLAG_SIZE);
-	Result(result, -9);
-	return 0;
-}
-int setStopFlag(Boolean8bit stop_flag)
-{
-	int result = FRAM_write_exte(&stop_flag, GECKO_STOP_TRANSFER_FLAG_ADDR, GECKO_STOP_TRANSFER_FLAG_SIZE);
-	Result(result, -1);
-	return 0;
-}
-
 int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 {
-	Boolean8bit stop_flag = FALSE_8BIT;
-
 	int result, i = 0;
 	result = GomEpsResetWDT(0);
 
@@ -417,10 +402,8 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 
 			vTaskDelay(SYSTEM_DEALY);
 
-			result = readStopFlag(&stop_flag);
-			if (stop_flag)
+			if (get_automatic_image_handling_state() == TRUE)
 			{
-				setStopFlag(FALSE_8BIT);
 				return -10;
 			}
 		}

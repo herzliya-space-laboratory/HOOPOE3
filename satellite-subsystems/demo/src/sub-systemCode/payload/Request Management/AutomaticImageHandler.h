@@ -8,7 +8,7 @@
 #ifndef IMAGEAUTOMATICHANDLER_H_
 #define IMAGEAUTOMATICHANDLER_H_
 
-Boolean8bit auto_thumbnail_creation;
+void create_xAIHS();
 
 void AutomaticImageHandlerTaskMain();
 
@@ -17,5 +17,7 @@ void KickStartAutomaticImageHandlerTask();
 int stopAction();
 int resumeAction();
 void handleErrors(int error);
+
+Boolean get_automatic_image_handling_state();
 
 #endif /* IMAGEAUTOMATICHANDLER_H_ */
