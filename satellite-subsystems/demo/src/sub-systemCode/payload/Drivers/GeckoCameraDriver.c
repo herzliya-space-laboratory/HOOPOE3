@@ -23,6 +23,9 @@
 
 #include "GeckoCameraDriver.h"
 
+#define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+#define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+
 #define Result(value, errorType)	if(value != 0) { return errorType; }
 
 #define _SPI_GECKO_BUS_SPEED MHZ(5)
@@ -50,10 +53,11 @@ void De_Initialized_GPIO()
 Boolean TurnOnGecko()
 {
 	printf("turning camera on\n");
-	Pin gpio4=PIN_GPIO04;
-	Pin gpio5=PIN_GPIO05;
-	Pin gpio6=PIN_GPIO06;
-	Pin gpio7=PIN_GPIO07;
+	Pin gpio4 = PIN_GPIO04;
+	Pin gpio5 = PIN_GPIO05;
+	Pin gpio6 = PIN_GPIO06_INPUT;
+	Pin gpio7 = PIN_GPIO07_INPUT;
+
 	PIO_Configure(&gpio4, PIO_LISTSIZE(&gpio4));
 	vTaskDelay(10);
 	PIO_Configure(&gpio5, PIO_LISTSIZE(&gpio5));
@@ -82,10 +86,10 @@ Boolean TurnOnGecko()
 Boolean TurnOffGecko()
 {
 	printf("turning camera off\n");
-	Pin gpio4=PIN_GPIO05;
-	Pin gpio5=PIN_GPIO07;
-	Pin gpio6=PIN_GPIO05;
-	Pin gpio7=PIN_GPIO07;
+	Pin gpio4 = PIN_GPIO05;
+	Pin gpio5 = PIN_GPIO07;
+	Pin gpio6 = PIN_GPIO06_INPUT;
+	Pin gpio7 = PIN_GPIO07_INPUT;
 
 	PIO_Clear(&gpio4);
 	vTaskDelay(10);
