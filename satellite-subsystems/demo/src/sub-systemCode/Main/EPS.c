@@ -131,9 +131,7 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 Boolean updateCam_powerLines()
 {
 	if (get_system_state(cam_operational_param) == SWITCH_OFF && getPIOs())
-		stopAction();
-	else if (get_system_state(cam_operational_param) == SWITCH_ON)
-		resumeAction();
+		printf("EPS - Should Shut Gecko\n"); // stopAction(); // sorry elai just wanted to check stuff in a simple way with the least variables possible... this is a wiled variable when working remotly
 
 	return TRUE;
 }

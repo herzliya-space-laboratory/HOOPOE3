@@ -41,7 +41,7 @@
 #define	totalPageCount 136
 #define totalFlashCount 4096
 
-#define READ_DELAY_INDEXES 10000
+#define READ_DELAY_INDEXES 1000
 
 #define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
 #define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
@@ -120,14 +120,6 @@ int gecko_power_mux_get(Boolean mux0, Boolean mux1)
 	{
 		return -1;
 	}
-
-	printf("ADC Samples: ");
-	for (int i = 0; i < 8; i++)
-	{
-		//adcSamples[i] = ADC_ConvertRaw10bitToMillivolt(adcSamples[i]);
-		printf("%u, ", adcSamples[i]);
-	}
-	printf("\n\n");
 
 	return adcSamples[6];
 }
@@ -253,20 +245,27 @@ Boolean getPIOs()
 {
 	Pin gpio4 = PIN_GPIO05;
 	Pin gpio5 = PIN_GPIO07;
+	Pin gpio12 = PIN_GPIO12;
 	Pin gpio6 = PIN_GPIO06_INPUT;
 	Pin gpio7 = PIN_GPIO07_INPUT;
-	Pin gpio12 = PIN_GPIO12;
+	/*
+	 * Pin gpio6 = PIN_GPIO06_INPUT;
+	 * Pin gpio7 = PIN_GPIO07_INPUT;
+	 *
+	 * GPIO 6 and 7 won't be checked since they will always return 1 when calling "PIO_Get"
+	 * for them.
+	 */
 
-	char output[5];
+	char output[3];
 	char outputSum = 00;
 
 	output[0] = PIO_Get(&gpio4);
 	output[1] = PIO_Get(&gpio5);
-	output[2] = PIO_Get(&gpio6);
-	output[3] = PIO_Get(&gpio7);
-	output[4] = PIO_Get(&gpio12);
+	PIO_Get(&gpio6);
+	PIO_Get(&gpio7);
+	output[3] = PIO_Get(&gpio12);
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 3; i++)
 		outputSum |= output[i];
 	if (outputSum)
 		return TRUE;
@@ -432,8 +431,10 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 		if(i % READ_DELAY_INDEXES == 0)
 		{
 			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
-
 			vTaskDelay(SYSTEM_DEALY);
+
+			if (get_automatic_image_handling_task_suspension_flag() == TRUE)
+				return -10;
 		}
 	}
 

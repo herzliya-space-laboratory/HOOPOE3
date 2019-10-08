@@ -72,5 +72,11 @@
 #define IMAGE_CHUNK_HEIGHT_ADDR (0xD002)
 #define IMAGE_CHUNK_HEIGHT_SIZE (2)
 
+#define AUTOMATIC_IMAGE_HANDLER_STATE_ADDR (0xD010)
+#define AUTOMATIC_IMAGE_HANDLER_STATE_SIZE (4)
+
+#define CAMERA_ACTIVATION_DURATION_ADDR (0xD014)
+#define CAMERA_ACTIVATION_DURATION_SIZE (4)
+
 #define DATABASEFRAMADDRESS (0x20000)	// The database's address at the FRAM (currently 200 bytes long, alto its dynamic meaning it might change...)
 #endif /* FRAMADRESS_H_ */

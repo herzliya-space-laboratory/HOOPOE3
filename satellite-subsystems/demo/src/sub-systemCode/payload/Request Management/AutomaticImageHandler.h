@@ -12,9 +12,14 @@
 void AutomaticImageHandlerTaskMain();
 
 void KickStartAutomaticImageHandlerTask();
+void initAutomaticImageHandlerTask();
 
-void create_xAIHS();
-Boolean get_automatic_image_handling_state();
+Boolean get_automatic_image_handling_task_suspension_flag();
+void set_automatic_image_handling_task_suspension_flag(Boolean param);
+
+Boolean get_automatic_image_handling_ready_for_long_term_stop();
+void set_automatic_image_handling_ready_for_long_term_stop(Boolean param);
+
 int stopAction();
 int resumeAction();
 

@@ -51,10 +51,10 @@ struct __attribute__ ((__packed__)) ImageDataBase_t
 	CameraPhotographyValues cameraParameters;
 	Boolean8bit AutoThumbnailCreation;
 };
-#define SIZEOF_IMAGE_DATABASE sizeof(struct ImageDataBase_t)
+#define SIZEOF_IMAGE_DATABASE ( sizeof(struct ImageDataBase_t) )
 
-#define DATABASE_FRAM_START (DATABASEFRAMADDRESS + SIZEOF_IMAGE_DATABASE)	///< The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
-#define DATABASE_FRAM_END (DATABASE_FRAM_START + MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata))	///< The ImageDataBases ending address in the FRAM
+#define DATABASE_FRAM_START ( DATABASEFRAMADDRESS + SIZEOF_IMAGE_DATABASE )	///< The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
+#define DATABASE_FRAM_END ( ( DATABASE_FRAM_START ) + ( MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata) ) )	///< The ImageDataBases ending address in the FRAM
 
 #define DATABASE_FRAM_SIZE (DATABASE_FRAM_END - DATABASEFRAMADDRESS)
 

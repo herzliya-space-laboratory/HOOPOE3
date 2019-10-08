@@ -206,8 +206,7 @@ int InitSubsystems()
 
 	init_GP();
 
-	create_xAIHS();
-	create_xGeckoStateSemaphore();
+	initAutomaticImageHandlerTask();
 
 	numberOfRestarts();
 
