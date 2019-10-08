@@ -82,7 +82,6 @@
 #define ARM_DISARM							57
 #define STOP_TM_ST							200
 #define RESUME_TM_ST						201
-#define DOWNLOAD_FILE_ST					8
 
 //payload
 #define SEND_IMG_CHUNCK_CHUNK_FIELD_ST		1

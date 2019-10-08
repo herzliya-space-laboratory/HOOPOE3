@@ -29,6 +29,7 @@
 #include "../Global/Global.h"
 #include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
+#include "../payload/Drivers/GeckoCameraDriver.h"
 #include "../payload/Request Management/AutomaticImageHandler.h"
 #include "../EPS.h"
 
@@ -125,6 +126,16 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 		return FALSE;
 
 	}
+}
+
+Boolean updateCam_powerLines()
+{
+	if (get_system_state(cam_operational_param) == SWITCH_OFF && getPIOs())
+		stopAction();
+	else if (get_system_state(cam_operational_param) == SWITCH_ON)
+		resumeAction();
+
+	return TRUE;
 }
 
 EPS_mode_t get_EPS_mode_t()
@@ -433,6 +444,7 @@ void EPS_Conditioning()
 	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
 	set_EPSState((uint8_t)batteryLastMode);
 	update_powerLines(switches_states);
+	updateCam_powerLines();
 	VBatt_previous = VBatt_filtered;
 }
 

@@ -257,20 +257,21 @@ Boolean getPIOs()
 	Pin gpio7 = PIN_GPIO07_INPUT;
 	Pin gpio12 = PIN_GPIO12;
 
-	char output;
+	char output[5];
+	char outputSum = 00;
 
-	output = PIO_Get(&gpio4);
-	printf("gpio get 4 (%d)\n", output);
-	output = PIO_Get(&gpio5);
-	printf("gpio get 5 (%d)\n", output);
-	output = PIO_Get(&gpio6);
-	printf("gpio get 6 (%d)\n", output);
-	output = PIO_Get(&gpio7);
-	printf("gpio get 7 (%d)\n", output);
-	output = PIO_Get(&gpio12);
-	printf("gpio get 12 (%d)\n", output);
+	output[0] = PIO_Get(&gpio4);
+	output[1] = PIO_Get(&gpio5);
+	output[2] = PIO_Get(&gpio6);
+	output[3] = PIO_Get(&gpio7);
+	output[4] = PIO_Get(&gpio12);
 
-	return TRUE;
+	for (int i = 0; i < 5; i++)
+		outputSum |= output[i];
+	if (outputSum)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 int initGecko()

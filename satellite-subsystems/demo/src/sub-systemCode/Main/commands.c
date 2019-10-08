@@ -41,7 +41,6 @@
 #include "../COMM/splTypes.h"
 #include "../COMM/DelayedCommand_list.h"
 #include "../Global/Global.h"
-#include "../Global/FileDump.h"
 #include "../TRXVU.h"
 #include "../Ants.h"
 #include "HouseKeeping.h"
@@ -311,9 +310,6 @@ void AUC_general(TC_spl decode)
 		break;
 	case (RESUME_TM_ST):
 		cmd_resume_TM(&type, &err);
-		break;
-	case (DOWNLOAD_FILE_ST):
-		DownloadFile(decode);
 		break;
 	default:
 		cmd_error(&type, &err);

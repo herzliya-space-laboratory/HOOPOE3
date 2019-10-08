@@ -31,6 +31,7 @@ voltage_t gecko_get_voltage_3v3();
 current_t gecko_get_current_5v();
 voltage_t gecko_get_voltage_5v();
 
+Boolean getPIOs();
 
 /*!
  * @brief Higher level function for taking an image.
