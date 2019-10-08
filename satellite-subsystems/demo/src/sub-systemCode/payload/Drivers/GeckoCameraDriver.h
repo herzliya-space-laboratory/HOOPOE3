@@ -19,6 +19,8 @@
 void Initialized_GPIO();
 void De_Initialized_GPIO();
 
+void create_xGeckoStateSemaphore();
+
 Boolean TurnOnGecko();
 Boolean TurnOffGecko();
 

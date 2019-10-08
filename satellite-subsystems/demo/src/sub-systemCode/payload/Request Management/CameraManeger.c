@@ -235,16 +235,13 @@ void Take_pictures_with_time_in_between()
 	time_unix currentTime;
 	Time_getUnixEpoch(&currentTime);
 
-	int auto_handler_error = 0;
-
 	if ( (lastPicture_time + timeBetweenPictures <= currentTime) && (numberOfPicturesLeftToBeTaken != 0) )
 	{
 		lastPicture_time = currentTime;
 
 		if (get_system_state(cam_operational_param))
 		{
-			auto_handler_error = stopAction();
-			handleErrors(auto_handler_error);
+			stopAction();
 
 			Time_getUnixEpoch(&turnedOnCamera);
 			TurnOnGecko();
@@ -254,8 +251,7 @@ void Take_pictures_with_time_in_between()
 				WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
 			}
 
-			auto_handler_error = resumeAction();
-			handleErrors(auto_handler_error);
+			resumeAction();
 		}
 
 		numberOfPicturesLeftToBeTaken--;
@@ -267,22 +263,19 @@ void act_upon_request(Camera_Request request)
 	ImageDataBaseResult error = DataBaseSuccess;
 
 	Boolean CouldNotExecute = FALSE;
-	int auto_handler_error = 0;
 
 	switch (request.id)
 	{
 	case take_image:
 		if (get_system_state(cam_operational_param))
 		{
-			auto_handler_error = stopAction();
-			handleErrors(auto_handler_error);
+			 stopAction();
 
 			Time_getUnixEpoch(&turnedOnCamera);
 
 			error = TakePicture(imageDataBase, request.data);
 
-			auto_handler_error = resumeAction();
-			handleErrors(auto_handler_error);
+			resumeAction();
 		}
 		else
 		{
@@ -293,14 +286,12 @@ void act_upon_request(Camera_Request request)
 	case take_image_with_special_values:
 		if (get_system_state(cam_operational_param))
 		{
-			auto_handler_error = stopAction();
-			handleErrors(auto_handler_error);
+			stopAction();
 
 			Time_getUnixEpoch(&turnedOnCamera);
 			error = TakeSpecialPicture(imageDataBase, request.data);
 
-			auto_handler_error = resumeAction();
-			handleErrors(auto_handler_error);
+			resumeAction();
 		}
 		else
 		{
@@ -322,14 +313,12 @@ void act_upon_request(Camera_Request request)
 	case delete_image:
 		if (get_system_state(cam_operational_param))
 		{
-			auto_handler_error = stopAction();
-			handleErrors(auto_handler_error);
+			stopAction();
 
 			Time_getUnixEpoch(&turnedOnCamera);
 			error = DeletePicture(imageDataBase, request.data);
 
-			auto_handler_error = resumeAction();
-			handleErrors(auto_handler_error);
+			resumeAction();
 		}
 		else
 		{
@@ -341,14 +330,12 @@ void act_upon_request(Camera_Request request)
 	case transfer_image_to_OBC:
 		if (get_system_state(cam_operational_param))
 		{
-			auto_handler_error = stopAction();
-			handleErrors(auto_handler_error);
+			stopAction();
 
 			Time_getUnixEpoch(&turnedOnCamera);
 			error = TransferPicture(imageDataBase, request.data);
 
-			auto_handler_error = resumeAction();
-			handleErrors(auto_handler_error);
+			resumeAction();
 		}
 		else
 		{
@@ -395,7 +382,7 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case turn_on_camera:
-		if (/*get_system_state(cam_operational_param)*/1)
+		if (get_system_state(cam_operational_param))
 		{
 			Time_getUnixEpoch(&turnedOnCamera);
 			TurnOnGecko();

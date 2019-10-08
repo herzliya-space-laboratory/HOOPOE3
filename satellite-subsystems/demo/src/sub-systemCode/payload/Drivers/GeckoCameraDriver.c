@@ -7,6 +7,7 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/semphr.h>
 
 #include <hal/Storage/FRAM.h>
 #include <hal/Timing/Time.h>
@@ -17,6 +18,7 @@
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
 
+#include "../../Global/freertosExtended.h"
 #include "../../Global/GlobalParam.h"
 #include "../../Global/logger.h"
 
@@ -43,6 +45,8 @@
 
 #define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
 #define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+
+xSemaphoreHandle xGeckoStateSemaphore;
 
 void Initialized_GPIO()
 {
@@ -157,7 +161,7 @@ voltage_t gecko_get_voltage_5v()
 	return ret;
 }
 
-Boolean TurnOnGecko()
+Boolean TurnOnGecko_gpio()
 {
 	printf("turning camera on\n");
 	Pin gpio4 = PIN_GPIO04;
@@ -195,7 +199,7 @@ Boolean TurnOnGecko()
 
 	return TRUE;
 }
-Boolean TurnOffGecko()
+Boolean TurnOffGecko_gpio()
 {
 	printf("turning camera off\n");
 	Pin gpio4 = PIN_GPIO05;
@@ -215,6 +219,34 @@ Boolean TurnOffGecko()
 	De_Initialized_GPIO();
 
 	return TRUE;
+}
+
+void create_xGeckoStateSemaphore()
+{
+	vSemaphoreCreateBinary(xGeckoStateSemaphore);
+}
+Boolean set_gecko_state(Boolean param)
+{
+	Boolean ret = FALSE;
+	if (xSemaphoreTake_extended(xGeckoStateSemaphore, 1000) == pdTRUE)
+	{
+		if (param == TRUE)
+			ret = TurnOnGecko_gpio();
+		else
+			ret = TurnOffGecko_gpio();
+
+		xSemaphoreGive_extended(xGeckoStateSemaphore);
+	}
+	return ret;
+}
+
+Boolean TurnOnGecko()
+{
+	return set_gecko_state(TRUE);
+}
+Boolean TurnOffGecko()
+{
+	return set_gecko_state(FALSE);
 }
 
 Boolean getPIOs()
@@ -401,11 +433,6 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
 
 			vTaskDelay(SYSTEM_DEALY);
-
-			if (get_automatic_image_handling_state() == TRUE)
-			{
-				return -10;
-			}
 		}
 	}
 

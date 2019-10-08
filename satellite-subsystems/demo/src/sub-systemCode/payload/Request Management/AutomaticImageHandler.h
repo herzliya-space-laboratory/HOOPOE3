@@ -8,16 +8,14 @@
 #ifndef IMAGEAUTOMATICHANDLER_H_
 #define IMAGEAUTOMATICHANDLER_H_
 
-void create_xAIHS();
 
 void AutomaticImageHandlerTaskMain();
 
 void KickStartAutomaticImageHandlerTask();
 
+void create_xAIHS();
+Boolean get_automatic_image_handling_state();
 int stopAction();
 int resumeAction();
-void handleErrors(int error);
-
-Boolean get_automatic_image_handling_state();
 
 #endif /* IMAGEAUTOMATICHANDLER_H_ */

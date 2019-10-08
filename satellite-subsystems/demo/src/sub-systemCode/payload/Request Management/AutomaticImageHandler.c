@@ -57,6 +57,8 @@ int resumeAction()
 }
 int stopAction()
 {
+	TurnOffGecko();
+	vTaskDelay(10);
 	set_get_automatic_image_handling_state(FALSE);
 	return 0;
 }
@@ -70,7 +72,7 @@ void AutomaticImageHandlerTaskMain()
 	{
 		error = 0;
 
-		if ( get_system_state(cam_operational_param) && automatic_image_handling_state )
+		if ( get_system_state(cam_operational_param) && get_automatic_image_handling_state() )
 		{
 			error = handleMarkedPictures();
 		}
@@ -96,10 +98,4 @@ void KickStartAutomaticImageHandlerTask()
 {
 	xTaskCreate(AutomaticImageHandlerTaskMain, (const signed char*)AutomaticImageHandlerTask_Name, AutomaticImageHandlerTask_StackDepth, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(SYSTEM_DEALY);
-}
-
-void handleErrors(int error)
-{
-	if (error != 0 && automatic_image_handling_state)
-		WriteErrorLog(error, SYSTEM_PAYLOAD_AUTO_HANDLING, (uint32_t)-1);
 }
