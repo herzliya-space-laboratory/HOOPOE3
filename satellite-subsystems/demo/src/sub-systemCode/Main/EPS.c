@@ -342,8 +342,23 @@ void sanityCheck_EPS(voltage_t current_VBatt)
 
 	if (check == FALSE)
 	{
-		//printf("The EPS logic failed us all\n");
-		battery_upward(current_VBatt, 0);
+		Boolean changeMode = FALSE;
+
+		for (int i = 0; i < NUM_BATTERY_MODE - 1; i++)
+		{
+			if (current_VBatt < voltage_table[0][i])
+			{
+				enterMode[i].fun(&switches_states, &batteryLastMode);
+				update_powerLines(switches_states);
+				changeMode = TRUE;
+			}
+		}
+
+		if (!changeMode)
+		{
+			enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
+			update_powerLines(switches_states);
+		}
 	}
 }
 

@@ -94,7 +94,7 @@ void StartTIME()
 {
 	// starts time
 	int error = 0;
-	Time initial_time_jan2000={0,0,0,1,30,6,19,0};
+	Time initial_time_jan2000={0,0,0,4,9,10,19,0};
 	error = Time_start(&initial_time_jan2000,0);
 	vTaskDelay(100);
 	time_unix time_now;
