@@ -106,13 +106,21 @@ void resumeAutomaticImageHandlingTask()
 
 int resumeAction()
 {
-	resumeAutomaticImageHandlingTask();
+	Boolean state = get_automatic_image_handling_task_suspension_flag();
+	if (state == FALSE)
+	{
+		resumeAutomaticImageHandlingTask();
+	}
 	return 0;
 }
 int stopAction()
 {
-	suspendAutomaticImageHandlingTask();
-	TurnOffGecko();
+	Boolean state = get_automatic_image_handling_task_suspension_flag();
+	if (state == TRUE)
+	{
+		suspendAutomaticImageHandlingTask();
+		TurnOffGecko();
+	}
 	vTaskDelay(100);
 	return 0;
 }
@@ -125,11 +133,12 @@ void AutomaticImageHandlerTaskMain()
 	while(TRUE)
 	{
 		set_automatic_image_handling_ready_for_long_term_stop(FALSE);
+		set_automatic_image_handling_task_suspension_flag(FALSE);
+
 		error = 0;
 
 		if ( get_system_state(cam_operational_param) )
 		{
-			set_automatic_image_handling_task_suspension_flag(FALSE);
 			error = handleMarkedPictures();
 		}
 
