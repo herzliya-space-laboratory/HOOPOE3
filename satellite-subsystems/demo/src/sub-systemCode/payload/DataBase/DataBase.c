@@ -594,7 +594,7 @@ ImageDataBaseResult clearImageDataBase(void)
 			{
 				if(checkForFileType(image_metadata, i) == DataBaseSuccess)
 				{
-					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);												return result;
+					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);
 					if (result == DataBaseSuccess)
 					{
 						updateFileTypes(&image_metadata, image_address, i, FALSE);
