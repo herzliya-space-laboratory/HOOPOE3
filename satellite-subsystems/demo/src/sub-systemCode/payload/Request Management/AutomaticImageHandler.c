@@ -158,7 +158,7 @@ int stopAction()
 
 void AutomaticImageHandlerTaskMain()
 {
-	int error = f_managed_enterFS();
+	int error = f_managed_enterFS();//task 4 enter fs
 	check_int("AutoImageHandler, enter FS", error);
 
 	while(TRUE)

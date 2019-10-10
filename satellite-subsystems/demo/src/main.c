@@ -85,7 +85,6 @@ void taskMain()
 	WDT_startWatchdogKickTask(10 / portTICK_RATE_MS, FALSE);
 
 	InitSubsystems();
-	printf("init\n");
 
 	vTaskDelay(100);
 
@@ -118,9 +117,7 @@ int main()
 	// The actual watchdog is already started, this only initializes the watchdog-kick interface.
 	WDT_start();
 
-	printf("Task Main \n");
 	xTaskGenericCreate(taskMain, (const signed char *)("taskMain"), 8196, NULL, configMAX_PRIORITIES - 2, NULL, NULL, NULL);
-	printf("start sch\n");
 	vTaskStartScheduler();
 	while(1){
 		printf("should not be here\n");

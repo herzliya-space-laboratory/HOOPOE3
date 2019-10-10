@@ -53,6 +53,8 @@ xTaskHandle xBeaconTask;
 
 static byte Dump_buffer[DUMP_BUFFER_SIZE];
 
+static int TRX_sendFrame_alt(byte* data, uint8_t length);
+
 void update_FRAM_bitRate()
 {
 	byte dat;
@@ -188,7 +190,7 @@ void TRXVU_task()
 }
 
 
-void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[NUM_FILES_IN_DUMP])
+void dump_logic(command_id cmdID, altSend_dumpParam altSend, const time_unix start_time, time_unix end_time, uint8_t resulotion, HK_types HK[NUM_FILES_IN_DUMP])
 {
 	char fileName[MAX_F_FILE_NAME_SIZE];
 	Ack_type ack = ACK_NOTHING;
@@ -245,8 +247,10 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 				{
 					build_HK_spl_packet(HK[i], Dump_buffer + l * parameterSize, &packet);
 					encode_TMpacket(raw_packet, &length_raw_packet, packet);
-
-					i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
+					if (altSend == useAltSend)
+						i_error = TRX_sendFrame_alt(raw_packet, (uint8_t)length_raw_packet);
+					else
+						i_error = TRX_sendFrame(raw_packet, (uint8_t)length_raw_packet);
 					check_int("TRX_sendFrame, dump_logic", i_error);
 					//printf("number of packets: %d\n", numberOfPackets++);
 
@@ -281,6 +285,7 @@ void dump_logic(command_id cmdID, const time_unix start_time, time_unix end_time
 void Dump_task(void *arg)
 {
 	byte* dump_param_data = (byte*)arg;
+	altSend_dumpParam sendType = useRegularSend;
 	time_unix startTime;
 	time_unix endTime;
 	command_id id;
@@ -288,11 +293,13 @@ void Dump_task(void *arg)
 	HK_types HK_dump_type[NUM_FILES_IN_DUMP];
 
 	id = BigEnE_raw_to_uInt(&dump_param_data[0]);
+	if (dump_param_data[4] == (byte)useAltSend)
+		sendType = useAltSend;
 	for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
-		HK_dump_type[i] = (HK_types)dump_param_data[4 + i];
-	resulotion = dump_param_data[4 + NUM_FILES_IN_DUMP];
-	startTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 5]);
-	endTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 9]);
+		HK_dump_type[i] = (HK_types)dump_param_data[4 + 1+ i];
+	resulotion = dump_param_data[4 + 1 + NUM_FILES_IN_DUMP];
+	startTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 5 + 1]);
+	endTime = BigEnE_raw_to_uInt(&dump_param_data[NUM_FILES_IN_DUMP + 9 + 1]);
 
 	if (get_system_state(dump_param))
 	{
@@ -302,10 +309,10 @@ void Dump_task(void *arg)
 	}
 	else
 	{
-		int f_error = f_managed_enterFS();
+		int f_error = f_managed_enterFS();// task enter 3
 		if (f_error != 0)
 			WriteErrorLog((log_errors)LOG_ERR_COMM_DUMP_ENTER_FS, SYSTEM_TRXVU, (int)f_error);
-		check_int("enter FS, dump task", f_error);// task enter 5
+		check_int("enter FS, dump task", f_error);
 		set_system_state(dump_param, SWITCH_ON);
 	}
 
@@ -319,7 +326,7 @@ void Dump_task(void *arg)
 	{
 		vTaskDelay(SYSTEM_DEALY);
 		xQueueReset(xDumpQueue);
-		dump_logic(id, startTime, endTime, resulotion, HK_dump_type);
+		dump_logic(id, sendType, startTime, endTime, resulotion, HK_dump_type);
 	}
 
 	set_system_state(dump_param, SWITCH_OFF);
@@ -866,6 +873,47 @@ int TRX_sendFrame(byte* data, uint8_t length)
 		//we in transponder mode
 		return 5;
 	}
+
+	if (xSemaphoreTake_extended(xIsTransmitting, MAX_DELAY))
+	{
+		unsigned char avalFrames = VALUE_TX_BUFFER_FULL;
+
+		int count = 0;
+		do
+		{
+			i_error = IsisTrxvu_tcSendAX25DefClSign(0, data, length, &avalFrames);
+			if (i_error != 0)
+				WriteErrorLog((log_errors)LOG_ERR_COMM_SEND_FRAME, SYSTEM_TRXVU, i_error);
+			check_int("TRX_sendFrame, IsisTrxvu_tcSendAX25DefClSign", i_error);
+			retVal = 0;
+			if (count > 0)
+				vTaskDelay(200);
+			if (count % 10 == 1)
+			{
+				//printf("Tx buffer is full\n");
+				retVal = -1;
+			}
+			count++;
+		}while(avalFrames == VALUE_TX_BUFFER_FULL);
+
+		// returns xIsTransmitting semaphore
+		lu_error = xSemaphoreGive_extended(xIsTransmitting);
+		check_portBASE_TYPE("TRX_sendFrame, xSemaphoreGive_extended", lu_error);
+		retVal = 0;
+	}
+	else
+	{
+		// can't take semaphore, big problem...
+		retVal = -2;
+	}
+
+	return retVal;
+}
+
+static int TRX_sendFrame_alt(byte* data, uint8_t length)
+{
+	int i_error = 0, retVal = 0;
+	portBASE_TYPE lu_error = 0;
 
 	if (xSemaphoreTake_extended(xIsTransmitting, MAX_DELAY))
 	{

@@ -37,7 +37,7 @@ int add_GenericElement_queue(saveRequest_task item)
 void GenericSave_Task()
 {
 	saveRequest_task removeItem;
-	int f_error = f_managed_enterFS();// task 6 enter FS
+	int f_error = f_managed_enterFS();//task 6 enter fs
 	check_int("enter FS, in GenericSave task", f_error);
 
 	portBASE_TYPE ret;

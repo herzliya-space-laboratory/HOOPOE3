@@ -280,10 +280,7 @@ int initGecko()
 
 int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
 {
-	unsigned char somebyte = 0;
-	GomEpsPing(0, 0, &somebyte);
-
-	printf("GomEpsResetWDT = %d\n", GomEpsResetWDT(0));
+	GomEpsResetWDT(0);
 
 	// Setting PGA Gain:
 	int result = GECKO_SetPgaGain(pgaGain);
@@ -452,8 +449,6 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 		}
 	}
 
-	printf("ImageSize = %d\n", IMAGE_SIZE);
-
 	result = GECKO_GetReadDone();
 	if (result == 0)
 		return -7;
@@ -469,7 +464,7 @@ int GECKO_EraseBlock( uint32_t imageID )
 	unsigned char somebyte = 0;
 	GomEpsPing(0, 0, &somebyte);
 
-	printf("GomEpsResetWDT = %d\n", GomEpsResetWDT(0));
+	GomEpsResetWDT(0);
 
 	// Setting image ID:
 	int result_setImageId = GECKO_SetImageID(imageID);

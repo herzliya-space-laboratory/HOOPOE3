@@ -45,16 +45,16 @@ void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_dump(TC_spl cmd)
 {
-	if (cmd.length != 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1)
+	if (cmd.length != 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1 + 1)
 	{
 		return;
 	}
 	//1. build combine data with command_id
-	unsigned char raw[2 * TIME_SIZE + NUM_FILES_IN_DUMP + 4 + 1] = {0};
+	unsigned char raw[2 * TIME_SIZE + NUM_FILES_IN_DUMP + 4 + 1 + 1] = {0};
 	// 1.1. copying command id
 	BigEnE_uInt_to_raw(cmd.id, &raw[0]);
 	// 1.2. copying command data
-	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1);
+	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1 + 1);
 	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), xDumpHandle);
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
@@ -164,7 +164,7 @@ void cmd_format_SD(Ack_type* type, ERR_type* err)
 }
 void cmd_dummy_func(Ack_type* type, ERR_type* err)
 {
-	printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
+	//printf("Im sorry Hoopoe3.\nI can't let you do it...\n");
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }
@@ -310,8 +310,8 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd)
 	int error = Time_setUnixEpoch(new_time);
 	if (error)
 	{
-		printf("fuckeddddddd\n");
-		printf("I gues we need to stay on this time forever\n");
+		//printf("fuckeddddddd\n");
+		//printf("I gues we need to stay on this time forever\n");
 		WriteErrorLog(LOG_ERR_SET_TIME, SYSTEM_OBC, error);
 		*type = ACK_SYSTEM;
 		*err = ERR_FAIL;
@@ -362,13 +362,12 @@ void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	*err = ERR_SUCCESS;
 
 }
-void cmd_deploy_ants(Ack_type* type, ERR_type* err)
+void cmd_deploy_ants(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	(void)type;
 	(void)err;
-	/*type = ACK_REDEPLOY;
 #ifndef ANTS_DO_NOT_DEPLOY
-	int error = deploye_ants();
+	int error = deploye_ants(cmd.data[0]);
 	if (error == -2)
 	{
 		*type = ACK_ANTS;
@@ -376,7 +375,7 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 	}
 	else if (error != 0)
 	{
-		if (err == 666)
+		if (error == 666)
 		{
 			printf("FUN FACT: deploy ants when you don't have permission can summon the DEVIL!!!\nerror: %d\n", error);
 		}
@@ -385,13 +384,13 @@ void cmd_deploy_ants(Ack_type* type, ERR_type* err)
 	}
 	else
 	{
-	 	 *type = ACK_CMD_FAIL;
+	 	*type = ACK_NOTHING;
 		*err = ERR_SUCCESS;
 	}
 
 #else
 	printf("sho! sho!, get out before i kill you\n");
-#endif*/
+#endif
 }
 
 void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd)

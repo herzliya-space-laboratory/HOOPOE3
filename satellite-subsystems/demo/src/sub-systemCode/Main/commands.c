@@ -80,7 +80,7 @@ void reset_command(TC_spl *command)
 	memset((void*)command, 0, SIZE_OF_COMMAND);
 }
 
-//todo: change name to more sugnifficent
+//todo: change name to more significant
 int init_command()
 {
 	if (xCTE != NULL)
@@ -185,7 +185,7 @@ void act_upon_command(TC_spl decode)
 		AUC_EPS(decode);
 		break;
 	case (TC_ADCS_T):
-		AdcsCmdQueueAdd(&decode); // TODO: save ACK
+		AdcsCmdQueueAdd(&decode);
 		break;
 	case (SOFTWARE_T):
 		AUC_SW(decode);
@@ -195,9 +195,6 @@ void act_upon_command(TC_spl decode)
 		break;
 	case (TC_ONLINE_TM_T):
 		AUC_onlineTM(decode);
-		break;
-	default:
-		printf("wrong type: %d\n", decode.type);
 		break;
 	}
 }
@@ -286,6 +283,7 @@ void AUC_general(TC_spl decode)
 		cmd_reset_TLM_SD(&type, &err);
 		break;
 	case (REDEPLOY):
+		cmd_deploy_ants(&type, &err, decode);
 		break;
 	case (ARM_DISARM):
 		cmd_ARM_DIARM(&type, &err, decode);
@@ -526,8 +524,6 @@ void AUC_CUF(TC_spl decode)
 	Ack_type type;
 	ERR_type err;
 
-	f_managed_enterFS();
-
 	switch (decode.subType)
 	{
 	case CUF_HEADER_ST:
@@ -564,8 +560,6 @@ void AUC_CUF(TC_spl decode)
 		cmd_error(&type, &err);
 		break;
 	}
-
-	f_managed_releaseFS();
 
 	//Builds ACK
 #ifndef NOT_USE_ACK_HK

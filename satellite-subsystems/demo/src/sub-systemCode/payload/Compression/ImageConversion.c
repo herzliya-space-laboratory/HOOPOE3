@@ -125,7 +125,6 @@ ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor)
 		return DataBaseNotInSD;
 
 	int err = GomEpsResetWDT(0);
-	printf("err DB eps: %d\n", err);
 
 	updateFileTypes(&image_metadata, image_address, jpg, TRUE);
 

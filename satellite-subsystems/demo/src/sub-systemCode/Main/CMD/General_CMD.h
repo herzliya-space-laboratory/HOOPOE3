@@ -41,7 +41,7 @@ void cmd_upload_time(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_ARM_DIARM(Ack_type* type, ERR_type* err, TC_spl cmd);
 
-void cmd_deploy_ants(Ack_type* type, ERR_type* err);
+void cmd_deploy_ants(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 void cmd_get_onlineTM(Ack_type* type, ERR_type* err, TC_spl cmd);
 

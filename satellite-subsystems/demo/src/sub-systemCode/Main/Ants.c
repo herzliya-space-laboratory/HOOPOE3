@@ -110,11 +110,12 @@ int deploye_ants(ISISantsSide side)
 
 	if (error != 0)
 	{
-		printf("error in Arm sequence: %d\n", error);
+		//printf("error in Arm sequence: %d\n", error);
 		return error;
 	}
 
-	//error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
+	WriteTransponderLog(ANTS_DEPLOY, 0);
+	error = IsisAntS_autoDeployment(0, side, DEFFULT_DEPLOY_TIME);
 	if (error)
 		WriteErrorLog((log_errors)LOG_ERR_DEPLOY_ANTS, SYSTEM_ANTS, error);
 	check_int("IsisAntS_autoDeployment, side A", error);
@@ -150,7 +151,7 @@ int checkDeployAttempt(int attemptNumber)
 	if (time < attempt.timeToDeploy)
 		return -2;// there is time for the deploy
 
-	printf("\n\n\n       deploy ants!!!!!!!\n\n\n");
+	//printf("\n\n\n       deploy ants!!!!!!!\n\n\n");
 	deploye_ants(nextDeploy);
 	attempt.isAtemptDone = ATTEMPT_DONE;
 	i_error = FRAM_write_exte((byte*)&attempt, addres, SIZE_DEPLOY_ATTEMPT_UNION);
