@@ -108,7 +108,7 @@ void CameraManagerTaskMain()
 
 			if (!automatic_image_handler_disabled_permanently)
 			{
-				if ( !(numberOfPicturesLeftToBeTaken > 0 && ((lastPicture_time + timeBetweenPictures) - timeNow )> 3*60) )
+				if ( !(numberOfPicturesLeftToBeTaken > 0 && ((lastPicture_time + timeBetweenPictures) - timeNow ) < 3*60) )
 				{
 					resumeAction();
 				}
@@ -276,22 +276,21 @@ void Take_pictures_with_time_in_between()
 
 		if (get_system_state(cam_operational_param))
 		{
-			for (int i = 0; i < 3; i++)
-			{
-				stopAction();
-				vTaskDelay(100);
-				if ( get_automatic_image_handling_task_suspension_flag() == TRUE)
-					break;
-			}
+			stopAction();
 
-			Time_getUnixEpoch(&turnedOnCamera);
-			TurnOnGecko();
-
-			ImageDataBaseResult error = takePicture(imageDataBase, FALSE_8BIT);
-			if (error != DataBaseSuccess)
+			if ( get_automatic_image_handling_task_suspension_flag() == TRUE)
 			{
-				printf("\n\n-E- Camera - time intervals, Error (%u)\n\n", error);
-				WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
+				updateGeneralDataBaseParameters(imageDataBase);
+
+				Time_getUnixEpoch(&turnedOnCamera);
+				TurnOnGecko();
+
+				ImageDataBaseResult error = takePicture(imageDataBase, FALSE_8BIT);
+				if (error != DataBaseSuccess)
+				{
+					printf("\n\n-E- Camera - time intervals, Error (%u)\n\n", error);
+					WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
+				}
 			}
 		}
 
@@ -302,8 +301,9 @@ void Take_pictures_with_time_in_between()
 void act_upon_request(Camera_Request request)
 {
 	ImageDataBaseResult error = DataBaseSuccess;
-
 	Boolean CouldNotExecute = FALSE;
+
+	updateGeneralDataBaseParameters(imageDataBase);
 
 	switch (request.id)
 	{
@@ -392,7 +392,8 @@ void act_upon_request(Camera_Request request)
 	case reset_DataBase:
 		stopAction();
 		error = resetImageDataBase(imageDataBase);
-		resumeAction();
+		if (!get_automatic_image_handling_task_suspension_flag())
+			resumeAction();
 		break;
 
 	case image_Dump_chunkField:
