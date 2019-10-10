@@ -82,10 +82,11 @@ void set_automatic_image_handling_ready_for_long_term_stop(Boolean param)
 void create_xAutomaticImageHandling_taskHandle()
 {
 	vSemaphoreCreateBinary(xAutomaticImageHandling_taskHandle);
+	automaticImageHandling_taskHandle = NULL;
 }
 void suspendAutomaticImageHandlingTask()
 {
-	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE)
+	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
 	{
 		vTaskSuspend(automaticImageHandling_taskHandle);
 		set_automatic_image_handling_task_suspension_flag(TRUE);
@@ -95,7 +96,7 @@ void suspendAutomaticImageHandlingTask()
 }
 void resumeAutomaticImageHandlingTask()
 {
-	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE)
+	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
 	{
 		vTaskResume(automaticImageHandling_taskHandle);
 		// Note: The Task Itself sets "automatic_image_handling_task_suspension_flag" back to "FALSE".
@@ -103,11 +104,27 @@ void resumeAutomaticImageHandlingTask()
 		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
 	}
 }
+Boolean checkIfInAutomaticImageHandlingTask()
+{
+	Boolean ret = FALSE;
+	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
+	{
+		xTaskHandle current_task_handle = xTaskGetCurrentTaskHandle();
+		if (current_task_handle == automaticImageHandling_taskHandle)
+			ret = TRUE;
+		else
+			ret = FALSE;
+
+		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
+	}
+
+	return ret;
+}
 
 int resumeAction()
 {
 	Boolean state = get_automatic_image_handling_task_suspension_flag();
-	if (state == FALSE)
+	if (state == TRUE)
 	{
 		resumeAutomaticImageHandlingTask();
 	}
@@ -116,7 +133,7 @@ int resumeAction()
 int stopAction()
 {
 	Boolean state = get_automatic_image_handling_task_suspension_flag();
-	if (state == TRUE)
+	if (state == FALSE)
 	{
 		suspendAutomaticImageHandlingTask();
 		TurnOffGecko();
@@ -165,6 +182,8 @@ void initAutomaticImageHandlerTask()
 	create_xAutomaticImageHandlingTaskSuspensionFlag();
 	create_xAutomaticImageHandlingReadyForLongTermStop();
 	create_xAutomaticImageHandling_taskHandle();
+
+	create_xGeckoStateSemaphore();
 }
 
 void KickStartAutomaticImageHandlerTask()

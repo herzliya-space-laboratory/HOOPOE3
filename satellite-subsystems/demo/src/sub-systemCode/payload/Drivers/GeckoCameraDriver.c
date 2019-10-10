@@ -41,7 +41,7 @@
 #define	totalPageCount 136
 #define totalFlashCount 4096
 
-#define READ_DELAY_INDEXES 1000
+#define READ_DELAY_INDEXES 10000
 
 #define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
 #define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
@@ -385,23 +385,35 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 
 int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 {
+	Boolean isAuto = checkIfInAutomaticImageHandlingTask();
+
 	int result, i = 0;
 	result = GomEpsResetWDT(0);
 
 	// Init Flash:
 	do
 	{
+		if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+			return -10;
+
 		result = GECKO_GetFlashInitDone();
 
 		if (i == 120)	// timeout at 2 minutes
 			return -1;
-		vTaskDelay(500);
 		i++;
+
+		vTaskDelay(500);
 	} while(result == 0);
+
+	if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+		return -10;
 
 	// Setting image ID:
 	result = GECKO_SetImageID(imageID);
 	Result( result, -2);
+
+	if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+		return -10;
 
 	// Starting Readout:
 	result = GECKO_StartReadout();
@@ -411,14 +423,16 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 	// Checking if the data is ready to be read:
 	do
 	{
-		result = GECKO_GetReadReady();
+		if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+			return -10;
 
-		printf("not finish in: GECKO_GetReadReady = %d\n" , result);
+		result = GECKO_GetReadReady();
 
 		if (i == 120)	// timeout at 2 minutes
 			return -1;
-		vTaskDelay(500);
 		i++;
+
+		vTaskDelay(500);
 	} while(result == 0);
 
 	vTaskDelay(1000);
@@ -433,7 +447,7 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
 			vTaskDelay(SYSTEM_DEALY);
 
-			if (get_automatic_image_handling_task_suspension_flag() == TRUE)
+			if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
 				return -10;
 		}
 	}

@@ -23,4 +23,6 @@ void set_automatic_image_handling_ready_for_long_term_stop(Boolean param);
 int stopAction();
 int resumeAction();
 
+Boolean checkIfInAutomaticImageHandlingTask();
+
 #endif /* IMAGEAUTOMATICHANDLER_H_ */

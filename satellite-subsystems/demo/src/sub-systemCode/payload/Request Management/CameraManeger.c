@@ -105,7 +105,14 @@ void CameraManagerTaskMain()
 			TurnOffGecko();
 			turnedOnCamera = 0;
 			vTaskDelay(100);
-			resumeAction();
+
+			if (!automatic_image_handler_disabled_permanently)
+			{
+				if ( !(numberOfPicturesLeftToBeTaken > 0 && ((lastPicture_time + timeBetweenPictures) - timeNow )> 3*60) )
+				{
+					resumeAction();
+				}
+			}
 		}
 
 		// Handle case where EPS shut down automatic image handler:
@@ -221,8 +228,6 @@ int KickStartCamera(void)
 	if (interfaceQueue == NULL)
 		return -1;
 
-	stopAction();
-
 	xTaskCreate(CameraManagerTaskMain, (const signed char*)CameraManagmentTask_Name, CameraManagmentTask_StackDepth, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 
 	return 0;
@@ -271,8 +276,13 @@ void Take_pictures_with_time_in_between()
 
 		if (get_system_state(cam_operational_param))
 		{
-			stopAction();
-			vTaskDelay(50);
+			for (int i = 0; i < 3; i++)
+			{
+				stopAction();
+				vTaskDelay(100);
+				if ( get_automatic_image_handling_task_suspension_flag() == TRUE)
+					break;
+			}
 
 			Time_getUnixEpoch(&turnedOnCamera);
 			TurnOnGecko();
@@ -280,6 +290,7 @@ void Take_pictures_with_time_in_between()
 			ImageDataBaseResult error = takePicture(imageDataBase, FALSE_8BIT);
 			if (error != DataBaseSuccess)
 			{
+				printf("\n\n-E- Camera - time intervals, Error (%u)\n\n", error);
 				WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
 			}
 		}
@@ -432,25 +443,29 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case turn_off_AutoThumbnailCreation:
-		automatic_image_handler_disabled_permanently = FALSE;
+		automatic_image_handler_disabled_permanently = TRUE;
 		setGeckoParametersInFRAM();
 
 		CouldNotExecute = TRUE;
-		for (int i = 0; i < 3; i++)
+		if (get_automatic_image_handling_ready_for_long_term_stop() == TRUE)
 		{
-			if (get_automatic_image_handling_ready_for_long_term_stop() == TRUE)
-			{
-				stopAction();
-				CouldNotExecute = FALSE;
-				break;
-			}
-			vTaskDelay(10);
+			stopAction();
+			CouldNotExecute = FALSE;
+			printf("\n\n\nWe did it boiz!\n\n\n");
+			break;
 		}
+		vTaskDelay(100);
 
 		setAutoThumbnailCreation(imageDataBase, FALSE_8BIT);
+
+		if (CouldNotExecute)
+		{
+			addRequestToQueue(request);
+		}
+
 		break;
 	case turn_on_AutoThumbnailCreation:
-		automatic_image_handler_disabled_permanently = TRUE;
+		automatic_image_handler_disabled_permanently = FALSE;
 		setGeckoParametersInFRAM();
 
 		resumeAction();
@@ -471,6 +486,7 @@ void act_upon_request(Camera_Request request)
 
 		if (error != DataBaseSuccess)
 		{
+			printf("\n\n-E- Camera Command (%u), Error (%u)\n\n", request.id, error);
 			WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 		}
 	}
