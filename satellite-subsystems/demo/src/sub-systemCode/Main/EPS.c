@@ -49,7 +49,7 @@ EPS_enter_mode_t enterMode[NUM_BATTERY_MODE];
 
 #define DEFULT_VALUES_VOL_TABLE	{ {6700, 7000, 7400}, {7500, 7100, 6800}}
 
-static void get_FRAMVoltageTable(voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2]);
+static Boolean get_FRAMVoltageTable(voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2]);
 
 voltage_t round_vol(voltage_t vol)
 {
@@ -266,11 +266,8 @@ void writeState_log(EPS_mode_t mode, voltage_t vol)
 	}
 }
 
-void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
+static void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt, voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
 {
-	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
-	get_FRAMVoltageTable(voltage_table);
-
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
 	{
 		if (current_VBatt < voltage_table[0][i])
@@ -285,12 +282,8 @@ void battery_downward(voltage_t current_VBatt, voltage_t previuosVBatt)
 	}
 }
 
-void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
+static void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt, voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
 {
-	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
-	get_FRAMVoltageTable(voltage_table);
-
-
 	for (int i = 0; i < EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2; i++)
 	{
 		if (current_VBatt > voltage_table[1][i])
@@ -305,11 +298,8 @@ void battery_upward(voltage_t current_VBatt, voltage_t previuosVBatt)
 	}
 }
 
-void sanityCheck_EPS(voltage_t current_VBatt)
+static void sanityCheck_EPS(voltage_t current_VBatt, voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
 {
-	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
-	get_FRAMVoltageTable(voltage_table);
-
 	Boolean check = FALSE;
 	if (batteryLastMode == full_mode)
 	{
@@ -348,15 +338,14 @@ void sanityCheck_EPS(voltage_t current_VBatt)
 		{
 			if (current_VBatt < voltage_table[0][i])
 			{
-				enterMode[i].fun(&switches_states, &batteryLastMode);
-				update_powerLines(switches_states);
+				batteryLastMode = i;
 				changeMode = TRUE;
 			}
 		}
 
 		if (!changeMode)
 		{
-			enterMode[NUM_BATTERY_MODE - 1].fun(&switches_states, &batteryLastMode);
+			batteryLastMode = NUM_BATTERY_MODE - 1;
 			update_powerLines(switches_states);
 		}
 	}
@@ -417,23 +406,26 @@ void EPS_Conditioning()
 	voltage_t current_VBatt = round_vol(eps_tlm.fields.vbatt);
 	voltage_t VBatt_filtered = (voltage_t)((float)current_VBatt * alpha + (1 - alpha) * (float)VBatt_previous);
 
-	//printf("\nsystem Vbatt: %u,\nfiltered Vbatt: %u \npreviuos Vbatt: %u\n", eps_tlm.fields.vbatt, VBatt_filtered, VBatt_previous);
-	//printf("last state: %d, channels state-> 3v3_0:%d 5v_0:%d\n\n", batteryLastMode, eps_tlm.fields.output[0], eps_tlm.fields.output[3]);
+	voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
+	Boolean ret = get_FRAMVoltageTable(voltage_table);
+	if (!ret)
+		return;
 
 	if (VBatt_filtered < VBatt_previous)
 	{
-		battery_downward(VBatt_filtered, VBatt_previous);
+		battery_downward(VBatt_filtered, VBatt_previous, voltage_table);
 	}
 	else if (VBatt_filtered > VBatt_previous)
 	{
-		battery_upward(VBatt_filtered, VBatt_previous);
+		battery_upward(VBatt_filtered, VBatt_previous, voltage_table);
 	}
 
-	sanityCheck_EPS(VBatt_filtered);
+	sanityCheck_EPS(VBatt_filtered, voltage_table);
 
 	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
 	set_EPSState((uint8_t)batteryLastMode);
 	update_powerLines(switches_states);
+
 	VBatt_previous = VBatt_filtered;
 }
 
@@ -523,7 +515,7 @@ void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mod
 }
 
 
-static void get_FRAMVoltageTable(voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
+static Boolean get_FRAMVoltageTable(voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2])
 {
 	int i_error = FRAM_read_exte((byte*)voltage_table, EPS_VOLTAGES_ADDR, EPS_VOLTAGES_SIZE_RAW);
 	if (i_error)
@@ -533,7 +525,10 @@ static void get_FRAMVoltageTable(voltage_t voltage_table[2][EPS_VOLTAGE_TABLE_NU
 	{
 		voltage_t temp[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 		memcpy(voltage_table, temp, EPS_VOLTAGES_SIZE_RAW);
+		return FALSE;
 	}
+
+	return TRUE;
 }
 //Write gom_eps_k_t
 void WriteCurrentTelemetry(gom_eps_hk_t telemetry)

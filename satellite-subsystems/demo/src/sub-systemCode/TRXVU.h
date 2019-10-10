@@ -87,6 +87,11 @@ typedef struct isisRXtlm {
 	float rx_rssi; ///< Rx Telemetry rssi measurement.
 } isisRXtlm;
 
+typedef enum{
+	useRegularSend = 0,
+	useAltSend = 13,
+}altSend_dumpParam;
+
 xQueueHandle xDumpQueue;
 xQueueHandle xTransponderQueue;//
 xTaskHandle xDumpHandle;//task handle for dump task

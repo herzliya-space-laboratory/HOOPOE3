@@ -45,16 +45,16 @@ void cmd_generic_I2C(Ack_type* type, ERR_type* err, TC_spl cmd)
 }
 void cmd_dump(TC_spl cmd)
 {
-	if (cmd.length != 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1)
+	if (cmd.length != 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1 + 1)
 	{
 		return;
 	}
 	//1. build combine data with command_id
-	unsigned char raw[2 * TIME_SIZE + NUM_FILES_IN_DUMP + 4 + 1] = {0};
+	unsigned char raw[2 * TIME_SIZE + NUM_FILES_IN_DUMP + 4 + 1 + 1] = {0};
 	// 1.1. copying command id
 	BigEnE_uInt_to_raw(cmd.id, &raw[0]);
 	// 1.2. copying command data
-	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1);
+	memcpy(raw + 4, cmd.data, 2 * TIME_SIZE + NUM_FILES_IN_DUMP + 1 + 1);
 	create_task(Dump_task, (const signed char * const)"Dump_Task", (unsigned short)(STACK_DUMP_SIZE), (void*)raw, (unsigned portBASE_TYPE)(TASK_DEFAULT_PRIORITIES), xDumpHandle);
 }
 void cmd_delete_TM(Ack_type* type, ERR_type* err, TC_spl cmd)
