@@ -343,6 +343,13 @@ ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], ui
 	return 0;
 }
 
+static void exitImageDumpTask()
+{
+	if (!get_automatic_image_handling_task_suspension_flag())
+		resumeAction();
+	vTaskDelete(NULL);
+}
+
 void imageDump_task(void* param)
 {
 	Camera_Request request;
@@ -352,7 +359,7 @@ void imageDump_task(void* param)
 	{
 		//	exit dump task and saves ACK
 		save_ACK(ACK_TASK, ERR_ALLREADY_EXIST, request.cmd_id);
-		vTaskDelete(NULL);
+		exitImageDumpTask();
 	}
 	else
 	{
@@ -369,8 +376,9 @@ void imageDump_task(void* param)
 	if (error != DataBaseSuccess)
 	{
 		WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
+		set_system_state(dump_param, SWITCH_OFF);
 		f_managed_releaseFS();
-		vTaskDelete(NULL);
+		exitImageDumpTask();
 	}
 
 	memset(chunk, 0, MAX_CHUNK_SIZE);
@@ -417,13 +425,12 @@ void imageDump_task(void* param)
 		time_unix endTime;
 		memcpy(&endTime, request.data + 4, sizeof(time_unix));
 
-		byte DataBaseBuffer[getDataBaseSize()];
 		uint32_t database_size = 0;
-		error = getImageDataBaseBuffer(startingTime, endTime, DataBaseBuffer, &database_size);
+		error = getImageDataBaseBuffer(startingTime, endTime, imageBuffer, &database_size);
 
 		if(error == DataBaseSuccess)
 		{
-			error = imageDataBase_Dump(request, DataBaseBuffer, database_size);
+			error = imageDataBase_Dump(request, imageBuffer, database_size);
 		}
 		else
 		{
@@ -447,7 +454,7 @@ void imageDump_task(void* param)
 
 	set_system_state(dump_param, SWITCH_OFF);
 	f_managed_releaseFS();
-	vTaskDelete(NULL);
+	exitImageDumpTask();
 }
 
 void KickStartImageDumpTask(void* request)
