@@ -24,42 +24,121 @@
 #define AutomaticImageHandlerTask_Name ("Automatic Image Handling Task")
 #define AutomaticImageHandlerTask_StackDepth 8192
 
-Boolean automatic_image_handling_state;
-xSemaphoreHandle xAIHS;
+xTaskHandle automaticImageHandling_taskHandle;
+xSemaphoreHandle xAutomaticImageHandling_taskHandle;
 
-void create_xAIHS()
+Boolean automatic_image_handling_ready_for_long_term_stop;
+xSemaphoreHandle xAutomaticImageHandlingReadyForLongTermStop;
+
+Boolean automatic_image_handling_task_suspension_flag;
+xSemaphoreHandle xAutomaticImageHandlingTaskSuspensionFlag;
+
+void create_xAutomaticImageHandlingTaskSuspensionFlag()
 {
-	vSemaphoreCreateBinary(xAIHS);
+	vSemaphoreCreateBinary(xAutomaticImageHandlingTaskSuspensionFlag);
 }
-Boolean get_automatic_image_handling_state()
+Boolean get_automatic_image_handling_task_suspension_flag()
 {
 	Boolean ret = FALSE;
-	if (xSemaphoreTake_extended(xAIHS, 1000) == pdTRUE)
+	if (xSemaphoreTake_extended(xAutomaticImageHandlingTaskSuspensionFlag, 1000) == pdTRUE)
 	{
-		ret = automatic_image_handling_state;
-		xSemaphoreGive_extended(xAIHS);
+		ret = automatic_image_handling_task_suspension_flag;
+		xSemaphoreGive_extended(xAutomaticImageHandlingTaskSuspensionFlag);
 	}
 	return ret;
 }
-void set_get_automatic_image_handling_state(Boolean param)
+void set_automatic_image_handling_task_suspension_flag(Boolean param)
 {
-	if (xSemaphoreTake_extended(xAIHS, 1000) == pdTRUE)
+	if (xSemaphoreTake_extended(xAutomaticImageHandlingTaskSuspensionFlag, 1000) == pdTRUE)
 	{
-		automatic_image_handling_state = param;
-		xSemaphoreGive_extended(xAIHS);
+		automatic_image_handling_task_suspension_flag = param;
+		xSemaphoreGive_extended(xAutomaticImageHandlingTaskSuspensionFlag);
 	}
+}
+
+void create_xAutomaticImageHandlingReadyForLongTermStop()
+{
+	vSemaphoreCreateBinary(xAutomaticImageHandlingReadyForLongTermStop);
+}
+Boolean get_automatic_image_handling_ready_for_long_term_stop()
+{
+	Boolean ret = FALSE;
+	if (xSemaphoreTake_extended(xAutomaticImageHandlingReadyForLongTermStop, 1000) == pdTRUE)
+	{
+		ret = automatic_image_handling_ready_for_long_term_stop;
+		xSemaphoreGive_extended(xAutomaticImageHandlingReadyForLongTermStop);
+	}
+	return ret;
+}
+void set_automatic_image_handling_ready_for_long_term_stop(Boolean param)
+{
+	if (xSemaphoreTake_extended(xAutomaticImageHandlingReadyForLongTermStop, 1000) == pdTRUE)
+	{
+		automatic_image_handling_ready_for_long_term_stop = param;
+		xSemaphoreGive_extended(xAutomaticImageHandlingReadyForLongTermStop);
+	}
+}
+
+void create_xAutomaticImageHandling_taskHandle()
+{
+	vSemaphoreCreateBinary(xAutomaticImageHandling_taskHandle);
+	automaticImageHandling_taskHandle = NULL;
+}
+void suspendAutomaticImageHandlingTask()
+{
+	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
+	{
+		vTaskSuspend(automaticImageHandling_taskHandle);
+		set_automatic_image_handling_task_suspension_flag(TRUE);
+
+		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
+	}
+}
+void resumeAutomaticImageHandlingTask()
+{
+	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
+	{
+		vTaskResume(automaticImageHandling_taskHandle);
+		// Note: The Task Itself sets "automatic_image_handling_task_suspension_flag" back to "FALSE".
+
+		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
+	}
+}
+Boolean checkIfInAutomaticImageHandlingTask()
+{
+	Boolean ret = FALSE;
+	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
+	{
+		xTaskHandle current_task_handle = xTaskGetCurrentTaskHandle();
+		if (current_task_handle == automaticImageHandling_taskHandle)
+			ret = TRUE;
+		else
+			ret = FALSE;
+
+		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
+	}
+
+	return ret;
 }
 
 int resumeAction()
 {
-	set_get_automatic_image_handling_state(TRUE);
+	Boolean state = get_automatic_image_handling_task_suspension_flag();
+	if (state == TRUE)
+	{
+		resumeAutomaticImageHandlingTask();
+	}
 	return 0;
 }
 int stopAction()
 {
-	TurnOffGecko();
-	vTaskDelay(10);
-	set_get_automatic_image_handling_state(FALSE);
+	Boolean state = get_automatic_image_handling_task_suspension_flag();
+	if (state == FALSE)
+	{
+		suspendAutomaticImageHandlingTask();
+		TurnOffGecko();
+	}
+	vTaskDelay(100);
 	return 0;
 }
 
@@ -70,9 +149,12 @@ void AutomaticImageHandlerTaskMain()
 
 	while(TRUE)
 	{
+		set_automatic_image_handling_ready_for_long_term_stop(FALSE);
+		set_automatic_image_handling_task_suspension_flag(FALSE);
+
 		error = 0;
 
-		if ( get_system_state(cam_operational_param) && get_automatic_image_handling_state() )
+		if ( get_system_state(cam_operational_param) )
 		{
 			error = handleMarkedPictures();
 		}
@@ -90,12 +172,27 @@ void AutomaticImageHandlerTaskMain()
 				WriteErrorLog(error, SYSTEM_PAYLOAD_AUTO_HANDLING, (uint32_t)image_metadata.cameraId);
 		}
 
-		vTaskDelay(SYSTEM_DEALY);
+		set_automatic_image_handling_ready_for_long_term_stop(TRUE);
+		vTaskDelay(1000);
 	}
+}
+
+void initAutomaticImageHandlerTask()
+{
+	create_xAutomaticImageHandlingTaskSuspensionFlag();
+	create_xAutomaticImageHandlingReadyForLongTermStop();
+	create_xAutomaticImageHandling_taskHandle();
+
+	create_xGeckoStateSemaphore();
 }
 
 void KickStartAutomaticImageHandlerTask()
 {
-	xTaskCreate(AutomaticImageHandlerTaskMain, (const signed char*)AutomaticImageHandlerTask_Name, AutomaticImageHandlerTask_StackDepth, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
-	vTaskDelay(SYSTEM_DEALY);
+	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE)
+	{
+		xTaskCreate(AutomaticImageHandlerTaskMain, (const signed char*)AutomaticImageHandlerTask_Name, AutomaticImageHandlerTask_StackDepth, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, &automaticImageHandling_taskHandle);
+		vTaskDelay(SYSTEM_DEALY);
+
+		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
+	}
 }

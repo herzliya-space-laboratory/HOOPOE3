@@ -437,7 +437,7 @@ void imageDump_task(void* param)
 		time_unix endTime;
 		memcpy(&endTime, request.data + 4, sizeof(time_unix));
 		fileType compressionType = 0;
-		memcpy(&endTime, request.data + 8, sizeof(byte));
+		memcpy(&compressionType, request.data + 8, sizeof(byte));
 
 		error = fileTypeDump(request, startingTime, endTime, compressionType);
 	}

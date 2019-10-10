@@ -121,14 +121,6 @@ int gecko_power_mux_get(Boolean mux0, Boolean mux1)
 		return -1;
 	}
 
-	printf("ADC Samples: ");
-	for (int i = 0; i < 8; i++)
-	{
-		//adcSamples[i] = ADC_ConvertRaw10bitToMillivolt(adcSamples[i]);
-		printf("%u, ", adcSamples[i]);
-	}
-	printf("\n\n");
-
 	return adcSamples[6];
 }
 
@@ -253,20 +245,27 @@ Boolean getPIOs()
 {
 	Pin gpio4 = PIN_GPIO05;
 	Pin gpio5 = PIN_GPIO07;
+	Pin gpio12 = PIN_GPIO12;
 	Pin gpio6 = PIN_GPIO06_INPUT;
 	Pin gpio7 = PIN_GPIO07_INPUT;
-	Pin gpio12 = PIN_GPIO12;
+	/*
+	 * Pin gpio6 = PIN_GPIO06_INPUT;
+	 * Pin gpio7 = PIN_GPIO07_INPUT;
+	 *
+	 * GPIO 6 and 7 won't be checked since they will always return 1 when calling "PIO_Get"
+	 * for them.
+	 */
 
-	char output[5];
+	char output[3];
 	char outputSum = 00;
 
 	output[0] = PIO_Get(&gpio4);
 	output[1] = PIO_Get(&gpio5);
-	output[2] = PIO_Get(&gpio6);
-	output[3] = PIO_Get(&gpio7);
-	output[4] = PIO_Get(&gpio12);
+	PIO_Get(&gpio6);
+	PIO_Get(&gpio7);
+	output[3] = PIO_Get(&gpio12);
 
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 3; i++)
 		outputSum |= output[i];
 	if (outputSum)
 		return TRUE;
@@ -386,23 +385,35 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 
 int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 {
+	Boolean isAuto = checkIfInAutomaticImageHandlingTask();
+
 	int result, i = 0;
 	result = GomEpsResetWDT(0);
 
 	// Init Flash:
 	do
 	{
+		if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+			return -10;
+
 		result = GECKO_GetFlashInitDone();
 
 		if (i == 120)	// timeout at 2 minutes
 			return -1;
-		vTaskDelay(500);
 		i++;
+
+		vTaskDelay(500);
 	} while(result == 0);
+
+	if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+		return -10;
 
 	// Setting image ID:
 	result = GECKO_SetImageID(imageID);
 	Result( result, -2);
+
+	if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+		return -10;
 
 	// Starting Readout:
 	result = GECKO_StartReadout();
@@ -412,14 +423,16 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 	// Checking if the data is ready to be read:
 	do
 	{
-		result = GECKO_GetReadReady();
+		if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+			return -10;
 
-		printf("not finish in: GECKO_GetReadReady = %d\n" , result);
+		result = GECKO_GetReadReady();
 
 		if (i == 120)	// timeout at 2 minutes
 			return -1;
-		vTaskDelay(500);
 		i++;
+
+		vTaskDelay(500);
 	} while(result == 0);
 
 	vTaskDelay(1000);
@@ -432,8 +445,10 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 		if(i % READ_DELAY_INDEXES == 0)
 		{
 			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
-
 			vTaskDelay(SYSTEM_DEALY);
+
+			if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+				return -10;
 		}
 	}
 

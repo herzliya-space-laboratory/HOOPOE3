@@ -132,8 +132,6 @@ Boolean updateCam_powerLines()
 {
 	if (get_system_state(cam_operational_param) == SWITCH_OFF && getPIOs())
 		stopAction();
-	else if (get_system_state(cam_operational_param) == SWITCH_ON)
-		resumeAction();
 
 	return TRUE;
 }

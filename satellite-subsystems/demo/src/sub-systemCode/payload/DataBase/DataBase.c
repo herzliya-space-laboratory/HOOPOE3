@@ -51,10 +51,10 @@ struct __attribute__ ((__packed__)) ImageDataBase_t
 	CameraPhotographyValues cameraParameters;
 	Boolean8bit AutoThumbnailCreation;
 };
-#define SIZEOF_IMAGE_DATABASE sizeof(struct ImageDataBase_t)
+#define SIZEOF_IMAGE_DATABASE ( sizeof(struct ImageDataBase_t) )
 
-#define DATABASE_FRAM_START (DATABASEFRAMADDRESS + SIZEOF_IMAGE_DATABASE)	///< The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
-#define DATABASE_FRAM_END (DATABASE_FRAM_START + MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata))	///< The ImageDataBases ending address in the FRAM
+#define DATABASE_FRAM_START ( DATABASEFRAMADDRESS + SIZEOF_IMAGE_DATABASE )	///< The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
+#define DATABASE_FRAM_END ( ( DATABASE_FRAM_START ) + ( MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata) ) )	///< The ImageDataBases ending address in the FRAM
 
 #define DATABASE_FRAM_SIZE (DATABASE_FRAM_END - DATABASEFRAMADDRESS)
 
@@ -241,7 +241,7 @@ ImageDataBaseResult SearchDataBase_forImageFileType_byTimeRange(time_unix lower_
 	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
 	{
 		error = SearchDataBase_byTimeRange(lower_barrier, higher_barrier, &current_image_metadata, &current_image_address, database_current_address);
-		database_current_address = current_image_address += sizeof(ImageMetadata);
+		database_current_address = current_image_address + sizeof(ImageMetadata);
 
 		if (error == DataBaseSuccess)
 		{
@@ -901,7 +901,7 @@ void setAutoThumbnailCreation(ImageDataBase database, Boolean8bit new_AutoThumbn
 void Gecko_TroubleShooter(ImageDataBaseResult error)
 {
 	Boolean should_reset_take = error > GECKO_Take_Success && error < GECKO_Read_Success;
-	Boolean should_reset_read = error > GECKO_Read_Success && error < GECKO_Erase_Success;
+	Boolean should_reset_read = error > GECKO_Read_Success && error < GECKO_Erase_Success && error != GECKO_Read_StoppedAsPerRequest;
 	Boolean should_reset_erase = error > GECKO_Erase_Success && error <= GECKO_Erase_Error_ClearEraseDoneFlag;
 
 	Boolean should_reset = should_reset_take || should_reset_read || should_reset_erase;
