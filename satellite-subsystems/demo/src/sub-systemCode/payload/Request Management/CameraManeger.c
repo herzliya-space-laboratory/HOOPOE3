@@ -126,7 +126,7 @@ void CameraManagerTaskMain()
 
 		Take_pictures_with_time_in_between();
 
-		vTaskDelay(SYSTEM_DEALY);
+		vTaskDelay(1000);
 	}
 }
 
@@ -453,7 +453,6 @@ void act_upon_request(Camera_Request request)
 		{
 			stopAction();
 			CouldNotExecute = FALSE;
-			printf("\n\n\nWe did it boiz!\n\n\n");
 			break;
 		}
 		vTaskDelay(100);

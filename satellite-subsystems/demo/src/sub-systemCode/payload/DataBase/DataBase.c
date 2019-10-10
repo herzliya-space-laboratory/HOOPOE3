@@ -450,14 +450,14 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 	// Reading the image to the buffer:
 
 	vTaskDelay(CAMERA_DELAY);
-/*
+
 	error = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
 	if( error )
 	{
 		printf("\ntransferImageToSD Error = (%d) reading image!\n\r", error);
 		return (GECKO_Read_Success - error);
 	}
-*/
+
 	vTaskDelay(DELAY);
 
 	// Creating a file for the picture at iOBC SD:

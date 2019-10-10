@@ -26,6 +26,8 @@
 #include "../../Misc/Macros.h"
 #include "../../Misc/FileSystem.h"
 
+#include "../../Request Management/AutomaticImageHandler.h"
+
 #include "imageDump.h"
 
 #define CameraDumpTask_Name ("Camera Dump Task")
