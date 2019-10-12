@@ -378,11 +378,17 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case create_thumbnail:
+		stopAction();
 		error = CreateThumbnail(request.data);
+		if (!get_automatic_image_handling_task_suspension_flag())
+			resumeAction();
 		break;
 
 	case create_jpg:
+		stopAction();
 		error = CreateJPG(request.data);
+		if (!get_automatic_image_handling_task_suspension_flag())
+			resumeAction();
 		break;
 
 	case update_photography_values:
@@ -472,6 +478,14 @@ void act_upon_request(Camera_Request request)
 		resumeAction();
 
 		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);
+		break;
+
+	case get_gecko_registers:
+		error = SendGeckoRegisters();
+		break;
+
+	case set_gecko_registers:
+		error = GeckoSetRegister(request.data);
 		break;
 
 	default:

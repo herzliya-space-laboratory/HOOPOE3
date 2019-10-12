@@ -15,6 +15,7 @@
 #define ACK_TYPE							TM_GENERAL_T
 #define LOG_T								TM_GENERAL_T
 #define DUMP_T								173
+#define GECKO_REGISTERS_T					10
 #define IMAGE_DUMP_T						11
 #define IMAGE_DATABASE_DUMP_T				12
 #define ACK_ST								90
@@ -52,6 +53,8 @@
 #define IMAGE_DUMP_RAW_ST					104
 #define IMAGE_DUMP_JPG_ST					105
 #define IMAGE_DUMP_JPG_FIRST_CHUNK_ST		106
+
+#define GECKO_REGISTERS_ST					107
 
 //Subtypes (TC)
 //comm
@@ -107,6 +110,8 @@
 #define ON_FUTURE_AUTO_THUMB				21
 #define OFF_AUTO_THUMB						22
 #define ON_AUTO_THUMB						23
+#define GET_GECKO_REGISTER					24
+#define SET_GECKO_REGISTER					25
 
 //eps
 #define ALLOW_ADCS_ST						99

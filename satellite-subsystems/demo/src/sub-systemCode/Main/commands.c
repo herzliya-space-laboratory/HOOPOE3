@@ -401,6 +401,12 @@ void AUC_payload(TC_spl decode)
 		case (OFF_AUTO_THUMB):
 			request.id = turn_off_AutoThumbnailCreation;
 			break;
+		case (GET_GECKO_REGISTER):
+			request.id = get_gecko_registers;
+			break;
+		case (SET_GECKO_REGISTER):
+			request.id = set_gecko_registers;
+			break;
 		default:
 			cmd_error(&type, &err);
 			break;

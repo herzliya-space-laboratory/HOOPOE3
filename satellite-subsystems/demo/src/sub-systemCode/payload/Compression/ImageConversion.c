@@ -124,7 +124,7 @@ ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor)
 	else if (!fileTypes[raw].value)			// if it was not created already, check if the raw is available of the creation process
 		return DataBaseNotInSD;
 
-	int err = GomEpsResetWDT(0);
+	GomEpsResetWDT(0);
 
 	updateFileTypes(&image_metadata, image_address, jpg, TRUE);
 

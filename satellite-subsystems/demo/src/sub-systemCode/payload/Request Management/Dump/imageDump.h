@@ -40,4 +40,6 @@ void imageDump_task(void* param);
 
 void KickStartImageDumpTask(void* param);
 
+int SendGeckoRegisters();
+
 #endif /* IMAGEDUMP_H_ */

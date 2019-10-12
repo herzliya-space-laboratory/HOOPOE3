@@ -28,6 +28,8 @@
 
 #include "../../Request Management/AutomaticImageHandler.h"
 
+#include "../../Drivers/GeckoCameraDriver.h"
+
 #include "imageDump.h"
 
 #define CameraDumpTask_Name ("Camera Dump Task")
@@ -455,4 +457,32 @@ void KickStartImageDumpTask(void* request)
 {
 	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraDumpTask_StackDepth, request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 	vTaskDelay(SYSTEM_DEALY);
+}
+
+int SendGeckoRegisters()
+{
+	TM_spl packet;
+
+	packet.type = GECKO_REGISTERS_T;
+	packet.subType = GECKO_REGISTERS_ST;
+
+	packet.length = NUMBER_OF_GECKO_REGISTERTS*sizeof(uint32_t);
+	Time_getUnixEpoch(&packet.time);
+
+	int error = 0;
+	uint32_t reg_value = 0;
+
+	for (uint8_t reg_index = 0; reg_index < NUMBER_OF_GECKO_REGISTERTS; reg_index++)
+	{
+		error = GECKO_GetRegister(reg_index, &reg_value);
+		CMP_AND_RETURN(error, 0, -1);
+
+		memcpy(packet.data + (reg_index * sizeof(uint32_t)), &reg_value, sizeof(uint32_t));
+	}
+
+	int rawPacket_length = 0;
+	byte rawPacket[packet.length + SPL_TM_HEADER_SIZE];
+	encode_TMpacket(rawPacket, &rawPacket_length, packet);
+
+	return TRX_sendFrame(rawPacket, rawPacket_length);
 }

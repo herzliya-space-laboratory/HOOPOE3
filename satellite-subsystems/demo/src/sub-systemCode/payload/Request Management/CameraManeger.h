@@ -52,6 +52,8 @@ typedef enum{
 	turn_on_future_AutoThumbnailCreation,
 	turn_off_AutoThumbnailCreation,
 	turn_on_AutoThumbnailCreation,
+	get_gecko_registers,
+	set_gecko_registers,
 	number_of_request_types
 }cam_Request_id_t;
 

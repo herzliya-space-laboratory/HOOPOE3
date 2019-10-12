@@ -48,21 +48,6 @@
 
 xSemaphoreHandle xGeckoStateSemaphore;
 
-void Initialized_GPIO()
-{
-	Pin gpio12 = PIN_GPIO12;
-	PIO_Configure(&gpio12, 1);/*PIO_LISTSIZE(&gpio12));*/
-	vTaskDelay(10);
-	PIO_Set(&gpio12);
-	vTaskDelay(10);
-}
-void De_Initialized_GPIO()
-{
-	Pin Pin12 = PIN_GPIO12;
-	PIO_Clear(&Pin12);
-	vTaskDelay(10);
-}
-
 int gecko_power_mux_init()
 {
 	Pin gpio9 = PIN_GPIO09;
@@ -154,6 +139,21 @@ voltage_t gecko_get_voltage_5v()
 	voltage_t ret = (voltage_t)VOLTAGE_5V_CONVERSION (gecko_power_mux_get(TRUE, FALSE) );
 	gecko_power_mux_deinit();
 	return ret;
+}
+
+void Initialized_GPIO()
+{
+	Pin gpio12 = PIN_GPIO12;
+	PIO_Configure(&gpio12, 1);/*PIO_LISTSIZE(&gpio12));*/
+	vTaskDelay(10);
+	PIO_Set(&gpio12);
+	vTaskDelay(10);
+}
+void De_Initialized_GPIO()
+{
+	Pin Pin12 = PIN_GPIO12;
+	PIO_Clear(&Pin12);
+	vTaskDelay(10);
 }
 
 Boolean TurnOnGecko_gpio()
@@ -493,4 +493,27 @@ int GECKO_EraseBlock( uint32_t imageID )
 	Result(result_clearEraseDone, -4);
 
 	return 0;
+}
+
+int GECKO_GetRegister(uint8_t reg_index, uint32_t* reg_val)
+{
+	if ( !getPIOs() )
+		return -2;
+
+	if (reg_index > NUMBER_OF_GECKO_REGISTERTS - 1)
+		return -1;
+
+	return GECKO_GetReg(reg_index, reg_val, GECKO_Endianness_big);
+}
+int GECKO_SetRegister(uint8_t reg_index, uint32_t reg_val)
+{
+	if ( !getPIOs() )
+		return -2;
+
+	CMP_AND_RETURN(getPIOs(), TRUE, -2);
+
+	if (reg_index > NUMBER_OF_GECKO_REGISTERTS - 1)
+		return -1;
+
+	return GECKO_SetReg(reg_index, reg_val, GECKO_Endianness_big);
 }

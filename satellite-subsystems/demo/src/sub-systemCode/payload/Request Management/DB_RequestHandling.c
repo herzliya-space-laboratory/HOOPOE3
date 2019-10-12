@@ -6,9 +6,9 @@
  */
 
 #include <freertos/FreeRTOS.h>
-
 #include <string.h>
 
+#include "../Drivers/GeckoCameraDriver.h"
 #include "DB_RequestHandling.h"
 
 ImageDataBaseResult TakePicture(ImageDataBase database, unsigned char* data)
@@ -125,11 +125,22 @@ ImageDataBaseResult UpdatePhotographyValues(ImageDataBase database, unsigned cha
 }
 ImageDataBaseResult setChunkDimensions(unsigned char* data)
 {
-	uint16_t width;
-	uint16_t height;
+	uint16_t width = 0;
+	uint16_t height = 0;
 
 	memcpy(&width, data, sizeof(uint16_t));
 	memcpy(&height, data + sizeof(uint16_t), sizeof(uint16_t));
 
 	return setChunkDimensions_inFRAM(width, height);
+}
+
+int GeckoSetRegister(unsigned char* data)
+{
+	uint8_t reg_index = 0;
+	uint32_t reg_val = 0;
+
+	memcpy(&reg_index, data, sizeof(uint8_t));
+	memcpy(&reg_val, data + sizeof(uint8_t), sizeof(uint32_t));
+
+	return GECKO_SetRegister(reg_index, reg_val);
 }

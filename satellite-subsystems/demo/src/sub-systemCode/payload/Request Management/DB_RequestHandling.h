@@ -27,4 +27,6 @@ ImageDataBaseResult CreateJPG(unsigned char* data);
 ImageDataBaseResult UpdatePhotographyValues(ImageDataBase database, unsigned char data[]);
 ImageDataBaseResult setChunkDimensions(unsigned char data[]);
 
+int GeckoSetRegister(unsigned char* data);
+
 #endif /* DB_REQUESTHANDLING_H_ */
