@@ -349,7 +349,7 @@ ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], ui
 
 static void exitImageDumpTask()
 {
-	if (!get_automatic_image_handling_task_suspension_flag())
+	if (get_automatic_image_handling_task_suspension_flag())
 		resumeAction();
 	vTaskDelete(NULL);
 }
@@ -453,9 +453,9 @@ void imageDump_task(void* param)
 	exitImageDumpTask();
 }
 
-void KickStartImageDumpTask(void* request)
+void KickStartImageDumpTask(void* request, xTaskHandle* task_handle)
 {
-	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraDumpTask_StackDepth, request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
+	xTaskCreate(imageDump_task, (const signed char*)CameraDumpTask_Name, CameraDumpTask_StackDepth, request, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, task_handle);
 	vTaskDelay(SYSTEM_DEALY);
 }
 

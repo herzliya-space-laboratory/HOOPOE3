@@ -442,8 +442,6 @@ void setCameraPhotographyValues(ImageDataBase database, uint32_t frameAmount, ui
 
 ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
-
 	int error = checkForFileType(image_metadata, raw);
 	CMP_AND_RETURN(error, DataBaseNotInSD, DataBasealreadyInSD);
 
@@ -498,8 +496,6 @@ ImageDataBaseResult transferImageToSD(ImageDataBase database, imageid cameraId)
 
 ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType type, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
-
 	char fileName[FILE_NAME_SIZE];
     getFileName(cameraId, type, fileName);
 
@@ -641,6 +637,8 @@ ImageDataBaseResult handleMarkedPictures()
 			already_transferred_raw = TRUE;
 		}
 
+		FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
+
 		if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
 		{
 			DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, DEFAULT_REDUCTION_LEVEL, TRUE, image_address, image_metadata);
@@ -649,6 +647,8 @@ ImageDataBaseResult handleMarkedPictures()
 
 			vTaskDelay(DELAY);
 		}
+
+		FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
 
 		if (!already_transferred_raw)
 		{
@@ -675,7 +675,7 @@ ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_uni
 
 	imageid zero = 0;
 	ImageDataBaseResult result = SearchDataBase_byID(zero, &image_metadata, &image_address, DATABASE_FRAM_START);	// Finding space at the database(FRAM) for the image's ImageMetadata:
-	CMP_AND_RETURN(result, DataBaseSuccess, DataBaseFull);
+	CMP_AND_RETURN(result, DataBaseSuccess, result);
 
 	image_metadata.cameraId = database->nextId;
 	image_metadata.timestamp = time_image_taken;

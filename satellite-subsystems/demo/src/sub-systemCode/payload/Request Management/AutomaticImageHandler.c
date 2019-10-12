@@ -42,10 +42,10 @@ Boolean get_automatic_image_handling_task_suspension_flag()
 	Boolean ret = FALSE;
 	if (xSemaphoreTake_extended(xAutomaticImageHandlingTaskSuspensionFlag, 1000) == pdTRUE)
 	{
-		printf("-S-\tTook Cam Semaphor 3\n");
+		//printf("-S-\tTook Cam Semaphor 3\n");
 		ret = automatic_image_handling_task_suspension_flag;
 		xSemaphoreGive_extended(xAutomaticImageHandlingTaskSuspensionFlag);
-		printf("-S-\tGave Cam Semaphor 3\n");
+		//printf("-S-\tGave Cam Semaphor 3\n");
 	}
 	return ret;
 }
@@ -53,10 +53,10 @@ void set_automatic_image_handling_task_suspension_flag(Boolean param)
 {
 	if (xSemaphoreTake_extended(xAutomaticImageHandlingTaskSuspensionFlag, 1000) == pdTRUE)
 	{
-		printf("-S-\tTook Cam Semaphor 3\n");
+		//printf("-S-\tTook Cam Semaphor 3\n");
 		automatic_image_handling_task_suspension_flag = param;
 		xSemaphoreGive_extended(xAutomaticImageHandlingTaskSuspensionFlag);
-		printf("-S-\tGave Cam Semaphor 3\n");
+		//printf("-S-\tGave Cam Semaphor 3\n");
 	}
 }
 
@@ -69,10 +69,10 @@ Boolean get_automatic_image_handling_ready_for_long_term_stop()
 	Boolean ret = FALSE;
 	if (xSemaphoreTake_extended(xAutomaticImageHandlingReadyForLongTermStop, 1000) == pdTRUE)
 	{
-		printf("-S-\tTook Cam Semaphor 1\n");
+		//printf("-S-\tTook Cam Semaphor 1\n");
 		ret = automatic_image_handling_ready_for_long_term_stop;
 		xSemaphoreGive_extended(xAutomaticImageHandlingReadyForLongTermStop);
-		printf("-S-\tGave Cam Semaphor 1\n");
+		//printf("-S-\tGave Cam Semaphor 1\n");
 	}
 	return ret;
 }
@@ -80,10 +80,10 @@ void set_automatic_image_handling_ready_for_long_term_stop(Boolean param)
 {
 	if (xSemaphoreTake_extended(xAutomaticImageHandlingReadyForLongTermStop, 1000) == pdTRUE)
 	{
-		printf("-S-\tTook Cam Semaphor 1\n");
+		//printf("-S-\tTook Cam Semaphor 1\n");
 		automatic_image_handling_ready_for_long_term_stop = param;
 		xSemaphoreGive_extended(xAutomaticImageHandlingReadyForLongTermStop);
-		printf("-S-\tGave Cam Semaphor 1\n");
+		//printf("-S-\tGave Cam Semaphor 1\n");
 	}
 }
 
@@ -96,24 +96,24 @@ void suspendAutomaticImageHandlingTask()
 {
 	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
 	{
-		printf("-S-\tTook Cam Semaphor 2\n");
+		//printf("-S-\tTook Cam Semaphor 2\n");
 		vTaskSuspend(automaticImageHandling_taskHandle);
 		set_automatic_image_handling_task_suspension_flag(TRUE);
 
 		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
-		printf("-S-\tGave Cam Semaphor 2\n");
+		//printf("-S-\tGave Cam Semaphor 2\n");
 	}
 }
 void resumeAutomaticImageHandlingTask()
 {
 	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
 	{
-		printf("-S-\tTook Cam Semaphor 2\n");
+		//printf("-S-\tTook Cam Semaphor 2\n");
 		vTaskResume(automaticImageHandling_taskHandle);
 		// Note: The Task Itself sets "automatic_image_handling_task_suspension_flag" back to "FALSE".
 
 		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
-		printf("-S-\tGave Cam Semaphor 2\n");
+		//printf("-S-\tGave Cam Semaphor 2\n");
 	}
 }
 Boolean checkIfInAutomaticImageHandlingTask()
@@ -121,7 +121,7 @@ Boolean checkIfInAutomaticImageHandlingTask()
 	Boolean ret = FALSE;
 	if (xSemaphoreTake_extended(xAutomaticImageHandling_taskHandle, 1000) == pdTRUE && automaticImageHandling_taskHandle != NULL)
 	{
-		printf("-S-\tTook Cam Semaphor 2\n");
+		//printf("-S-\tTook Cam Semaphor 2\n");
 		xTaskHandle current_task_handle = xTaskGetCurrentTaskHandle();
 		if (current_task_handle == automaticImageHandling_taskHandle)
 			ret = TRUE;
@@ -129,7 +129,7 @@ Boolean checkIfInAutomaticImageHandlingTask()
 			ret = FALSE;
 
 		xSemaphoreGive_extended(xAutomaticImageHandling_taskHandle);
-		printf("-S-\tGave Cam Semaphor 2\n");
+		//printf("-S-\tGave Cam Semaphor 2\n");
 	}
 
 	return ret;
@@ -150,6 +150,7 @@ int stopAction()
 	if (state == FALSE)
 	{
 		suspendAutomaticImageHandlingTask();
+		set_automatic_image_handling_task_suspension_flag(TRUE);
 		TurnOffGecko();
 	}
 	vTaskDelay(100);

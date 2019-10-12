@@ -51,6 +51,8 @@ static time_unix cameraActivation_duration; ///< the duration the camera will st
 
 static Boolean automatic_image_handler_disabled_permanently;
 
+xTaskHandle xImageDumpTaskHandle;
+
 ImageDataBase imageDataBase;
 
 
@@ -87,7 +89,6 @@ void CameraManagerTaskMain()
 	inner_init();
 
 	Camera_Request req;
-	time_unix timeNow;
 
 	int f_error = f_managed_enterFS();//task 5 enter fs
 	check_int("CameraManagerTaskMain, enter FS", f_error);
@@ -99,28 +100,16 @@ void CameraManagerTaskMain()
 			act_upon_request(req);
 		}
 
-		Time_getUnixEpoch(&timeNow);
-		if ( timeNow > ( turnedOnCamera + cameraActivation_duration ) && turnedOnCamera != 0)
-		{
-			TurnOffGecko();
-			turnedOnCamera = 0;
-			vTaskDelay(100);
-
-			if (!automatic_image_handler_disabled_permanently)
-			{
-				if ( !(numberOfPicturesLeftToBeTaken > 0 && ((lastPicture_time + timeBetweenPictures) - timeNow ) < 3*60) )
-				{
-					resumeAction();
-				}
-			}
-		}
-
 		// Handle case where EPS shut down automatic image handler:
 		if (get_system_state(cam_operational_param) && !automatic_image_handler_disabled_permanently && turnedOnCamera == 0)
 		{
-			if (!get_automatic_image_handling_task_suspension_flag())
+			if (xImageDumpTaskHandle != NULL && eTaskGetState(xImageDumpTaskHandle) == eDeleted)
 			{
-				resumeAction();
+				if (get_automatic_image_handling_task_suspension_flag())
+				{
+					xImageDumpTaskHandle = NULL;
+					resumeAction();
+				}
 			}
 		}
 
@@ -228,6 +217,8 @@ int KickStartCamera(void)
 	if (interfaceQueue == NULL)
 		return -1;
 
+	xImageDumpTaskHandle = NULL;
+
 	xTaskCreate(CameraManagerTaskMain, (const signed char*)CameraManagmentTask_Name, CameraManagmentTask_StackDepth, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
 
 	return 0;
@@ -292,6 +283,9 @@ void Take_pictures_with_time_in_between()
 					WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
 				}
 			}
+
+			TurnOffGecko();
+			resumeAction();
 		}
 
 		numberOfPicturesLeftToBeTaken--;
@@ -380,15 +374,11 @@ void act_upon_request(Camera_Request request)
 	case create_thumbnail:
 		stopAction();
 		error = CreateThumbnail(request.data);
-		if (!get_automatic_image_handling_task_suspension_flag())
-			resumeAction();
 		break;
 
 	case create_jpg:
 		stopAction();
 		error = CreateJPG(request.data);
-		if (!get_automatic_image_handling_task_suspension_flag())
-			resumeAction();
 		break;
 
 	case update_photography_values:
@@ -398,8 +388,6 @@ void act_upon_request(Camera_Request request)
 	case reset_DataBase:
 		stopAction();
 		error = resetImageDataBase(imageDataBase);
-		if (!get_automatic_image_handling_task_suspension_flag())
-			resumeAction();
 		break;
 
 	case image_Dump_chunkField:
@@ -407,7 +395,7 @@ void act_upon_request(Camera_Request request)
 	case DataBase_Dump:
 	case fileType_Dump:
 		stopAction();
-		KickStartImageDumpTask(&request);
+		KickStartImageDumpTask(&request, &xImageDumpTaskHandle);
 		break;
 
 	case update_defult_duration:
