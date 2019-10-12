@@ -112,6 +112,7 @@
 #define ON_AUTO_THUMB						23
 #define GET_GECKO_REGISTER					24
 #define SET_GECKO_REGISTER					25
+#define RE_INIT_CAM_MANAGER					26
 
 //eps
 #define ALLOW_ADCS_ST						99

@@ -407,6 +407,9 @@ void AUC_payload(TC_spl decode)
 		case (SET_GECKO_REGISTER):
 			request.id = set_gecko_registers;
 			break;
+		case (RE_INIT_CAM_MANAGER):
+			request.id = re_init_cam_manager;
+			break;
 		default:
 			cmd_error(&type, &err);
 			break;

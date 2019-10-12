@@ -488,6 +488,12 @@ void act_upon_request(Camera_Request request)
 		error = GeckoSetRegister(request.data);
 		break;
 
+	case re_init_cam_manager:
+		resetQueue();
+		inner_init();
+		error = initCamera(TRUE);
+		break;
+
 	default:
 		return;
 		break;

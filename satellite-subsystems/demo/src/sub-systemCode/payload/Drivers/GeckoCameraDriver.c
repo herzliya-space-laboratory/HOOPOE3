@@ -510,8 +510,6 @@ int GECKO_SetRegister(uint8_t reg_index, uint32_t reg_val)
 	if ( !getPIOs() )
 		return -2;
 
-	CMP_AND_RETURN(getPIOs(), TRUE, -2);
-
 	if (reg_index > NUMBER_OF_GECKO_REGISTERTS - 1)
 		return -1;
 
