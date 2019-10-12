@@ -210,7 +210,7 @@ void dump_logic(command_id cmdID, altSend_dumpParam altSend, const time_unix sta
 	int i_error;
 	//int numberOfPackets = 0;
 
-	if (CHECK_STARTING_DUMP_ABILITY)
+	if ((CHECK_STARTING_DUMP_ABILITY) || altSend == useAltSend)
 	{
 		for (int i = 0; i < NUM_FILES_IN_DUMP; i++)
 		{

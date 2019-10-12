@@ -116,39 +116,42 @@ int gecko_power_mux_get(Boolean mux0, Boolean mux1)
 
 	unsigned short adcSamples[8];
 	int error = ADC_SingleShot(adcSamples);
+	vTaskDelay(10);
 	if (error != 0)
 	{
 		return -1;
 	}
 
-	return adcSamples[6];
+	//return ( (ADC_REFERENCE_VOLTAGE * adcSamples[6]) / 0x3FF );
+	return ADC_ConvertRaw10bitToMillivolt(adcSamples[6]);
+	//return adcSamples[6];
 }
 
 current_t gecko_get_current_3v3()
 {
 	gecko_power_mux_init();
-	current_t ret = (current_t)CURRENT_3V3_CONVERSION (gecko_power_mux_get(FALSE, FALSE) );
+	current_t ret = (current_t)CURRENT_3V3_CONVERSION (gecko_power_mux_get(FALSE, TRUE) );
 	gecko_power_mux_deinit();
 	return ret;
 }
 voltage_t gecko_get_voltage_3v3()
 {
 	gecko_power_mux_init();
-	voltage_t ret = (voltage_t)VOLTAGE_3V3_CONVERSION( gecko_power_mux_get(FALSE, TRUE) );
+	voltage_t ret = (voltage_t)VOLTAGE_3V3_CONVERSION( gecko_power_mux_get(FALSE, FALSE) );
 	gecko_power_mux_deinit();
 	return ret;
 }
 current_t gecko_get_current_5v()
 {
 	gecko_power_mux_init();
-	current_t ret = (current_t)CURRENT_5V_CONVERSION( gecko_power_mux_get(TRUE, FALSE) );
+	current_t ret = (current_t)CURRENT_5V_CONVERSION( gecko_power_mux_get(TRUE, TRUE) );
 	gecko_power_mux_deinit();
 	return ret;
 }
 voltage_t gecko_get_voltage_5v()
 {
 	gecko_power_mux_init();
-	voltage_t ret = (voltage_t)VOLTAGE_5V_CONVERSION (gecko_power_mux_get(TRUE, TRUE) );
+	voltage_t ret = (voltage_t)VOLTAGE_5V_CONVERSION (gecko_power_mux_get(TRUE, FALSE) );
 	gecko_power_mux_deinit();
 	return ret;
 }
@@ -356,6 +359,9 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 	// Start sampling:
 	result = GECKO_StartSample();
 	Result( result, -15);
+
+	printf("\n\ncurrent_3v3 = (%d), voltage_3v3 = (%d), current_5v = (%d), voltage_5v = (%d), \n\n",
+			gecko_get_current_3v3(), gecko_get_voltage_3v3(), gecko_get_current_5v(), gecko_get_voltage_5v());
 
 	// Waiting until sample done:
 	i = 0;

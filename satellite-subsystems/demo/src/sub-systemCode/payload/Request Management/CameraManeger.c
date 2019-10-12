@@ -126,7 +126,7 @@ void CameraManagerTaskMain()
 
 		Take_pictures_with_time_in_between();
 
-		vTaskDelay(1000);
+		vTaskDelay(100);
 	}
 }
 

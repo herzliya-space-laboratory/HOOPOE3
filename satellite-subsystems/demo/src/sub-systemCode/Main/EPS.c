@@ -403,7 +403,7 @@ void EPS_Conditioning()
 	}
 	if (eps_tlm.fields.vbatt > EPS_VOL_LOGIC_MAX + 100 || eps_tlm.fields.vbatt < EPS_VOL_LOGIC_MIN - 100 )
 	{
-		WriteErrorLog((log_errors)LOG_ERR_EPS_VOLTAGE, SYSTEM_EPS, 3333333);
+		WriteErrorLog((log_errors)LOG_ERR_EPS_VOLTAGE, SYSTEM_EPS, (int)eps_tlm.fields.vbatt);
 		return;
 	}
 	set_Vbatt(eps_tlm.fields.vbatt);
