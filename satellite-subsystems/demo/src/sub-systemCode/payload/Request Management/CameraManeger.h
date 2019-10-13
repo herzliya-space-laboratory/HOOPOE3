@@ -17,14 +17,13 @@
 
 #include <hal/boolean.h>
 
-#define MAX_NUMBER_OF_CAMERA_REQ	25
+#define MAX_NUMBER_OF_CAMERA_REQ	(25)
 
-#define AUTO_CAMERA_SLEEP_TIMEOUT	CONVERT_MS_TO_SECONDS(30 * 60)
+#define AUTO_CAMERA_SLEEP_TIMEOUT	( CONVERT_MS_TO_SECONDS(30 * 60) )
 
-#define MAX_TIME_TO_KEEP_ON_CAMERA	(60 * 10)
-#define	MIN_TIME_TO_KEEP_ON_CAMERA	10
+#define KEEP_ON_CAMERA	(30)	// seconds
 
-#define DEFALT_DURATION 15	// seconds
+#define DEFALT_DURATION	(15)	// seconds
 
 typedef int duration_t;
 
@@ -97,5 +96,7 @@ int addRequestToQueue(Camera_Request request);
  * @return	0 if reset done correctly
  */
 int resetQueue();
+
+int send_request_to_reset_database();
 
 #endif /* CAMERAMANEGER_H_ */

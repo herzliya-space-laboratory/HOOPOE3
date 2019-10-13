@@ -327,7 +327,7 @@ void AUC_payload(TC_spl decode)
 
 	Camera_Request request;
 	request.cmd_id = decode.id;
-	request.keepOnCamera = 24*60*60;	// currently one day, ToDo: just do something!
+	request.keepOnCamera = KEEP_ON_CAMERA;
 	memcpy(request.data, decode.data, SPL_TC_DATA_SIZE);
 
 	switch (decode.subType)

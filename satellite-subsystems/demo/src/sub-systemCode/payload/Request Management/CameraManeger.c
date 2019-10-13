@@ -281,7 +281,6 @@ void Take_pictures_with_time_in_between()
 				ImageDataBaseResult error = takePicture(imageDataBase, FALSE_8BIT);
 				if (error != DataBaseSuccess)
 				{
-					printf("\n\n-E- Camera - time intervals, Error (%u)\n\n", error);
 					WriteErrorLog(error, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
 				}
 			}
@@ -498,8 +497,16 @@ void act_upon_request(Camera_Request request)
 
 		if (error != DataBaseSuccess)
 		{
-			printf("\n\n-E- Camera Command (%u), Error (%u)\n\n", request.id, error);
 			WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 		}
 	}
+}
+
+int send_request_to_reset_database()
+{
+	Camera_Request request = { .cmd_id = 0, .id = reset_DataBase , .keepOnCamera = KEEP_ON_CAMERA };
+	int error = addRequestToQueue(request);
+	CMP_AND_RETURN(error, 0, error);
+	vTaskDelay(100);
+	return 0;
 }
