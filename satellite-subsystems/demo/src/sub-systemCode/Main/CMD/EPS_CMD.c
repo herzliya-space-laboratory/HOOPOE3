@@ -105,6 +105,11 @@ void cmd_upload_volt_COMM(Ack_type* type, ERR_type* err, TC_spl cmd)
 
 	int i_error = FRAM_read_exte((byte*)eps_logic, EPS_VOLTAGES_ADDR, 12);
 	check_int("cmd_upload_volt_COMM, FRAM_write_exte(EPS_VOLTAGES_ADDR)", i_error);
+	if (i_error != 0)
+	{
+		*type = ACK_FRAM;
+		*err = ERR_READ_FAIL;
+	}
 	for (int i = 0; i < 2; i++)
 	{
 		if (eps_logic[1][0] < comm_vol[i] && comm_vol[i] < eps_logic[1][1])
@@ -116,9 +121,19 @@ void cmd_upload_volt_COMM(Ack_type* type, ERR_type* err, TC_spl cmd)
 	}
 
 	i_error = FRAM_write_exte((byte*)comm_vol, BEACON_LOW_BATTERY_STATE_ADDR, 2);
+	if (i_error != 0)
+	{
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
+	}
 	check_int("cmd_upload_volt_COMM, FRAM_write_exte(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 	voltage_t volll = comm_vol[1];
 	i_error = FRAM_write_exte((byte*)&volll, TRANS_LOW_BATTERY_STATE_ADDR, 2);
+	if (i_error != 0)
+	{
+		*type = ACK_FRAM;
+		*err = ERR_WRITE_FAIL;
+	}
 	check_int("cmd_upload_volt_COMM, FRAM_write_exte(BEACON_LOW_BATTERY_STATE_ADDR)", i_error);
 }
 void cmd_heater_temp(Ack_type* type, ERR_type* err, TC_spl cmd)

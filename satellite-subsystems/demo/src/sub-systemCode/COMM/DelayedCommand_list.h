@@ -28,7 +28,7 @@ void check_delaycommand();
 /**
  * 	@brief		reset the delayed command list in the FRAM, deleting all commands
  */
-void reset_delayCommand(Boolean firstActivation);
+void reset_delayCommand();
 
 /**
  *  @brief       add new command to the delayed command list in an empty space
@@ -41,7 +41,7 @@ int add_delayCommand(TC_spl decode);
 /*
  * @brief	Read from the FRAM the current list to a ram buffer
  */
-void get_delayCommand_list();
+int get_delayCommand_list();
 
 /*
  * @brief	Delete the command with the latest time stamp to execute

@@ -170,7 +170,7 @@ void cmd_time_frequency(Ack_type* type, ERR_type* err, TC_spl cmd)
 		return;
 	}
 	//1. check if parameter in range
-	if (cmd.data[0] < MIN_TIME_DELAY_BEACON || cmd.data[0] > MAX_TIME_DELAY_BEACON)
+	if (!(cmd.data[0] >= MIN_TIME_DELAY_BEACON && cmd.data[0] <= MAX_TIME_DELAY_BEACON))
 	{
 		*type = ACK_CMD_FAIL;
 		*err = ERR_PARAMETERS;
