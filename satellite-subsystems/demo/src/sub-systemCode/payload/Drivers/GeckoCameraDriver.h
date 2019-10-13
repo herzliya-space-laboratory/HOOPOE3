@@ -18,6 +18,7 @@
 #define NUMBER_OF_GECKO_REGISTERTS	15
 
 int initGecko();
+void GECKO_Reset();
 void create_xGeckoStateSemaphore();
 
 void Initialized_GPIO();

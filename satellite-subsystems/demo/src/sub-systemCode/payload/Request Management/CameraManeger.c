@@ -185,8 +185,6 @@ int initCamera(Boolean first_activation)
 	int error = initGecko();
 	CMP_AND_RETURN(error, 0, error);
 
-	Initialized_GPIO();
-
 	error = createFolders();
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 

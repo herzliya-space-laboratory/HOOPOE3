@@ -275,6 +275,11 @@ int initGecko()
 {
 	return GECKO_Init( (SPIslaveParameters){ bus1_spi, mode0_spi, slave1_spi, 100, 1, _SPI_GECKO_BUS_SPEED, 0 } );
 }
+void GECKO_Reset()
+{
+	TurnOffGecko_gpio();
+	TurnOnGecko_gpio();
+}
 
 int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, uint32_t exposure, uint32_t frameAmount, uint32_t frameRate, uint32_t imageID, Boolean testPattern)
 {
