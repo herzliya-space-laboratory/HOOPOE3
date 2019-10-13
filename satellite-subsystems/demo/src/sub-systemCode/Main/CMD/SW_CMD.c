@@ -16,6 +16,8 @@
 #include "../../COMM/DelayedCommand_list.h"
 #include "../../Ants.h"
 
+#include "../../payload/Request Management/CameraManeger.h"
+
 #include "../../Global/logger.h"
 
 void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err)
@@ -57,7 +59,7 @@ void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			reset_FRAM_MAIN();
 			break;
 		case CAMMERA:
-			//todo:
+			send_request_to_reset_database();
 			break;
 		case everything:
 			reset_FRAM_MAIN();

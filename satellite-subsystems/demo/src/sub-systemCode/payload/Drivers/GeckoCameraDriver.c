@@ -158,7 +158,6 @@ void De_Initialized_GPIO()
 
 Boolean TurnOnGecko_gpio()
 {
-	printf("turning camera on\n");
 	Pin gpio4 = PIN_GPIO04;
 	Pin gpio5 = PIN_GPIO05;
 	Pin gpio6 = PIN_GPIO06_INPUT;
@@ -189,14 +188,10 @@ Boolean TurnOnGecko_gpio()
 
 	Initialized_GPIO();
 
-	printf("\n\ncurrent_3v3 = (%d), voltage_3v3 = (%d), current_5v = (%d), voltage_5v = (%d), \n\n",
-			gecko_get_current_3v3(), gecko_get_voltage_3v3(), gecko_get_current_5v(), gecko_get_voltage_5v());
-
 	return TRUE;
 }
 Boolean TurnOffGecko_gpio()
 {
-	printf("turning camera off\n");
 	Pin gpio4 = PIN_GPIO05;
 	Pin gpio5 = PIN_GPIO07;
 	Pin gpio6 = PIN_GPIO06_INPUT;
@@ -360,9 +355,6 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 	result = GECKO_StartSample();
 	Result( result, -15);
 
-	printf("\n\ncurrent_3v3 = (%d), voltage_3v3 = (%d), current_5v = (%d), voltage_5v = (%d), \n\n",
-			gecko_get_current_3v3(), gecko_get_voltage_3v3(), gecko_get_current_5v(), gecko_get_voltage_5v());
-
 	// Waiting until sample done:
 	i = 0;
 	do
@@ -447,7 +439,6 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 		// Printing a value one every 40000 pixels:
 		if(i % READ_DELAY_INDEXES == 0)
 		{
-			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
 			vTaskDelay(SYSTEM_DEALY);
 
 			if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)

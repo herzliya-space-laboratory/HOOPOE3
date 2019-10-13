@@ -27,25 +27,20 @@ typedef unsigned int uint;
 
 ImageDataBaseResult JPEG_compressor(uint32_t compfact, unsigned int quality_factor, char pDst_filename[FILE_NAME_SIZE], byte* buffer)
 {
+	// Source image resolution:
 	unsigned int image_width = IMAGE_WIDTH / compfact;
 	unsigned int image_height = IMAGE_HEIGHT / compfact;
-	printf("Source image resolution: %ix%i\n", image_width, image_height);
 
 	// Fill in the compression parameter structure.
 	jpeg_params_t params = { .m_quality = quality_factor, .m_subsampling = H2V2, .m_no_chroma_discrim_flag = FALSE_JPEG };
-
-	printf("Writing JPEG image to file: %s\n", pDst_filename);
 
 	// Now create the JPEG file.
 
 	if (!compress_image_to_jpeg_file(pDst_filename, image_width, image_height, H2V2, buffer, &params))
 	{
-		printf("Failed writing to output file!\n");
+		// Failed writing to output file!
 		return DataBaseFileSystemError;
 	}
-
-	uint32_t file_size = f_filelength(pDst_filename);
-	printf("Compressed file size: %u\n", (unsigned int)file_size);
 
 	return JpegCompression_Success;
 }
@@ -74,11 +69,9 @@ ImageDataBaseResult Create_BMP_File(char pSrc_filename_raw[FILE_NAME_SIZE], char
 
 ImageDataBaseResult CompressImage(imageid id, fileType reductionLevel, unsigned int quality_factor)
 {
-	printf("jpeg_encoder class example program\n");
-
 	if ((quality_factor < 1) || (quality_factor > 100))
 	{
-		printf("Quality factor must range from 1-100!\n");
+		// Quality factor must range from 1-100!
 		return JpegCompression_qualityFactor_outOfRange;
 	}
 
