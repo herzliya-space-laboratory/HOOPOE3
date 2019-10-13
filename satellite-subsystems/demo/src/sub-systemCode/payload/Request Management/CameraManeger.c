@@ -176,6 +176,8 @@ int createFolders()
 
 int initCamera(Boolean first_activation)
 {
+	TurnOffGecko();
+
 	cameraActivation_duration = DEFALT_DURATION;
 	automatic_image_handler_disabled_permanently = FALSE;
 	setGeckoParametersInFRAM();
@@ -338,6 +340,7 @@ void act_upon_request(Camera_Request request)
 		break;
 
 	case delete_image_file:
+		stopAction();
 		error = DeletePictureFile(imageDataBase, request.data);
 		break;
 

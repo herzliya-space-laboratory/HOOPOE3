@@ -231,3 +231,24 @@ void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*err = ERR_PARAMETERS;
 	}
 }
+void cmd_resetGWT(Ack_type* type, ERR_type* err, TC_spl cmd)
+{
+	if (cmd.length != 0)
+	{
+		*type = ACK_CMD_FAIL;
+		*err = ERR_LENGTH;
+		return;
+	}
+
+	int error = GomEpsResetWDT(0);
+	if (error != 0)
+	{
+		*type = ACK_EPS;
+		*err = ERR_FAIL;
+	}
+	else
+	{
+		*type = ACK_NOTHING;
+		*err = ERR_SUCCESS;
+	}
+}

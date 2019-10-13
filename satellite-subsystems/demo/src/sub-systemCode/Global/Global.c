@@ -328,7 +328,7 @@ int FRAM_read_exte(unsigned char *data, unsigned int address, unsigned int size)
 		 error = FRAM_read(data, address, size);
 		 if (error == 0)
 			 return 0;
-		 vTaskDelay(i*20);
+		 vTaskDelay(i*10);
 	}
 	return error;
 }

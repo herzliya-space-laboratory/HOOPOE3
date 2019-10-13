@@ -451,6 +451,9 @@ void AUC_EPS(TC_spl decode)
 	case (UPDATE_EPS_ALPHA_ST):
 		cmd_update_alpha(&type, &err, decode);
 		break;
+	case (EPS_WDT_RESET_ST):
+		cmd_resetGWT(&type, &err, decode);
+		break;
 	default:
 		cmd_error(&type, &err);
 		break;

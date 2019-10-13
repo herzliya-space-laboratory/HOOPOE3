@@ -29,7 +29,7 @@
 #define THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME	"T64"
 #define JPEG_IMAGES_FOLDER_NAME					"JPG"
 
-#define MAX_NUMBER_OF_PICTURES 4000	///< The maximum number of pictures the database supports
+#define MAX_NUMBER_OF_PICTURES 1000	///< The maximum number of pictures the database supports
 
 #define DEFAULT_FRAME_RATE 1	///< The frame rate that will be used when taking a picture if the value wasn't updated with an command from the ground
 #define DEFAULT_FRAME_AMOUNT 1	///< The amount of frames that will be taken when taking a picture if the value wasn't updated with an command from the ground

@@ -123,6 +123,7 @@
 #define UPD_COMM_VOLTAGE					20
 #define CHANGE_HEATER_TMP_ST				0
 #define UPDATE_EPS_ALPHA_ST					11
+#define EPS_WDT_RESET_ST					13
 
 //adcs
 #define ADCS_I2C_GENRIC_ST					0
