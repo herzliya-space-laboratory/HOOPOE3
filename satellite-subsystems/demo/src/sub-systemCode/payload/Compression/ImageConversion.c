@@ -68,8 +68,6 @@ void ImageSkipping(fileType reductionLevel)	// where 2^(bin level) is the size r
 
 ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType reductionLevel, Boolean Skipping, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
-
 	bit fileTypes[8];
 	char2bits(image_metadata.fileTypes, fileTypes);
 
@@ -87,14 +85,14 @@ ImageDataBaseResult CreateImageThumbnail_withoutSearch(imageid id, fileType redu
 	else
 		BinImage(reductionLevel);
 
-	updateFileTypes(&image_metadata, image_address, reductionLevel, TRUE);
+	result = updateFileTypes(&image_metadata, image_address, reductionLevel, TRUE);
+	DB_RETURN_ERROR(result);
 
 	// Saving data:
 	result = saveImageToBuffer(id, reductionLevel);
 	DB_RETURN_ERROR(result);
 
 	return DataBaseSuccess;
-
 }
 
 ImageDataBaseResult CreateImageThumbnail(imageid id, fileType reductionLevel, Boolean Skipping)
@@ -124,9 +122,10 @@ ImageDataBaseResult compressImage(imageid id, unsigned int quality_factor)
 	else if (!fileTypes[raw].value)			// if it was not created already, check if the raw is available of the creation process
 		return DataBaseNotInSD;
 
-	int err = GomEpsResetWDT(0);
+	GomEpsResetWDT(0);
 
-	updateFileTypes(&image_metadata, image_address, jpg, TRUE);
+	result = updateFileTypes(&image_metadata, image_address, jpg, TRUE);
+	DB_RETURN_ERROR(result);
 
 	ImageDataBaseResult JPEG_result = CompressImage(id, raw, quality_factor);
 	if (JPEG_result != JpegCompression_Success)

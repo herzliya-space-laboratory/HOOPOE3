@@ -23,7 +23,7 @@
 #define ACK_HK_SIZE ACK_DATA_LENGTH
 #define EPS_HK_SIZE 51
 #define SP_HK_SIZE	FLOAT_SIZE * NUMBER_OF_SOLAR_PANNELS
-#define CAM_HK_SIZE 62
+#define CAM_HK_SIZE 70
 #define COMM_HK_SIZE 18
 #define ADCS_HK_SIZE 34
 #define FS_HK_SIZE 4*4
@@ -129,6 +129,10 @@ typedef union __attribute__ ((__packed__))
 		temp_t TempREGU6;
 		temp_t TempREGU8;
 		temp_t TempFlash;
+		voltage_t voltage_5V_DB;
+		current_t current_5V_DB;
+		voltage_t voltage_3V3_DB;
+		current_t current_3V3_DB;
 	}fields;
 }CAM_HK;
 

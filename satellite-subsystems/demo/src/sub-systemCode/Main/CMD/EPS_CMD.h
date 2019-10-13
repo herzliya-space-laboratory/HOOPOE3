@@ -24,5 +24,6 @@ void cmd_SHUT_CAM(Ack_type* type, ERR_type* err, TC_spl cmd);
 void cmd_allow_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd);
 void cmd_allow_CAM(Ack_type* type, ERR_type* err, TC_spl cmd);
 void cmd_update_alpha(Ack_type* type, ERR_type* err, TC_spl cmd);
+void cmd_resetGWT(Ack_type* type, ERR_type* err, TC_spl cmd);
 
 #endif /* EPS_CMD_H_ */

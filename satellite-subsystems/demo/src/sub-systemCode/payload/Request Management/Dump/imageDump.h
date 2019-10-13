@@ -38,6 +38,8 @@ ImageDataBaseResult setChunkDimensions_inFRAM(uint16_t width, uint16_t height);
  */
 void imageDump_task(void* param);
 
-void KickStartImageDumpTask(void* param);
+void KickStartImageDumpTask(void* request, xTaskHandle* task_handle);
+
+int SendGeckoRegisters();
 
 #endif /* IMAGEDUMP_H_ */

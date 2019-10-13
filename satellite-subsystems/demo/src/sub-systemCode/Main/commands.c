@@ -401,6 +401,15 @@ void AUC_payload(TC_spl decode)
 		case (OFF_AUTO_THUMB):
 			request.id = turn_off_AutoThumbnailCreation;
 			break;
+		case (GET_GECKO_REGISTER):
+			request.id = get_gecko_registers;
+			break;
+		case (SET_GECKO_REGISTER):
+			request.id = set_gecko_registers;
+			break;
+		case (RE_INIT_CAM_MANAGER):
+			request.id = re_init_cam_manager;
+			break;
 		default:
 			cmd_error(&type, &err);
 			break;
@@ -441,6 +450,9 @@ void AUC_EPS(TC_spl decode)
 		break;
 	case (UPDATE_EPS_ALPHA_ST):
 		cmd_update_alpha(&type, &err, decode);
+		break;
+	case (EPS_WDT_RESET_ST):
+		cmd_resetGWT(&type, &err, decode);
 		break;
 	default:
 		cmd_error(&type, &err);

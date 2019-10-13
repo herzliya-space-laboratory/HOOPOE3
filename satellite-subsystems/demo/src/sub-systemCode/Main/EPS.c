@@ -29,6 +29,8 @@
 #include "../Global/Global.h"
 #include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
+#include "../payload/Drivers/GeckoCameraDriver.h"
+#include "../payload/Request Management/AutomaticImageHandler.h"
 #include "../EPS.h"
 
 #define CAM_STATE	 0x0F
@@ -126,6 +128,14 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 		return FALSE;
 
 	}
+}
+
+Boolean updateCam_powerLines()
+{
+	if (get_system_state(cam_operational_param) == SWITCH_OFF && getPIOs())
+		stopAction();
+
+	return TRUE;
 }
 
 EPS_mode_t get_EPS_mode_t()
@@ -248,19 +258,23 @@ void writeState_log(EPS_mode_t mode, voltage_t vol)
 	switch(mode)
 	{
 	case full_mode:
-		//printf("Enter Full Mode\n");
+		printf("Enter Full Mode\n");
+		resumeAction();
 		WriteEpsLog(EPS_ENTER_FULL_MODE, (int)vol);
 		break;
 	case cruise_mode:
-		//printf("Enter Cruise Mode\n");
+		printf("Enter Cruise Mode\n");
+		stopAction();
 		WriteEpsLog(EPS_ENTER_CRUISE_MODE, (int)vol);
 		break;
 	case safe_mode:
-		//printf("Enter Safe Mode\n");
+		printf("Enter Safe Mode\n");
+		stopAction();
 		WriteEpsLog(EPS_ENTER_SAFE_MODE, (int)vol);
 		break;
 	case critical_mode:
-		//printf("Enter Critical Mode\n");
+		printf("Enter Critical Mode\n");
+		stopAction();
 		WriteEpsLog(EPS_ENTER_CRITICAL_MODE, (int)vol);
 		break;
 	}
@@ -389,7 +403,7 @@ void EPS_Conditioning()
 	}
 	if (eps_tlm.fields.vbatt > EPS_VOL_LOGIC_MAX + 100 || eps_tlm.fields.vbatt < EPS_VOL_LOGIC_MIN - 100 )
 	{
-		WriteErrorLog((log_errors)LOG_ERR_EPS_VOLTAGE, SYSTEM_EPS, 3333333);
+		WriteErrorLog((log_errors)LOG_ERR_EPS_VOLTAGE, SYSTEM_EPS, (int)eps_tlm.fields.vbatt);
 		return;
 	}
 	set_Vbatt(eps_tlm.fields.vbatt);
@@ -425,7 +439,7 @@ void EPS_Conditioning()
 	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
 	set_EPSState((uint8_t)batteryLastMode);
 	update_powerLines(switches_states);
-
+	updateCam_powerLines();
 	VBatt_previous = VBatt_filtered;
 }
 

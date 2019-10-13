@@ -12,8 +12,13 @@
 #include <stdint.h>
 
 #include "../../Global/sizes.h"
+#include "../../Global/Global.h"
 
 #define MAX_NUMBER_OF_PICTURES_IN_GECKO_SD 7180	///< the maximum number of images that can be stored in the Gecko camera's SD card, calculated by the size of the card (128 Gb = 16 GB) and the size of an image (2 MB)
+#define NUMBER_OF_GECKO_REGISTERTS	15
+
+int initGecko();
+void create_xGeckoStateSemaphore();
 
 void Initialized_GPIO();
 void De_Initialized_GPIO();
@@ -21,7 +26,12 @@ void De_Initialized_GPIO();
 Boolean TurnOnGecko();
 Boolean TurnOffGecko();
 
-int initGecko();
+Boolean getPIOs();
+
+current_t gecko_get_current_3v3();
+voltage_t gecko_get_voltage_3v3();
+current_t gecko_get_current_5v();
+voltage_t gecko_get_voltage_5v();
 
 /*!
  * @brief Higher level function for taking an image.
@@ -131,5 +141,7 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer);
  */
 int GECKO_EraseBlock(uint32_t imageID);
 
+int GECKO_GetRegister(uint8_t reg_index, uint32_t* reg_val);
+int GECKO_SetRegister(uint8_t reg_index, uint32_t reg_val);
 
 #endif /* Camera_H_ */

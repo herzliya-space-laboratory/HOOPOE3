@@ -274,6 +274,17 @@ TroubleErrCode AdcsGetCssVector(unsigned char raw_css[10]){
 	return TRBL_SUCCESS;
 }
 
+TroubleErrCode AdcsGetEstAngles(uint16_t angles[3])
+{
+	cspace_adcs_estAng_t est_ang;
+	int err = cspaceADCS_getEstimatedAngles(ADCS_ID, &est_ang);
+	if(0 != err){
+		return TRBL_FAIL;
+	}
+	memcpy(angles, est_ang.raw, 6);
+	return TRBL_SUCCESS;
+}
+
 int UpdateTlmElementAtIndex(int index, Boolean8bit ToSave, char Period)
 {
 	TroubleErrCode err = TRBL_SUCCESS;

@@ -44,7 +44,7 @@
 #endif
 
 #define MIN_TIME_DELAY_BEACON	5
-#define MAX_TIME_DELAY_BEACON 	40
+#define MAX_TIME_DELAY_BEACON 	255
 
 #define TRANSMMIT_DELAY_9600(length) (length - length)
 //(portTickType)((length + 30) * (5 / 6) + 30)

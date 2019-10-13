@@ -7,21 +7,32 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/semphr.h>
 
 #include <hal/Storage/FRAM.h>
 #include <hal/Timing/Time.h>
+#include <hal/Drivers/ADC.h>
 
 #include <at91/peripherals/pio/pio.h>
 
 #include <satellite-subsystems/GomEPS.h>
 #include <satellite-subsystems/SCS_Gecko/gecko_driver.h>
 
-#include "../../Global/FRAMadress.h"
-
+#include "../../Global/freertosExtended.h"
 #include "../../Global/GlobalParam.h"
 #include "../../Global/logger.h"
 
+#include "../Request Management/AutomaticImageHandler.h"
+
 #include "GeckoCameraDriver.h"
+
+#define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+#define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+
+#define VOLTAGE_3V3_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL * 2)
+#define CURRENT_3V3_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL / 2)
+#define VOLTAGE_5V_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL * 3)
+#define CURRENT_5V_CONVERSION(ANALOG_SIGNAL)	(ANALOG_SIGNAL / 2)
 
 #define Result(value, errorType)	if(value != 0) { return errorType; }
 
@@ -32,10 +43,108 @@
 
 #define READ_DELAY_INDEXES 10000
 
+#define PIN_GPIO06_INPUT	{1 << 22, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+#define PIN_GPIO07_INPUT	{1 << 23, AT91C_BASE_PIOB, AT91C_ID_PIOB, PIO_INPUT, PIO_DEFAULT}
+
+xSemaphoreHandle xGeckoStateSemaphore;
+
+int gecko_power_mux_init()
+{
+	Pin gpio9 = PIN_GPIO09;
+	Pin gpio10 = PIN_GPIO10;
+	Pin gpio11 = PIN_GPIO11;
+
+	PIO_Configure(&gpio9, 1);/*PIO_LISTSIZE(&gpio9));*/
+	vTaskDelay(10);
+	PIO_Configure(&gpio10, 1);/*PIO_LISTSIZE(&gpio10));*/
+	vTaskDelay(10);
+	PIO_Configure(&gpio11, 1);/*PIO_LISTSIZE(&gpio11));*/
+	vTaskDelay(10);
+
+	PIO_Set(&gpio9);
+	vTaskDelay(10);
+
+	return 0;
+}
+int gecko_power_mux_deinit()
+{
+	Pin gpio9 = PIN_GPIO09;
+	Pin gpio10 = PIN_GPIO10;
+	Pin gpio11 = PIN_GPIO11;
+
+	PIO_Clear(&gpio9);
+	vTaskDelay(10);
+	PIO_Clear(&gpio10);
+	vTaskDelay(10);
+	PIO_Clear(&gpio11);
+	vTaskDelay(10);
+
+	return 0;
+}
+
+int gecko_power_mux_get(Boolean mux0, Boolean mux1)
+{
+	Pin gpio10 = PIN_GPIO10;
+	Pin gpio11 = PIN_GPIO11;
+
+	if (mux0)
+		PIO_Set(&gpio10);
+	else
+		PIO_Clear(&gpio10);
+	vTaskDelay(10);
+
+	if (mux1)
+		PIO_Set(&gpio11);
+	else
+		PIO_Clear(&gpio11);
+	vTaskDelay(10);
+
+	unsigned short adcSamples[8];
+	int error = ADC_SingleShot(adcSamples);
+	vTaskDelay(10);
+	if (error != 0)
+	{
+		return -1;
+	}
+
+	//return ( (ADC_REFERENCE_VOLTAGE * adcSamples[6]) / 0x3FF );
+	return ADC_ConvertRaw10bitToMillivolt(adcSamples[6]);
+	//return adcSamples[6];
+}
+
+current_t gecko_get_current_3v3()
+{
+	gecko_power_mux_init();
+	current_t ret = (current_t)CURRENT_3V3_CONVERSION (gecko_power_mux_get(FALSE, TRUE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+voltage_t gecko_get_voltage_3v3()
+{
+	gecko_power_mux_init();
+	voltage_t ret = (voltage_t)VOLTAGE_3V3_CONVERSION( gecko_power_mux_get(FALSE, FALSE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+current_t gecko_get_current_5v()
+{
+	gecko_power_mux_init();
+	current_t ret = (current_t)CURRENT_5V_CONVERSION( gecko_power_mux_get(TRUE, TRUE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+voltage_t gecko_get_voltage_5v()
+{
+	gecko_power_mux_init();
+	voltage_t ret = (voltage_t)VOLTAGE_5V_CONVERSION (gecko_power_mux_get(TRUE, FALSE) );
+	gecko_power_mux_deinit();
+	return ret;
+}
+
 void Initialized_GPIO()
 {
 	Pin gpio12 = PIN_GPIO12;
-	PIO_Configure(&gpio12, PIO_LISTSIZE(&gpio12));
+	PIO_Configure(&gpio12, 1);/*PIO_LISTSIZE(&gpio12));*/
 	vTaskDelay(10);
 	PIO_Set(&gpio12);
 	vTaskDelay(10);
@@ -47,43 +156,51 @@ void De_Initialized_GPIO()
 	vTaskDelay(10);
 }
 
-Boolean TurnOnGecko()
+Boolean TurnOnGecko_gpio()
 {
-	Pin gpio4=PIN_GPIO04;
-	Pin gpio5=PIN_GPIO05;
-	Pin gpio6=PIN_GPIO06;
-	Pin gpio7=PIN_GPIO07;
-	PIO_Configure(&gpio4, PIO_LISTSIZE(&gpio4));
+	printf("turning camera on\n");
+	Pin gpio4 = PIN_GPIO04;
+	Pin gpio5 = PIN_GPIO05;
+	Pin gpio6 = PIN_GPIO06_INPUT;
+	Pin gpio7 = PIN_GPIO07_INPUT;
+
+	PIO_Configure(&gpio4, 1);/*PIO_LISTSIZE(&gpio4));*/
 	vTaskDelay(10);
-	PIO_Configure(&gpio5, PIO_LISTSIZE(&gpio5));
+	PIO_Configure(&gpio5, 1);/*PIO_LISTSIZE(&gpio5));*/
 	vTaskDelay(10);
-	PIO_Configure(&gpio6, PIO_LISTSIZE(&gpio6));
+	PIO_Configure(&gpio6, 1);/*PIO_LISTSIZE(&gpio6));*/
 	vTaskDelay(10);
-	PIO_Configure(&gpio7, PIO_LISTSIZE(&gpio7));
+	PIO_Configure(&gpio7, 1);/*PIO_LISTSIZE(&gpio7));*/
 	vTaskDelay(10);
 
 	PIO_Set(&gpio4);
 	vTaskDelay(10);
 	PIO_Set(&gpio5);
 	vTaskDelay(10);
-	PIO_Set(&gpio6);
+	int gpio6_get = PIO_Get(&gpio6);
 	vTaskDelay(10);
-	PIO_Set(&gpio7);
+	int gpio7_get = PIO_Get(&gpio7);
 	vTaskDelay(10);
 
-	//Initialized_GPIO();
+	if (gpio6_get != 1 || gpio7_get != 1)
+	{
+		return FALSE;
+	}
 
-	set_system_state(cam_param, SWITCH_ON);
-	WritePayloadLog(PAYLOAD_TURNED_GECKO_ON, (int)0);
+	Initialized_GPIO();
+
+	printf("\n\ncurrent_3v3 = (%d), voltage_3v3 = (%d), current_5v = (%d), voltage_5v = (%d), \n\n",
+			gecko_get_current_3v3(), gecko_get_voltage_3v3(), gecko_get_current_5v(), gecko_get_voltage_5v());
 
 	return TRUE;
 }
-Boolean TurnOffGecko()
+Boolean TurnOffGecko_gpio()
 {
-	Pin gpio4=PIN_GPIO05;
-	Pin gpio5=PIN_GPIO07;
-	Pin gpio6=PIN_GPIO05;
-	Pin gpio7=PIN_GPIO07;
+	printf("turning camera off\n");
+	Pin gpio4 = PIN_GPIO05;
+	Pin gpio5 = PIN_GPIO07;
+	Pin gpio6 = PIN_GPIO06_INPUT;
+	Pin gpio7 = PIN_GPIO07_INPUT;
 
 	PIO_Clear(&gpio4);
 	vTaskDelay(10);
@@ -94,12 +211,69 @@ Boolean TurnOffGecko()
 	PIO_Clear(&gpio7);
 	vTaskDelay(10);
 
-	//De_Initialized_GPIO();
-
-	set_system_state(cam_param, SWITCH_OFF);
-	WritePayloadLog(PAYLOAD_TURNED_GECKO_OFF, (int)0);
+	De_Initialized_GPIO();
 
 	return TRUE;
+}
+
+void create_xGeckoStateSemaphore()
+{
+	vSemaphoreCreateBinary(xGeckoStateSemaphore);
+}
+Boolean set_gecko_state(Boolean param)
+{
+	Boolean ret = FALSE;
+	if (xSemaphoreTake_extended(xGeckoStateSemaphore, 1000) == pdTRUE)
+	{
+		if (param == TRUE)
+			ret = TurnOnGecko_gpio();
+		else
+			ret = TurnOffGecko_gpio();
+
+		xSemaphoreGive_extended(xGeckoStateSemaphore);
+	}
+	return ret;
+}
+
+Boolean TurnOnGecko()
+{
+	return set_gecko_state(TRUE);
+}
+Boolean TurnOffGecko()
+{
+	return set_gecko_state(FALSE);
+}
+
+Boolean getPIOs()
+{
+	Pin gpio4 = PIN_GPIO05;
+	Pin gpio5 = PIN_GPIO07;
+	Pin gpio12 = PIN_GPIO12;
+	Pin gpio6 = PIN_GPIO06_INPUT;
+	Pin gpio7 = PIN_GPIO07_INPUT;
+	/*
+	 * Pin gpio6 = PIN_GPIO06_INPUT;
+	 * Pin gpio7 = PIN_GPIO07_INPUT;
+	 *
+	 * GPIO 6 and 7 won't be checked since they will always return 1 when calling "PIO_Get"
+	 * for them.
+	 */
+
+	char output[3];
+	char outputSum = 00;
+
+	output[0] = PIO_Get(&gpio4);
+	output[1] = PIO_Get(&gpio5);
+	PIO_Get(&gpio6);
+	PIO_Get(&gpio7);
+	output[3] = PIO_Get(&gpio12);
+
+	for (int i = 0; i < 3; i++)
+		outputSum |= output[i];
+	if (outputSum)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 int initGecko()
@@ -186,6 +360,9 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 	result = GECKO_StartSample();
 	Result( result, -15);
 
+	printf("\n\ncurrent_3v3 = (%d), voltage_3v3 = (%d), current_5v = (%d), voltage_5v = (%d), \n\n",
+			gecko_get_current_3v3(), gecko_get_voltage_3v3(), gecko_get_current_5v(), gecko_get_voltage_5v());
+
 	// Waiting until sample done:
 	i = 0;
 	do
@@ -209,22 +386,9 @@ int GECKO_TakeImage( uint8_t adcGain, uint8_t pgaGain, uint16_t sensorOffset, ui
 	return 0;
 }
 
-int readStopFlag(Boolean8bit* stop_flag)
-{
-	int result = FRAM_read_exte(stop_flag, GECKO_STOP_TRANSFER_FLAG_ADDR, GECKO_STOP_TRANSFER_FLAG_SIZE);
-	Result(result, -9);
-	return 0;
-}
-int setStopFlag(Boolean8bit stop_flag)
-{
-	int result = FRAM_write_exte(&stop_flag, GECKO_STOP_TRANSFER_FLAG_ADDR, GECKO_STOP_TRANSFER_FLAG_SIZE);
-	Result(result, -1);
-	return 0;
-}
-
 int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 {
-	Boolean8bit stop_flag = FALSE_8BIT;
+	Boolean isAuto = checkIfInAutomaticImageHandlingTask();
 
 	int result, i = 0;
 	result = GomEpsResetWDT(0);
@@ -232,17 +396,27 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 	// Init Flash:
 	do
 	{
+		if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+			return -10;
+
 		result = GECKO_GetFlashInitDone();
 
 		if (i == 120)	// timeout at 2 minutes
 			return -1;
-		vTaskDelay(500);
 		i++;
+
+		vTaskDelay(500);
 	} while(result == 0);
+
+	if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+		return -10;
 
 	// Setting image ID:
 	result = GECKO_SetImageID(imageID);
 	Result( result, -2);
+
+	if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+		return -10;
 
 	// Starting Readout:
 	result = GECKO_StartReadout();
@@ -252,12 +426,16 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 	// Checking if the data is ready to be read:
 	do
 	{
+		if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
+			return -10;
+
 		result = GECKO_GetReadReady();
 
 		if (i == 120)	// timeout at 2 minutes
 			return -1;
-		vTaskDelay(500);
 		i++;
+
+		vTaskDelay(500);
 	} while(result == 0);
 
 	vTaskDelay(1000);
@@ -269,14 +447,11 @@ int GECKO_ReadImage(uint32_t imageID, uint32_t *buffer)
 		// Printing a value one every 40000 pixels:
 		if(i % READ_DELAY_INDEXES == 0)
 		{
+			printf("%u, %u\n", i, (uint8_t)*(buffer + i));
 			vTaskDelay(SYSTEM_DEALY);
 
-			result = readStopFlag(&stop_flag);
-			if (stop_flag)
-			{
-				setStopFlag(FALSE_8BIT);
+			if (isAuto && get_automatic_image_handling_task_suspension_flag() == TRUE)
 				return -10;
-			}
 		}
 	}
 
@@ -318,4 +493,25 @@ int GECKO_EraseBlock( uint32_t imageID )
 	Result(result_clearEraseDone, -4);
 
 	return 0;
+}
+
+int GECKO_GetRegister(uint8_t reg_index, uint32_t* reg_val)
+{
+	if ( !getPIOs() )
+		return -2;
+
+	if (reg_index > NUMBER_OF_GECKO_REGISTERTS - 1)
+		return -1;
+
+	return GECKO_GetReg(reg_index, reg_val, GECKO_Endianness_big);
+}
+int GECKO_SetRegister(uint8_t reg_index, uint32_t reg_val)
+{
+	if ( !getPIOs() )
+		return -2;
+
+	if (reg_index > NUMBER_OF_GECKO_REGISTERTS - 1)
+		return -1;
+
+	return GECKO_SetReg(reg_index, reg_val, GECKO_Endianness_big);
 }

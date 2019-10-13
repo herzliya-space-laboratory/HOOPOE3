@@ -45,16 +45,16 @@ typedef struct __attribute__ ((__packed__))
 
 struct __attribute__ ((__packed__)) ImageDataBase_t
 {
-	// size = 21 bytes
+	// size = 23 bytes
 	unsigned int numberOfPictures;		///< current number of pictures saved on the satellite
 	imageid nextId;						///< the next id we will use for a picture, (camera id)
 	CameraPhotographyValues cameraParameters;
 	Boolean8bit AutoThumbnailCreation;
 };
-#define SIZEOF_IMAGE_DATABASE sizeof(struct ImageDataBase_t)
+#define SIZEOF_IMAGE_DATABASE ( sizeof(struct ImageDataBase_t) )
 
-#define DATABASE_FRAM_START (DATABASEFRAMADDRESS + SIZEOF_IMAGE_DATABASE)	///< The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
-#define DATABASE_FRAM_END (DATABASE_FRAM_START + MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata))	///< The ImageDataBases ending address in the FRAM
+#define DATABASE_FRAM_START ( DATABASEFRAMADDRESS + SIZEOF_IMAGE_DATABASE )	///< The ImageDataBase's starting address in the FRAM, not including the general fields at the start of the database
+#define DATABASE_FRAM_END ( ( DATABASE_FRAM_START ) + ( MAX_NUMBER_OF_PICTURES * sizeof(ImageMetadata) ) )	///< The ImageDataBases ending address in the FRAM
 
 #define DATABASE_FRAM_SIZE (DATABASE_FRAM_END - DATABASEFRAMADDRESS)
 
@@ -72,31 +72,31 @@ static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 	switch (type)
 	{
 		case raw:
-			sprintf(baseString, "%s\\%s\\i%u.raw", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.raw", GENERAL_PAYLOAD_FOLDER_NAME, RAW_IMAGES_FOLDER_NAME, id);
 			break;
 		case jpg:
-			sprintf(baseString, "%s\\%s\\i%u.jpg", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.jpg", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
 			break;
 		case bmp:
-			sprintf(baseString, "%s\\%s\\i%u.bmp", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.bmp", GENERAL_PAYLOAD_FOLDER_NAME, JPEG_IMAGES_FOLDER_NAME, id);
 			break;
 		case t02:
-			sprintf(baseString, "%s\\%s\\i%u.t02", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t02", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_1_IMAGES_FOLDER_NAME, id);
 			break;
 		case t04:
-			sprintf(baseString, "%s\\%s\\i%u.t04", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t04", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_2_IMAGES_FOLDER_NAME, id);
 			break;
 		case t08:
-			sprintf(baseString, "%s\\%s\\i%u.t08", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t08", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_3_IMAGES_FOLDER_NAME, id);
 			break;
 		case t16:
-			sprintf(baseString, "%s\\%s\\i%u.t16", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t16", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_4_IMAGES_FOLDER_NAME, id);
 			break;
 		case t32:
-			sprintf(baseString, "%s\\%s\\i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_5_IMAGES_FOLDER_NAME, id);
 			break;
 		case t64:
-			sprintf(baseString, "%s\\%s\\i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME, id);
+			sprintf(baseString, "%s/%s/i%u.t32", GENERAL_PAYLOAD_FOLDER_NAME, THUMBNAIL_LEVEL_6_IMAGES_FOLDER_NAME, id);
 			break;
 		default:
 			break;
@@ -111,14 +111,13 @@ static void getFileName(imageid id, fileType type, char string[FILE_NAME_SIZE])
 ImageDataBaseResult zeroImageDataBase()
 {
 	uint32_t database_fram_size = DATABASE_FRAM_END - DATABASEFRAMADDRESS;
-	uint8_t zero[database_fram_size];
 
 	for (uint32_t i = 0; i < database_fram_size; i++)
 	{
-		zero[i] = 0;
+		imageBuffer[i] = 0;
 	}
 
-	int result = FRAM_write_exte((unsigned char*)zero, DATABASEFRAMADDRESS, database_fram_size);
+	int result = FRAM_write_exte((unsigned char*)imageBuffer, DATABASEFRAMADDRESS, database_fram_size);
 	CMP_AND_RETURN(result, 0, DataBaseFramFail);
 
 	return DataBaseSuccess;
@@ -147,6 +146,17 @@ ImageDataBaseResult SearchDataBase_byID(imageid id, ImageMetadata* image_metadat
 	{
 		result = FRAM_read_exte((unsigned char *)image_metadata, database_current_address, sizeof(ImageMetadata));
 		CMP_AND_RETURN(result, 0, DataBaseFramFail);
+
+		// printing for tests:
+		printf("cameraId: %d, timestamp: %u, ", image_metadata->cameraId, image_metadata->timestamp);
+		bit fileTypes[8];
+		char2bits(image_metadata->fileTypes, fileTypes);
+		printf("files types:");
+		for (int j = 0; j < 8; j++) {
+			printf(" %u", fileTypes[j].value);
+		}
+		printf(", angles: %u %u %u, marked = %u\n",
+				image_metadata->angle_rates[0], image_metadata->angle_rates[1], image_metadata->angle_rates[2], image_metadata->markedFor_TumbnailCreation);
 
 		if (image_metadata->cameraId == id)
 		{
@@ -231,7 +241,7 @@ ImageDataBaseResult SearchDataBase_forImageFileType_byTimeRange(time_unix lower_
 	while (database_current_address < DATABASE_FRAM_END && database_current_address >= DATABASE_FRAM_START)
 	{
 		error = SearchDataBase_byTimeRange(lower_barrier, higher_barrier, &current_image_metadata, &current_image_address, database_current_address);
-		database_current_address = current_image_address += sizeof(ImageMetadata);
+		database_current_address = current_image_address + sizeof(ImageMetadata);
 
 		if (error == DataBaseSuccess)
 		{
@@ -264,7 +274,7 @@ ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType redu
 		return DataBaseNotInSD;
 }
 
-void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value)
+ImageDataBaseResult updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value)
 {
 	bit fileTypes[8];
 	char2bits(image_metadata->fileTypes, fileTypes);
@@ -276,7 +286,10 @@ void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, file
 
 	image_metadata->fileTypes = bits2char(fileTypes);
 
-	FRAM_write_exte((unsigned char*)image_metadata, image_address, sizeof(ImageMetadata));
+	int error = FRAM_write_exte((unsigned char*)image_metadata, image_address, sizeof(ImageMetadata));
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+
+	return DataBaseSuccess;
 }
 
 uint32_t GetImageFactor(fileType image_type)
@@ -365,6 +378,12 @@ ImageDataBaseResult setDataBaseValues(ImageDataBase database)
 	ImageDataBaseResult result = updateGeneralDataBaseParameters(database);
 	DB_RETURN_ERROR(result);
 
+	printf("\nRe: database->numberOfPictures = %u, database->nextId = %u; CameraParameters: frameAmount = %lu,"
+			" frameRate = %lu, adcGain = %u, pgaGain = %u, sensor offset = %u, exposure = %lu\n", database->numberOfPictures,
+			database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate,
+			database->cameraParameters.adcGain, database->cameraParameters.pgaGain,
+			database->cameraParameters.sensorOffset, database->cameraParameters.exposure);
+
 	return DataBaseSuccess;
 }
 
@@ -378,6 +397,8 @@ ImageDataBase initImageDataBase(Boolean first_activation)
 		free(database);
 		return NULL;
 	}
+
+	printf("numberOfPictures = %u, nextId = %u; CameraParameters: frameAmount = %lu, frameRate = %lu, adcGain = %u, pgaGain = %u, sensor offset = %u, exposure = %lu\n", database->numberOfPictures, database->nextId, database->cameraParameters.frameAmount, database->cameraParameters.frameRate, database->cameraParameters.adcGain, database->cameraParameters.pgaGain, database->cameraParameters.sensorOffset, database->cameraParameters.exposure);
 
 	ImageDataBaseResult error;
 
@@ -424,8 +445,6 @@ void setCameraPhotographyValues(ImageDataBase database, uint32_t frameAmount, ui
 
 ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
-
 	int error = checkForFileType(image_metadata, raw);
 	CMP_AND_RETURN(error, DataBaseNotInSD, DataBasealreadyInSD);
 
@@ -436,6 +455,7 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 	error = GECKO_ReadImage((uint32_t)cameraId, (uint32_t*)imageBuffer);
 	if( error )
 	{
+		printf("\ntransferImageToSD Error = (%d) reading image!\n\r", error);
 		return (GECKO_Read_Success - error);
 	}
 
@@ -443,7 +463,8 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 
 	// Creating a file for the picture at iOBC SD:
 
-	updateFileTypes(&image_metadata, image_address, raw, TRUE);
+	error = updateFileTypes(&image_metadata, image_address, raw, TRUE);
+	CMP_AND_RETURN(error, DataBaseSuccess, error);
 
 	error = saveImageToBuffer(cameraId, raw);
 	CMP_AND_RETURN(error, DataBaseSuccess, error);
@@ -479,8 +500,6 @@ ImageDataBaseResult transferImageToSD(ImageDataBase database, imageid cameraId)
 
 ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType type, uint32_t image_address, ImageMetadata image_metadata)
 {
-	FRAM_read_exte((unsigned char*)&image_metadata, image_address, sizeof(ImageMetadata));
-
 	char fileName[FILE_NAME_SIZE];
     getFileName(cameraId, type, fileName);
 
@@ -490,7 +509,8 @@ ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType 
 	int error = f_delete(fileName);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	updateFileTypes(&image_metadata, image_address, type, FALSE);
+	error = updateFileTypes(&image_metadata, image_address, type, FALSE);
+	DB_RETURN_ERROR(error);
 
 	return DataBaseSuccess;
 }
@@ -517,6 +537,7 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 	int err = GECKO_EraseBlock(id);
 	if( err )
 	{
+		printf("Error (%d) erasing image!\n\r",err);
 		return (GECKO_Erase_Success - err);
 	}
 
@@ -532,8 +553,10 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 	{
 		if(checkForFileType(image_metadata, i) == DataBaseSuccess)
 		{
-			DeleteImageFromOBC_withoutSearch(id, i, image_address, image_metadata);
-			updateFileTypes(&image_metadata, image_address, i, FALSE);
+			result = DeleteImageFromOBC_withoutSearch(id, i, image_address, image_metadata);
+			DB_RETURN_ERROR(result);
+			result = updateFileTypes(&image_metadata, image_address, i, FALSE);
+			DB_RETURN_ERROR(result);
 		}
 	}
 
@@ -546,7 +569,8 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 
 	database->numberOfPictures--;
 
-	updateGeneralDataBaseParameters(database);
+	result = updateGeneralDataBaseParameters(database);
+	DB_RETURN_ERROR(result);
 
 	WritePayloadLog(PAYLOAD_ERASED_IMAGE, (uint32_t)image_metadata.cameraId);
 
@@ -574,10 +598,11 @@ ImageDataBaseResult clearImageDataBase(void)
 			{
 				if(checkForFileType(image_metadata, i) == DataBaseSuccess)
 				{
-					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);												return result;
+					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);
 					if (result == DataBaseSuccess)
 					{
-						updateFileTypes(&image_metadata, image_address, i, FALSE);
+						result = updateFileTypes(&image_metadata, image_address, i, FALSE);
+						DB_RETURN_ERROR(result);
 					}
 					else if (result != DataBaseNotInSD)
 					{
@@ -602,7 +627,7 @@ ImageDataBaseResult handleMarkedPictures()
 
 	Boolean already_transferred_raw = FALSE;
 
-	if ( DB_result == 0 )
+	if ( DB_result == 0 && image_metadata.cameraId != 0 )
 	{
 		if (checkForFileType(image_metadata, raw) == DataBaseNotInSD)
 		{
@@ -621,6 +646,9 @@ ImageDataBaseResult handleMarkedPictures()
 			already_transferred_raw = TRUE;
 		}
 
+		DB_result = FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
+		DB_RETURN_ERROR(DB_result);
+
 		if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
 		{
 			DB_result = CreateImageThumbnail_withoutSearch(image_metadata.cameraId, DEFAULT_REDUCTION_LEVEL, TRUE, image_address, image_metadata);
@@ -630,6 +658,9 @@ ImageDataBaseResult handleMarkedPictures()
 			vTaskDelay(DELAY);
 		}
 
+		DB_result = FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
+		DB_RETURN_ERROR(DB_result);
+
 		if (!already_transferred_raw)
 		{
 			DB_result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, raw, image_address, image_metadata);
@@ -637,10 +668,12 @@ ImageDataBaseResult handleMarkedPictures()
 		}
 
 		// making sure i wont lose the data written in the functions above to the FRAM:
-		FRAM_read_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_result = FRAM_read_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_RETURN_ERROR(DB_result);
 
 		image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
-		FRAM_write_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_result = FRAM_write_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_RETURN_ERROR(DB_result);
 	}
 
 	return DataBaseSuccess;
@@ -648,18 +681,19 @@ ImageDataBaseResult handleMarkedPictures()
 
 //---------------------------------------------------------------
 
-ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_unix time_image_taken, uint16_t angle_rates[3], byte raw_css[10])
+ImageDataBaseResult writeNewImageMetaDataToFRAM(ImageDataBase database, time_unix time_image_taken, uint16_t angle_rates[3], uint16_t estimated_angles[3], byte raw_css[10])
 {
 	ImageMetadata image_metadata;
 	uint32_t image_address;
 
 	imageid zero = 0;
 	ImageDataBaseResult result = SearchDataBase_byID(zero, &image_metadata, &image_address, DATABASE_FRAM_START);	// Finding space at the database(FRAM) for the image's ImageMetadata:
-	CMP_AND_RETURN(result, DataBaseSuccess, DataBaseFull);
+	CMP_AND_RETURN(result, DataBaseSuccess, result);
 
 	image_metadata.cameraId = database->nextId;
 	image_metadata.timestamp = time_image_taken;
 	memcpy(&image_metadata.angle_rates, angle_rates, sizeof(uint16_t) * 3);
+	memcpy(&image_metadata.estimated_angles, estimated_angles, sizeof(uint16_t) * 3);
 	memcpy(&image_metadata.raw_css, raw_css, sizeof(byte) * 10);
 	image_metadata.fileTypes = 0;
 
@@ -717,6 +751,19 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	uint16_t angle_rates[3];
 	memcpy(angle_rates, sen_rates.raw, sizeof(uint16_t) * 3);
 
+	uint16_t angles[3];
+	ADCS_error = AdcsGetEstAngles(angles);
+	if (ADCS_error != TRBL_SUCCESS)
+	{
+		if (CAM_ADCS_error == DataBaseSuccess)
+			CAM_ADCS_error = DataBaseAdcsError_gettingEstimatedAngles;
+
+		for (int i = 0; i < 3; i++)
+		{
+			angles[i] = 0;
+		}
+	}
+
 	// Getting Course-Sun-Sensor Values:
 	byte raw_css[10];
 	ADCS_error = AdcsGetCssVector(raw_css);
@@ -743,13 +790,14 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 	{
 		vTaskDelay(DELAY);
 
-		result = writeNewImageMetaDataToFRAM(database, currentDate, angle_rates, raw_css);
+		result = writeNewImageMetaDataToFRAM(database, currentDate, angle_rates, angles, raw_css);
 		DB_RETURN_ERROR(result);
 
 		currentDate += database->cameraParameters.frameRate;
 	}
 
-	updateGeneralDataBaseParameters(database);
+	result = updateGeneralDataBaseParameters(database);
+	DB_RETURN_ERROR(result);
 
 	WritePayloadLog(PAYLOAD_TOOK_IMAGE, (uint32_t)getLatestID(database));
 
@@ -765,11 +813,13 @@ ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, ui
 	setCameraPhotographyValues(database, frameAmount, frameRate, adcGain, pgaGain, sensorOffset, exposure);
 
 	ImageDataBaseResult DB_result = takePicture(database, testPattern);
+	DB_RETURN_ERROR(DB_result);
 
 	setCameraPhotographyValues(database, regularParameters.frameAmount, regularParameters.frameRate, regularParameters.adcGain, regularParameters.pgaGain, regularParameters.sensorOffset, regularParameters.exposure);
-	setDataBaseValues(database);
+	DB_result = setDataBaseValues(database);
+	DB_RETURN_ERROR(DB_result);
 
-	return DB_result;
+	return DataBaseSuccess;
 }
 
 //---------------------------------------------------------------
@@ -825,6 +875,17 @@ ImageDataBaseResult getImageDataBaseBuffer(imageid start, imageid end, byte buff
 		if (image_metadata.cameraId != 0 && (image_metadata.cameraId >= start && image_metadata.cameraId <= end))
 		{
 			database_size += sizeof(ImageMetadata);
+
+			// printing for tests:
+			printf("cameraId: %d, timestamp: %u, inOBC:", image_metadata.cameraId, image_metadata.timestamp);
+			bit fileTypes[8];
+			char2bits(image_metadata.fileTypes, fileTypes);
+			printf(", files:");
+			for (int j = 0; j < 8; j++) {
+				printf(" %u", fileTypes[j].value);
+			}
+			printf(", angles: %u %u %u, markedFor_4thTumbnailCreation = %u\n",
+					image_metadata.angle_rates[0], image_metadata.angle_rates[1], image_metadata.angle_rates[2], image_metadata.markedFor_TumbnailCreation);
 		}
 		else
 		{
@@ -856,7 +917,7 @@ void setAutoThumbnailCreation(ImageDataBase database, Boolean8bit new_AutoThumbn
 void Gecko_TroubleShooter(ImageDataBaseResult error)
 {
 	Boolean should_reset_take = error > GECKO_Take_Success && error < GECKO_Read_Success;
-	Boolean should_reset_read = error > GECKO_Read_Success && error < GECKO_Erase_Success;
+	Boolean should_reset_read = error > GECKO_Read_Success && error < GECKO_Erase_Success && error != GECKO_Read_StoppedAsPerRequest;
 	Boolean should_reset_erase = error > GECKO_Erase_Success && error <= GECKO_Erase_Error_ClearEraseDoneFlag;
 
 	Boolean should_reset = should_reset_take || should_reset_read || should_reset_erase;

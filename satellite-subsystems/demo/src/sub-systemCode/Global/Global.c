@@ -311,36 +311,36 @@ Boolean getBitValueByIndex(byte* data, int length, int index)
 int FRAM_write_exte(unsigned char *data, unsigned int address, unsigned int size)
 {
 	int error = 0;
-	for (int i = 0; i < 10; i++)
+	for (int i = 1; i <= 10; i++)
 	{
 		 error = FRAM_write(data, address, size);
 		 if (error == 0)
 			 return 0;
-		 vTaskDelay(10);
+		 vTaskDelay(i*20);
 	}
 	return error;
 }
 int FRAM_read_exte(unsigned char *data, unsigned int address, unsigned int size)
 {
 	int error = 0;
-	for (int i = 0; i < 10; i++)
+	for (int i = 1; i <= 10; i++)
 	{
 		 error = FRAM_read(data, address, size);
 		 if (error == 0)
 			 return 0;
-		 vTaskDelay(10);
+		 vTaskDelay(i*10);
 	}
 	return error;
 }
 int FRAM_writeAndVerify_exte(unsigned char *data, unsigned int address, unsigned int size)
 {
 	int error = 0;
-	for (int i = 0; i < 10; i++)
+	for (int i = 1; i <= 10; i++)
 	{
 		 error = FRAM_writeAndVerify(data, address, size);
 		 if (error == 0)
 			 return 0;
-		 vTaskDelay(10);
+		 vTaskDelay(i*20);
 	}
 	return error;
 }
