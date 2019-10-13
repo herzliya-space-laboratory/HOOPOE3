@@ -504,7 +504,7 @@ void act_upon_request(Camera_Request request)
 
 int send_request_to_reset_database()
 {
-	Camera_Request request = { .cmd_id = 0, .id = reset_DataBase , .keepOnCamera = KEEP_ON_CAMERA };
+	Camera_Request request = { .cmd_id = 0, .id = reset_DataBase };
 	int error = addRequestToQueue(request);
 	CMP_AND_RETURN(error, 0, error);
 	vTaskDelay(100);

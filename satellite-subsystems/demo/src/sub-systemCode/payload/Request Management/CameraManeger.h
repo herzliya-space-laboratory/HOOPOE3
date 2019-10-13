@@ -21,8 +21,6 @@
 
 #define AUTO_CAMERA_SLEEP_TIMEOUT	( CONVERT_MS_TO_SECONDS(30 * 60) )
 
-#define KEEP_ON_CAMERA	(30)	// seconds
-
 #define DEFALT_DURATION	(15)	// seconds
 
 typedef int duration_t;
@@ -61,7 +59,6 @@ typedef struct __attribute__ ((__packed__))
 {
 	command_id cmd_id;
 	cam_Request_id_t id;
-	duration_t keepOnCamera;
 	byte data[SPL_TC_DATA_SIZE];
 }Camera_Request;
 
