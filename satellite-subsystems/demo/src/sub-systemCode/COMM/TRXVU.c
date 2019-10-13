@@ -1109,7 +1109,8 @@ void change_TRXVU_state(Boolean state)
 		if (i_error != 0)
 		{
 			WriteErrorLog(LOG_ERR_FRAM_READ, SYSTEM_TRXVU, i_error);
-			rssiData = DEFAULT_TRANS_RSSI;
+			unsigned short temp = DEFAULT_TRANS_RSSI;
+			memcpy(rssiData, &temp, 2);
 		}
 		check_int("change_TRXVU_state, FRAM_read", i_error);
 		change_trans_RSSI(rssiData);

@@ -274,7 +274,7 @@ ImageDataBaseResult checkForFileType(ImageMetadata image_metadata, fileType redu
 		return DataBaseNotInSD;
 }
 
-void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value)
+ImageDataBaseResult updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, fileType reductionLevel, Boolean value)
 {
 	bit fileTypes[8];
 	char2bits(image_metadata->fileTypes, fileTypes);
@@ -286,7 +286,10 @@ void updateFileTypes(ImageMetadata* image_metadata, uint32_t image_address, file
 
 	image_metadata->fileTypes = bits2char(fileTypes);
 
-	FRAM_write_exte((unsigned char*)image_metadata, image_address, sizeof(ImageMetadata));
+	int error = FRAM_write_exte((unsigned char*)image_metadata, image_address, sizeof(ImageMetadata));
+	CMP_AND_RETURN(error, 0, DataBaseFramFail);
+
+	return DataBaseSuccess;
 }
 
 uint32_t GetImageFactor(fileType image_type)
@@ -460,7 +463,8 @@ ImageDataBaseResult transferImageToSD_withoutSearch(imageid cameraId, uint32_t i
 
 	// Creating a file for the picture at iOBC SD:
 
-	updateFileTypes(&image_metadata, image_address, raw, TRUE);
+	error = updateFileTypes(&image_metadata, image_address, raw, TRUE);
+	CMP_AND_RETURN(error, DataBaseSuccess, error);
 
 	error = saveImageToBuffer(cameraId, raw);
 	CMP_AND_RETURN(error, DataBaseSuccess, error);
@@ -505,7 +509,8 @@ ImageDataBaseResult DeleteImageFromOBC_withoutSearch(imageid cameraId, fileType 
 	int error = f_delete(fileName);
 	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
 
-	updateFileTypes(&image_metadata, image_address, type, FALSE);
+	error = updateFileTypes(&image_metadata, image_address, type, FALSE);
+	DB_RETURN_ERROR(error);
 
 	return DataBaseSuccess;
 }
@@ -548,8 +553,10 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 	{
 		if(checkForFileType(image_metadata, i) == DataBaseSuccess)
 		{
-			DeleteImageFromOBC_withoutSearch(id, i, image_address, image_metadata);
-			updateFileTypes(&image_metadata, image_address, i, FALSE);
+			result = DeleteImageFromOBC_withoutSearch(id, i, image_address, image_metadata);
+			DB_RETURN_ERROR(result);
+			result = updateFileTypes(&image_metadata, image_address, i, FALSE);
+			DB_RETURN_ERROR(result);
 		}
 	}
 
@@ -562,7 +569,8 @@ ImageDataBaseResult DeleteImageFromPayload(ImageDataBase database, imageid id)
 
 	database->numberOfPictures--;
 
-	updateGeneralDataBaseParameters(database);
+	result = updateGeneralDataBaseParameters(database);
+	DB_RETURN_ERROR(result);
 
 	WritePayloadLog(PAYLOAD_ERASED_IMAGE, (uint32_t)image_metadata.cameraId);
 
@@ -593,7 +601,8 @@ ImageDataBaseResult clearImageDataBase(void)
 					result = DeleteImageFromOBC_withoutSearch(image_metadata.cameraId, i, image_address, image_metadata);
 					if (result == DataBaseSuccess)
 					{
-						updateFileTypes(&image_metadata, image_address, i, FALSE);
+						result = updateFileTypes(&image_metadata, image_address, i, FALSE);
+						DB_RETURN_ERROR(result);
 					}
 					else if (result != DataBaseNotInSD)
 					{
@@ -637,7 +646,8 @@ ImageDataBaseResult handleMarkedPictures()
 			already_transferred_raw = TRUE;
 		}
 
-		FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
+		DB_result = FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
+		DB_RETURN_ERROR(DB_result);
 
 		if (checkForFileType(image_metadata, DEFAULT_REDUCTION_LEVEL) == DataBaseNotInSD)
 		{
@@ -648,7 +658,8 @@ ImageDataBaseResult handleMarkedPictures()
 			vTaskDelay(DELAY);
 		}
 
-		FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
+		DB_result = FRAM_read_exte(&image_metadata, image_address, sizeof(ImageMetadata));
+		DB_RETURN_ERROR(DB_result);
 
 		if (!already_transferred_raw)
 		{
@@ -657,10 +668,12 @@ ImageDataBaseResult handleMarkedPictures()
 		}
 
 		// making sure i wont lose the data written in the functions above to the FRAM:
-		FRAM_read_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_result = FRAM_read_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_RETURN_ERROR(DB_result);
 
 		image_metadata.markedFor_TumbnailCreation = FALSE_8BIT;
-		FRAM_write_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_result = FRAM_write_exte( (unsigned char*)&image_metadata, image_address, (unsigned int)sizeof(ImageMetadata)); // reading the id from the ImageDescriptor file
+		DB_RETURN_ERROR(DB_result);
 	}
 
 	return DataBaseSuccess;
@@ -783,7 +796,8 @@ ImageDataBaseResult takePicture(ImageDataBase database, Boolean8bit testPattern)
 		currentDate += database->cameraParameters.frameRate;
 	}
 
-	updateGeneralDataBaseParameters(database);
+	result = updateGeneralDataBaseParameters(database);
+	DB_RETURN_ERROR(result);
 
 	WritePayloadLog(PAYLOAD_TOOK_IMAGE, (uint32_t)getLatestID(database));
 
@@ -799,11 +813,13 @@ ImageDataBaseResult takePicture_withSpecialParameters(ImageDataBase database, ui
 	setCameraPhotographyValues(database, frameAmount, frameRate, adcGain, pgaGain, sensorOffset, exposure);
 
 	ImageDataBaseResult DB_result = takePicture(database, testPattern);
+	DB_RETURN_ERROR(DB_result);
 
 	setCameraPhotographyValues(database, regularParameters.frameAmount, regularParameters.frameRate, regularParameters.adcGain, regularParameters.pgaGain, regularParameters.sensorOffset, regularParameters.exposure);
-	setDataBaseValues(database);
+	DB_result = setDataBaseValues(database);
+	DB_RETURN_ERROR(DB_result);
 
-	return DB_result;
+	return DataBaseSuccess;
 }
 
 //---------------------------------------------------------------

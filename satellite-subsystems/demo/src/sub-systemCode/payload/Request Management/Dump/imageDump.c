@@ -349,8 +349,7 @@ ImageDataBaseResult imageDataBase_Dump(Camera_Request request, byte buffer[], ui
 
 static void exitImageDumpTask()
 {
-	if (get_automatic_image_handling_task_suspension_flag())
-		resumeAction();
+	resumeAction();
 	vTaskDelete(NULL);
 }
 
