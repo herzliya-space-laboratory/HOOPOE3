@@ -53,11 +53,6 @@
 
 #define create_task(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask) xTaskCreate( (pvTaskCode) , (pcName) , (usStackDepth) , (pvParameters), (uxPriority), (pxCreatedTask) ); vTaskDelay(10);
 
-/*TODO:
- * 1. finish all commands function
- * 2. remove comments from AUC to execute commands
- * 3. change the way commands pass throw tasks
- */
 
 xSemaphoreHandle xCTE = NULL;
 
@@ -80,7 +75,6 @@ void reset_command(TC_spl *command)
 	memset((void*)command, 0, SIZE_OF_COMMAND);
 }
 
-//todo: change name to more significant
 int init_command()
 {
 	if (xCTE != NULL)
@@ -258,7 +252,6 @@ void AUC_general(TC_spl decode)
 
 	switch (decode.subType)
 	{
-	//todo: add generic ADCS I2C command as bypass to the ADCS logic = use the AdcsGenericI2C...
 
 	case (GENERIC_I2C_ST):
 		cmd_generic_I2C(&type, &err, decode);

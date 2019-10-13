@@ -22,7 +22,7 @@
 
 void cmd_reset_delayed_command_list(Ack_type* type, ERR_type* err)
 {
-	reset_delayCommand(FALSE);
+	reset_delayCommand();
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 }

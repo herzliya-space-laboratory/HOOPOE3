@@ -140,13 +140,20 @@ void check_delaycommand()
 	if (list_changed == TRUE)
 	{
 		// 12. return the list to the FRAM
-		FRAM_write_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND));	//write back the new list
-		FRAM_write_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, sizeof(numberOfCommands));	//write back the nuber of commands that stored in the FRAM
+		err = FRAM_write_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND));	//write back the new list
+		if (err != 0)
+		{
+			WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_WRITE, SYSTEM_TRXVU, err);
+			return;
+		}
+		err = FRAM_write_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, sizeof(numberOfCommands));	//write back the nuber of commands that stored in the FRAM
+		if (err != 0)
+			WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_WRITE, SYSTEM_TRXVU, err);
 	}
 
 }
 
-void reset_delayCommand(Boolean firstActivation)
+void reset_delayCommand()
 {
 	byte numberOfCommands = 0;				//get number of command in the FRAM
 
@@ -161,12 +168,6 @@ void reset_delayCommand(Boolean firstActivation)
 	if (err != 0)
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_WRITE, SYSTEM_TRXVU, err);
 	check_int("reset_delayCommand, FRAM_write_exte(NUMBER_COMMAND_FRAM_ADDR)", err);
-
-	//  if its not init, update the number of APRS commands
-	if (!firstActivation)
-	{
-		//set_numOfDelayedCommand(numberOfCommands);
-	}
 }
 
 int add_delayCommand(TC_spl decode)
@@ -191,7 +192,7 @@ int add_delayCommand(TC_spl decode)
 	if (i_error != 0)
 	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ, SYSTEM_TRXVU, i_error);
-		return -1;
+		return i_error;
 	}
 	check_int("add_delayCommand, FRAM_read", i_error);
 
@@ -214,18 +215,27 @@ int add_delayCommand(TC_spl decode)
 	// 7.1. returns the list to the FRAM
 	i_error = FRAM_write_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, (SIZE_OF_DELAYED_COMMAND * MAX_NUMBER_OF_DELAY_COMMAND));
 	if (i_error != 0)
+	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_WRITE, SYSTEM_TRXVU, i_error);
+		DELETE_CMD_FROM_LIST(count);
+		return i_error;
+	}
 	check_int("add_delayCommand, FRAM_write", i_error);
 	numberOfCommands++;
 	i_error = FRAM_write_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
 	if (i_error != 0)
+	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_WRITE, SYSTEM_TRXVU, i_error);
+		DELETE_CMD_FROM_LIST(count);
+		numberOfCommands--;
+		return i_error;
+	}
 	check_int("add_delayCommand, FRAM_write", i_error);
 
 	return 0;
 }
 
-void get_delayCommand_list()
+int get_delayCommand_list()
 {
 	int error;
 	memset(DelayCommand_list, 0, MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND);	//sets all slots in the array to zero for later write to the FRAM
@@ -233,7 +243,7 @@ void get_delayCommand_list()
 	if (error != 0)
 	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ, SYSTEM_TRXVU, error);
-		return;
+		return error;
 	}
 	check_int("get_delayCommand_list, FRAM_read_exte(DELAY_COMMAD_FRAM_ADDR)", error);
 	unsigned char num;
@@ -241,9 +251,10 @@ void get_delayCommand_list()
 	if (error != 0)
 	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ, SYSTEM_TRXVU, error);
-		return;
+		return error;
 	}
 	check_int("get_delayCommand_list, FRAM_read_exte(NUMBER_COMMAND_FRAM_ADDR)", error);
+	return 0;
 }
 
 void EmptyOldestCommand()
@@ -268,3 +279,4 @@ void EmptyOldestCommand()
 		}
 	}
 }
+

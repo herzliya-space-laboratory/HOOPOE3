@@ -691,7 +691,7 @@ void Beacon_task()
 		}
 		check_int("beacon_task, FRAM_write_exte(BEACON_TIME_ADDR)", i_error);
 		// 6. check if value in range
-		if (!(MIN_TIME_DELAY_BEACON <= delayBaecon || delayBaecon <= MAX_TIME_DELAY_BEACON))
+		if (!(delayBaecon >= MIN_TIME_DELAY_BEACON && delayBaecon <= MAX_TIME_DELAY_BEACON))
 		{
 			delayBaecon = DEFULT_BEACON_DELAY;
 		}
@@ -829,7 +829,7 @@ void reset_FRAM_TRXVU()
 	reset_APRS_list(TRUE);
 
 	//Delay command list
-	reset_delayCommand(TRUE);
+	reset_delayCommand();
 
 	//BEACON_LOW_BATTERY_STATE_ADDR reset
 	voltage_t voltage = DEFULT_COMM_VOL;

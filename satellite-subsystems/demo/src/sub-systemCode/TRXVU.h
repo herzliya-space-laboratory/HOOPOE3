@@ -44,15 +44,14 @@
 #endif
 
 #define MIN_TIME_DELAY_BEACON	5
-#define MAX_TIME_DELAY_BEACON 	255
+#define MAX_TIME_DELAY_BEACON 	254
 
 #define TRANSMMIT_DELAY_9600(length) (length - length)
 //(portTickType)((length + 30) * (5 / 6) + 30)
 #define TRANSMMIT_DELAY_1200(length) (portTickType)(20 * 100)
 
-#define GROUND_PASSING_TIME	(60*5)//todo: find real values
+#define GROUND_PASSING_TIME	(60*5)
 
-//todo: find real values
 #define DEFULT_COMM_VOL		7250
 
 #define MIN_TRANS_RSSI 	0
