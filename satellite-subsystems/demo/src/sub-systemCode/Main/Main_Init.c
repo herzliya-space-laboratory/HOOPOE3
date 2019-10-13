@@ -79,28 +79,16 @@ void numberOfRestarts()
 void StartFRAM()
 {
 	int error = FRAM_start();
-	if(0 != error )
-	{
-		printf("error in FRAM_start(); err = %d\n",error);
-	}
 }
 
 void StartI2C()
 {
 	int error = I2C_start(I2c_SPEED_Hz, I2c_Timeout);
-	if(0 != error )
-	{
-		printf("error in I2C_start; err = %d\n",error);
-	}
 }
 
 void StartSPI()
 {
 	int error = SPI_start(bus1_spi, slave1_spi);
-	if(0 != error )
-	{
-		printf("error in SPI_start; err = %d\n",error);
-	}
 }
 
 void StartTIME()
@@ -109,10 +97,6 @@ void StartTIME()
 	int error = 0;
 	Time initial_time_jan2000={0,0,0,1,30,6,19,0};
 	error = Time_start(&initial_time_jan2000,0);
-	if(0 != error )
-	{
-		printf("error in Time_start; err = %d\n",error);
-	}
 	vTaskDelay(100);
 	time_unix time_now;
 	error = Time_getUnixEpoch(&time_now);
@@ -215,8 +199,6 @@ int InitSubsystems()
 	InitializeFS(activation);
 
 	//CUFManageRestart(activation);
-
-	//resetSD();
 
 #ifdef ANTS_ON
 	init_Ants(activation);

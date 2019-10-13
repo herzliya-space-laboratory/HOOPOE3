@@ -258,22 +258,18 @@ void writeState_log(EPS_mode_t mode, voltage_t vol)
 	switch(mode)
 	{
 	case full_mode:
-		printf("Enter Full Mode\n");
 		resumeAction();
 		WriteEpsLog(EPS_ENTER_FULL_MODE, (int)vol);
 		break;
 	case cruise_mode:
-		printf("Enter Cruise Mode\n");
 		stopAction();
 		WriteEpsLog(EPS_ENTER_CRUISE_MODE, (int)vol);
 		break;
 	case safe_mode:
-		printf("Enter Safe Mode\n");
 		stopAction();
 		WriteEpsLog(EPS_ENTER_SAFE_MODE, (int)vol);
 		break;
 	case critical_mode:
-		printf("Enter Critical Mode\n");
 		stopAction();
 		WriteEpsLog(EPS_ENTER_CRITICAL_MODE, (int)vol);
 		break;
