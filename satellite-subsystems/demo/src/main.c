@@ -86,24 +86,14 @@ void taskMain()
 
 	InitSubsystems();
 
-	vTaskDelay(100);
-
-	SubSystemTaskStart();
-
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	const portTickType xFrequency = 1000;
 	
+	printf("I am ready to leave and start my own life in space\n");
 	while(1)
 	{
-		EPS_Conditioning();
+		printf("GoodBye Moonmen\n");
 
-		Command_logic();
-
-		save_time();
-
-#ifdef ANTS_ON
-		DeployIfNeeded();
-#endif
 		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
 }
