@@ -30,92 +30,6 @@ typedef struct __attribute__((__packed__))	_LogStruct
 }LogStruct;
 
 typedef enum _log_errors{
-	LOG_ERR_FRAM_WRITE = 0,
-	LOG_ERR_FRAM_READ = 1,
-	LOG_ERR_GET_TIME = 2,
-	LOG_ERR_SET_TIME = 3,
-	LOG_ERR_DELETE_TM = 4,
-	LOG_ERR_DELETE_FILES = 5,
-
-	LOG_ERR_RESET_FRAM_MAIN = 30,
-	LOG_ERR_FRAM_GLOBAL_PARAM = 31,
-	LOG_ERR_SAMAPHORE_GLOBAL_PARAM = 32,
-	LOG_ERR_SAVE_HK = 33,
-	LOG_ERR_SEMAPHORE_SD = 34,
-	LOG_ERR_SEMAPHORE_CMD = 35,
-	LOG_ERR_READ_SD_TLM = 36,
-	/*
-	 * --------Payload Errors--------
-	 *
-	 * BUTCHERING
-	 */
-	LOG_ERR_BUTCHER_SUCCSESSFULL = 100,
-	LOG_ERR_BUTCHER_NULL_POINTER_ERR = 101,
-	LOG_ERR_BUTHCER_PARAMATER_VALUE_ERR = 102,
-	LOG_ERR_BUTCHER_UD_ERROR = 103,
-	LOG_ERR_BUTCHER_BAD_WIDTH_ERR = 104,
-	/*
-	 * DATABASE
-	 *
-	 * General
-	 */
-	LOG_ERR_DataBaseSuccessfull = 110,
-	LOG_ERR_DataBaseNullPointerERR = 111,
-	LOG_ERR_DataBaseNotInSDERR = 112,
-	LOG_ERR_DataBaseTransferERR = 113,
-	LOG_ERR_DataBasealreadyInSDERR = 114,
-	LOG_ERR_DataBaseGradeCalculationERR = 115,
-	LOG_ERR_DataBaseIllegalIdERR = 116,
-	LOG_ERR_DataBaseVectorNotExistERR = 117,
-	LOG_ERR_DataBaseFramERR = 118,
-	LOG_ERR_DataBaseFullERR = 119,
-	LOG_ERR_DataBaseERR = 121,
-	LOG_ERR_DataBaseTimeERR = 122,
-	LOG_ERR_DataBaseShotPicNotLongAgoERR = 123,
-	LOG_ERR_DataBaseAlreadyMarkedERR = 124,
-	LOG_ERR_DataBase_SmallerThanTheCurrentMaxERR = 125,
-	LOG_ERR_DataBase_sizeBeyondFRAMBounderiesERR = 126,
-	/*
-	 * GECKO_UC_TakeImage
-	 */
-	LOG_ERR_GECKO_Take_Successfull = 130,
-	LOG_ERR_GECKO_Take_ERR_TurnOffSensor = 131,
-	LOG_ERR_GECKO_Take_ERR_Set_ADC_Gain = 132,
-	LOG_ERR_GECKO_Take_ERR_Set_PGA_Gain = 133,
-	LOG_ERR_GECKO_Take_ERR_setExposure = 134,
-	LOG_ERR_GECKO_Take_ERR_setFrameAmount = 135,
-	LOG_ERR_GECKO_Take_ERR_setFrameRate = 136,
-	LOG_ERR_GECKO_Take_ERR_turnOnSensor = 137,
-	LOG_ERR_GECKO_Take_sensorTurnOnTimeoutERR = 138,
-	LOG_ERR_GECKO_Take_trainingTimeoutERR = 139,
-	LOG_ERR_GECKO_Take_trainingErrorERR = 141,
-	LOG_ERR_GECKO_Take_ERR_notInitialiseFlash = 142,
-	LOG_ERR_GECKO_Take_ERR_setImageID = 143,
-	LOG_ERR_GECKO_Take_ERR_disableTestPattern = 144,
-	LOG_ERR_GECKO_Take_ERR_startSampling = 145,
-	LOG_ERR_GECKO_Take_samplingTimeoutERR = 146,
-	LOG_ERR_GECKO_Take_ERR_clearSampleFlag = 147,
-	LOG_ERR_GECKO_Take_ERR_turnOfSensor = 148,
-	/*
-	 * GECKO_UC_ReadImage
-	 */
-	LOG_ERR_GECKO_Read_Successfull = 150,
-	LOG_ERR_GECKO_Read_ERR_InitialiseFlash = 151,
-	LOG_ERR_GECKO_Read_ERR_SetImageID = 152,
-	LOG_ERR_GECKO_Read_ERR_StartReadout = 153,
-	LOG_ERR_GECKO_Read_readTimeoutERR = 154,
-	LOG_ERR_GECKO_Read_wordCountMismatchERR = 155,
-	LOG_ERR_GECKO_Read_pageCountMismatchERR = 156,
-	LOG_ERR_GECKO_Read_readDoneFlagNotSetERR = 157,
-	LOG_ERR_GECKO_Read_Error_ClearReadDoneFlagERR = 158,
-	/*
-	 * GECKO_UC_EraseImage
-	 */
-	LOG_ERR_GECKO_Erase_Successfull = 160,
-	LOG_ERR_GECKO_Erase_ERR_SetImageID = 161,
-	LOG_ERR_GECKO_Erase_StartEraseERR = 162,
-	LOG_ERR_GECKO_Erase_TimeoutERR = 163,
-	LOG_ERR_GECKO_Erase_Error_ClearEraseDoneFlag = 164,
 	/*
 	 * CUF Errors
 	 */
@@ -130,7 +44,31 @@ typedef enum _log_errors{
 	CUF_DISABLE_FAIL = 173
 } log_errors;
 
+typedef enum _log_errors_OBC{
+	LOG_ERR_FRAM_WRITE = 0,
+	LOG_ERR_FRAM_READ = 1,
+	LOG_ERR_GET_TIME = 2,
+	LOG_ERR_SET_TIME = 3,
+	LOG_ERR_DELETE_TM = 4,
+	LOG_ERR_DELETE_FILES = 5,
+
+	LOG_ERR_RESET_FRAM_MAIN = 30,
+	LOG_ERR_FRAM_GLOBAL_PARAM = 31,
+	LOG_ERR_SAMAPHORE_GLOBAL_PARAM = 32,
+	LOG_ERR_SAVE_HK = 33,
+	LOG_ERR_SEMAPHORE_SD = 34,
+	LOG_ERR_SEMAPHORE_CMD = 35,
+	LOG_ERR_READ_SD_TLM = 36,
+} log_errors_OBC;
+
 typedef enum _log_errors_COMM{
+	LOG_ERR_FRAM_WRITE_ = 0,
+	LOG_ERR_FRAM_READ_ = 1,
+	LOG_ERR_GET_TIME_ = 2,
+	LOG_ERR_SET_TIME_ = 3,
+	LOG_ERR_DELETE_TM_ = 4,
+	LOG_ERR_DELETE_FILES_ = 5,
+
 	LOG_ERR_COMM_SET_BIT_RATE = 10,
 	LOG_ERR_COMM_IDLE = 11,
 	LOG_ERR_COMM_INIT_TRXVU = 12,
@@ -162,6 +100,13 @@ typedef enum _log_errors_COMM{
 } log_errors_COMM;
 
 typedef enum _log_errors_ANTS{
+	LOG_ERR_FRAM_WRITE__ = 0,
+	LOG_ERR_FRAM_READ__ = 1,
+	LOG_ERR_GET_TIME__ = 2,
+	LOG_ERR_SET_TIME__ = 3,
+	LOG_ERR_DELETE_TM__ = 4,
+	LOG_ERR_DELETE_FILES__ = 5,
+
 	LOG_ERR_INIT_ANTS = 20,
 	LOG_ERR_ARM_ANTS_A = 21,
 	LOG_ERR_ARM_ANTS_B = 22,
@@ -175,6 +120,13 @@ typedef enum _log_errors_ANTS{
 } log_errors_ANTS;
 
 typedef enum _log_errors_EPS{
+	LOG_ERR_FRAM_WRITE___ = 0,
+	LOG_ERR_FRAM_READ___ = 1,
+	LOG_ERR_GET_TIME___ = 2,
+	LOG_ERR_SET_TIME___ = 3,
+	LOG_ERR_DELETE_TM___ = 4,
+	LOG_ERR_DELETE_FILES___ = 5,
+
 	LOG_ERR_EPS_GRD_WDT = 10,
 	LOG_ERR_EPS_FRAM_OVERRIDE_VALUE = 11,
 	LOG_ERR_EPS_UPDATE_POWER_LINES = 12,
