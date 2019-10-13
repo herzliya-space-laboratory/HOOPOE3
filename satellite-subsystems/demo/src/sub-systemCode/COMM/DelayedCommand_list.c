@@ -104,7 +104,10 @@ void check_delaycommand()
 	unsigned char numberOfCommands = 0;	//stored the number of commands from the FRAM
 	err = FRAM_read_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
 	if (err != 0)
+	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ, SYSTEM_TRXVU, err);
+		return;
+	}
 	check_int("check_delaycommand, FRAM_read_exte(NUMBER_COMMAND_FRAM_ADDR)", err);
 	set_numOfDelayedCommand(numberOfCommands);
 	//printf("number of commands in FRAM %d\n", numberOfCommands);
@@ -141,7 +144,6 @@ void check_delaycommand()
 		FRAM_write_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, sizeof(numberOfCommands));	//write back the nuber of commands that stored in the FRAM
 	}
 
-	//set_numOfDelayedCommand(numberOfCommands);
 }
 
 void reset_delayCommand(Boolean firstActivation)
@@ -187,7 +189,10 @@ int add_delayCommand(TC_spl decode)
 	// 3. read number of delay commands in delay command list
 	i_error = FRAM_read_exte(&numberOfCommands, NUMBER_COMMAND_FRAM_ADDR, 1);
 	if (i_error != 0)
+	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ, SYSTEM_TRXVU, i_error);
+		return -1;
+	}
 	check_int("add_delayCommand, FRAM_read", i_error);
 
 	// 4. check if the list is full
@@ -226,14 +231,19 @@ void get_delayCommand_list()
 	memset(DelayCommand_list, 0, MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND);	//sets all slots in the array to zero for later write to the FRAM
 	error = FRAM_read_exte(DelayCommand_list, DELAY_COMMAD_FRAM_ADDR, MAX_NUMBER_OF_DELAY_COMMAND * SIZE_OF_DELAYED_COMMAND);
 	if (error != 0)
+	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ, SYSTEM_TRXVU, error);
+		return;
+	}
 	check_int("get_delayCommand_list, FRAM_read_exte(DELAY_COMMAD_FRAM_ADDR)", error);
 	unsigned char num;
 	error = FRAM_read_exte(&num, NUMBER_COMMAND_FRAM_ADDR, 1);
 	if (error != 0)
+	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_DELAYED_COMMAND_FRAM_READ, SYSTEM_TRXVU, error);
+		return;
+	}
 	check_int("get_delayCommand_list, FRAM_read_exte(NUMBER_COMMAND_FRAM_ADDR)", error);
-	//set_numOfDelayedCommand(num);
 }
 
 void EmptyOldestCommand()

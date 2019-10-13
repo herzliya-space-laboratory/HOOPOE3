@@ -137,7 +137,7 @@ int get_offlineSetting_FRAM(saveTM_FRAM *list)
 		return -4;
 	int i_error = FRAM_read_exte((byte*)list, OFFLINE_LIST_SETTINGS_ADDR, OFFLINE_FRAM_STRUCT_SIZE * MAX_ITEMS_OFFLINE_LIST);
 	check_int("FRAM_writeAndVerify, save_offlineSettings_FRAM", i_error);
-	return 0;
+	return i_error;
 }
 //update the current off line list from the FRAM
 int update_offlineSetting_FRAM()
