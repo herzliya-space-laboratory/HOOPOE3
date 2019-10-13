@@ -57,7 +57,7 @@ void cmd_reset_FRAM(Ack_type* type, ERR_type* err, TC_spl cmd)
 			reset_FRAM_MAIN();
 			break;
 		case CAMMERA:
-			//todo:
+			//todo: Roy
 			break;
 		case everything:
 			reset_FRAM_MAIN();

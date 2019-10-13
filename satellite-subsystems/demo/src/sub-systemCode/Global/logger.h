@@ -244,7 +244,9 @@ typedef enum _log_adcs{
 	LOG_ADCS_MALLOC_ERR,
 	LOG_ADCS_I2C_READ_ERR,
 	LOG_ADCS_I2C_WRITE_ERR,
-	LOG_ADCS_GENERIC_I2C_ACK
+	LOG_ADCS_GENERIC_I2C_ACK,
+	LOG_ADCS_HARD_RESET,
+	LOG_ADCS_SOFT_RESET
 } log_adcs;
 
 typedef enum _log_transponder{
