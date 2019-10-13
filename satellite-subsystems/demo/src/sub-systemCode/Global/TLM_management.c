@@ -1,5 +1,5 @@
 /*
- * filesystem.c
+טו * filesystem.c
  *
  *  Created on: 20 áîøõ 2019
  *      Author: Idan
@@ -157,7 +157,7 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 			*fileHandler = f_open(file_name, config);
 			lastError = f_getlasterror();
 
-			if (*fileHandler != NULL||lastError==5)
+			if (*fileHandler != NULL)
 				return 0;
 			vTaskDelay(100);
 		}
@@ -559,7 +559,9 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 		int error = f_managed_open(curr_file_name, "r", &current_file);
 		if (error != 0 || curr_file_name == NULL)
 			continue;
-		unsigned int length =f_filelength(curr_file_name)/(size_elementWithTimeStamp);//number of elements in currnet_file
+		int file_length =f_filelength(curr_file_name);
+		int length = file_length/(size_elementWithTimeStamp);//number of elements in currnet_file
+
 		int err_fread=0;
 		(void)err_fread;
 		f_seek( current_file, 0L , SEEK_SET );
