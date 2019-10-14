@@ -75,6 +75,7 @@ void reset_command(TC_spl *command)
 	memset((void*)command, 0, SIZE_OF_COMMAND);
 }
 
+
 int init_command()
 {
 	if (xCTE != NULL)

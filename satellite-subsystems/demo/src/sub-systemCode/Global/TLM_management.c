@@ -271,7 +271,7 @@ FileSystemResult c_fileCreate(char* c_file_name,
 	{
 			return FS_FRAM_FAIL;
 	}
-	if(setNumOfFilesInFS(num_of_files_in_FS+1)!=0)//TODO change to c_fil
+	if(setNumOfFilesInFS(num_of_files_in_FS+1)!=0)
 	{
 		return FS_FRAM_FAIL;
 	}

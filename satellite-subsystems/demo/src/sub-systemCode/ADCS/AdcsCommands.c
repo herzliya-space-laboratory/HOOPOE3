@@ -634,10 +634,8 @@ TroubleErrCode AdcsExecuteCommand(TC_spl *cmd)
 			SendAdcsTlm((byte*)&temp,sizeof(temp),ADCS_GET_TLM_OVERRIDE_FLAG_ST);
 			break;
 		case ADCS_SET_DATA_LOG_ST:
-			//TODO: implement
 			break;
 		default:
-			//TODO: return unknown subtype
 			break;
 	}
 	unsigned int error_codes[] = {sub_type,err,i2c_cmd.ack};

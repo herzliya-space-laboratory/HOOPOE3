@@ -111,7 +111,7 @@ int soft_reset_subsystem(subSystem_indx reset_idx)
 		break;
 	case ADCS:
 		error = cspaceADCS_componentReset(0);
-		WriteResetLog(SYSTEM_ADCS, error);
+		WriteAdcsLog(LOG_ADCS_SOFT_RESET,error);//TODO:Check
 		check_int("soft reset, ADCS", error);
 		break;
 	case OBC:
@@ -152,7 +152,7 @@ int hard_reset_subsystem(subSystem_indx reset_idx)
 	case ADCS:
 		channel.raw = 0;
 		error = GomEpsSetOutput(0, channel);
-		WriteResetLog(SYSTEM_ADCS, error);
+		WriteAdcsLog(LOG_ADCS_HARD_RESET,error); //TODO:Check
 		check_int("Hard reset ADCS, turn off EPS channels", error);
 		break;
 	case CAMMERA:

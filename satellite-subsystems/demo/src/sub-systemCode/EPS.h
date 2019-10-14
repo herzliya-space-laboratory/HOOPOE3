@@ -63,7 +63,7 @@ typedef struct{
 void EPS_Init();
 
 /**
- *TODO:
+ * @brief	reset the EPS parameters saved on the FRAM to default values
  */
 void reset_FRAM_EPS();
 void reset_EPS_voltages();
