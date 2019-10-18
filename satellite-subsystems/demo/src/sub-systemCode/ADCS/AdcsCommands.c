@@ -24,6 +24,7 @@
 #define ADCS_ACK_TC_ERR_INDEX 2
 
 byte I2cData[ADCS_CMD_MAX_DATA_LENGTH]; //global for splited I2C TC (272 bytes long)
+unsigned char Adcs_raw_12c_command[ADCS_CMD_MAX_DATA_LENGTH];
 
 /*!
  * @brief allows the user to send a read request directly to the I2C.
@@ -71,16 +72,10 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	}
 	char is_tlm = (i2c_cmd->id & 0x80); // if MSB is 1 then it is TLM. if 0 then TC
 	if(!is_tlm){ // is command
-		memcpy(&i2c_cmd->data[1],i2c_cmd->data,i2c_cmd->length);	// data bytes of the CMD(length can be 0)
-		i2c_cmd->data[0] = i2c_cmd->id;								// first byte is the CMD ID
-		//TODO: delete
-		printf("\n\n");
-		for(unsigned int i = 0; i < sizeof(adcs_i2c_cmd);i++){
-			printf("%02X-",i2c_cmd->data[i]);
-		}
-		printf("\n\n");
+		memcpy(&Adcs_raw_12c_command[1],i2c_cmd->data,i2c_cmd->length);	// data bytes of the CMD(length can be 0)
+		Adcs_raw_12c_command[0] = i2c_cmd->id;								// first byte is the CMD ID
 
-		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length + 1); // +1 in case of 0 length CMD
+		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)Adcs_raw_12c_command, i2c_cmd->length + 1); // +1 in case of 0 length CMD
 		if(0 != err){
 			WriteAdcsLog(LOG_ADCS_I2C_WRITE_ERR,err);
 			return err;
