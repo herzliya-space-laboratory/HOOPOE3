@@ -338,7 +338,8 @@ src/sub-systemCode/CUF/CUF.d: ../src/sub-systemCode/CUF/CUF.c \
  C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/IsisTxS.h \
  C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/SCS_Gecko/gecko_driver.h \
  C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/SCS_Gecko/gecko_use_cases.h \
- C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/version/version.h
+ C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/version/version.h \
+ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/../../freertos/include/freertos/task.h
 
 ../src/sub-systemCode/CUF/CUF.h:
 
@@ -1019,3 +1020,5 @@ C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite
 C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/SCS_Gecko/gecko_use_cases.h:
 
 C:\HOOPOE3\satellite-subsystems\demo\src/../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/version/version.h:
+
+C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/../../freertos/include/freertos/task.h:

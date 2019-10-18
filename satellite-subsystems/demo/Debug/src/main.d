@@ -20,7 +20,6 @@ src/main.d: ../src/main.c \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exithandler.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h \
- C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/WatchDogTimer.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/boolean.h \
  C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/Time.h \
@@ -126,8 +125,6 @@ C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/utility/exitha
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/commons.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/at91/include/at91/peripherals/cp15/cp15.h:
-
-C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Utility/util.h:
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/hal/include/hal/Timing/WatchDogTimer.h:
 

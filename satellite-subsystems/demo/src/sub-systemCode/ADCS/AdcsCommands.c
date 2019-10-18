@@ -73,6 +73,13 @@ int AdcsGenericI2cCmd(adcs_i2c_cmd *i2c_cmd)
 	if(!is_tlm){ // is command
 		memcpy(&i2c_cmd->data[1],i2c_cmd->data,i2c_cmd->length);	// data bytes of the CMD(length can be 0)
 		i2c_cmd->data[0] = i2c_cmd->id;								// first byte is the CMD ID
+		//TODO: delete
+		printf("\n\n");
+		for(unsigned int i = 0; i < sizeof(adcs_i2c_cmd);i++){
+			printf("%02X-",i2c_cmd->data[i]);
+		}
+		printf("\n\n");
+
 		err = I2C_write(ADCS_I2C_ADRR, (unsigned char *)i2c_cmd->data, i2c_cmd->length + 1); // +1 in case of 0 length CMD
 		if(0 != err){
 			WriteAdcsLog(LOG_ADCS_I2C_WRITE_ERR,err);

@@ -514,12 +514,16 @@ void Rx_logic()
 
 	i_error = IsisTrxvu_rcGetFrameCount(I2C_BUS_ADDR, &RxCounter);
 	if (i_error != 0)
+	{
 		WriteErrorLog((log_errors)LOG_ERR_COMM_COUNT_FRAME, SYSTEM_TRXVU, i_error);
+
+	}
 	check_int("IsisTrxvu_rcGetFrameCount, trxvu_logic", i_error);
 	if (RxCounter > 0)
 	{
 		//	1.1. gets data from Rx buffer
 		i_error = TRX_getFrameData(&dataBuffer_length, dataBuffer);
+
 		if (dataBuffer != NULL && i_error == 0)
 		{
 			// 1.2. decode data to spl packet
