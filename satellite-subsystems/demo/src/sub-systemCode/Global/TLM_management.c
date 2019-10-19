@@ -372,8 +372,6 @@ FileSystemResult c_fileReset(char* c_file_name)
 			//f_delete(temp_name);
 		//} while (!f_findnext(&find));
 	//}
-	c_file.last_time_modified=curr_time;
-	c_file.creation_time =curr_time;
 	return FS_SUCCSESS;
 }
 

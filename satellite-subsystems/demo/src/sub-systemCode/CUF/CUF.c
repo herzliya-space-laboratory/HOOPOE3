@@ -726,10 +726,10 @@ void funcsPointerToArr()
 	CUFARR[82] = (void *)_flushDCache;
 	CUFARR[83] = (void *)_flushWriteBuffer;
 	CUFARR[84] = (void *)_invalidateIDTLBs;
-	CUFARR[85] = (void *)DBGU_Configure;
-	CUFARR[86] = (void *)DBGU_GetChar;
-	CUFARR[87] = (void *)DBGU_PutChar;
-	CUFARR[88] = (void *)DBGU_IsRxReady;
+	//CUFARR[85] = (void *)DBGU_Configure;
+	//CUFARR[86] = (void *)DBGU_GetChar;
+	//CUFARR[87] = (void *)DBGU_PutChar;
+	//CUFARR[88] = (void *)DBGU_IsRxReady;
 
 	//CUFARR[89] = (void *)ISI_Enable;
 	//CUFARR[90] = (void *)ISI_Disable;
@@ -818,7 +818,7 @@ void funcsPointerToArr()
 	CUFARR[172] = (void *)TWI_GetStatus;
 	CUFARR[173] = (void *)TWI_GetMaskedStatus;
 	CUFARR[174] = (void *)TWI_SendSTOPCondition;
-	CUFARR[175] = (void *)USART_Configure;
+	/*CUFARR[175] = (void *)USART_Configure;
 	CUFARR[176] = (void *)USART_SetTransmitterEnabled;
 	CUFARR[177] = (void *)USART_SetReceiverEnabled;
 	CUFARR[178] = (void *)USART_Write;
@@ -847,6 +847,7 @@ void funcsPointerToArr()
 	CUFARR[201] = (void *)USBGenericRequest_GetLength;
 	CUFARR[202] = (void *)USBGenericRequest_GetEndpointNumber;
 	CUFARR[203] = (void *)USBGenericRequest_GetRecipient;
+
 	CUFARR[204] = (void *)USBGenericRequest_GetDirection;
 	CUFARR[205] = (void *)USBGetDescriptorRequest_GetDescriptorType;
 	CUFARR[206] = (void *)USBGetDescriptorRequest_GetDescriptorIndex;
@@ -895,6 +896,8 @@ void funcsPointerToArr()
 	//CUFARR[249] = (void *)WriteBMPheader;
 	//CUFARR[250] = (void *)BMP_displayHeader;
 	//CUFARR[251] = (void *)RGB565toBGR555;
+	 *
+	 */
 	CUFARR[252] = (void *)restart;
 	CUFARR[253] = (void *)restartPrefetchAbort;
 	CUFARR[254] = (void *)restartDataAbort;
@@ -907,7 +910,7 @@ void funcsPointerToArr()
 	CUFARR[261] = (void *)power;
 	CUFARR[262] = (void *)srand;
 	CUFARR[263] = (void *)rand;
-	CUFARR[264] = (void *)VIDEO_Ycc2Rgb;
+	//CUFARR[264] = (void *)VIDEO_Ycc2Rgb;
 	//CUFARR[265] = (void *)DEMO_SD_Basic;
 	//CUFARR[266] = (void *)DEMO_SD_FileTasks;
 	//CUFARR[267] = (void *)DEMO_SD_StringFunc;
@@ -938,12 +941,12 @@ void funcsPointerToArr()
 	CUFARR[292] = (void *)vCoRoutineAddToDelayedList;
 	CUFARR[293] = (void *)xCoRoutineRemoveFromEventList;
 	CUFARR[294] = (void *)vListInitialise;
-	CUFARR[295] = (void *)vListInitialiseItem;
+	/*CUFARR[295] = (void *)vListInitialiseItem;
 	CUFARR[296] = (void *)vListInsert;
 	CUFARR[297] = (void *)vListInsertEnd;
 	CUFARR[298] = (void *)uxListRemove;
 	CUFARR[299] = (void *)pxPortInitialiseStack;
-	CUFARR[300] = (void *)pxPortInitialiseStack;
+	*/CUFARR[300] = (void *)pxPortInitialiseStack;
 	CUFARR[301] = (void *)pvPortMalloc;
 	CUFARR[302] = (void *)vPortFree;
 	CUFARR[303] = (void *)vPortInitialiseBlocks;
@@ -1044,7 +1047,7 @@ void funcsPointerToArr()
 	CUFARR[398] = (void *)vPortFree;
 	CUFARR[399] = (void *)vPortInitialiseBlocks;
 	CUFARR[400] = (void *)xPortGetFreeHeapSize;
-	CUFARR[401] = (void *)checksum_prepareLUTCRC32;
+	/*CUFARR[401] = (void *)checksum_prepareLUTCRC32;
 	CUFARR[402] = (void *)checksum_calculateCRC32LUT;
 	CUFARR[403] = (void *)checksum_calculateCRC32;
 	CUFARR[404] = (void *)checksum_verifyCRC32;
@@ -1055,7 +1058,7 @@ void funcsPointerToArr()
 	CUFARR[409] = (void *)checksum_prepareLUTCRC8;
 	CUFARR[410] = (void *)checksum_calculateCRC8LUT;
 	CUFARR[411] = (void *)checksum_calculateCRC8;
-	CUFARR[412] = (void *)checksum_verifyCRC8;
+	*/CUFARR[412] = (void *)checksum_verifyCRC8;
 	CUFARR[413] = (void *)Supervisor_start;
 	CUFARR[414] = (void *)Supervisor_emergencyReset;
 	CUFARR[415] = (void *)Supervisor_reset;
@@ -1087,12 +1090,13 @@ void funcsPointerToArr()
 	CUFARR[441] = (void *)I2Cslave_getDriverState;
 	CUFARR[442] = (void *)I2Cslave_mute;
 	CUFARR[443] = (void *)I2Cslave_unMute;
-	CUFARR[444] = (void *)LED_start;
+	/*CUFARR[444] = (void *)LED_start;
 	CUFARR[445] = (void *)LED_glow;
 	CUFARR[446] = (void *)LED_dark;
 	CUFARR[447] = (void *)LED_toggle;
 	CUFARR[448] = (void *)LED_wave;
 	CUFARR[449] = (void *)LED_waveReverse;
+	*/
 	CUFARR[450] = (void *)PWM_start;
 	CUFARR[451] = (void *)PWM_startAuto;
 	CUFARR[452] = (void *)PWM_setDutyCycles;
@@ -1157,7 +1161,7 @@ void funcsPointerToArr()
 	CUFARR[510] = (void *)WDT_forceKickEveryNms;
 	CUFARR[511] = (void *)WDT_startWatchdogKickTask;
 	CUFARR[512] = (void *)WDT_stopWatchdogKickTask;
-	CUFARR[513] = (void *)DBGU_Init;
+	/*CUFARR[513] = (void *)DBGU_Init;
 	CUFARR[514] = (void *)DBGU_IntIsRxReady;
 	CUFARR[515] = (void *)DBGU_IntGetChar;
 	CUFARR[516] = (void *)f_printf;
@@ -1166,7 +1170,7 @@ void funcsPointerToArr()
 	CUFARR[519] = (void *)UTIL_DbguGetInteger;
 	CUFARR[520] = (void *)UTIL_DbguGetIntegerMinMax;
 	CUFARR[521] = (void *)UTIL_DbguGetHexa32;
-	CUFARR[522] = (void *)UTIL_DbguGetString;
+	*/CUFARR[522] = (void *)UTIL_DbguGetString;
 	CUFARR[523] = (void *)fn_init;
 	CUFARR[524] = (void *)fn_start;
 	CUFARR[525] = (void *)fn_stop;
@@ -1251,7 +1255,7 @@ void funcsPointerToArr()
 	//CUFARR[604] = (void *)fm_wgetattr;
 	//CUFARR[605] = (void *)fm_wsetattr;
 
-	CUFARR[606] = (void *)f_dotest;
+	//CUFARR[606] = (void *)f_dotest;
 	CUFARR[607] = (void *)hcc_mem_init;
 	CUFARR[608] = (void *)hcc_mem_start;
 	CUFARR[609] = (void *)hcc_mem_stop;
@@ -1464,6 +1468,10 @@ void funcsPointerToArr()
 	CUFARR[816] = (void *)reset_FRAM_FS;
 	CUFARR[817] = (void *)sd_format;
 	CUFARR[818] = (void *)deleteDir;
+
+
+
+
 	CUFARR[819] = (void *)InitializeFS;
 	CUFARR[820] = (void *)DeInitializeFS;
 	CUFARR[821] = (void *)c_fileCreate;
@@ -1471,12 +1479,20 @@ void funcsPointerToArr()
 	CUFARR[823] = (void *)c_fileDeleteElements;
 	//CUFARR[824] = (void *)c_fileGetNumOfElements;
 	CUFARR[825] = (void *)c_fileRead;
-	CUFARR[826] = (void *)print_file;
+	//CUFARR[826] = (void *)print_file;
 	CUFARR[827] = (void *)c_fileReset;
 	//CUFARR[828] = (void *)FS_test;
 	//CUFARR[829] = (void *)test_i;
 	CUFARR[830] = (void *)init_command;
 	CUFARR[831] = (void *)add_command;
+
+
+
+
+
+
+
+
 	CUFARR[832] = (void *)get_command;
 	CUFARR[833] = (void *)act_upon_command;
 	CUFARR[834] = (void *)AUC_COMM;
