@@ -183,19 +183,40 @@ int initCamera(Boolean first_activation)
 	setGeckoParametersInFRAM();
 
 	int error = initGecko();
-	CMP_AND_RETURN(error, 0, error);
+	if (error != 0)
+	{
+		vTaskDelay(1000);
+		error = initGecko();
+		CMP_AND_RETURN(error, 0, error);
+	}
 
 	error = createFolders();
-	CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+	if (error != 0)
+	{
+		vTaskDelay(1000);
+		error = createFolders();
+		CMP_AND_RETURN(error, 0, DataBaseFileSystemError);
+	}
 
 	imageDataBase = initImageDataBase(first_activation);
 	if (imageDataBase == NULL)
+	{
 		error = -1;
+		vTaskDelay(1000);
+		imageDataBase = initImageDataBase(first_activation);
+		CHECK_FOR_NULL(imageDataBase, -1);
+		error = 0;
+	}
 
 	if (first_activation)
 	{
 		error = setChunkDimensions_inFRAM(DEFALT_CHUNK_WIDTH, DEFALT_CHUNK_HEIGHT);
-		CMP_AND_RETURN(error, DataBaseSuccess, error);
+		if (error != DataBaseSuccess)
+		{
+			vTaskDelay(1000);
+			error = setChunkDimensions_inFRAM(DEFALT_CHUNK_WIDTH, DEFALT_CHUNK_HEIGHT);
+			CMP_AND_RETURN(error, DataBaseSuccess, error);
+		}
 	}
 
 	return error;
@@ -462,7 +483,6 @@ void act_upon_request(Camera_Request request)
 	case turn_on_AutoThumbnailCreation:
 		automatic_image_handler_disabled_permanently = FALSE;
 		setGeckoParametersInFRAM();
-
 		resumeAction();
 
 		setAutoThumbnailCreation(imageDataBase, TRUE_8BIT);

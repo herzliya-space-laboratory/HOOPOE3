@@ -30,7 +30,7 @@
 #define SKIP_FILE_TIME_SEC ((60*60*24)/NUMBER_OF_WRITES)
 #define _SD_CARD (0)
 #define FIRST_TIME (-1)
-
+#define DEFAULT_SD 1
 #define FILE_NAME_WITH_INDEX_SIZE (MAX_F_FILE_NAME_SIZE+sizeof(int)*2)
 #define MAX_ELEMENT_SIZE (MAX_SIZE_TM_PACKET+sizeof(int))
 #define FS_TAKE_SEMPH_DELAY	(1000 * 30)
@@ -44,6 +44,7 @@ xSemaphoreHandle xFileOpenHandler;
 typedef struct
 {
 	int num_of_files;
+	int sd_index;
 } FS;
 
 //struct for chain file info
@@ -57,7 +58,25 @@ typedef struct
 
 } C_FILE;
 #define C_FILES_BASE_ADDR (FSFRAM+sizeof(FS))
+static int getSdIndex()
+{
+	FS fs;
 
+	if(FRAM_read_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+	{
+		return -1;
+	}
+	return fs.sd_index;
+}
+static int setSdIndex(int new_sd_index)
+{
+
+	if(FRAM_write_exte((unsigned char*)&new_sd_index,FSFRAM+sizeof(int),sizeof(int))!=0)
+	{
+		return -1;
+	}
+	return 0;
+}
 FileSystemResult reset_FRAM_FS()
 {
 	FS fs = {0};
@@ -128,9 +147,8 @@ static int getNumOfFilesInFS()
 
 static int setNumOfFilesInFS(int new_num_of_files)
 {
-	FS fs;
-	fs.num_of_files = new_num_of_files;
-	if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+
+	if(FRAM_write_exte((unsigned char*)&new_num_of_files,FSFRAM,sizeof(int))!=0)
 	{
 		return -1;
 	}
@@ -194,6 +212,7 @@ FileSystemResult createSemahores_FS()
 		return FS_COULD_NOT_CREATE_SEMAPHORE;
 	return FS_SUCCSESS;
 }
+
 FileSystemResult InitializeFS(Boolean first_time)
 {
 	FileSystemResult FS_result = createSemahores_FS();
@@ -216,14 +235,21 @@ FileSystemResult InitializeFS(Boolean first_time)
 	{
 		return FS_FAT_API_FAIL;
 	}
+	int sd_index = getSdIndex();
+	if(sd_index!=0&&sd_index!=1)
+	{
+		sd_index=DEFAULT_SD;
+	}
+	ret = f_initvolume( 0, atmel_mcipdc_initfunc, DEFAULT_SD ); /* Initialize volID as safe */
 
-	ret = f_initvolume( 0, atmel_mcipdc_initfunc, _SD_CARD ); /* Initialize volID as safe */
-
-	if( F_ERR_NOTFORMATTED == ret )
+	if( F_ERR_CARDREMOVED == ret )
 	{
 		DeInitializeFS();
 		vTaskDelay(1000);
-		InitializeFS(first_time);
+		fs_init();
+		f_managed_enterFS();
+		f_initvolume( 0, atmel_mcipdc_initfunc, DEFAULT_SD );
+
 		return FS_FAT_API_FAIL;
 	}
 	else if( F_NO_ERROR != ret)
@@ -234,8 +260,8 @@ FileSystemResult InitializeFS(Boolean first_time)
 	{
 		char names[256];
 		strcpy(names, "*.*");
-		sd_format(0);
-		FS fs = {0};
+		sd_format(DEFAULT_SD);
+		FS fs = {0,DEFAULT_SD};
 		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
 		{
 			return FS_FAT_API_FAIL;
