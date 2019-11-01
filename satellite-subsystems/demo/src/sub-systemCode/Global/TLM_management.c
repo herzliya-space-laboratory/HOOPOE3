@@ -79,8 +79,8 @@ static int setSdIndex(int new_sd_index)
 }
 FileSystemResult reset_FRAM_FS()
 {
-	FS fs = {0};
-	if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
+	int num_of_files = 0;
+	if(FRAM_write_exte((unsigned char*)&num_of_files,FSFRAM,sizeof(int))!=0)
 	{
 		return FS_FAT_API_FAIL;
 	}
@@ -103,8 +103,6 @@ void sd_format(int index)
 void deleteDir(char* name, Boolean delete_folder)
 {
 	F_FIND find;
-	int format_err = f_format(0,F_FAT32_MEDIA);
-	return;
 	char temp_name[256]={0};
 	if (!f_findfirst(name,&find))
 	{
@@ -177,12 +175,14 @@ int f_managed_open(char* file_name, char* config, F_FILE** fileHandler)
 
 			if (*fileHandler != NULL)
 				return 0;
+			if(lastError == F_ERR_NOTFOUND || lastError == F_ERR_INVALIDDRIVE)
+				return lastError;
 			vTaskDelay(100);
 		}
 
 		if (fileHandler == NULL || lastError != 0)
 			xSemaphoreGive_extended(xFileOpenHandler);
-		vTaskDelay(SYSTEM_DEALY);
+		//vTaskDelay(SYSTEM_DEALY);
 	}
 	else
 	{
