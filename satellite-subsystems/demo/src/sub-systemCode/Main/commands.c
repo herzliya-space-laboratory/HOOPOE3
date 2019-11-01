@@ -268,7 +268,7 @@ void AUC_general(TC_spl decode)
 		cmd_delete_TM(&type, &err, decode);
 		break;
 	case (FORMAT_SD_ST):
-		cmd_format_SD(&type, &err);
+		cmd_format_SD(&type, &err, decode);
 		break;
 	case (RESET_FILE_ST):
 		cmd_reset_file(&type, &err, decode);

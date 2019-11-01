@@ -148,11 +148,16 @@ void cmd_reset_file(Ack_type* type, ERR_type* err, TC_spl cmd)
 		}
 	}
 }
-void cmd_format_SD(Ack_type* type, ERR_type* err)
+void cmd_format_SD(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
+	if (cmd.length == 0)
+	{
+		*type = ACK_CMD_FAIL;
+		*err = ERR_PARAMETERS;
+	}
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
-	sd_format(0);
+	sd_format(cmd.data[0]);
 	FileSystemResult resFS = reset_FRAM_FS();
 	if (resFS != FS_SUCCSESS)
 	{
