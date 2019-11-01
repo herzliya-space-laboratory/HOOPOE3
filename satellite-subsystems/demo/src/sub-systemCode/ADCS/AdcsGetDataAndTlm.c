@@ -246,6 +246,11 @@ TroubleErrCode SaveElementTlmAtIndex(unsigned int index)
 			WriteAdcsLog(LOG_ADCS_FS_WRITE_ERR,res);
 			return TRBL_FS_WRITE_ERR;
 		}
+		else if (res == FS_NOT_EXIST)
+		{
+			res = c_fileCreate(TlmElements[index].TlmFileName, TlmElements[index].TlmElementeSize);
+			res = c_fileWrite(TlmElements[index].TlmFileName, adcs_tlm);
+		}
 		TlmElements[index].LastSaveTime = curr_time;
 	}
 	return TRBL_SUCCESS;

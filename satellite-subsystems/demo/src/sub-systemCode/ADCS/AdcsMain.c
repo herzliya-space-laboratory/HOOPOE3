@@ -132,6 +132,8 @@ void AdcsTask()
 	vTaskDelay(ADCS_INIT_DELAY);
 	while(TRUE)
 	{
+		if (system_off_delay == 0)
+			system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 		if(SWITCH_OFF == get_system_state(ADCS_param)){
 			WriteAdcsLog(LOG_ADCS_CHANNEL_OFF,-1);
 			vTaskDelay(system_off_delay);

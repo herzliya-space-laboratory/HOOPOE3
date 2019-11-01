@@ -11,7 +11,7 @@
 #include "sizes.h"
 #include "Global.h"
 
-#define TIME_RESET_SEC	2
+#define TIME_RESET_SEC	0
 
 typedef enum
 {

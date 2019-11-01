@@ -531,7 +531,7 @@ static Boolean get_FRAMVoltageTable(voltage_t voltage_table[2][EPS_VOLTAGE_TABLE
 	if (i_error)
 		WriteErrorLog((log_errors)LOG_ERR_EPS_READ_VOLTAGE_TABLE, SYSTEM_EPS, i_error);
 
-	if (!check_EPSTableCorrection(voltage_table))
+	if (!check_EPSTableCorrection(voltage_table) || i_error != 0)
 	{
 		voltage_t temp[2][EPS_VOLTAGE_TABLE_NUM_ELEMENTS / 2] = DEFULT_VALUES_VOL_TABLE;
 		memcpy(voltage_table, temp, EPS_VOLTAGES_SIZE_RAW);

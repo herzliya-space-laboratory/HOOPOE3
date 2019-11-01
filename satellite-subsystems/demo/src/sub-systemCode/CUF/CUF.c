@@ -111,7 +111,7 @@ int LoadPerminantCUF()
 		f_read(PerminantCUF[i]->name, sizeof(char), CUFNAMELENGTH, PerminantCUFData);
 		f_read(&PerminantCUF[i]->disabled, sizeof(Boolean), 1, PerminantCUFData);
 	}
-	f_close(PerminantCUFData);
+	f_managed_close(&PerminantCUFData);
 	return 0; //return 0 on success
 }
 

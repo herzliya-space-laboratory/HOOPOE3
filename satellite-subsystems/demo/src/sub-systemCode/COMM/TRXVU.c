@@ -521,7 +521,6 @@ void Rx_logic()
 	check_int("IsisTrxvu_rcGetFrameCount, trxvu_logic", i_error);
 	if (RxCounter > 0)
 	{
-		printf("Rx counter is now: %u\n", RxCounter);
 		//	1.1. gets data from Rx buffer
 		i_error = TRX_getFrameData(&dataBuffer_length, dataBuffer);
 
@@ -540,7 +539,6 @@ void Rx_logic()
 				// 1.3. sends receive ACK
 				byte rawACK[ACK_RAW_SIZE];
 				build_raw_ACK(ACK_RECEIVE_COMM, ERR_SUCCESS, packet.id, rawACK);
-				printf("Send ACK, command ID: %u\n", packet.id);
 				TRX_sendFrame(rawACK, ACK_RAW_SIZE);
 
 				i_error = Time_getUnixEpoch(&time_now);

@@ -236,11 +236,11 @@ FileSystemResult InitializeFS(Boolean first_time)
 		return FS_FAT_API_FAIL;
 	}
 	int sd_index = getSdIndex();
-	if(sd_index!=0&&sd_index!=1)
+	if(first_time||(sd_index!=0&&sd_index!=1))
 	{
 		sd_index=DEFAULT_SD;
 	}
-	ret = f_initvolume( 0, atmel_mcipdc_initfunc, DEFAULT_SD ); /* Initialize volID as safe */
+	ret = f_initvolume( 0, atmel_mcipdc_initfunc, sd_index ); /* Initialize volID as safe */
 
 	if( F_ERR_CARDREMOVED == ret )
 	{
@@ -248,7 +248,7 @@ FileSystemResult InitializeFS(Boolean first_time)
 		vTaskDelay(1000);
 		fs_init();
 		f_managed_enterFS();
-		f_initvolume( 0, atmel_mcipdc_initfunc, DEFAULT_SD );
+		f_initvolume( 0, atmel_mcipdc_initfunc, sd_index );
 
 		return FS_FAT_API_FAIL;
 	}
@@ -258,8 +258,6 @@ FileSystemResult InitializeFS(Boolean first_time)
 	}
 	if(first_time)
 	{
-		char names[256];
-		strcpy(names, "*.*");
 		sd_format(DEFAULT_SD);
 		FS fs = {0,DEFAULT_SD};
 		if(FRAM_write_exte((unsigned char*)&fs,FSFRAM,sizeof(FS))!=0)
