@@ -606,7 +606,7 @@ ImageDataBaseResult handleMarkedPictures()
 
 	Boolean already_transferred_raw = FALSE;
 
-	if ( DB_result == 0 && image_metadata.cameraId != 0 )
+	if ( DB_result == DataBaseSuccess && image_metadata.cameraId != 0 )
 	{
 		if (checkForFileType(image_metadata, raw) == DataBaseNotInSD)
 		{

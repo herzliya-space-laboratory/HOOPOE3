@@ -89,6 +89,7 @@ void CameraManagerTaskMain()
 	inner_init();
 
 	Camera_Request req;
+	time_unix currentTime;
 
 	int f_error = f_managed_enterFS();//task 5 enter fs
 	check_int("CameraManagerTaskMain, enter FS", f_error);
@@ -100,10 +101,17 @@ void CameraManagerTaskMain()
 			act_upon_request(req);
 		}
 
+		Time_getUnixEpoch(&currentTime);
+		if (turnedOnCamera + cameraActivation_duration <= currentTime)
+		{
+			turnedOnCamera = 0;
+		}
+
 		// Handle case where EPS shut down automatic image handler:
 		if (get_system_state(cam_operational_param) && !automatic_image_handler_disabled_permanently && turnedOnCamera == 0)
 		{
-			if (xImageDumpTaskHandle != NULL && eTaskGetState(xImageDumpTaskHandle) == eDeleted)
+			eTaskState auto_image_handler_state = eTaskGetState(xImageDumpTaskHandle);
+			if (xImageDumpTaskHandle != NULL &&  auto_image_handler_state == eSuspended)
 			{
 				if (get_automatic_image_handling_task_suspension_flag())
 				{

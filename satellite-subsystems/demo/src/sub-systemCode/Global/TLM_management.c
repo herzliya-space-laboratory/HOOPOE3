@@ -27,7 +27,7 @@
 #include "TLM_management.h"
 
 #define NUMBER_OF_WRITES 1
-#define SKIP_FILE_TIME_SEC ((60*60*24)/NUMBER_OF_WRITES)
+#define SKIP_FILE_TIME_SEC ((60*60*24*0.5)/NUMBER_OF_WRITES)
 #define _SD_CARD (0)
 #define FIRST_TIME (-1)
 #define DEFAULT_SD 1
@@ -98,7 +98,7 @@ Boolean TLMfile(char* filename)
 }
 void sd_format(int index)
 {
-	int format_err = f_format(index,F_FAT32_MEDIA);
+	int format_err = f_format(0,F_FAT32_MEDIA);
 }
 void deleteDir(char* name, Boolean delete_folder)
 {
