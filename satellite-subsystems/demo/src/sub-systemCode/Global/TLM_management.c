@@ -1,5 +1,5 @@
 /*
-טו * filesystem.c
+ * filesystem.c
  *
  *  Created on: 20 áîøõ 2019
  *      Author: Idan
@@ -26,16 +26,18 @@
 
 #include "TLM_management.h"
 
-#define NUMBER_OF_WRITES 1
+#define NUMBER_OF_WRITES 60
 #define SKIP_FILE_TIME_SEC ((60*60*24*0.5)/NUMBER_OF_WRITES)
 #define _SD_CARD (0)
 #define FIRST_TIME (-1)
 #define DEFAULT_SD 1
 #define FILE_NAME_WITH_INDEX_SIZE (MAX_F_FILE_NAME_SIZE+sizeof(int)*2)
+#define ELEMENTS_PER_READ 900
 #define MAX_ELEMENT_SIZE (MAX_SIZE_TM_PACKET+sizeof(int))
 #define FS_TAKE_SEMPH_DELAY	(1000 * 30)
 char allocked_write_element[MAX_ELEMENT_SIZE];
-char allocked_read_element[MAX_ELEMENT_SIZE];
+
+char allocked_read_element[(MAX_ELEMENT_SIZE)*(ELEMENTS_PER_READ)];
 char allocked_delete_element[MAX_ELEMENT_SIZE];
 
 xSemaphoreHandle xFileOpenHandler;
@@ -562,6 +564,7 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 
 	int buffer_index = 0;
 	void* element;
+	int end_read = 0;
 	if(get_C_FILE_struct(c_file_name,&c_file,&addr)!=TRUE)//get c_file
 	{
 		return FS_NOT_EXIST;
@@ -574,7 +577,6 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 	int index_current = getFileIndex(c_file.creation_time,from_time);
 	get_file_name_by_index(c_file_name,index_current,curr_file_name);
 	unsigned int size_elementWithTimeStamp = c_file.size_of_element+sizeof(unsigned int);
-	element = allocked_read_element;//store element and his timestamp
 	do
 	{
 		get_file_name_by_index(c_file_name,index_current++,curr_file_name);
@@ -583,39 +585,58 @@ FileSystemResult c_fileRead(char* c_file_name,byte* buffer, int size_of_buffer,
 			continue;
 		int file_length =f_filelength(curr_file_name);
 		int length = file_length/(size_elementWithTimeStamp);//number of elements in currnet_file
-
+		int left_to_read = length;
+		int how_much_to_read=0;
 		int err_fread=0;
 		(void)err_fread;
 		f_seek( current_file, 0L , SEEK_SET );
-		for(unsigned int j=0;j < length;j++)
+		for(unsigned int j=0;j < length;j+=how_much_to_read)
 		{
-			err_fread = f_read(element,(size_t)size_elementWithTimeStamp,(size_t)1,current_file);
+			if(left_to_read<ELEMENTS_PER_READ)
+			{
+				how_much_to_read = left_to_read;
+			}
+			else
+			{
+				how_much_to_read=ELEMENTS_PER_READ;
+			}
+			element = allocked_read_element;
+			err_fread = f_read(element,(size_t)size_elementWithTimeStamp,how_much_to_read,current_file);
+			for(int k=0;k<how_much_to_read;k++)
+			{
+				unsigned int element_time;
+				memcpy(&element_time, element, sizeof(int));
+				//printf("read element, time is %u\n",element_time);
+				if(element_time > to_time)
+				{
+					end_read = 1;
+					break;
+				}
 
-			unsigned int element_time = *((unsigned int*)element);
-			//printf("read element, time is %u\n",element_time);
-			if(element_time > to_time)
+				if(element_time >= from_time)
+				{
+					*last_read_time = element_time;
+					if((unsigned int)buffer_index + size_elementWithTimeStamp>=(unsigned int)size_of_buffer)
+					{
+						error = f_managed_close(&current_file);
+						if (error == COULD_NOT_GIVE_SEMAPHORE_ERROR)
+							return FS_COULD_NOT_GIVE_SEMAPHORE;
+						return FS_BUFFER_OVERFLOW;
+					}
+
+					if (element_time >= (time_unix)resolution + lastCopy_time)
+					{
+						(*read)++;
+						memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
+						buffer_index += size_elementWithTimeStamp;
+						lastCopy_time = element_time;
+					}
+				}
+				element+=c_file.size_of_element+sizeof(int);
+			}
+			if(end_read)
 			{
 				break;
-			}
-
-			if(element_time >= from_time)
-			{
-				*last_read_time = element_time;
-				if((unsigned int)buffer_index + size_elementWithTimeStamp>=(unsigned int)size_of_buffer)
-				{
-					error = f_managed_close(&current_file);
-					if (error == COULD_NOT_GIVE_SEMAPHORE_ERROR)
-						return FS_COULD_NOT_GIVE_SEMAPHORE;
-					return FS_BUFFER_OVERFLOW;
-				}
-
-				if (element_time >= (time_unix)resolution + lastCopy_time)
-				{
-					(*read)++;
-					memcpy(buffer + buffer_index,element,size_elementWithTimeStamp);
-					buffer_index += size_elementWithTimeStamp;
-					lastCopy_time = element_time;
-				}
 			}
 		}
 		error = f_managed_close(&current_file);
