@@ -188,7 +188,7 @@ void AutomaticImageHandlerTaskMain()
 		}
 
 		set_automatic_image_handling_ready_for_long_term_stop(TRUE);
-		vTaskDelay(1000);
+		vTaskDelay(10000);
 	}
 }
 

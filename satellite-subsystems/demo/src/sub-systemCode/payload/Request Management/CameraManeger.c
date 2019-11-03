@@ -123,7 +123,7 @@ void CameraManagerTaskMain()
 
 		Take_pictures_with_time_in_between();
 
-		vTaskDelay(100);
+		vTaskDelay(500);
 	}
 }
 
@@ -314,6 +314,10 @@ void Take_pictures_with_time_in_between()
 
 			TurnOffGecko();
 			resumeAction();
+		}
+		else
+		{
+			WriteErrorLog(EPS_didntLetMeTurnTheGeckoOn, SYSTEM_PAYLOAD, cmd_id_for_takePicturesWithTimeInBetween);
 		}
 
 		numberOfPicturesLeftToBeTaken--;
@@ -525,6 +529,10 @@ void act_upon_request(Camera_Request request)
 		{
 			WriteErrorLog(error, SYSTEM_PAYLOAD, request.cmd_id);
 		}
+	}
+	else if (request.id != turn_off_AutoThumbnailCreation)
+	{
+		WriteErrorLog(EPS_didntLetMeTurnTheGeckoOn, SYSTEM_PAYLOAD, request.cmd_id);
 	}
 }
 

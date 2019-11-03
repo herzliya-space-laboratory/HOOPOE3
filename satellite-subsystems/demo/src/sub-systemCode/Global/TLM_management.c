@@ -26,13 +26,13 @@
 
 #include "TLM_management.h"
 
-#define NUMBER_OF_WRITES 60
+#define NUMBER_OF_WRITES 1
 #define SKIP_FILE_TIME_SEC ((60*60*24*0.5)/NUMBER_OF_WRITES)
 #define _SD_CARD (0)
 #define FIRST_TIME (-1)
 #define DEFAULT_SD 1
 #define FILE_NAME_WITH_INDEX_SIZE (MAX_F_FILE_NAME_SIZE+sizeof(int)*2)
-#define ELEMENTS_PER_READ 900
+#define ELEMENTS_PER_READ 9000
 #define MAX_ELEMENT_SIZE (MAX_SIZE_TM_PACKET+sizeof(int))
 #define FS_TAKE_SEMPH_DELAY	(1000 * 30)
 char allocked_write_element[MAX_ELEMENT_SIZE];
