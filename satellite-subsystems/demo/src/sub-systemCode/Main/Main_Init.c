@@ -120,12 +120,6 @@ void StartTIME()
 
 Boolean first_activation()
 {
-	byte dataFRAM = FALSE_8BIT;
-	FRAM_read_exte(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
-	if (!dataFRAM)
-	{
-		return FALSE;
-	}
 	// 1. reset global FRAM adrees
 	reset_FRAM_MAIN();
 	// 2 reset TRXVU FRAM adress
@@ -134,10 +128,7 @@ Boolean first_activation()
 	reset_FRAM_EPS();
 
 	reset_offline_TM_list();
-	// 3. cahnge the first activation to false
-	dataFRAM = FALSE_8BIT;
 
-	FRAM_write_exte(&dataFRAM, FIRST_ACTIVATION_ADDR, 1);
 	return TRUE;
 }
 

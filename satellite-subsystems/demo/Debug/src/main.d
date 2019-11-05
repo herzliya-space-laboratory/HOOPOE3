@@ -82,7 +82,10 @@ src/main.d: ../src/main.c \
  ../src/sub-systemCode/Global/../Main/../Global/Global.h \
  ../src/sub-systemCode/Global/../Main/../COMM/GSC.h \
  ../src/sub-systemCode/Global/../Main/../Global/TLM_management.h \
- ../src/sub-systemCode/Ants.h
+ ../src/sub-systemCode/Ants.h \
+ ../src/sub-systemCode/payload/Drivers/GeckoCameraDriver.h \
+ ../src/sub-systemCode/payload/Drivers/../../Global/sizes.h \
+ ../src/sub-systemCode/payload/Drivers/../../Global/Global.h
 
 C:/HOOPOE3/satellite-subsystems/demo/../..//hal/freertos/include/freertos/FreeRTOS.h:
 
@@ -253,3 +256,9 @@ C:\HOOPOE3\satellite-subsystems\demo\src/sub-systemCode/Global/Global.h:
 ../src/sub-systemCode/Global/../Main/../Global/TLM_management.h:
 
 ../src/sub-systemCode/Ants.h:
+
+../src/sub-systemCode/payload/Drivers/GeckoCameraDriver.h:
+
+../src/sub-systemCode/payload/Drivers/../../Global/sizes.h:
+
+../src/sub-systemCode/payload/Drivers/../../Global/Global.h:
