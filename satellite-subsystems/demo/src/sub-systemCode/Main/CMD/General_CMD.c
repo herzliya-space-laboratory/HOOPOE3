@@ -18,7 +18,6 @@
 #include "../../Main/HouseKeeping.h"
 #include "../../TRXVU.h"
 #include "../../Ants.h"
-#include "../../payload/DataBase/DataBase.h"
 
 #include "../../Global/logger.h"
 
@@ -164,7 +163,6 @@ void cmd_format_SD(Ack_type* type, ERR_type* err, TC_spl cmd)
 		*type = ACK_FRAM;
 		*err = ERR_WRITE_FAIL;
 	}
-	clearImageDataBase();
 	gracefulReset();
 }
 void cmd_dummy_func(Ack_type* type, ERR_type* err)

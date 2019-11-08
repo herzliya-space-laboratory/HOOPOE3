@@ -122,12 +122,6 @@ Boolean get_system_state(systems_state_parameters param)
 			else
 				return_value = SWITCH_OFF;
 			break;
-		case cam_param:
-			if (current_global_param.state.fields.cammera == 1)
-				return_value = SWITCH_ON;
-			else
-				return_value = SWITCH_OFF;
-			break;
 		case anttena_deploy_param:
 			if (current_global_param.state.fields.anttena_deploy == 1)
 				return_value = SWITCH_ON;
@@ -142,12 +136,6 @@ Boolean get_system_state(systems_state_parameters param)
 			break;
 		case dump_param:
 			if (current_global_param.state.fields.dump == 1)
-				return_value = SWITCH_ON;
-			else
-				return_value = SWITCH_OFF;
-			break;
-		case cam_operational_param:
-			if (current_global_param.state.fields.cam_operational == 1)
 				return_value = SWITCH_ON;
 			else
 				return_value = SWITCH_OFF;
@@ -191,12 +179,6 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 			else
 				current_global_param.state.fields.mute = 0;
 			break;
-		case cam_param:
-			if (set_state == SWITCH_ON)
-				current_global_param.state.fields.cammera= 1;
-			else
-				current_global_param.state.fields.cammera = 0;
-			break;
 		case anttena_deploy_param:
 			if (set_state == SWITCH_ON)
 				current_global_param.state.fields.anttena_deploy = 1;
@@ -214,12 +196,6 @@ void set_system_state(systems_state_parameters param, Boolean set_state)
 				current_global_param.state.fields.dump = 1;
 			else
 				current_global_param.state.fields.dump = 0;
-			break;
-		case cam_operational_param:
-			if (set_state == SWITCH_ON)
-				current_global_param.state.fields.cam_operational = 1;
-			else
-				current_global_param.state.fields.cam_operational = 0;
 			break;
 		case Tx_param:
 			if (set_state == SWITCH_ON)

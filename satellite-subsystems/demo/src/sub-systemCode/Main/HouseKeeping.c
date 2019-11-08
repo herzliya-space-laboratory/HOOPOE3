@@ -43,7 +43,6 @@
 #include "../Global/logger.h"
 #include "../Global/OnlineTM.h"
 #include "../Global/GenericTaskSave.h"
-#include "../payload/Drivers/GeckoCameraDriver.h"
 
 
 int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId)
@@ -100,8 +99,6 @@ void set_GP_COMM(ISIStrxvuRxTelemetry_revC hk_in)
 // collect from the drivers telemetry for each of the HK types
 int SP_HK_collect(SP_HK* hk_out)
 {
-	if (get_system_state(cam_param))
-		return COLLECTING_HK_CODE_ERROR;
 	int errors[NUMBER_OF_SOLAR_PANNELS];
 	int error_combine = 1;
 	int error = IsisSolarPanelv2_wakeup();
@@ -162,45 +159,6 @@ int EPS_HK_collect(EPS_HK* hk_out)
 
 	set_GP_EPS(*hk_out);
 	return error;
-}
-int CAM_HK_collect(CAM_HK* hk_out)
-{
-	if (get_system_state(cam_param) == SWITCH_OFF)
-		return COLLECTING_HK_CODE_ERROR;
-	hk_out->fields.VoltageInput5V = (voltage_t)(GECKO_GetVoltageInput5V() * 1000);
-	hk_out->fields.CurrentInput5V = (current_t)(GECKO_GetCurrentInput5V() * 1000);
-	hk_out->fields.VoltageFPGA1V = (voltage_t)(GECKO_GetVoltageFPGA1V() * 1000);
-	hk_out->fields.CurrentFPGA1V = (current_t)(GECKO_GetCurrentFPGA1V() * 1000);
-	hk_out->fields.VoltageFPGA1V8 = (voltage_t)(GECKO_GetVoltageFPGA1V8() * 1000);
-	hk_out->fields.CurrentFPGA1V8 = (current_t)(GECKO_GetCurrentFPGA1V8() * 1000);
-	hk_out->fields.VoltageFPGA2V5 = (voltage_t)(GECKO_GetVoltageFPGA2V5() * 1000);
-	hk_out->fields.CurrentFPGA2V5 = (current_t)(GECKO_GetCurrentFPGA2V5() * 1000);
-	hk_out->fields.VoltageFPGA3V3 = (voltage_t)(GECKO_GetVoltageFPGA3V3() * 1000);
-	hk_out->fields.CurrentFPGA3V3 = (current_t)(GECKO_GetCurrentFPGA3V3() * 1000);
-	hk_out->fields.VoltageFlash1V8 = (voltage_t)(GECKO_GetVoltageFlash1V8() * 1000);
-	hk_out->fields.CurrentFlash1V8 = (current_t)(GECKO_GetCurrentFlash1V8() * 1000);
-	hk_out->fields.VoltageFlash3V3 = (voltage_t)(GECKO_GetVoltageFlash3V3() * 1000);
-	hk_out->fields.CurrentFlash3V3 = (current_t)(GECKO_GetCurrentFlash3V3() * 1000);
-	hk_out->fields.VoltageSNSR1V8 = (voltage_t)(GECKO_GetVoltageSNSR1V8() * 1000);
-	hk_out->fields.CurrentSNSR1V8 = (current_t)(GECKO_GetCurrentSNSR1V8() * 1000);
-	hk_out->fields.VoltageSNSRVDDPIX = (voltage_t)(GECKO_GetVoltageSNSRVDDPIX() * 1000);
-	hk_out->fields.CurrentSNSRVDDPIX = (current_t)(GECKO_GetCurrentSNSRVDDPIX() * 1000);
-	hk_out->fields.VoltageSNSR3V3 = (voltage_t)(GECKO_GetVoltageSNSR3V3() * 1000);
-	hk_out->fields.CurrentSNSR3V3 = (current_t)(GECKO_GetCurrentSNSR3V3() * 1000);
-	hk_out->fields.VoltageFlashVTT09 = (voltage_t)(GECKO_GetVoltageFlashVTT09() * 1000);
-
-	hk_out->fields.TempSMU3AB = GECKO_GetTempSMU3AB();
-	hk_out->fields.TempSMU3BC = GECKO_GetTempSMU3BC();
-	hk_out->fields.TempREGU6 = GECKO_GetTempREGU6();
-	hk_out->fields.TempREGU8 = GECKO_GetTempREGU8();
-	hk_out->fields.TempFlash = GECKO_GetTempFlash();
-
-	hk_out->fields.voltage_5V_DB = gecko_get_voltage_5v();
-	hk_out->fields.current_5V_DB = gecko_get_current_5v();
-	hk_out->fields.voltage_3V3_DB = gecko_get_voltage_3v3();
-	hk_out->fields.current_3V3_DB = gecko_get_current_3v3();
-
-	return 0;
 }
 int COMM_HK_collect(COMM_HK* hk_out)
 {

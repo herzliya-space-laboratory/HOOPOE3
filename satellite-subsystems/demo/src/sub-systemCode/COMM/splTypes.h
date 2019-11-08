@@ -15,9 +15,6 @@
 #define ACK_TYPE							TM_GENERAL_T
 #define LOG_T								TM_GENERAL_T
 #define DUMP_T								173
-#define GECKO_REGISTERS_T					10
-#define IMAGE_DUMP_T						11
-#define IMAGE_DATABASE_DUMP_T				12
 #define ACK_ST								90
 #define TM_ADCS_T 							154
 #define TM_ONLINE_TM_T	        			88
@@ -27,7 +24,6 @@
 #define GENERAL_T 							20
 #define TC_ADCS_T 							154
 #define GENERALLY_SPEAKING_T				195
-#define PAYLOAD_T							251
 #define EPS_T								6
 #define SOFTWARE_T 							42
 #define CUF_T								69
@@ -39,22 +35,6 @@
 #define LOG_EVENTS_ST						49
 #define LOG_ERROR_ST						50
 #define OFFLINE_SETTING_ST					255
-
-//Payload dump subTypes:
-#define IMAGE_DATABASE_DUMP_ST				96
-#define IMAGE_DATABASE_DUMP_FIRST_CHUNK_ST	97
-
-#define IMAGE_DUMP_THUMBNAIL6_ST			98
-#define IMAGE_DUMP_THUMBNAIL5_ST			99
-#define IMAGE_DUMP_THUMBNAIL4_ST			100
-#define IMAGE_DUMP_THUMBNAIL3_ST			101
-#define IMAGE_DUMP_THUMBNAIL2_ST			102
-#define IMAGE_DUMP_THUMBNAIL1_ST			103
-#define IMAGE_DUMP_RAW_ST					104
-#define IMAGE_DUMP_JPG_ST					105
-#define IMAGE_DUMP_JPG_FIRST_CHUNK_ST		106
-
-#define GECKO_REGISTERS_ST					107
 
 //Subtypes (TC)
 //comm
@@ -86,39 +66,9 @@
 #define STOP_TM_ST							200
 #define RESUME_TM_ST						201
 
-//payload
-#define SEND_IMG_CHUNCK_CHUNK_FIELD_ST		1
-#define SEND_IMG_CHUNCK_BIT_FIELD_ST 		2
-#define TAKE_IMG_ST							3
-#define TAKE_IMG_SPECIAL_VAL_ST				4
-#define TAKE_IMG_WITH_TIME_INTERVALS	 	5
-#define UPDATE_PHOTOGRAPHY_VALUES_ST		6
-#define DELETE_IMG_FILE_ST					7
-#define DELETE_IMG_ST						8
-#define MOV_IMG_CAM_OBS_ST					9
-#define CREATE_THUMBNAIL_FROM_IMG_ST		10
-#define CREATE_JPEG_FROM_IMG_ST				11
-#define RESET_DATA_BASE_ST					12
-#define SEND_IMAGE_DATA_BASE_ST				13
-#define FILE_TYPE_DUMP_ST					14
-#define UPDATE_DEF_DUR_ST					15
-#define SET_CHUNK_SIZE						16
-#define STOP_TAKING_IMG_TIME_INTERVAL_ST	17
-#define	OFF_CAM_ST							18
-#define ON_CAM_ST							19
-#define OFF_FUTURE_AUTO_THUMB				20
-#define ON_FUTURE_AUTO_THUMB				21
-#define OFF_AUTO_THUMB						22
-#define ON_AUTO_THUMB						23
-#define GET_GECKO_REGISTER					24
-#define SET_GECKO_REGISTER					25
-#define RE_INIT_CAM_MANAGER					26
-
 //eps
 #define ALLOW_ADCS_ST						99
 #define SHUT_ADCS_ST						100
-#define ALLOW_CAM_ST						101
-#define SHUT_CAM_ST							102
 #define UPD_LOGIC_VOLT_ST					255
 #define UPD_COMM_VOLTAGE					20
 #define CHANGE_HEATER_TMP_ST				0

@@ -622,28 +622,6 @@ Boolean CUFTest(int* testCUFData)
 #include "../../../satellite-subsystems/demo/src/sub-systemCode/Main/CMD/General_CMD.h"
 #include "../../../satellite-subsystems/demo/src/sub-systemCode/Main/CMD/payload_CMD.h"
 #include "../../../satellite-subsystems/demo/src/sub-systemCode/Main/CMD/SW_CMD.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/ImageConversion.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/BooleanJpeg.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/color_conv.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/DCT.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/ImgCompressor.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/jpeg.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/jpeg_encoder.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/jpeg_memory_alloc.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/jpeg_params.h"
-//#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/jpeg_tables.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/output_stream.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Compression/jpeg/bmp/rawToBMP.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/DataBase/DataBase.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Drivers/GeckoCameraDriver.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Misc/Boolean_bit.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Misc/FileSystem.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Misc/Macros.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Request Management/AutomaticImageHandler.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Request Management/CameraManeger.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Request Management/DB_RequestHandling.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Request Management/Dump/Butchering.h"
-#include "../../../satellite-subsystems/demo/src/sub-systemCode/payload/Request Management/Dump/imageDump.h"
 #include "../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/cspaceADCS.h"
 #include "../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/cspaceADCS_types.h"
 #include "../../../satellite-subsystems/satellite-subsystems/include/satellite-subsystems/GomEPS.h"
@@ -1273,8 +1251,8 @@ void funcsPointerToArr()
 	CUFARR[621] = (void *)reset_EPS_voltages;
 	CUFARR[622] = (void *)get_EPS_mode_t;
 	CUFARR[623] = (void *)EPS_Conditioning;
-	CUFARR[624] = (void *)get_shut_CAM;
-	CUFARR[625] = (void *)shut_CAM;
+	//CUFARR[624] = (void *)get_shut_CAM;
+	//CUFARR[625] = (void *)shut_CAM;
 	CUFARR[626] = (void *)get_shut_ADCS;
 	CUFARR[627] = (void *)shut_ADCS;
 	CUFARR[628] = (void *)EnterFullMode;
@@ -1497,7 +1475,7 @@ void funcsPointerToArr()
 	CUFARR[833] = (void *)act_upon_command;
 	CUFARR[834] = (void *)AUC_COMM;
 	CUFARR[835] = (void *)AUC_general;
-	CUFARR[836] = (void *)AUC_payload;
+	//CUFARR[836] = (void *)AUC_payload;
 	CUFARR[837] = (void *)AUC_EPS;
 	//CUFARR[838] = (void *)AUC_ADCS;
 	CUFARR[839] = (void *)AUC_SW;
@@ -1506,7 +1484,7 @@ void funcsPointerToArr()
 	CUFARR[842] = (void *)save_ACK;
 	CUFARR[843] = (void *)SP_HK_collect;
 	CUFARR[844] = (void *)EPS_HK_collect;
-	CUFARR[845] = (void *)CAM_HK_collect;
+	//CUFARR[845] = (void *)CAM_HK_collect;
 	CUFARR[846] = (void *)COMM_HK_collect;
 	CUFARR[847] = (void *)FS_HK_collect;
 	CUFARR[848] = (void *)HK_find_fileName;
@@ -1532,9 +1510,9 @@ void funcsPointerToArr()
 	CUFARR[868] = (void *)cmd_heater_temp;
 	CUFARR[869] = (void *)cmd_upload_volt_COMM;
 	CUFARR[870] = (void *)cmd_SHUT_ADCS;
-	CUFARR[871] = (void *)cmd_SHUT_CAM;
+	//CUFARR[871] = (void *)cmd_SHUT_CAM;
 	CUFARR[872] = (void *)cmd_allow_ADCS;
-	CUFARR[873] = (void *)cmd_allow_CAM;
+	//CUFARR[873] = (void *)cmd_allow_CAM;
 	CUFARR[874] = (void *)cmd_update_alpha;
 	CUFARR[875] = (void *)cmd_resetGWT;
 	CUFARR[876] = (void *)cmd_delete_TM;
@@ -1563,6 +1541,7 @@ void funcsPointerToArr()
 	CUFARR[899] = (void *)cmd_reset_FRAM;
 	CUFARR[900] = (void *)cmd_FRAM_read;
 	CUFARR[901] = (void *)cmd_FRAM_write;
+	/*
 	CUFARR[902] = (void *)CreateImageThumbnail_withoutSearch;
 	CUFARR[903] = (void *)CreateImageThumbnail;
 	CUFARR[904] = (void *)compressImage;
@@ -1679,6 +1658,7 @@ void funcsPointerToArr()
 	CUFARR[1015] = (void *)imageDump_task;
 	CUFARR[1016] = (void *)KickStartImageDumpTask;
 	CUFARR[1017] = (void *)SendGeckoRegisters;
+	*/
 	CUFARR[1018] = (void *)cspaceADCS_initialize;
 	CUFARR[1019] = (void *)cspaceADCS_componentReset;
 	CUFARR[1020] = (void *)cspaceADCS_setCurrentTime;

@@ -48,15 +48,9 @@
 #include "../ADCS/AdcsMain.h"
 
 #include "../TRXVU.h"
-#include "../payload/Request Management/CameraManeger.h"
-#include "../payload/Request Management/AutomaticImageHandler.h"
 #include "sub-systemCode/ADCS/AdcsMain.h"
 #include "HouseKeeping.h"
 #include "commands.h"
-
-#include "../payload/Compression/ImageConversion.h"
-#include "../payload/Compression/jpeg/ImgCompressor.h"
-#include "../payload/Request Management/AutomaticImageHandler.h"
 
 #define I2c_SPEED_Hz 100000
 #define I2c_Timeout 10
@@ -190,8 +184,6 @@ int InitSubsystems()
 
 	init_GP();
 
-	initAutomaticImageHandlerTask();
-
 	numberOfRestarts();
 
 	EPS_Init();
@@ -208,8 +200,6 @@ int InitSubsystems()
 
 	init_trxvu();
 
-	initCamera(activation);
-
 	init_command();
 
 	return 0;
@@ -225,12 +215,6 @@ int SubSystemTaskStart()
 	vTaskDelay(100);
 
 	xTaskCreate(GenericSave_Task, (const signed char*)("generic save task"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);
-	vTaskDelay(100);
-
-	KickStartCamera();
-	vTaskDelay(100);
-
-	KickStartAutomaticImageHandlerTask();
 	vTaskDelay(100);
 
 	xTaskCreate(AdcsTask, (const signed char*)("ADCS"), 8192, NULL, (unsigned portBASE_TYPE)TASK_DEFAULT_PRIORITIES, NULL);

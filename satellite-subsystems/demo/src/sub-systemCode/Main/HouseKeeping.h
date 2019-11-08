@@ -23,7 +23,6 @@
 #define ACK_HK_SIZE ACK_DATA_LENGTH
 #define EPS_HK_SIZE 51
 #define SP_HK_SIZE	FLOAT_SIZE * NUMBER_OF_SOLAR_PANNELS
-#define CAM_HK_SIZE 70
 #define COMM_HK_SIZE 18
 #define ADCS_HK_SIZE 34
 #define FS_HK_SIZE 4*4
@@ -33,7 +32,6 @@
 #define ACK_FILE_NAME "ACKf"
 #define EPS_HK_FILE_NAME "EPSf"
 #define	SP_HK_FILE_NAME	"SPF"
-#define CAM_HK_FILE_NAME "CAMf"
 #define COMM_HK_FILE_NAME "COMMf"// TRX and ANTS HK
 #define FS_HK_FILE_NAME "FSf"
 #define ADCS_HK_FILE_NAME "ADCf"// ADCS
@@ -100,44 +98,6 @@ typedef union __attribute__ ((__packed__))
 
 typedef union __attribute__ ((__packed__))
 {
-	byte raw[CAM_HK_SIZE];
-	struct __attribute__((packed))
-	{
-		voltage_t VoltageInput5V;
-		current_t CurrentInput5V;
-		voltage_t VoltageFPGA1V;
-		current_t CurrentFPGA1V;
-		voltage_t VoltageFPGA1V8;
-		current_t CurrentFPGA1V8;
-		voltage_t VoltageFPGA2V5;
-		current_t CurrentFPGA2V5;
-		voltage_t VoltageFPGA3V3;
-		current_t CurrentFPGA3V3;
-		voltage_t VoltageFlash1V8;
-		current_t CurrentFlash1V8;
-		voltage_t VoltageFlash3V3;
-		current_t CurrentFlash3V3;
-		voltage_t VoltageSNSR1V8;
-		current_t CurrentSNSR1V8;
-		voltage_t VoltageSNSRVDDPIX;
-		current_t CurrentSNSRVDDPIX;
-		voltage_t VoltageSNSR3V3;
-		current_t CurrentSNSR3V3;
-		voltage_t VoltageFlashVTT09;
-		temp_t TempSMU3AB;
-		temp_t TempSMU3BC;
-		temp_t TempREGU6;
-		temp_t TempREGU8;
-		temp_t TempFlash;
-		voltage_t voltage_5V_DB;
-		current_t current_5V_DB;
-		voltage_t voltage_3V3_DB;
-		current_t current_3V3_DB;
-	}fields;
-}CAM_HK;
-
-typedef union __attribute__ ((__packed__))
-{
 	byte raw[COMM_HK_SIZE];
 	struct __attribute__((packed))
 	{
@@ -188,7 +148,6 @@ int save_ACK(Ack_type type, ERR_type err, command_id ACKcommandId);
 
 int SP_HK_collect(SP_HK* hk_out);
 int EPS_HK_collect(EPS_HK* hk_out);
-int CAM_HK_collect(CAM_HK* hk_out);
 int COMM_HK_collect(COMM_HK* hk_out);
 int FS_HK_collect(FS_HK* hk_out, int SD_num);
 

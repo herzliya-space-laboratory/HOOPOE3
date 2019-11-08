@@ -29,11 +29,8 @@
 #include "../Global/Global.h"
 #include "../Global/logger.h"
 #include "../Global/GlobalParam.h"
-#include "../payload/Drivers/GeckoCameraDriver.h"
-#include "../payload/Request Management/AutomaticImageHandler.h"
 #include "../EPS.h"
 
-#define CAM_STATE	 0x0F
 #define ADCS_STATE	 0xF0
 
 #define CALCAVARAGE3(vbatt_prev) (((vbatt_prev)[0] + (vbatt_prev)[1] + (vbatt_prev)[2])/3)
@@ -83,24 +80,6 @@ void shut_ADCS(Boolean mode)
 	check_int("shut_ADCS, FRAM_write", error);
 }
 
-Boolean8bit  get_shut_CAM()
-{
-	Boolean8bit mode;
-	int error = FRAM_read_exte(&mode, SHUT_CAM_ADDR, 1);
-	if (error)
-		WriteErrorLog((log_errors)LOG_ERR_EPS_FRAM_OVERRIDE_VALUE, SYSTEM_EPS, error);
-	check_int("shut_CAM, FRAM_read", error);
-	return mode;
-}
-void shut_CAM(Boolean mode)
-{
-	int error = FRAM_write_exte((byte*)&mode, SHUT_CAM_ADDR, 1);
-	if (error)
-		WriteErrorLog((log_errors)LOG_ERR_EPS_FRAM_OVERRIDE_VALUE, SYSTEM_EPS, error);
-	check_int("shut_CAM, FRAM_write", error);
-}
-
-
 Boolean update_powerLines(gom_eps_channelstates_t newState)
 {
 	gom_eps_hk_t eps_tlm;
@@ -128,14 +107,6 @@ Boolean update_powerLines(gom_eps_channelstates_t newState)
 		return FALSE;
 
 	}
-}
-
-Boolean updateCam_powerLines()
-{
-	if (get_system_state(cam_operational_param) == SWITCH_OFF && getPIOs())
-		stopAction();
-
-	return TRUE;
 }
 
 EPS_mode_t get_EPS_mode_t()
@@ -258,19 +229,15 @@ void writeState_log(EPS_mode_t mode, voltage_t vol)
 	switch(mode)
 	{
 	case full_mode:
-		resumeAction();
 		WriteEpsLog(EPS_ENTER_FULL_MODE, (int)vol);
 		break;
 	case cruise_mode:
-		stopAction();
 		WriteEpsLog(EPS_ENTER_CRUISE_MODE, (int)vol);
 		break;
 	case safe_mode:
-		stopAction();
 		WriteEpsLog(EPS_ENTER_SAFE_MODE, (int)vol);
 		break;
 	case critical_mode:
-		stopAction();
 		WriteEpsLog(EPS_ENTER_CRITICAL_MODE, (int)vol);
 		break;
 	}
@@ -375,18 +342,6 @@ Boolean overRide_ADCS(gom_eps_channelstates_t* switches_states)
 	return TRUE;
 }
 
-Boolean overRide_Camera()
-{
-	if(get_shut_CAM())
-	{
-		set_system_state(cam_operational_param, SWITCH_OFF);
-
-		return FALSE;
-	}
-
-	return TRUE;
-}
-
 void EPS_Conditioning()
 {
 	gom_eps_hk_t eps_tlm;
@@ -435,7 +390,6 @@ void EPS_Conditioning()
 	enterMode[batteryLastMode].fun(&switches_states, &batteryLastMode);
 	set_EPSState((uint8_t)batteryLastMode);
 	update_powerLines(switches_states);
-	updateCam_powerLines();
 	VBatt_previous = VBatt_filtered;
 }
 
@@ -458,9 +412,6 @@ void EnterFullMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 		set_system_state(ADCS_param, SWITCH_ON);
 	}
-
-	if (overRide_Camera())
-		set_system_state(cam_operational_param, SWITCH_ON);
 }
 
 void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
@@ -481,8 +432,6 @@ void EnterCruiseMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 		set_system_state(ADCS_param, SWITCH_ON);
 	}
-
-	set_system_state(cam_operational_param, SWITCH_OFF);
 }
 
 void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
@@ -503,8 +452,6 @@ void EnterSafeMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
 
 		set_system_state(ADCS_param, SWITCH_ON);
 	}
-
-	set_system_state(cam_operational_param, SWITCH_OFF);
 }
 
 void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mode)
@@ -519,7 +466,6 @@ void EnterCriticalMode(gom_eps_channelstates_t* switches_states, EPS_mode_t* mod
 	switches_states->fields.channel5V_2 = 0;
 	switches_states->fields.channel5V_3 = 0;
 
-	set_system_state(cam_operational_param, SWITCH_OFF);
 	set_system_state(Tx_param, SWITCH_OFF);
 	set_system_state(ADCS_param, SWITCH_OFF);
 }

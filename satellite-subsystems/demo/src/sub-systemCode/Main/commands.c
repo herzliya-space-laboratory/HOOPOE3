@@ -45,8 +45,6 @@
 #include "../Ants.h"
 #include "HouseKeeping.h"
 #include "../EPS.h"
-#include "../payload/Request Management/CameraManeger.h"
-#include "../payload/DataBase/DataBase.h"
 #include "../CUF/uploadCodeTelemetry.h"
 
 #include "hcc/api_fat.h"
@@ -173,8 +171,6 @@ void act_upon_command(TC_spl decode)
 	case (GENERAL_T):
 		AUC_general(decode);
 		break;
-	case (PAYLOAD_T):
-		AUC_payload(decode);
 		break;
 	case (EPS_T):
 		AUC_EPS(decode);
@@ -314,105 +310,6 @@ void AUC_general(TC_spl decode)
 #endif
 }
 
-void AUC_payload(TC_spl decode)
-{
-	Ack_type type = ACK_CAMERA;
-	ERR_type err = ERR_SUCCESS;
-
-	Camera_Request request;
-	request.cmd_id = decode.id;
-	memcpy(request.data, decode.data, SPL_TC_DATA_SIZE);
-
-	switch (decode.subType)
-	{
-		case (SEND_IMG_CHUNCK_CHUNK_FIELD_ST):
-			request.id = image_Dump_chunkField;
-			break;
-		case (SEND_IMG_CHUNCK_BIT_FIELD_ST):
-			request.id = image_Dump_bitField;
-			break;
-		case (TAKE_IMG_ST):
-			request.id = take_image;
-			break;
-		case (TAKE_IMG_SPECIAL_VAL_ST):
-			request.id = take_image_with_special_values;
-			break;
-		case (TAKE_IMG_WITH_TIME_INTERVALS):
-			request.id = take_image_with_time_intervals;
-			break;
-		case (UPDATE_PHOTOGRAPHY_VALUES_ST):
-			request.id = update_photography_values;
-			break;
-		case (DELETE_IMG_FILE_ST):
-			request.id = delete_image_file;
-			break;
-		case (DELETE_IMG_ST):
-			request.id = delete_image;
-			break;
-		case (MOV_IMG_CAM_OBS_ST):
-			request.id = transfer_image_to_OBC;
-			break;
-		case (CREATE_THUMBNAIL_FROM_IMG_ST):
-			request.id = create_thumbnail;
-			break;
-		case (CREATE_JPEG_FROM_IMG_ST):
-			request.id = create_jpg;
-			break;
-		case (RESET_DATA_BASE_ST):
-			request.id = reset_DataBase;
-			break;
-		case (SEND_IMAGE_DATA_BASE_ST):
-			request.id = DataBase_Dump;
-			break;
-		case (FILE_TYPE_DUMP_ST):
-			request.id = fileType_Dump;
-			break;
-		case (UPDATE_DEF_DUR_ST):
-			request.id = update_defult_duration;
-			break;
-		case (SET_CHUNK_SIZE):
-			request.id = set_chunk_size;
-			break;
-		case (STOP_TAKING_IMG_TIME_INTERVAL_ST):
-			request.id = stop_take_image_with_time_intervals;
-			break;
-		case (OFF_CAM_ST):
-			request.id = turn_off_camera;
-			break;
-		case (ON_CAM_ST):
-			request.id = turn_on_camera;
-			break;
-		case (ON_FUTURE_AUTO_THUMB):
-			request.id = turn_on_future_AutoThumbnailCreation;
-			break;
-		case (OFF_FUTURE_AUTO_THUMB):
-			request.id = turn_off_future_AutoThumbnailCreation;
-			break;
-		case (ON_AUTO_THUMB):
-			request.id = turn_on_AutoThumbnailCreation;
-			break;
-		case (OFF_AUTO_THUMB):
-			request.id = turn_off_AutoThumbnailCreation;
-			break;
-		case (GET_GECKO_REGISTER):
-			request.id = get_gecko_registers;
-			break;
-		case (SET_GECKO_REGISTER):
-			request.id = set_gecko_registers;
-			break;
-		case (RE_INIT_CAM_MANAGER):
-			request.id = re_init_cam_manager;
-			break;
-		default:
-			cmd_error(&type, &err);
-			break;
-	}
-
-	if (err == ERR_SUCCESS)
-		addRequestToQueue(request);
-
-}
-
 void AUC_EPS(TC_spl decode)
 {
 	Ack_type type;
@@ -434,12 +331,6 @@ void AUC_EPS(TC_spl decode)
 		break;
 	case (SHUT_ADCS_ST):
 		cmd_SHUT_ADCS(&type, &err, decode);
-		break;
-	case (ALLOW_CAM_ST):
-		cmd_allow_CAM(&type, &err, decode);
-		break;
-	case (SHUT_CAM_ST):
-		cmd_SHUT_CAM(&type, &err, decode);
 		break;
 	case (UPDATE_EPS_ALPHA_ST):
 		cmd_update_alpha(&type, &err, decode);

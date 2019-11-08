@@ -100,7 +100,6 @@ typedef enum subSystem_indx
 	TRXVU = 1,
 	Ants = 2,
 	ADCS = 4,
-	CAMMERA = 5,
 	OBC = 6,
 	everything = 10
 }subSystem_indx;

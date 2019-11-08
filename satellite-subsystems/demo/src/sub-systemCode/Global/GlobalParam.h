@@ -20,8 +20,6 @@ typedef enum
 	transponder_active_param,
 	dump_param,
 	//state of the sub-system (on/off)
-	cam_param,
-	cam_operational_param,
 	Tx_param,
 	ADCS_param,
 }systems_state_parameters;

@@ -168,18 +168,6 @@ void cmd_heater_temp(Ack_type* type, ERR_type* err, TC_spl cmd)
 			break;
 	}
 }
-void cmd_SHUT_CAM(Ack_type* type, ERR_type* err, TC_spl cmd)
-{
-	if (cmd.length != 0)
-	{
-		*type = ACK_CMD_FAIL;
-		*err = ERR_LENGTH;
-		return;
-	}
-	*type = ACK_NOTHING;
-	*err = ERR_SUCCESS;
-	shut_CAM(SWITCH_ON);
-}
 void cmd_SHUT_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 {
 	if (cmd.length != 0)
@@ -191,18 +179,6 @@ void cmd_SHUT_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 	*type = ACK_NOTHING;
 	*err = ERR_SUCCESS;
 	shut_ADCS(SWITCH_ON);
-}
-void cmd_allow_CAM(Ack_type* type, ERR_type* err, TC_spl cmd)
-{
-	if (cmd.length != 0)
-	{
-		*type = ACK_CMD_FAIL;
-		*err = ERR_LENGTH;
-		return;
-	}
-	*type = ACK_NOTHING;
-	*err = ERR_SUCCESS;
-	shut_CAM(SWITCH_OFF);
 }
 void cmd_allow_ADCS(Ack_type* type, ERR_type* err, TC_spl cmd)
 {

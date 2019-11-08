@@ -13,7 +13,6 @@
 #include <at91/utility/trace.h>
 #include <at91/peripherals/cp15/cp15.h>
 
-
 #include <hal/Timing/WatchDogTimer.h>
 #include <hal/Timing/Time.h>
 #include <hal/Drivers/LED.h>

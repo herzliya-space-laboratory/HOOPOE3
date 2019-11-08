@@ -29,8 +29,6 @@
 #include <satellite-subsystems/cspaceADCS.h>
 #include <satellite-subsystems/GomEPS.h>
 
-#include "../payload/Drivers/GeckoCameraDriver.h"
-
 #include "Global.h"
 #include "logger.h"
 #include "TLM_management.h"
@@ -154,9 +152,6 @@ int hard_reset_subsystem(subSystem_indx reset_idx)
 		error = GomEpsSetOutput(0, channel);
 		WriteAdcsLog(LOG_ADCS_HARD_RESET,error); //TODO:Check
 		check_int("Hard reset ADCS, turn off EPS channels", error);
-		break;
-	case CAMMERA:
-		GECKO_Reset();
 		break;
 	default:
 		return -444;
