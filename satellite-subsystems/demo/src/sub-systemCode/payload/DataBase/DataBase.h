@@ -156,7 +156,10 @@ typedef enum
 	// JPEG Error Messages:
 	JpegCompression_Success							= 56,
 	JpegCompression_Failure							= 57,
-	JpegCompression_qualityFactor_outOfRange		= 58
+	JpegCompression_qualityFactor_outOfRange		= 58,
+
+	// EPS doesn't let me take images freely:
+	EPS_didntLetMeTurnTheGeckoOn					= 59
 } ImageDataBaseResult;
 
 uint8_t imageBuffer[BMP_FILE_DATA_SIZE];
