@@ -15,7 +15,7 @@
 #include "sub-systemCode/ADCS/AdcsGetDataAndTlm.h"
 
 #include "AdcsCommands.h"
-#include "AdcsMain.h"
+#include "AdcsMain.h"//todo: delete this and move the fram update to here.
 
 #define MAX_CONFIG_PARAM_LENGTH 64
 

@@ -10,7 +10,6 @@ typedef enum
 {
 	CMD_UPDATE_STATE_MATRIX	// update chain matrix
 
-
 }AdcsStateMachineCMD;
 
 typedef enum __attribute__ ((__packed__)){

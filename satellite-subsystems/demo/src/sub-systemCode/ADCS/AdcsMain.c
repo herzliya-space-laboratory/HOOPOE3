@@ -30,42 +30,48 @@ time_unix system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 
 TroubleErrCode UpdateAdcsFramParameters(AdcsFramParameters param, unsigned char *data)
 {
-	if(NULL == data){
+	//todo: move to AdcsCommands and diasamble to seprate functions
+
+	if(NULL == data)
+	{
 		return TRBL_NULL_DATA;
 	}
+	
 	unsigned int addr = 0;
 	unsigned int size = 0;
 	unsigned char *ptr = NULL;
 
 	switch(param)
 	{
-	case DELAY_LOOP:
-		addr = ADCS_LOOP_DELAY_ADDR;
-		size = ADCS_LOOP_DELAY_SIZE;
-		ptr = (void*)&delay_loop;
-		break;
+		case DELAY_LOOP:
+			addr = ADCS_LOOP_DELAY_ADDR;
+			size = ADCS_LOOP_DELAY_SIZE;
+			ptr = (void*)&delay_loop;
+			break;
 
-	case QUEUE_WAIT_TIME:
-		addr = ADCS_LOOP_DELAY_ADDR;
-		size = ADCS_LOOP_DELAY_SIZE;
-		ptr = (void*)getAdcsQueueWaitPointer();
-		break;
+		case QUEUE_WAIT_TIME:
+			addr = ADCS_LOOP_DELAY_ADDR;
+			size = ADCS_LOOP_DELAY_SIZE;
+			ptr = (void*)getAdcsQueueWaitPointer();
+			break;
 
-	case DELAY_SYSTEM_OFF:
-		addr = ADCS_SYS_OFF_DELAY_ADDR;
-		size = ADCS_SYS_OFF_DELAY_SIZE;
-		ptr = (void*)&system_off_delay;
-		break;
-	default:
-		return TRBL_FAIL;
+		case DELAY_SYSTEM_OFF:
+			addr = ADCS_SYS_OFF_DELAY_ADDR;
+			size = ADCS_SYS_OFF_DELAY_SIZE;
+			ptr = (void*)&system_off_delay;
+			break;
+		default:
+			return TRBL_FAIL;
 	}
 
 	if(0 != FRAM_write_exte(data,addr,size)){
 		return TRBL_FRAM_WRITE_ERR;
 	}
+
 	if(NULL == memcpy(ptr,data,size)){
 		return TRBL_FAIL;
 	}
+
 	return TRBL_SUCCESS;
 
 }
@@ -76,49 +82,65 @@ TroubleErrCode AdcsInit()
 	TroubleErrCode trbl = TRBL_SUCCESS;
 	unsigned char adcs_i2c = ADCS_I2C_ADRR;
 	int rv;
-	int init_err_flag = 0;
+	int init_err_flag = 0;//todo: init err flags enum.
 	FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 
+	//init the cspace drivers
 	rv = cspaceADCS_initialize(&adcs_i2c, 1);
 	if(rv != E_NO_SS_ERR && rv != E_IS_INITIALIZED){
 		init_err_flag = 1;
-		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
+		FRAM_write_exte((byte*)&init_err_flag, ADCS_SUCCESSFUL_INIT_FLAG_ADDR, ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 		return TRBL_ADCS_INIT_ERR;
 	}
 
-	
+	//init the command Queue
 	trbl = AdcsCmdQueueInit();
 	if (trbl != TRBL_SUCCESS){
 		init_err_flag = 2;
 		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 		return trbl;
 	}
+
+	//init the TlmElements
 	trbl = InitTlmElements();
 	if (trbl != TRBL_SUCCESS){
 		init_err_flag = 3;
 		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 		return trbl;
 	}
+
+	//Crate the Files for the tlm to save in
 	Boolean b = CreateTlmElementFiles();
 	if (b != TRUE){
 		init_err_flag = 4;
 		FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
 	}
+
 	time_unix* adcsQueueWaitPointer = getAdcsQueueWaitPointer();
 
-	if(0 != FRAM_read_exte((byte*)&delay_loop,ADCS_LOOP_DELAY_ADDR,ADCS_LOOP_DELAY_SIZE)){
+	//Load the delay at the end of the ADCS main loop from the Fram if fail load the default delay(1000ms).
+	if(0 != FRAM_read_exte((byte*)&delay_loop, ADCS_LOOP_DELAY_ADDR, ADCS_LOOP_DELAY_SIZE))
+	{
 		delay_loop = DEFAULT_ADCS_LOOP_DELAY;
 	}
-	if(0 != FRAM_read_exte((unsigned char*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE)){
+
+	//Load the time to wait if system_off before the next system check from the the Fram if fail load the default delay(10000ms).
+	if(0 != FRAM_read_exte((unsigned char*)&system_off_delay,ADCS_SYS_OFF_DELAY_ADDR,ADCS_SYS_OFF_DELAY_SIZE))
+	{
 		system_off_delay = DEFAULT_ADCS_SYSTEM_OFF_DELAY;
 	}
-	if(0 != FRAM_read_exte((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_ADDR,ADCS_QUEUE_WAIT_TIME_SIZE)){
+
+	//Load the time to wait when insirting a coomand to the Q if the Q full from the Fram if fail load the default delay(100ms).
+	if(0 != FRAM_read_exte((byte*)adcsQueueWaitPointer,ADCS_QUEUE_WAIT_TIME_ADDR,ADCS_QUEUE_WAIT_TIME_SIZE))
+	{
 		*adcsQueueWaitPointer = DEFAULT_ADCS_QUEUE_WAIT_TIME;
 	}
 
-	init_err_flag = TRUE;
+
+	// init_err_flag = TRUE
 	FRAM_write_exte((byte*)&init_err_flag,ADCS_SUCCESSFUL_INIT_FLAG_ADDR,ADCS_SUCCESSFUL_INIT_FLAG_SIZE);
-	return TRBL_SUCCESS;
+
+	return TRBL_SUCCESS;//the function calling that dosent use the adcs trbl code. 
 }
 
 void AdcsTask()
@@ -141,12 +163,15 @@ void AdcsTask()
 		}
 		UpdateAdcsStateMachine();
 
-		if(!AdcsCmdQueueIsEmpty()){
+		if(!AdcsCmdQueueIsEmpty())
+		{
+
 			trbl = AdcsCmdQueueGet(&cmd);
 			if(TRBL_SUCCESS != trbl){
 				WriteAdcsLog(LOG_ADCS_QUEUE_ERR,trbl);
 				AdcsTroubleShooting(trbl);
 			}
+
 			trbl = AdcsExecuteCommand(&cmd);
 			if(TRBL_SUCCESS != trbl){
 				WriteAdcsLog(LOG_ADCS_CMD_ERR,trbl);
